@@ -3,6 +3,184 @@
 
 \begin{document}
 
-% Your blueprint will go here.
+\section{Setup}
+
+Throughout, let $G$ be a finite group, let $n = \operatorname{exponent}(G)$, and let
+$V$ be a finite-dimensional complex vector space carrying a representation
+$\rho : G \to \operatorname{GL}(V)$. We work towards showing that for some ring
+embedding $\varphi : \mathbb{Q}(\zeta_n) \hookrightarrow \mathbb{C}$, every
+character value $\operatorname{tr}(\rho(g))$ lies in $\varphi(\mathbb{Q}(\zeta_n))$.
+
+The proof does not need Brauer's induction theorem: every eigenvalue of $\rho(g)$
+is an $n$-th root of unity in $\mathbb{C}$, so the trace is a $\mathbb{Z}$-sum of
+$n$-th roots of unity, and these lie in the image of any cyclotomic embedding
+sending the abstract primitive root to a primitive $n$-th root of unity in
+$\mathbb{C}$.
+
+\section{Eigenvalues of $\rho(g)$ are roots of unity}
+
+\begin{lemma}[$\rho(g)$ has order dividing the exponent]
+    \label{lem:rho_pow_eq_one}
+    Let $G$ be a finite group with $n = \operatorname{exponent}(G) > 0$, let $V$
+    be a $\mathbb{C}$-module, and let $\rho : G \to \operatorname{End}_{\mathbb{C}}(V)$
+    be a representation. For every $g \in G$,
+    \[ (\rho(g))^{n} = 1. \]
+\end{lemma}
+\begin{proof}
+    Since $\rho$ is a monoid homomorphism, $(\rho(g))^n = \rho(g^n)$. By the
+    defining property of the monoid exponent, $g^n = 1$, so
+    $\rho(g^n) = \rho(1) = 1$. This uses
+    \texttt{Monoid.pow\_exponent\_eq\_one} and the monoid-hom laws
+    \texttt{map\_pow}, \texttt{map\_one}.
+\end{proof}
+
+\begin{lemma}[$X^n - 1$ annihilates $\rho(g)$]
+    \label{lem:annihilating_polynomial}
+    \uses{lem:rho_pow_eq_one}
+    Under the hypotheses of Lemma~\ref{lem:rho_pow_eq_one}, the polynomial
+    $X^n - 1 \in \mathbb{C}[X]$ evaluated at $\rho(g)$ equals $0$ in
+    $\operatorname{End}_{\mathbb{C}}(V)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:rho_pow_eq_one}
+    Expand $\operatorname{aeval}_{\rho(g)}(X^n - 1) = (\rho(g))^n - 1$ via
+    \texttt{map\_sub}, \texttt{Polynomial.aeval\_X\_pow},
+    \texttt{Polynomial.aeval\_one}. By Lemma~\ref{lem:rho_pow_eq_one} this is $0$.
+\end{proof}
+
+\begin{lemma}[Charpoly splits over $\mathbb{C}$]
+    \label{lem:charpoly_splits}
+    For any finite-dimensional $\mathbb{C}$-vector space $V$ and any
+    $f \in \operatorname{End}_{\mathbb{C}}(V)$, the characteristic polynomial
+    $f.\operatorname{charpoly}$ splits over $\mathbb{C}$.
+\end{lemma}
+\begin{proof}
+    This is \texttt{IsAlgClosed.splits\_codomain} applied to the identity ring
+    map on $\mathbb{C}$, using that $\mathbb{C}$ is algebraically closed.
+\end{proof}
+
+\begin{lemma}[Charpoly roots are $n$-th roots of unity]
+    \label{lem:charpoly_roots_roots_of_unity}
+    \uses{lem:annihilating_polynomial, lem:charpoly_splits}
+    With $G$, $n$, $\rho$ as above and $g \in G$, every root
+    $\lambda \in \mathbb{C}$ of $(\rho(g)).\operatorname{charpoly}$ satisfies
+    $\lambda^n = 1$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:annihilating_polynomial, lem:charpoly_splits}
+    A root of the characteristic polynomial of an endomorphism is an
+    eigenvalue (\texttt{Module.End.hasEigenvalue\_iff\_isRoot\_charpoly}), and
+    an eigenvalue is a root of the minimal polynomial
+    (\texttt{Module.End.isRoot\_of\_hasEigenvalue}). By
+    Lemma~\ref{lem:annihilating_polynomial} the minimal polynomial of $\rho(g)$
+    divides $X^n - 1$ (\texttt{minpoly.dvd}). Substituting $\lambda$ into this
+    divisibility gives $\lambda^n - 1 = 0$, i.e.\ $\lambda^n = 1$.
+\end{proof}
+
+\section{Trace as a sum of roots of unity}
+
+\begin{lemma}[Trace as sum of charpoly roots]
+    \label{lem:trace_eq_sum_charpoly_roots}
+    \uses{lem:charpoly_splits}
+    Let $V$ be a finite-dimensional $\mathbb{C}$-vector space and let
+    $f \in \operatorname{End}_{\mathbb{C}}(V)$. Then
+    \[ \operatorname{tr}(f) \;=\; \sum_{\lambda} \lambda, \]
+    where the sum runs over the multiset of roots of $f.\operatorname{charpoly}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:charpoly_splits}
+    Direct application of
+    \texttt{Module.End.trace\_eq\_sum\_roots\_charpoly\_of\_splits} together with
+    Lemma~\ref{lem:charpoly_splits}.
+\end{proof}
+
+\section{The cyclotomic embedding}
+
+\begin{lemma}[Primitive $n$-th root of unity in $\mathbb{C}$]
+    \label{lem:complex_primitive_root}
+    For every positive natural number $n$, there exists $\zeta \in \mathbb{C}$
+    that is a primitive $n$-th root of unity.
+\end{lemma}
+\begin{proof}
+    Take $\zeta = \exp(2 \pi i / n)$; this is a primitive $n$-th root of unity
+    by \texttt{Complex.isPrimitiveRoot\_exp}.
+\end{proof}
+
+\begin{lemma}[Embedding of the cyclotomic field into $\mathbb{C}$]
+    \label{lem:cyclotomic_embedding}
+    \uses{lem:complex_primitive_root}
+    For every positive natural number $n$, there exists a ring homomorphism
+    $\varphi : \operatorname{CyclotomicField}(n, \mathbb{Q}) \to \mathbb{C}$
+    such that $\varphi(\zeta_n)$ is a primitive $n$-th root of unity in
+    $\mathbb{C}$, where $\zeta_n = \texttt{IsCyclotomicExtension.zeta}\,n\,\mathbb{Q}\,(\operatorname{CyclotomicField}(n,\mathbb{Q}))$
+    is the canonical primitive root.
+\end{lemma}
+\begin{proof}
+    \uses{lem:complex_primitive_root}
+    Let $L = \operatorname{CyclotomicField}(n, \mathbb{Q})$. Mathlib provides the
+    canonical primitive root $\zeta_n \in L$ via
+    \texttt{IsCyclotomicExtension.zeta}, and the cyclotomic polynomial
+    $\Phi_n$ is irreducible over $\mathbb{Q}$
+    (\texttt{Polynomial.cyclotomic.irreducible\_rat}). By
+    Lemma~\ref{lem:complex_primitive_root} choose a primitive $n$-th root of
+    unity $\zeta \in \mathbb{C}$. The equivalence
+    \texttt{IsPrimitiveRoot.embeddingsEquivPrimitiveRoots} then yields an
+    algebra map $\psi : L \to_\mathbb{Q} \mathbb{C}$ sending $\zeta_n$ to
+    $\zeta$. Take $\varphi := \psi.\texttt{toRingHom}$.
+\end{proof}
+
+\begin{lemma}[Range of the embedding contains all $n$-th roots of unity]
+    \label{lem:range_contains_roots_of_unity}
+    \uses{lem:cyclotomic_embedding}
+    Let $n > 0$ and let $\varphi$ be as in
+    Lemma~\ref{lem:cyclotomic_embedding}. Every $\mu \in \mathbb{C}$ with
+    $\mu^n = 1$ lies in $\varphi.\operatorname{range}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:cyclotomic_embedding}
+    Set $\zeta := \varphi(\zeta_n)$, a primitive $n$-th root of unity in
+    $\mathbb{C}$. By \texttt{IsPrimitiveRoot.zpow\_eq\_one\_iff\_dvd} (or
+    equivalently \texttt{IsPrimitiveRoot.nthRootsFinset}), every
+    $\mu \in \mathbb{C}$ with $\mu^n = 1$ is a power $\zeta^k$ for some
+    $k \in \mathbb{Z}$ (in fact $k \in \{0, \dots, n-1\}$). Powers of $\zeta_n$
+    lie in $L$, so $\zeta^k = \varphi(\zeta_n^k) \in \varphi.\operatorname{range}$.
+\end{proof}
+
+\section{The main theorem}
+
+\begin{theorem}[Character values lie in a cyclotomic field]
+    \label{thm:brauer_character_in_cyclotomic}
+    \uses{lem:rho_pow_eq_one, lem:charpoly_roots_roots_of_unity,
+        lem:trace_eq_sum_charpoly_roots, lem:cyclotomic_embedding,
+        lem:range_contains_roots_of_unity}
+    Let $G$ be a finite group and set $n = \operatorname{exponent}(G)$. There
+    exists a ring homomorphism
+    \[
+        \varphi : \operatorname{CyclotomicField}(n, \mathbb{Q})
+            \;\longrightarrow\; \mathbb{C}
+    \]
+    such that for every finite-dimensional complex representation
+    $\rho : G \to \operatorname{GL}(V)$ and every $g \in G$,
+    \[
+        \operatorname{tr}(\rho(g)) \in \varphi.\operatorname{range}.
+    \]
+\end{theorem}
+\begin{proof}
+    \uses{lem:charpoly_roots_roots_of_unity,
+        lem:trace_eq_sum_charpoly_roots,
+        lem:cyclotomic_embedding,
+        lem:range_contains_roots_of_unity}
+    Since $G$ is finite, $n = \operatorname{exponent}(G) > 0$
+    (\texttt{Monoid.exponent\_pos\_of\_finite}). Apply
+    Lemma~\ref{lem:cyclotomic_embedding} to obtain $\varphi$. Fix $\rho$, $g$.
+    By Lemma~\ref{lem:trace_eq_sum_charpoly_roots},
+    $\operatorname{tr}(\rho(g))$ equals the sum of the roots (with
+    multiplicity) of $(\rho(g)).\operatorname{charpoly}$. By
+    Lemma~\ref{lem:charpoly_roots_roots_of_unity} each such root is an $n$-th
+    root of unity in $\mathbb{C}$, and by
+    Lemma~\ref{lem:range_contains_roots_of_unity} each such root lies in
+    $\varphi.\operatorname{range}$. Since $\varphi.\operatorname{range}$ is a
+    subring of $\mathbb{C}$, the sum lies in $\varphi.\operatorname{range}$.
+\end{proof}
 
 \end{document}
