@@ -21,6 +21,8 @@ $\mathbb{C}$.
 
 \begin{lemma}[$\rho(g)$ has order dividing the exponent]
     \label{lem:rho_pow_eq_one}
+    \lean{LeanEval.RepresentationTheory.rho_pow_eq_one}
+    \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     Let $G$ be a finite group with $n = \operatorname{exponent}(G) > 0$, let $V$
     be a $\mathbb{C}$-module, and let $\rho : G \to \operatorname{End}_{\mathbb{C}}(V)$
     be a representation. For every $g \in G$,
@@ -36,6 +38,8 @@ $\mathbb{C}$.
 
 \begin{lemma}[$X^n - 1$ annihilates $\rho(g)$]
     \label{lem:annihilating_polynomial}
+    \lean{LeanEval.RepresentationTheory.annihilating_polynomial}
+    \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:rho_pow_eq_one}
     Under the hypotheses of Lemma~\ref{lem:rho_pow_eq_one}, the polynomial
     $X^n - 1 \in \mathbb{C}[X]$ evaluated at $\rho(g)$ equals $0$ in
@@ -50,6 +54,8 @@ $\mathbb{C}$.
 
 \begin{lemma}[Charpoly splits over $\mathbb{C}$]
     \label{lem:charpoly_splits}
+    \lean{LeanEval.RepresentationTheory.charpoly_splits}
+    \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     For any finite-dimensional $\mathbb{C}$-vector space $V$ and any
     $f \in \operatorname{End}_{\mathbb{C}}(V)$, the characteristic polynomial
     $f.\operatorname{charpoly}$ splits over $\mathbb{C}$.
@@ -61,6 +67,8 @@ $\mathbb{C}$.
 
 \begin{lemma}[Charpoly roots are $n$-th roots of unity]
     \label{lem:charpoly_roots_roots_of_unity}
+    \lean{LeanEval.RepresentationTheory.charpoly_roots_roots_of_unity}
+    \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:annihilating_polynomial, lem:charpoly_splits}
     With $G$, $n$, $\rho$ as above and $g \in G$, every root
     $\lambda \in \mathbb{C}$ of $(\rho(g)).\operatorname{charpoly}$ satisfies
@@ -81,6 +89,8 @@ $\mathbb{C}$.
 
 \begin{lemma}[Trace as sum of charpoly roots]
     \label{lem:trace_eq_sum_charpoly_roots}
+    \lean{LeanEval.RepresentationTheory.trace_eq_sum_charpoly_roots}
+    \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:charpoly_splits}
     Let $V$ be a finite-dimensional $\mathbb{C}$-vector space and let
     $f \in \operatorname{End}_{\mathbb{C}}(V)$. Then
@@ -98,6 +108,8 @@ $\mathbb{C}$.
 
 \begin{lemma}[Primitive $n$-th root of unity in $\mathbb{C}$]
     \label{lem:complex_primitive_root}
+    \lean{LeanEval.RepresentationTheory.complex_primitive_root}
+    \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     For every positive natural number $n$, there exists $\zeta \in \mathbb{C}$
     that is a primitive $n$-th root of unity.
 \end{lemma}
@@ -108,6 +120,8 @@ $\mathbb{C}$.
 
 \begin{lemma}[Embedding of the cyclotomic field into $\mathbb{C}$]
     \label{lem:cyclotomic_embedding}
+    \lean{LeanEval.RepresentationTheory.cyclotomic_embedding}
+    \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:complex_primitive_root}
     For every positive natural number $n$, there exists a ring homomorphism
     $\varphi : \operatorname{CyclotomicField}(n, \mathbb{Q}) \to \mathbb{C}$
@@ -131,6 +145,8 @@ $\mathbb{C}$.
 
 \begin{lemma}[Range of the embedding contains all $n$-th roots of unity]
     \label{lem:range_contains_roots_of_unity}
+    \lean{LeanEval.RepresentationTheory.range_contains_roots_of_unity}
+    \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:cyclotomic_embedding}
     Let $n > 0$ and let $\varphi$ be as in
     Lemma~\ref{lem:cyclotomic_embedding}. Every $\mu \in \mathbb{C}$ with
@@ -150,9 +166,9 @@ $\mathbb{C}$.
 
 \begin{theorem}[Character values lie in a cyclotomic field]
     \label{thm:brauer_character_in_cyclotomic}
-    \uses{lem:rho_pow_eq_one, lem:charpoly_roots_roots_of_unity,
-        lem:trace_eq_sum_charpoly_roots, lem:cyclotomic_embedding,
-        lem:range_contains_roots_of_unity}
+    \lean{LeanEval.RepresentationTheory.brauer_character_in_cyclotomic}
+    \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
+    \uses{lem:rho_pow_eq_one, lem:charpoly_roots_roots_of_unity, lem:trace_eq_sum_charpoly_roots, lem:cyclotomic_embedding, lem:range_contains_roots_of_unity}
     Let $G$ be a finite group and set $n = \operatorname{exponent}(G)$. There
     exists a ring homomorphism
     \[
