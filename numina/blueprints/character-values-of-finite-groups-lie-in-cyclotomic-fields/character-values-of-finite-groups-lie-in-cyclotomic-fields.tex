@@ -23,6 +23,7 @@ $\mathbb{C}$.
     \label{lem:rho_pow_eq_one}
     \lean{LeanEval.RepresentationTheory.rho_pow_eq_one}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
+    \leanok
     Let $G$ be a finite group with $n = \operatorname{exponent}(G) > 0$, let $V$
     be a $\mathbb{C}$-module, and let $\rho : G \to \operatorname{End}_{\mathbb{C}}(V)$
     be a representation. For every $g \in G$,
@@ -41,6 +42,7 @@ $\mathbb{C}$.
     \lean{LeanEval.RepresentationTheory.annihilating_polynomial}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:rho_pow_eq_one}
+    \leanok
     Under the hypotheses of Lemma~\ref{lem:rho_pow_eq_one}, the polynomial
     $X^n - 1 \in \mathbb{C}[X]$ evaluated at $\rho(g)$ equals $0$ in
     $\operatorname{End}_{\mathbb{C}}(V)$.
@@ -56,6 +58,7 @@ $\mathbb{C}$.
     \label{lem:charpoly_splits}
     \lean{LeanEval.RepresentationTheory.charpoly_splits}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
+    \leanok
     For any finite-dimensional $\mathbb{C}$-vector space $V$ and any
     $f \in \operatorname{End}_{\mathbb{C}}(V)$, the characteristic polynomial
     $f.\operatorname{charpoly}$ splits over $\mathbb{C}$.
@@ -70,6 +73,7 @@ $\mathbb{C}$.
     \lean{LeanEval.RepresentationTheory.charpoly_roots_roots_of_unity}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:annihilating_polynomial, lem:charpoly_splits}
+    \leanok
     With $G$, $n$, $\rho$ as above and $g \in G$, every root
     $\lambda \in \mathbb{C}$ of $(\rho(g)).\operatorname{charpoly}$ satisfies
     $\lambda^n = 1$.
@@ -92,6 +96,7 @@ $\mathbb{C}$.
     \lean{LeanEval.RepresentationTheory.trace_eq_sum_charpoly_roots}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:charpoly_splits}
+    \leanok
     Let $V$ be a finite-dimensional $\mathbb{C}$-vector space and let
     $f \in \operatorname{End}_{\mathbb{C}}(V)$. Then
     \[ \operatorname{tr}(f) \;=\; \sum_{\lambda} \lambda, \]
@@ -110,6 +115,7 @@ $\mathbb{C}$.
     \label{lem:complex_primitive_root}
     \lean{LeanEval.RepresentationTheory.complex_primitive_root}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
+    \leanok
     For every positive natural number $n$, there exists $\zeta \in \mathbb{C}$
     that is a primitive $n$-th root of unity.
 \end{lemma}
@@ -169,6 +175,7 @@ $\mathbb{C}$.
     \lean{LeanEval.RepresentationTheory.brauer_character_in_cyclotomic}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:rho_pow_eq_one, lem:charpoly_roots_roots_of_unity, lem:trace_eq_sum_charpoly_roots, lem:cyclotomic_embedding, lem:range_contains_roots_of_unity}
+    \leanok
     Let $G$ be a finite group and set $n = \operatorname{exponent}(G)$. There
     exists a ring homomorphism
     \[
