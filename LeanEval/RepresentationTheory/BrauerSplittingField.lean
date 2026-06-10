@@ -52,7 +52,7 @@ theorem charpoly_splits
     {V : Type*} [AddCommGroup V] [Module ℂ V] [FiniteDimensional ℂ V]
     (f : Module.End ℂ V) :
     f.charpoly.Splits := by
-  simpa using IsAlgClosed.splits_codomain (k := ℂ) (f := RingHom.id ℂ) (f.charpoly)
+  simpa using IsAlgClosed.splits (k := ℂ) (f.charpoly)
 
 /-- Every root of the characteristic polynomial of `ρ g` is an
 `(exponent G)`-th root of unity in `ℂ`. -/
@@ -100,22 +100,51 @@ theorem complex_primitive_root (n : ℕ) (hn : 0 < n) :
 `φ : CyclotomicField n ℚ →+* ℂ` sending the canonical primitive root
 `IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ)` to a primitive
 `n`-th root of unity in `ℂ`. -/
-theorem cyclotomic_embedding (n : ℕ) [NeZero n] [NeZero ((n : ℕ) : ℚ)] :
+theorem cyclotomic_embedding (n : ℕ) [NeZero n] [NeZero ((n : ℕ) : ℚ)]
+    [IsCyclotomicExtension {n} ℚ (CyclotomicField n ℚ)] :
     ∃ φ : CyclotomicField n ℚ →+* ℂ,
       IsPrimitiveRoot
         (φ (IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ))) n := by
-  sorry
+  -- Pick a primitive n-th root ζ in ℂ.
+  obtain ⟨ζ, hζ⟩ := complex_primitive_root n (NeZero.pos n)
+  -- The canonical primitive root in the cyclotomic field.
+  set ζ₀ : CyclotomicField n ℚ := IsCyclotomicExtension.zeta n ℚ _ with hζ₀
+  have hζ₀_prim : IsPrimitiveRoot ζ₀ n := IsCyclotomicExtension.zeta_spec n ℚ _
+  -- Irreducibility of the n-th cyclotomic polynomial over ℚ.
+  have hirr : Irreducible (Polynomial.cyclotomic n ℚ) :=
+    Polynomial.cyclotomic.irreducible_rat (NeZero.pos n)
+  -- The element of `primitiveRoots n ℂ` corresponding to ζ.
+  have hζmem : ζ ∈ primitiveRoots n ℂ :=
+    (mem_primitiveRoots (NeZero.pos n)).mpr hζ
+  -- Use the equivalence between algebra embeddings and primitive roots.
+  let ψ : CyclotomicField n ℚ →ₐ[ℚ] ℂ :=
+    (hζ₀_prim.embeddingsEquivPrimitiveRoots ℂ hirr).symm ⟨ζ, hζmem⟩
+  refine ⟨ψ.toRingHom, ?_⟩
+  -- The embedding sends ζ₀ to ζ, which is a primitive root.
+  have hψζ : ψ ζ₀ = ζ := by
+    have h := hζ₀_prim.embeddingsEquivPrimitiveRoots_apply_coe ℂ hirr ψ
+    -- h : ((... .symm ⟨ζ, hζmem⟩) : L →ₐ[K] ℂ) ζ₀ = ζ (via the apply_coe simp lemma).
+    -- The LHS reduces by Equiv.apply_symm_apply.
+    simpa [ψ] using h.symm
+  show IsPrimitiveRoot (ψ.toRingHom ζ₀) n
+  rw [show ψ.toRingHom ζ₀ = ψ ζ₀ from rfl, hψζ]
+  exact hζ
 
 /-- The range of any ring embedding `φ : CyclotomicField n ℚ →+* ℂ` whose
 image of the canonical primitive root is a primitive `n`-th root of unity
 contains every `n`-th root of unity in `ℂ`. -/
 theorem range_contains_roots_of_unity (n : ℕ) [NeZero n] [NeZero ((n : ℕ) : ℚ)]
+    [IsCyclotomicExtension {n} ℚ (CyclotomicField n ℚ)]
     (φ : CyclotomicField n ℚ →+* ℂ)
     (hφ : IsPrimitiveRoot
             (φ (IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ))) n)
     {μ : ℂ} (hμ : μ ^ n = 1) :
     μ ∈ φ.range := by
-  sorry
+  -- Every n-th root of unity is a power of the primitive root ζ = φ(zeta).
+  obtain ⟨k, _, hk⟩ := hφ.eq_pow_of_pow_eq_one hμ
+  refine ⟨IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ) ^ k, ?_⟩
+  rw [map_pow]
+  exact hk
 
 @[eval_problem]
 theorem brauer_character_in_cyclotomic
@@ -140,6 +169,9 @@ theorem brauer_character_in_cyclotomic
   -- Provide the NeZero instances as typeclass arguments
   haveI : NeZero n := hNeZero_n
   haveI : NeZero ((n : ℕ) : ℚ) := hnzq
+  -- The CyclotomicField is a cyclotomic extension (uses NeZero (n : ℚ)).
+  haveI : IsCyclotomicExtension {n} ℚ (CyclotomicField n ℚ) :=
+    CyclotomicField.isCyclotomicExtension n ℚ
   -- Get the cyclotomic embedding
   rcases cyclotomic_embedding n with ⟨φ, hφ⟩
   refine ⟨φ, λ V _ _ _ ρ g => ?_⟩
