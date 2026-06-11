@@ -1,0 +1,18 @@
+Polynomial decay rate of y' = -y^3
+← All problems
+
+cubic_decay_asymptotic
+
+Submitter: Kim Morrison.
+
+Notes: Asymptotic rate y t * sqrt t -> 1/sqrt 2 for the unique solution of y' = -y^3 on (0, infty) with y continuous at 0 and y 0 = 1.
+
+Source: Standard ODE textbook exercise.
+
+Informal solution: The closed form is y(t) = (1 + 2t)^{-1/2}, so y(t) sqrt(t) = sqrt(t / (1 + 2t)) -> 1/sqrt(2). Uniqueness on (0, infty) follows by Grönwall: any two solutions u, v of u' = -u^3 with the same right-limit 1 at 0 satisfy |u - v|' bounded by a Lipschitz constant on bounded subintervals, and continuity at 0 forces |u(t) - v(t)| -> 0 as t -> 0+, hence u = v.
+
+theorem cubic_decay_asymptotic (y : ℝ → ℝ) (hy_diff : ∀ t : ℝ, 0 < t → HasDerivAt y (-(y t) ^ 3) t)
+    (hy_cont : ContinuousWithinAt y (Set.Ici 0) 0)
+    (hy0 : y 0 = 1) :
+    Tendsto (fun t : ℝ => y t * Real.sqrt t) atTop (𝓝 (1 / Real.sqrt 2)) := by
+  sorry

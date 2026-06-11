@@ -1,0 +1,416 @@
+% Blueprint: Polynomial decay rate of y' = -y^3
+% Created by Numina
+
+\begin{document}
+
+\section{Polynomial decay rate of $y' = -y^3$}
+
+We study the initial value problem
+\[
+    y'(t) = -\,y(t)^3 \quad (t > 0), \qquad y(0) = 1,
+\]
+where $y$ is continuous on $[0,\infty)$. The unique solution is
+$y(t) = (1+2t)^{-1/2}$, and the goal is the asymptotic rate
+\[
+    y(t)\,\sqrt{t} \longrightarrow \frac{1}{\sqrt 2} \qquad (t \to \infty).
+\]
+The argument has three parts: an explicit closed form together with its
+derivative, a Gr\"onwall uniqueness argument forcing every solution to equal the
+closed form, and a limit computation for the closed form.
+
+\subsection{The closed form}
+
+\begin{definition}[Closed form]
+    \label{def:closed-form}
+    \lean{LeanEval.Analysis.ODE.closedForm}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \leanok
+    Define $g : \mathbb{R} \to \mathbb{R}$ by
+    \[
+        g(t) = \bigl(\sqrt{1 + 2t}\,\bigr)^{-1}.
+    \]
+    On $\{t : 1 + 2t > 0\}$ this equals $(1+2t)^{-1/2}$.
+\end{definition}
+
+\begin{lemma}[Initial value of the closed form]
+    \label{lem:closed-form-zero}
+    \lean{LeanEval.Analysis.ODE.closedForm_zero}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form}
+    \leanok
+    $g(0) = 1$.
+\end{lemma}
+\begin{proof}
+    \uses{def:closed-form}
+    At $t = 0$ we have $1 + 2t = 1$, so $\sqrt{1+2t} = \sqrt 1 = 1$ and hence
+    $g(0) = 1^{-1} = 1$.
+\end{proof}
+
+\begin{lemma}[Derivative of the affine square root]
+    \label{lem:sqrt-affine-deriv}
+    \lean{LeanEval.Analysis.ODE.sqrt_affine_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form}
+    \leanok
+    For every $t$ with $1 + 2t > 0$, the function $t \mapsto \sqrt{1+2t}$ has
+    derivative $1/\sqrt{1+2t}$ at $t$.
+\end{lemma}
+\begin{proof}
+    The affine map $t \mapsto 1 + 2t$ has derivative $2$. Since $1 + 2t \neq 0$,
+    the square root has a derivative (\texttt{Real.hasDerivAt\_sqrt}), and the
+    chain rule gives derivative $2 \cdot \frac{1}{2\sqrt{1+2t}} = 1/\sqrt{1+2t}$.
+\end{proof}
+
+\begin{lemma}[Cube identity for the closed form]
+    \label{lem:closed-form-cube-identity}
+    \lean{LeanEval.Analysis.ODE.closedForm_cube_identity}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form}
+    \leanok
+    For every $t$ with $1 + 2t > 0$, writing $s = \sqrt{1+2t}$ and
+    $s' = 1/\sqrt{1+2t}$,
+    \[
+        -\,\frac{s'}{s^2} = -\,g(t)^3 .
+    \]
+\end{lemma}
+\begin{proof}
+    Since $s^2 = 1 + 2t$ and $s' = 1/\sqrt{1+2t}$,
+    \[
+        \frac{s'}{s^2} = \frac{1/\sqrt{1+2t}}{1+2t}
+                       = (1+2t)^{-3/2} = g(t)^3 ,
+    \]
+    a field and square-root identity valid since $1 + 2t > 0$. Negating gives the
+    claim.
+\end{proof}
+
+\begin{lemma}[Closed form solves the ODE]
+    \label{lem:closed-form-deriv}
+    \lean{LeanEval.Analysis.ODE.closedForm_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form, lem:sqrt-affine-deriv, lem:closed-form-cube-identity}
+    \leanok
+    For every $t$ with $1 + 2t > 0$, the function $g$ has derivative
+    $-\,g(t)^3$ at $t$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:sqrt-affine-deriv, lem:closed-form-cube-identity}
+    Write $s(t) = \sqrt{1+2t}$. By Lemma~\ref{lem:sqrt-affine-deriv}, $s$ has
+    derivative $s' = 1/\sqrt{1+2t}$ at $t$, and $s(t) \neq 0$. Since
+    $g = s^{-1}$, the inverse rule (\texttt{HasDerivAt.inv}) gives that $g$ has
+    derivative $-\,s'/s^2$ at $t$. By
+    Lemma~\ref{lem:closed-form-cube-identity} this equals $-g(t)^3$.
+\end{proof}
+
+\begin{lemma}[Continuity of the closed form]
+    \label{lem:closed-form-continuous}
+    \lean{LeanEval.Analysis.ODE.closedForm_continuousOn}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form, lem:closed-form-deriv}
+    \leanok
+    $g$ is continuous on $[0,\infty)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:closed-form-deriv}
+    For every $t \ge 0$ we have $1 + 2t > 0$, so by
+    Lemma~\ref{lem:closed-form-deriv} $g$ is differentiable, hence continuous, at
+    each such $t$; differentiability on $[0,\infty)$ implies continuity there.
+\end{proof}
+
+\subsection{Uniqueness via Gr\"onwall}
+
+Throughout this subsection $y$ denotes a function satisfying the hypotheses of the
+main theorem: $y$ has derivative $-y(t)^3$ at every $t > 0$, $y$ is continuous
+within $[0,\infty)$ at $0$, and $y(0) = 1$.
+
+\begin{lemma}[Continuity of a solution]
+    \label{lem:solution-continuous}
+    \lean{LeanEval.Analysis.ODE.solution_continuousOn}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \leanok
+    Any $y$ as above is continuous on $[0,\infty)$.
+\end{lemma}
+\begin{proof}
+    At each $t > 0$, $y$ is differentiable (it has a derivative), hence
+    continuous. At $0$, continuity within $[0,\infty)$ is a hypothesis. Combining
+    the continuity on $(0,\infty)$ with continuity at $0$ gives continuity on all
+    of $[0,\infty)$.
+\end{proof}
+
+\begin{lemma}[Derivative of the negated cube]
+    \label{lem:cube-deriv}
+    \lean{LeanEval.Analysis.ODE.deriv_neg_cube}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \leanok
+    For every $z$, $\mathrm{deriv}\,(z \mapsto -z^3)\,(z) = -3z^2$.
+\end{lemma}
+\begin{proof}
+    The derivative of $z \mapsto z^3$ at $z$ is $3z^2$ (\texttt{deriv\_pow}),
+    and \texttt{deriv.neg} negates it to give $-3z^2$.
+\end{proof}
+
+\begin{lemma}[Derivative bound for the cube]
+    \label{lem:cube-deriv-bound}
+    \lean{LeanEval.Analysis.ODE.nnnorm_deriv_neg_cube_le}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{lem:cube-deriv}
+    \leanok
+    For every $M \ge 0$ and every $z \in [-M, M]$, the derivative of
+    $z \mapsto -z^3$ has nonnegative norm at most $3M^2$:
+    $\bigl\| \mathrm{deriv}\,(z \mapsto -z^3)\,(z) \bigr\|_+ \le 3M^2$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:cube-deriv}
+    By Lemma~\ref{lem:cube-deriv} the derivative at $z$ is $-3z^2$, whose
+    nonnegative norm is $3z^2 = 3|z|^2 \le 3M^2$ since $|z| \le M$.
+\end{proof}
+
+\begin{lemma}[Local Lipschitz bound for the cube]
+    \label{lem:cube-lipschitz}
+    \lean{LeanEval.Analysis.ODE.cube_lipschitzOnWith}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{lem:cube-deriv-bound}
+    \leanok
+    For every $M \ge 0$, the map $z \mapsto -z^3$ is Lipschitz with constant
+    $3M^2$ on the interval $[-M, M]$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:cube-deriv-bound}
+    The interval $[-M,M]$ is convex. By Lemma~\ref{lem:cube-deriv-bound} the
+    derivative of $z \mapsto -z^3$ has nonnegative norm at most $3M^2$ on it. The
+    mean value inequality on a convex set
+    (\texttt{Convex.lipschitzOnWith\_of\_nnnorm\_deriv\_le}) turns this derivative
+    bound into the stated Lipschitz estimate.
+\end{proof}
+
+\begin{lemma}[Solution as an $\mathrm{Ici}$ trajectory]
+    \label{lem:solution-traj}
+    \lean{LeanEval.Analysis.ODE.solution_traj}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{lem:solution-continuous}
+    \leanok
+    Let $y$ be a solution as above, let $0 < a \le t$, and let $M \ge 0$ bound
+    $|y|$ on $[0,t]$. Then for every $s \in [a,t]$: $y$ has derivative $-y(s)^3$
+    within $\mathrm{Ici}\,s$ at $s$, $y$ is continuous on $[a,t]$, and
+    $y(s) \in \mathrm{Icc}\,(-M)\,M$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:solution-continuous}
+    For $s \in [a,t] \subseteq (0,\infty)$, $y$ has the two-sided derivative
+    $-y(s)^3$ by hypothesis, which restricts to a derivative within
+    $\mathrm{Ici}\,s$ (\texttt{HasDerivAt.hasDerivWithinAt}). Continuity on
+    $[a,t]$ follows from Lemma~\ref{lem:solution-continuous}, and $|y(s)| \le M$
+    on $[a,t] \subseteq [0,t]$ means $y(s) \in \mathrm{Icc}\,(-M)\,M$.
+\end{proof}
+
+\begin{lemma}[Closed form as an $\mathrm{Ici}$ trajectory]
+    \label{lem:closed-form-traj}
+    \lean{LeanEval.Analysis.ODE.closedForm_traj}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form, lem:closed-form-deriv, lem:closed-form-continuous}
+    \leanok
+    Let $0 < a \le t$ and let $M \ge 0$ bound $|g|$ on $[0,t]$. Then for every
+    $s \in [a,t]$: $g$ has derivative $-g(s)^3$ within $\mathrm{Ici}\,s$ at $s$,
+    $g$ is continuous on $[a,t]$, and $g(s) \in \mathrm{Icc}\,(-M)\,M$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:closed-form-deriv, lem:closed-form-continuous}
+    For $s \in [a,t]$ we have $1 + 2s > 0$, so by
+    Lemma~\ref{lem:closed-form-deriv} $g$ has derivative $-g(s)^3$ at $s$, which
+    restricts to a derivative within $\mathrm{Ici}\,s$
+    (\texttt{HasDerivAt.hasDerivWithinAt}). Continuity on $[a,t]$ is
+    Lemma~\ref{lem:closed-form-continuous}, and $|g(s)| \le M$ gives
+    $g(s) \in \mathrm{Icc}\,(-M)\,M$.
+\end{proof}
+
+\begin{lemma}[Gr\"onwall distance bound]
+    \label{lem:gronwall-bound}
+    \lean{LeanEval.Analysis.ODE.gronwall_bound}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form, lem:cube-lipschitz, lem:solution-traj, lem:closed-form-traj}
+    \leanok
+    Let $y$ be a solution as above, let $t > 0$, and let $M \ge 0$ be such that
+    $|y(s)| \le M$ and $|g(s)| \le M$ for all $s \in [0,t]$. Then for every $a$
+    with $0 < a \le t$,
+    \[
+        \bigl| y(t) - g(t) \bigr|
+          \;\le\; \bigl| y(a) - g(a) \bigr|\,\exp\!\bigl(3M^2 (t - a)\bigr).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:cube-lipschitz, lem:solution-traj, lem:closed-form-traj}
+    Apply Mathlib's Gr\"onwall trajectory estimate
+    (\texttt{dist\_le\_of\_trajectories\_ODE\_of\_mem}) on $[a,t]$ with constant
+    set $s(\cdot) = \mathrm{Icc}\,(-M)\,M$, Lipschitz constant $K = 3M^2$, and
+    $\delta = |y(a) - g(a)|$. Its hypotheses are exactly
+    Lemma~\ref{lem:cube-lipschitz} (Lipschitz on $\mathrm{Icc}\,(-M)\,M$) and the
+    derivative-within-$\mathrm{Ici}$, continuity, and membership clauses of
+    Lemmas~\ref{lem:solution-traj} and~\ref{lem:closed-form-traj}; the initial
+    distance bound holds with equality. Rewriting $\mathrm{dist}$ on $\mathbb{R}$
+    as the absolute value of the difference (\texttt{Real.dist\_eq}) gives the
+    stated bound.
+\end{proof}
+
+\begin{lemma}[Uniform bound on a compact interval]
+    \label{lem:compact-bound}
+    \lean{LeanEval.Analysis.ODE.compact_bound}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form, lem:solution-continuous, lem:closed-form-continuous}
+    \leanok
+    Let $y$ be a solution as above and let $t \ge 0$. Then there is $M \ge 0$
+    with $|y(s)| \le M$ and $|g(s)| \le M$ for all $s \in [0,t]$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:solution-continuous, lem:closed-form-continuous}
+    By Lemmas~\ref{lem:solution-continuous} and~\ref{lem:closed-form-continuous},
+    $y$ and $g$ are continuous on the compact interval $[0,t]$, so each is
+    bounded there (\texttt{IsCompact.exists\_bound\_of\_continuousOn}); take $M$
+    to be the larger of the two bounds.
+\end{proof}
+
+\begin{lemma}[A vanishing right limit forces nonpositivity]
+    \label{lem:limit-forces-nonpos}
+    \lean{LeanEval.Analysis.ODE.limit_forces_nonpos}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \leanok
+    Let $t > 0$, let $c \in \mathbb{R}$, and let $h : \mathbb{R} \to \mathbb{R}$
+    tend to $0$ along the right neighbourhood filter $\mathcal{N}_{>0}\,0$ at
+    $0$. If $c \le h(a)$ for all $a \in (0,t]$, then $c \le 0$.
+\end{lemma}
+\begin{proof}
+    The filter $\mathcal{N}_{>0}\,0$ is nontrivial, and $c \le h(a)$ holds
+    eventually along it (it holds for every $a \in (0,t]$, a neighbourhood of
+    $0$ from the right). By limit-inequality preservation
+    (\texttt{le\_of\_tendsto}), $c \le \lim_{a \to 0^+} h(a) = 0$.
+\end{proof}
+
+\begin{lemma}[The Gr\"onwall bound vanishes at $0^+$]
+    \label{lem:gronwall-rhs-tendsto}
+    \lean{LeanEval.Analysis.ODE.gronwall_rhs_tendsto}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form, lem:solution-continuous, lem:closed-form-continuous, lem:closed-form-zero}
+    \leanok
+    Let $y$ be a solution as above, let $t > 0$, and let $M \ge 0$. Then the map
+    \[
+        a \;\longmapsto\; \bigl| y(a) - g(a) \bigr|\,\exp\!\bigl(3M^2(t-a)\bigr)
+    \]
+    tends to $0$ along the right neighbourhood filter $\mathcal{N}_{>0}\,0$ at
+    $0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:solution-continuous, lem:closed-form-continuous, lem:closed-form-zero}
+    By Lemmas~\ref{lem:solution-continuous} and~\ref{lem:closed-form-continuous},
+    $y$ and $g$ are continuous at $0$, so $|y(a) - g(a)| \to |y(0) - g(0)|$ and
+    $\exp(3M^2(t-a)) \to \exp(3M^2 t)$ as $a \to 0$, and a fortiori along
+    $\mathcal{N}_{>0}\,0$. The product therefore tends to
+    $|y(0) - g(0)|\,\exp(3M^2 t)$. But $y(0) = 1$ by hypothesis and $g(0) = 1$ by
+    Lemma~\ref{lem:closed-form-zero}, so $|y(0) - g(0)| = 0$ and the limit is $0$.
+\end{proof}
+
+\begin{lemma}[Uniqueness]
+    \label{lem:uniqueness}
+    \lean{LeanEval.Analysis.ODE.uniqueness}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form, lem:closed-form-zero, lem:gronwall-bound, lem:compact-bound, lem:gronwall-rhs-tendsto, lem:limit-forces-nonpos}
+    \leanok
+    Any solution $y$ as above satisfies $y(t) = g(t)$ for all $t \ge 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:closed-form-zero, lem:gronwall-bound, lem:compact-bound, lem:gronwall-rhs-tendsto, lem:limit-forces-nonpos}
+    Fix $t \ge 0$. If $t = 0$ then $y(0) = 1 = g(0)$ by hypothesis and
+    Lemma~\ref{lem:closed-form-zero}. Suppose $t > 0$. By
+    Lemma~\ref{lem:compact-bound} pick $M \ge 0$ bounding $|y|$ and $|g|$ on
+    $[0,t]$. By Lemma~\ref{lem:gronwall-bound}, for all $a \in (0,t]$,
+    \[
+        \bigl| y(t) - g(t) \bigr|
+          \le \bigl| y(a) - g(a) \bigr|\,\exp\!\bigl(3M^2(t-a)\bigr) .
+    \]
+    By Lemma~\ref{lem:gronwall-rhs-tendsto} the right-hand side tends to $0$ along
+    $\mathcal{N}_{>0}\,0$. Applying Lemma~\ref{lem:limit-forces-nonpos} with
+    $c = |y(t)-g(t)|$ gives $|y(t) - g(t)| \le 0$, hence $y(t) = g(t)$.
+\end{proof}
+
+\subsection{Asymptotics of the closed form}
+
+\begin{lemma}[Reciprocal form of the ratio]
+    \label{lem:ratio-eventually-eq}
+    \lean{LeanEval.Analysis.ODE.ratio_eq}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \leanok
+    For every $t > 0$, $\dfrac{t}{1+2t} = \dfrac{1}{1/t + 2}$.
+\end{lemma}
+\begin{proof}
+    For $t > 0$ both $t \neq 0$ and $1 + 2t \neq 0$; multiplying the numerator
+    and denominator of $t/(1+2t)$ by $1/t$ gives $1/(1/t + 2)$ by field
+    arithmetic.
+\end{proof}
+
+\begin{lemma}[Limit of the ratio]
+    \label{lem:ratio-limit}
+    \lean{LeanEval.Analysis.ODE.ratio_tendsto}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{lem:ratio-eventually-eq}
+    \leanok
+    As $t \to \infty$, $\dfrac{t}{1 + 2t} \to \dfrac{1}{2}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:ratio-eventually-eq}
+    By Lemma~\ref{lem:ratio-eventually-eq}, eventually $t/(1+2t) = 1/(1/t+2)$.
+    As $t \to \infty$, $1/t \to 0$ (\texttt{tendsto\_inv\_atTop\_zero}), so the
+    denominator tends to $2$ and the quotient tends to $1/2$ by the arithmetic of
+    limits.
+\end{proof}
+
+\begin{lemma}[Square-root form of the scaled closed form]
+    \label{lem:closed-form-sqrt-eq}
+    \lean{LeanEval.Analysis.ODE.closedForm_mul_sqrt}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form}
+    \leanok
+    For every $t > 0$, $g(t)\,\sqrt t = \sqrt{\dfrac{t}{1+2t}}$.
+\end{lemma}
+\begin{proof}
+    \uses{def:closed-form}
+    For $t > 0$ both $t \ge 0$ and $1 + 2t \ge 0$, so using
+    $\sqrt a/\sqrt b = \sqrt{a/b}$,
+    \[
+        g(t)\,\sqrt t = \frac{\sqrt t}{\sqrt{1+2t}} = \sqrt{\frac{t}{1+2t}} .
+    \]
+\end{proof}
+
+\begin{lemma}[Asymptotics of the closed form]
+    \label{lem:closed-form-asymptotic}
+    \lean{LeanEval.Analysis.ODE.closedForm_asymptotic}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form, lem:ratio-limit, lem:closed-form-sqrt-eq}
+    \leanok
+    As $t \to \infty$, $g(t)\,\sqrt{t} \to \dfrac{1}{\sqrt 2}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:ratio-limit, lem:closed-form-sqrt-eq}
+    By Lemma~\ref{lem:closed-form-sqrt-eq}, eventually $g(t)\sqrt t =
+    \sqrt{t/(1+2t)}$. By Lemma~\ref{lem:ratio-limit}, $t/(1+2t) \to 1/2$, and the
+    square root is continuous (\texttt{Filter.Tendsto.sqrt}), so
+    $g(t)\sqrt t \to \sqrt{1/2}$. Finally $\sqrt{1/2} = 1/\sqrt 2$.
+\end{proof}
+
+\subsection{Main result}
+
+\begin{theorem}[Cubic decay asymptotic]
+    \label{thm:main}
+    \lean{LeanEval.Analysis.ODE.cubic_decay_asymptotic}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
+    \uses{def:closed-form, lem:uniqueness, lem:closed-form-asymptotic}
+    \leanok
+    Let $y : \mathbb{R} \to \mathbb{R}$ satisfy $y'(t) = -y(t)^3$ for all
+    $t > 0$, be continuous within $[0,\infty)$ at $0$, and satisfy $y(0) = 1$.
+    Then $y(t)\,\sqrt{t} \to \dfrac{1}{\sqrt 2}$ as $t \to \infty$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:uniqueness, lem:closed-form-asymptotic}
+    By Lemma~\ref{lem:uniqueness}, $y(t) = g(t)$ for all $t \ge 0$, so
+    $y(t)\sqrt t = g(t)\sqrt t$ for all $t \ge 0$, in particular eventually as
+    $t \to \infty$. The conclusion is then Lemma
+    \ref{lem:closed-form-asymptotic}.
+\end{proof}
+
+\end{document}

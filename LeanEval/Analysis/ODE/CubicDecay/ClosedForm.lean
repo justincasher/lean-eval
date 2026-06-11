@@ -1,0 +1,74 @@
+import Mathlib
+import EvalTools.Markers
+
+/-!
+The closed form `g(t) = (√(1 + 2t))⁻¹` for the IVP `y' = -y³`, `y 0 = 1`, together with
+its initial value, derivative, and continuity. Helper file for
+`LeanEval.Analysis.ODE.CubicDecay`.
+-/
+
+namespace LeanEval
+namespace Analysis
+namespace ODE
+
+open Filter Topology
+
+/-- Closed form (`def:closed-form`): `g(t) = (√(1 + 2t))⁻¹`. On `{t : 1 + 2t > 0}` this
+equals `(1 + 2t)^(-1/2)`. -/
+noncomputable def closedForm (t : ℝ) : ℝ := (Real.sqrt (1 + 2 * t))⁻¹
+
+/-- Initial value of the closed form (`lem:closed-form-zero`): `g(0) = 1`. -/
+theorem closedForm_zero : closedForm 0 = 1 := by
+  unfold closedForm
+  norm_num [Real.sqrt_one]
+
+/-- Derivative of the affine square root (`lem:sqrt-affine-deriv`): for `t` with `1 + 2t > 0`,
+the map `t ↦ √(1 + 2t)` has derivative `1/√(1 + 2t)` at `t`. -/
+theorem sqrt_affine_hasDerivAt (t : ℝ) (ht : 0 < 1 + 2 * t) :
+    HasDerivAt (fun t : ℝ => Real.sqrt (1 + 2 * t)) (1 / Real.sqrt (1 + 2 * t)) t := by
+  have hs_ne_zero : (fun t : ℝ => 1 + 2 * t) t ≠ 0 := by
+    simpa using ht.ne'
+  have hin : HasDerivAt (fun t : ℝ => 1 + 2 * t) 2 t := by
+    simpa using ((hasDerivAt_id t).const_mul 2).const_add 1
+  have htemp := hin.sqrt hs_ne_zero
+  have h_simp : 2 / (2 * Real.sqrt (1 + 2 * t)) = 1 / Real.sqrt (1 + 2 * t) := by
+    calc
+      2 / (2 * Real.sqrt (1 + 2 * t)) = (2 / 2) / Real.sqrt (1 + 2 * t) := by
+        ring
+      _ = 1 / Real.sqrt (1 + 2 * t) := by
+        norm_num
+  simpa [h_simp] using htemp
+
+/-- Cube identity for the closed form (`lem:closed-form-cube-identity`): for `t` with
+`1 + 2t > 0`, writing `s = √(1 + 2t)` and `s' = 1/√(1 + 2t)`, one has `-(s'/s²) = -g(t)³`. -/
+theorem closedForm_cube_identity (t : ℝ) (ht : 0 < 1 + 2 * t) :
+    -((1 / Real.sqrt (1 + 2 * t)) / (Real.sqrt (1 + 2 * t)) ^ 2) = -(closedForm t) ^ 3 := by
+  have hs : Real.sqrt (1 + 2 * t) ≠ 0 := (Real.sqrt_pos.mpr ht).ne'
+  simp only [closedForm]
+  field_simp [hs]
+
+/-- Closed form solves the ODE (`lem:closed-form-deriv`): for `t` with `1 + 2t > 0`, the
+function `g` has derivative `-g(t)³` at `t`. -/
+theorem closedForm_hasDerivAt (t : ℝ) (ht : 0 < 1 + 2 * t) :
+    HasDerivAt closedForm (-(closedForm t) ^ 3) t := by
+  have hs : Real.sqrt (1 + 2 * t) ≠ 0 := (Real.sqrt_pos.mpr ht).ne'
+  have h := (sqrt_affine_hasDerivAt t ht).inv hs
+  have hderiv : -(1 / Real.sqrt (1 + 2 * t)) / (Real.sqrt (1 + 2 * t)) ^ 2 = -(closedForm t) ^ 3 := by
+    calc
+      -(1 / Real.sqrt (1 + 2 * t)) / (Real.sqrt (1 + 2 * t)) ^ 2
+          = -((1 / Real.sqrt (1 + 2 * t)) / (Real.sqrt (1 + 2 * t)) ^ 2) := by ring
+      _ = -(closedForm t) ^ 3 := closedForm_cube_identity t ht
+  rw [hderiv] at h
+  exact h
+
+/-- Continuity of the closed form (`lem:closed-form-continuous`): `g` is continuous on
+`[0, ∞)`. -/
+theorem closedForm_continuousOn : ContinuousOn closedForm (Set.Ici 0) := by
+  intro t ht
+  rw [Set.mem_Ici] at ht
+  have hpos : 0 < 1 + 2 * t := by linarith
+  exact ((closedForm_hasDerivAt t hpos).continuousAt).continuousWithinAt
+
+end ODE
+end Analysis
+end LeanEval
