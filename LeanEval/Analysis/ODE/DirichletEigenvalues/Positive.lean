@@ -129,6 +129,7 @@ lemma g_match_initial_data (y : ℝ → ℝ) {s : ℝ} (hs : s ≠ 0) :
 
 /-- Difference of two ODE solutions is again an ODE solution. -/
 lemma diff_of_two_ode_solutions {y g : ℝ → ℝ} {J : Set ℝ} {lam : ℝ}
+    (hJ : IsOpen J)
     (hy : ∀ x ∈ J, HasDerivAt y (deriv y x) x)
     (hyy : ∀ x ∈ J, HasDerivAt (deriv y) (-(lam * y x)) x)
     (hg : ∀ x ∈ J, HasDerivAt g (deriv g x) x)
@@ -136,7 +137,19 @@ lemma diff_of_two_ode_solutions {y g : ℝ → ℝ} {J : Set ℝ} {lam : ℝ}
     (∀ x ∈ J, HasDerivAt (fun t => y t - g t) (deriv y x - deriv g x) x) ∧
       (∀ x ∈ J, HasDerivAt (deriv (fun t => y t - g t)) (-(lam * (y x - g x))) x) ∧
       (0 ∈ J → deriv (fun t => y t - g t) 0 = deriv y 0 - deriv g 0) := by
-  sorry
+  refine ⟨?_, ?_, ?_⟩
+  · intro x hx; exact (hy x hx).sub (hg x hx)
+  · intro x hx
+    have hzz : HasDerivAt (fun t => deriv y t - deriv g t) (-(lam * (y x - g x))) x := by
+      have h := (hyy x hx).sub (hgg x hx)
+      have hcalc : -(lam * y x) - (-(lam * g x)) = -(lam * (y x - g x)) := by ring
+      simpa [hcalc] using h
+    have h_ev : deriv (fun t => y t - g t) =ᶠ[𝓝 x] (fun t => deriv y t - deriv g t) := by
+      filter_upwards [hJ.mem_nhds hx] with t ht
+      exact deriv_sub ((hy t ht).differentiableAt) ((hg t ht).differentiableAt)
+    exact hzz.congr_of_eventuallyEq h_ev
+  · intro h0J
+    exact ((hy 0 h0J).sub (hg 0 h0J)).deriv
 
 /-- For `λ > 0`, the difference `z = y - g` (with `A = y'(0)/s, B = y(0)`,
 `g(x) = A sin(s·x) + B cos(s·x)`, `s = √λ`) has zero initial data and satisfies the ODE. -/
