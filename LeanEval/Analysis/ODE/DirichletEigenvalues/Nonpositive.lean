@@ -18,7 +18,10 @@ at every `x ∈ J`. -/
 lemma y_sq_first_deriv {y : ℝ → ℝ} {J : Set ℝ}
     (hy : ∀ x ∈ J, HasDerivAt y (deriv y x) x) {x : ℝ} (hx : x ∈ J) :
     HasDerivAt (fun t => y t * y t) (2 * y x * deriv y x) x := by
-  sorry
+  have h := hy x hx
+  have prod := h.mul h
+  convert prod using 1
+  ring
 
 /-- Second derivative formula for `y²`: with `h(t) = 2 y(t) y'(t)`, the function `h` has
 derivative `2 y'(x)² - 2 λ y(x)²` at each `x ∈ J`. -/

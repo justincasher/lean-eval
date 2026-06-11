@@ -27,7 +27,16 @@ lemma cos_smul_hasDerivAt (s x : ℝ) :
 lemma sin_cos_combo_first_deriv (A B s x : ℝ) :
     HasDerivAt (fun t : ℝ => A * Real.sin (s * t) + B * Real.cos (s * t))
       (A * s * Real.cos (s * x) - B * s * Real.sin (s * x)) x := by
-  sorry
+  have hsin := sin_smul_hasDerivAt s x
+  have hcos := cos_smul_hasDerivAt s x
+  have hA : HasDerivAt (fun t : ℝ => A * Real.sin (s * t)) (A * (s * Real.cos (s * x))) x :=
+    hsin.const_mul A
+  have hB : HasDerivAt (fun t : ℝ => B * Real.cos (s * t)) (B * (-(s * Real.sin (s * x)))) x :=
+    hcos.const_mul B
+  have hsum : HasDerivAt (fun t : ℝ => A * Real.sin (s * t) + B * Real.cos (s * t))
+      (A * (s * Real.cos (s * x)) + B * (-(s * Real.sin (s * x)))) x :=
+    hA.add hB
+  simpa [mul_assoc, mul_comm, mul_left_comm, sub_eq_add_neg] using hsum
 
 /-- Second derivative formula: the function `t ↦ A s cos (s t) - B s sin (s t)`, which is
 the first derivative of `t ↦ A sin (s t) + B cos (s t)`, has at every `x` the value
@@ -41,7 +50,16 @@ lemma sin_cos_combo_second_deriv (A B s x : ℝ) :
 lemma sin_cos_combo_initial_values (A B s : ℝ) :
     let g : ℝ → ℝ := fun t => A * Real.sin (s * t) + B * Real.cos (s * t)
     g 0 = B ∧ deriv g 0 = A * s := by
-  sorry
+  intro g
+  have h0 : g 0 = B := by
+    dsimp [g]
+    simp [Real.sin_zero, Real.cos_zero]
+  have hderiv : deriv g 0 = A * s := by
+    have h := sin_cos_combo_first_deriv A B s 0
+    have hderiv_eq : deriv g 0 = A * s * Real.cos (s * 0) - B * s * Real.sin (s * 0) := by
+      simpa [g] using h.deriv
+    simpa [Real.sin_zero, Real.cos_zero, mul_zero, mul_one] using hderiv_eq
+  exact And.intro h0 hderiv
 
 /-- `g(x) = A sin(s·x) + B cos(s·x)` solves the harmonic oscillator on `ℝ`:
 its first derivative is `A s cos(s·x) - B s sin(s·x)`, its second derivative is

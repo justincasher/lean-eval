@@ -56,7 +56,13 @@ lemma sin_cos_combo_solves_ode_lambda (lam A B : ℝ) (hlam : 0 ≤ lam) :
     let g : ℝ → ℝ := fun x => A * Real.sin (s * x) + B * Real.cos (s * x)
     (∀ x : ℝ, HasDerivAt g (deriv g x) x) ∧
       (∀ x : ℝ, HasDerivAt (deriv g) (-(lam * g x)) x) := by
-  sorry
+  intro s g
+  have hsq : s ^ 2 = lam := Real.sq_sqrt hlam
+  have h := sin_cos_combo_solves_ode A B s
+  rcases h with ⟨h1, _, h3, _, _, _⟩
+  refine ⟨h1, λ x => ?_⟩
+  have h3x : HasDerivAt (deriv g) (-(s ^ 2) * g x) x := h3 x
+  simpa [hsq, neg_mul] using h3x
 
 /-- Initial data match for `g` when `A = y'(0)/s, B = y(0)` (with `s ≠ 0`):
 `g 0 = y 0` and `deriv g 0 = deriv y 0`. -/
