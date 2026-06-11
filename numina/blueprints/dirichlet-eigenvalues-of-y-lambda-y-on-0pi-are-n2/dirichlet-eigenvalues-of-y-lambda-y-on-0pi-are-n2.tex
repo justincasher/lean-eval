@@ -33,6 +33,9 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Derivative of $x \mapsto \sin(sx)$]
     \label{lem:sin_smul_hasDerivAt}
+    \lean{LeanEval.Analysis.ODE.sin_smul_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
+    \leanok
     For every $s, x \in \mathbb{R}$, the function $t \mapsto \sin(st)$ has
     derivative $s \cos(sx)$ at $x$ (i.e.\ $\mathrm{HasDerivAt}\,(t \mapsto
     \sin(st))\, (s\cos(sx))\, x$).
@@ -47,6 +50,9 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Derivative of $x \mapsto \cos(sx)$]
     \label{lem:cos_smul_hasDerivAt}
+    \lean{LeanEval.Analysis.ODE.cos_smul_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
+    \leanok
     For every $s, x \in \mathbb{R}$, the function $t \mapsto \cos(st)$ has
     derivative $-s \sin(sx)$ at $x$.
 \end{lemma}
@@ -74,7 +80,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Second derivative of $A\sin(sx) + B\cos(sx)$]
     \label{lem:sin_cos_combo_second_deriv}
+    \lean{LeanEval.Analysis.ODE.sin_cos_combo_second_deriv}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:sin_smul_hasDerivAt, lem:cos_smul_hasDerivAt, lem:sin_cos_combo_first_deriv}
+    \leanok
     For every $A, B, s, x \in \mathbb{R}$, with $g(t) = A \sin(st) + B \cos(st)$,
     \[ \mathrm{deriv}\bigl(t \mapsto A s \cos(st) - B s \sin(st)\bigr)(x)
        = -s^2 \, g(x). \]
@@ -104,7 +113,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[$A\sin(sx) + B\cos(sx)$ solves the harmonic oscillator]
     \label{lem:sin_cos_combo_solves_ode}
+    \lean{LeanEval.Analysis.ODE.sin_cos_combo_solves_ode}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:sin_cos_combo_first_deriv, lem:sin_cos_combo_second_deriv, lem:sin_cos_combo_initial_values}
+    \leanok
     For every $A, B, s \in \mathbb{R}$, the function
     $g(x) = A \sin(sx) + B \cos(sx)$ is twice differentiable on $\mathbb{R}$ with
     $\mathrm{deriv}\, g\, x = A s \cos(sx) - B s \sin(sx)$ and
@@ -123,6 +135,9 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Nontrivial witness for $\sin(nx)$]
     \label{lem:sin_nx_nontrivial_witness}
+    \lean{LeanEval.Analysis.ODE.sin_nx_nontrivial_witness}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
+    \leanok
     For every positive natural number $n$, there exists $x_0 \in (0,\pi)$ with
     $\sin(n \cdot x_0) \ne 0$.
 \end{lemma}
@@ -135,7 +150,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[$\sin(nx)$ realises the eigenvalue $n^2$]
     \label{lem:sin_eigenfunction}
+    \lean{LeanEval.Analysis.ODE.sin_eigenfunction}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:sin_cos_combo_solves_ode, lem:sin_nx_nontrivial_witness}
+    \leanok
     For every positive natural number $n$, the function $y(x) = \sin(nx)$ and
     $J = \mathbb{R}$ satisfy the Dirichlet ODE conditions: $y$ is twice
     differentiable on $\mathbb{R}$ with $\mathrm{deriv}\, y'(x) = -n^2 \, y(x)$,
@@ -167,6 +185,9 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Second derivative formula for $y^2$]
     \label{lem:y_sq_second_deriv_formula}
+    \lean{LeanEval.Analysis.ODE.y_sq_second_deriv_formula}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Let
     $h(x) = 2 y(x) y'(x)$. Then for every $x \in J$, $h$ has derivative
@@ -183,7 +204,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Second derivative of $y^2$ is nonnegative when $\lambda \le 0$]
     \label{lem:y_sq_second_deriv_nonneg}
+    \lean{LeanEval.Analysis.ODE.y_sq_second_deriv_nonneg}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:y_sq_second_deriv_formula}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, and $\lambda \le 0$.
     Let $h(x) = 2 y(x) y'(x)$. Then for every $x \in J$,
@@ -199,7 +223,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[$y^2$ is differentiable on $J$]
     \label{lem:y_sq_differentiableOn_J}
+    \lean{LeanEval.Analysis.ODE.y_sq_differentiableOn_J}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:y_sq_first_deriv}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     (in the shorthand sense of the introduction). Then the function
     $f(x) = y(x)^2$ is differentiable on $J$, and moreover
@@ -215,7 +242,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[$\mathrm{deriv}\, y^2$ is differentiable on $J$]
     \label{lem:y_sq_deriv_differentiableOn_J}
+    \lean{LeanEval.Analysis.ODE.y_sq_deriv_differentiableOn_J}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:y_sq_differentiableOn_J, lem:y_sq_second_deriv_formula}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Let $f(x) = y(x)^2$.
     Then $\mathrm{deriv}\, f$ is differentiable on $J$.
@@ -232,7 +262,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[{$y^2$ is convex on $[0,\pi]$ when $\lambda \le 0$}]
     \label{lem:y_sq_convex}
+    \lean{LeanEval.Analysis.ODE.y_sq_convex}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:y_sq_differentiableOn_J, lem:y_sq_deriv_differentiableOn_J, lem:y_sq_second_deriv_nonneg}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, and $\lambda \le 0$.
     Then the function $f(x) = y(x)^2$ is convex on $[0,\pi]$.
@@ -250,7 +283,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[No eigenvalue $\le 0$]
     \label{lem:no_eigen_nonpos}
+    \lean{LeanEval.Analysis.ODE.no_eigen_nonpos}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:y_sq_convex}
+    \leanok
     If $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$ with
     $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, $y(0) = y(\pi) = 0$, and
     $\lambda \le 0$, then $y(x) = 0$ for every $x \in [0,\pi]$.
@@ -269,6 +305,9 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Derivative of $(y')^2$]
     \label{lem:yprime_sq_hasDerivAt}
+    \lean{LeanEval.Analysis.ODE.yprime_sq_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Then for every
     $x \in J$, the function $t \mapsto y'(t)^2 = y'(t) \cdot y'(t)$ has
@@ -283,7 +322,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Energy has derivative $0$ pointwise on $J$]
     \label{lem:energy_hasDerivAt_zero}
+    \lean{LeanEval.Analysis.ODE.energy_hasDerivAt_zero}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:y_sq_first_deriv, lem:yprime_sq_hasDerivAt}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Then for every
     $x \in J$, the function
@@ -302,7 +344,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Energy conservation]
     \label{lem:energy_const}
+    \lean{LeanEval.Analysis.ODE.energy_const}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:energy_hasDerivAt_zero}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Let
     $E(x) = \lambda \, y(x)^2 + y'(x)^2$. Then for every $x \in [0,\pi]$,
@@ -320,7 +365,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Zero initial conditions force zero solution]
     \label{lem:zero_initial_zero_solution}
+    \lean{LeanEval.Analysis.ODE.zero_initial_zero_solution}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:energy_const}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, $\lambda > 0$,
     $y(0) = 0$, and $y'(0) = 0$. Then $y(x) = 0$ and $y'(x) = 0$ for every
@@ -353,7 +401,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Initial data of $g$ when $A = y'(0)/s$, $B = y(0)$]
     \label{lem:g_match_initial_data}
+    \lean{LeanEval.Analysis.ODE.g_match_initial_data}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:sin_cos_combo_initial_values}
+    \leanok
     Let $y : \mathbb{R} \to \mathbb{R}$, $s \in \mathbb{R}$ with $s \neq 0$. Set
     $A = y'(0)/s$, $B = y(0)$, and $g(x) = A \sin(sx) + B \cos(sx)$. Then
     $g(0) = y(0)$ and $\mathrm{deriv}\, g\, 0 = y'(0)$ (where $y'(0)$ denotes
@@ -409,7 +460,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Explicit form of solutions, $\lambda > 0$]
     \label{lem:solution_explicit}
+    \lean{LeanEval.Analysis.ODE.solution_explicit}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:zero_initial_zero_solution, lem:solution_diff_is_zero_initial_solution}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$ and $\lambda > 0$. Let
     $s = \sqrt{\lambda} > 0$. Then for every $x \in [0,\pi]$,
@@ -428,7 +482,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Solution form when $y(0) = 0$, $\lambda > 0$]
     \label{lem:solution_form_when_y0_zero}
+    \lean{LeanEval.Analysis.ODE.solution_form_when_y0_zero}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:solution_explicit}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, $y(0) = 0$, and
     $\lambda > 0$. Let $s = \sqrt{\lambda} > 0$. Then for every
@@ -443,6 +500,9 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[$s > 0$ and $\sin(s\pi) = 0$ force $s$ to be a positive natural]
     \label{lem:sin_pi_smul_eq_zero_pos_to_nat}
+    \lean{LeanEval.Analysis.ODE.sin_pi_smul_eq_zero_pos_to_nat}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
+    \leanok
     Let $s \in \mathbb{R}$ with $s > 0$ and $\sin(s \cdot \pi) = 0$. Then there
     exists a positive natural number $n$ with $(n : \mathbb{R}) = s$.
 \end{lemma}
@@ -456,7 +516,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Nontriviality forces $y'(0) \neq 0$ when $y(0) = 0$]
     \label{lem:yprime0_ne_zero_of_nontrivial}
+    \lean{LeanEval.Analysis.ODE.yprime0_ne_zero_of_nontrivial}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:solution_form_when_y0_zero}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, $\lambda > 0$,
     $y(0) = 0$, and there exists $x_0 \in (0,\pi)$ with $y(x_0) \neq 0$. Then
@@ -473,7 +536,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Positive eigenvalues are squares of positive naturals]
     \label{lem:pos_eigen_nat_sq}
+    \lean{LeanEval.Analysis.ODE.pos_eigen_nat_sq}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:solution_form_when_y0_zero, lem:sin_pi_smul_eq_zero_pos_to_nat, lem:yprime0_ne_zero_of_nontrivial}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, $y(0) = y(\pi) = 0$,
     there exists $x_0 \in (0,\pi)$ with $y(x_0) \neq 0$, and $\lambda > 0$. Then
@@ -494,7 +560,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{theorem}[{Dirichlet eigenvalues of $-y'' = \lambda y$ on $[0,\pi]$}]
     \label{thm:dirichlet_eigenvalues_eq_nat_sq}
+    \lean{LeanEval.Analysis.ODE.dirichlet_eigenvalues_eq_nat_sq}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:sin_eigenfunction, lem:no_eigen_nonpos, lem:pos_eigen_nat_sq}
+    \leanok
     A real $\lambda$ admits a nontrivial twice-differentiable Dirichlet
     eigenfunction on $[0,\pi]$ (in the shorthand sense of the introduction) if
     and only if $\lambda = n^2$ for some positive natural number $n$.

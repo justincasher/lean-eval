@@ -41,7 +41,27 @@ theorem dirichlet_eigenvalues_eq_nat_sq (lam : ℝ) :
         y 0 = 0 ∧ y Real.pi = 0 ∧
         ∃ x ∈ Set.Ioo (0 : ℝ) Real.pi, y x ≠ 0) ↔
       ∃ n : ℕ, 0 < n ∧ lam = (n : ℝ) ^ 2 := by
-  sorry
+  constructor
+  · rintro ⟨y, J, hJ, hsub, hy, hyy, hy0, hypi, hnontriv⟩
+    by_cases hle : lam ≤ 0
+    · exfalso
+      rcases hnontriv with ⟨x₀, hx₀, hx₀_ne⟩
+      have hy_zero : ∀ x ∈ Set.Icc (0 : ℝ) Real.pi, y x = 0 :=
+        no_eigen_nonpos hJ hsub hy hyy hle hy0 hypi
+      have hx₀_mem : x₀ ∈ Set.Icc (0 : ℝ) Real.pi := by
+        rcases hx₀ with ⟨hx₀_left, hx₀_right⟩
+        exact ⟨hx₀_left.le, hx₀_right.le⟩
+      exact hx₀_ne (hy_zero x₀ hx₀_mem)
+    · have hgt : 0 < lam := by
+        by_contra! hle'
+        exact hle hle'
+      exact pos_eigen_nat_sq hJ hsub hy hyy hy0 hypi hnontriv hgt
+  · rintro ⟨n, hn, hlam⟩
+    rcases sin_eigenfunction n hn with ⟨hy_deriv_all, hy_second_deriv_all, hy0_all, hypi_all, hnontriv_all⟩
+    refine ⟨fun x => Real.sin ((n : ℝ) * x), Set.univ, isOpen_univ, Set.subset_univ _,
+      (fun x _ => hy_deriv_all x), (fun x _ => ?_), hy0_all, hypi_all, hnontriv_all⟩
+    rw [hlam]
+    exact hy_second_deriv_all x
 
 end ODE
 end Analysis
