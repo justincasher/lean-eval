@@ -3,6 +3,209 @@
 
 \begin{document}
 
-% Your blueprint will go here.
+\section{Dirichlet eigenvalues of $-y'' = \lambda y$ on $[0,\pi]$}
+
+We prove that a real number $\lambda$ admits a nontrivial $C^2$ solution of
+$-y'' = \lambda y$ on some open neighbourhood of $[0,\pi]$ with $y(0) = y(\pi) = 0$
+if and only if $\lambda = n^2$ for some positive natural $n$.
+
+Throughout, ``$y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
+with $-y'' = \lambda y$'' is shorthand for:
+\begin{itemize}
+    \item $J \subseteq \mathbb{R}$ is open and $[0,\pi] \subseteq J$;
+    \item for every $x \in J$, $y$ is differentiable at $x$ with derivative
+        $y'(x) := \mathrm{deriv}\, y\, x$;
+    \item for every $x \in J$, $y'$ is differentiable at $x$ with
+        $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$.
+\end{itemize}
+
+The argument splits into the easy ``if'' direction (the function $\sin(nx)$
+realises the eigenvalue $\lambda = n^2$) and the ``only if'' direction, which is
+substantively case-split on the sign of $\lambda$. For $\lambda \le 0$ a
+convexity argument forces $y \equiv 0$, contradicting nontriviality. For
+$\lambda > 0$ an energy argument forces every solution to take the explicit form
+$A\sin(\sqrt{\lambda}x) + B\cos(\sqrt{\lambda}x)$, after which the boundary
+conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
+
+\subsection{Backward direction: $\sin(nx)$ is an eigenfunction}
+
+\begin{lemma}[$\sin(nx)$ realises the eigenvalue $n^2$]
+    \label{lem:sin_eigenfunction}
+    For every positive natural number $n$, the function $y(x) = \sin(nx)$ and
+    $J = \mathbb{R}$ satisfy the Dirichlet ODE conditions: $y$ is twice
+    differentiable on $\mathbb{R}$ with $\mathrm{deriv}\, y'(x) = -n^2 \, y(x)$,
+    $y(0) = y(\pi) = 0$, and there exists $x_0 \in (0,\pi)$ with $y(x_0) \neq 0$.
+\end{lemma}
+\begin{proof}
+    Differentiability of $y$ on $\mathbb{R}$ follows from the chain rule applied
+    to $\sin$ at the linear function $x \mapsto nx$, giving $y'(x) = n\cos(nx)$.
+    Differentiating again gives $\mathrm{deriv}\, y'(x) = -n^2 \sin(nx) = -n^2 y(x)$.
+    For the boundary values, $\sin 0 = 0$ and $\sin(n\pi) = 0$ for any integer
+    $n$.
+
+    For nontriviality, take $x_0 = \pi/(2n)$. Then $0 < x_0 \le \pi/2 < \pi$ (using
+    $n \ge 1$ and $\pi > 0$), and $y(x_0) = \sin(\pi/2) = 1 \neq 0$.
+\end{proof}
+
+\subsection{Forward direction, case $\lambda \le 0$: convexity of $y^2$}
+
+\begin{lemma}[$y^2$ is convex on $[0,\pi]$ when $\lambda \le 0$]
+    \label{lem:y_sq_convex}
+    Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
+    with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, and $\lambda \le 0$.
+    Then the function $f(x) = y(x)^2$ is convex on $[0,\pi]$.
+\end{lemma}
+\begin{proof}
+    By the power and product rules, $f'(x) = 2 y(x) y'(x)$ on $J$, and
+    differentiating again gives
+    \[ f''(x) = 2 y'(x)^2 + 2 y(x) y''(x) = 2 y'(x)^2 - 2\lambda y(x)^2 \quad
+    \text{on } J. \]
+    Since $\lambda \le 0$, both summands are nonnegative, so $f''(x) \ge 0$ on
+    $J$, in particular on the interior of $[0,\pi]$. The function $f$ is
+    continuous on $[0,\pi]$ and twice differentiable on its interior, so
+    convexity on $[0,\pi]$ follows from \texttt{convexOn\_of\_deriv2\_nonneg}.
+\end{proof}
+
+\begin{lemma}[No eigenvalue $\le 0$]
+    \label{lem:no_eigen_nonpos}
+    \uses{lem:y_sq_convex}
+    If $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$ with
+    $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, $y(0) = y(\pi) = 0$, and
+    $\lambda \le 0$, then $y(x) = 0$ for every $x \in [0,\pi]$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:y_sq_convex}
+    By \cref{lem:y_sq_convex}, $f(x) = y(x)^2$ is convex on $[0,\pi]$. The
+    boundary conditions give $f(0) = f(\pi) = 0$. By the maximum principle for
+    convex functions on an interval (\texttt{ConvexOn.le\_max\_of\_mem\_Icc}),
+    \[ f(z) \le \max(f(0), f(\pi)) = 0 \quad \text{for } z \in [0,\pi]. \]
+    Since $f(z) = y(z)^2 \ge 0$, we conclude $f(z) = 0$, hence $y(z) = 0$ for
+    every $z \in [0,\pi]$.
+\end{proof}
+
+\subsection{Forward direction, case $\lambda > 0$: energy method}
+
+\begin{lemma}[Energy conservation]
+    \label{lem:energy_const}
+    Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
+    with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Then the energy
+    \[ E(x) := \lambda \, y(x)^2 + y'(x)^2 \]
+    is constant on $[0,\pi]$.
+\end{lemma}
+\begin{proof}
+    Differentiating, on $J$ we have
+    \[ E'(x) = 2\lambda \, y(x) y'(x) + 2 y'(x) y''(x)
+           = 2 y'(x) \, (\lambda y(x) + y''(x)) = 0, \]
+    using the ODE $y''(x) = -\lambda y(x)$. Since $E$ is differentiable on $J$
+    (so in particular on $[0,\pi]$) with derivative identically zero, $E$ is
+    constant on $[0,\pi]$ by \texttt{constant\_of\_derivWithin\_zero}.
+\end{proof}
+
+\begin{lemma}[Zero initial conditions force zero solution]
+    \label{lem:zero_initial_zero_solution}
+    \uses{lem:energy_const}
+    Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
+    with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, $\lambda > 0$,
+    $y(0) = 0$, and $y'(0) = 0$. Then $y(x) = 0$ and $y'(x) = 0$ for every
+    $x \in [0,\pi]$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:energy_const}
+    By \cref{lem:energy_const}, $E(x) = \lambda y(x)^2 + y'(x)^2$ is constant on
+    $[0,\pi]$, equal to $E(0) = \lambda \cdot 0 + 0 = 0$. Hence
+    \[ \lambda y(x)^2 + y'(x)^2 = 0 \quad \text{for every } x \in [0,\pi]. \]
+    Both summands are nonnegative (using $\lambda > 0$), so each is zero. From
+    $\lambda y(x)^2 = 0$ and $\lambda > 0$ we get $y(x) = 0$, and from
+    $y'(x)^2 = 0$ we get $y'(x) = 0$.
+\end{proof}
+
+\begin{lemma}[$A\sin(sx) + B\cos(sx)$ solves the harmonic oscillator]
+    \label{lem:sin_cos_combo_solves_ode}
+    For every $A, B, s \in \mathbb{R}$, the function
+    $g(x) = A \sin(sx) + B \cos(sx)$ is twice differentiable on $\mathbb{R}$ with
+    \[ g'(x) = A s \cos(sx) - B s \sin(sx), \qquad
+       g''(x) = -s^2 \, g(x). \]
+    Moreover $g(0) = B$ and $g'(0) = A s$.
+\end{lemma}
+\begin{proof}
+    By the chain rule applied to $\sin$ and $\cos$ at the linear map
+    $x \mapsto sx$, we have $\mathrm{deriv}(x \mapsto \sin(sx))(x) = s\cos(sx)$
+    and $\mathrm{deriv}(x \mapsto \cos(sx))(x) = -s\sin(sx)$. Linearity of the
+    derivative gives $g'(x) = A s \cos(sx) - B s \sin(sx)$. Differentiating
+    once more and using $\mathrm{deriv}(x \mapsto \cos(sx)) = -s\sin(sx)$ and
+    $\mathrm{deriv}(x \mapsto \sin(sx)) = s\cos(sx)$ gives
+    $g''(x) = -A s^2 \sin(sx) - B s^2 \cos(sx) = -s^2 g(x)$.
+
+    The initial values follow from $\sin 0 = 0$ and $\cos 0 = 1$:
+    $g(0) = A \cdot 0 + B \cdot 1 = B$ and $g'(0) = A s \cdot 1 - B s \cdot 0 = A s$.
+\end{proof}
+
+\begin{lemma}[Explicit form of solutions, $\lambda > 0$]
+    \label{lem:solution_explicit}
+    \uses{lem:zero_initial_zero_solution, lem:sin_cos_combo_solves_ode}
+    Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
+    with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$ and $\lambda > 0$. Let
+    $s = \sqrt{\lambda} > 0$. Then for every $x \in [0,\pi]$,
+    \[ y(x) = \frac{y'(0)}{s} \sin(sx) + y(0) \cos(sx). \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:zero_initial_zero_solution, lem:sin_cos_combo_solves_ode}
+    Set $A = y'(0)/s$, $B = y(0)$, and
+    $g(x) = A \sin(sx) + B \cos(sx)$. By
+    \cref{lem:sin_cos_combo_solves_ode}, $g$ is twice differentiable on
+    $\mathbb{R}$ with $g''(x) = -s^2 g(x) = -\lambda g(x)$ (since $s^2 = \lambda$),
+    and $g(0) = B = y(0)$, $g'(0) = A s = y'(0)$.
+
+    Define $z(x) = y(x) - g(x)$. Then $z$ is twice differentiable on $J$ with
+    $z''(x) = y''(x) - g''(x) = -\lambda y(x) + \lambda g(x) = -\lambda z(x)$,
+    $z(0) = y(0) - g(0) = 0$, and $z'(0) = y'(0) - g'(0) = 0$. By
+    \cref{lem:zero_initial_zero_solution}, $z(x) = 0$ for every $x \in [0,\pi]$,
+    i.e., $y(x) = g(x)$.
+\end{proof}
+
+\begin{lemma}[Positive eigenvalues are squares of positive naturals]
+    \label{lem:pos_eigen_nat_sq}
+    \uses{lem:solution_explicit}
+    Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
+    with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, $y(0) = y(\pi) = 0$,
+    there exists $x_0 \in (0,\pi)$ with $y(x_0) \neq 0$, and $\lambda > 0$. Then
+    $\lambda = n^2$ for some positive natural number $n$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:solution_explicit}
+    Let $s = \sqrt{\lambda} > 0$. By \cref{lem:solution_explicit} and $y(0) = 0$,
+    $y(x) = (y'(0)/s) \sin(sx)$ for all $x \in [0,\pi]$. From $y(\pi) = 0$ we get
+    $(y'(0)/s) \sin(s\pi) = 0$.
+
+    If $y'(0) = 0$, then $y(x) = 0$ for all $x \in [0,\pi]$, contradicting
+    $y(x_0) \neq 0$ with $x_0 \in (0,\pi) \subseteq [0,\pi]$. Hence $y'(0) \neq 0$,
+    and $s > 0$, so $y'(0)/s \neq 0$ and therefore $\sin(s\pi) = 0$.
+
+    By \texttt{Real.sin\_eq\_zero\_iff}, there exists an integer $k$ with
+    $k\pi = s\pi$. Since $\pi > 0$, this gives $k = s > 0$, so $k \ge 1$. Setting
+    $n = k$ (as a positive natural), $\lambda = s^2 = n^2$.
+\end{proof}
+
+\subsection{Main theorem}
+
+\begin{theorem}[Dirichlet eigenvalues of $-y'' = \lambda y$ on $[0,\pi]$]
+    \label{thm:dirichlet_eigenvalues_eq_nat_sq}
+    \uses{lem:sin_eigenfunction, lem:no_eigen_nonpos, lem:pos_eigen_nat_sq}
+    A real $\lambda$ admits a nontrivial $C^2$ Dirichlet eigenfunction on
+    $[0,\pi]$ if and only if $\lambda = n^2$ for some positive natural number
+    $n$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:sin_eigenfunction, lem:no_eigen_nonpos, lem:pos_eigen_nat_sq}
+    The backward implication is \cref{lem:sin_eigenfunction}: given $n \ge 1$
+    with $\lambda = n^2$, the witness is $y(x) = \sin(nx)$ on $J = \mathbb{R}$.
+
+    For the forward implication, suppose $y$, $J$ realise $\lambda$ as a
+    Dirichlet eigenvalue. Split on the sign of $\lambda$. If $\lambda \le 0$,
+    then by \cref{lem:no_eigen_nonpos}, $y(x) = 0$ for every $x \in [0,\pi]$,
+    contradicting the existence of $x_0 \in (0,\pi)$ with $y(x_0) \neq 0$. Hence
+    $\lambda > 0$, and by \cref{lem:pos_eigen_nat_sq}, $\lambda = n^2$ for some
+    positive natural $n$.
+\end{proof}
 
 \end{document}
