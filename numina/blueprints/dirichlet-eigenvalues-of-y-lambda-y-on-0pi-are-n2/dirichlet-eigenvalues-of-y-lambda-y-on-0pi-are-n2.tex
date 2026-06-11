@@ -121,23 +121,33 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \subsection{Backward direction: $\sin(nx)$ is an eigenfunction}
 
+\begin{lemma}[Nontrivial witness for $\sin(nx)$]
+    \label{lem:sin_nx_nontrivial_witness}
+    For every positive natural number $n$, there exists $x_0 \in (0,\pi)$ with
+    $\sin(n \cdot x_0) \ne 0$.
+\end{lemma}
+\begin{proof}
+    Take $x_0 = \pi/(2n)$. From $n \ge 1$ and $\pi > 0$ we get $0 < \pi/(2n)
+    \le \pi/2 < \pi$, so $x_0 \in (0,\pi)$. Moreover
+    $n \cdot x_0 = n \cdot \pi/(2n) = \pi/2$ (using $n \ge 1$ so $n \neq 0$), so
+    $\sin(n x_0) = \sin(\pi/2) = 1 \neq 0$ by \texttt{Real.sin\_pi\_div\_two}.
+\end{proof}
+
 \begin{lemma}[$\sin(nx)$ realises the eigenvalue $n^2$]
     \label{lem:sin_eigenfunction}
-    \uses{lem:sin_cos_combo_solves_ode}
+    \uses{lem:sin_cos_combo_solves_ode, lem:sin_nx_nontrivial_witness}
     For every positive natural number $n$, the function $y(x) = \sin(nx)$ and
     $J = \mathbb{R}$ satisfy the Dirichlet ODE conditions: $y$ is twice
     differentiable on $\mathbb{R}$ with $\mathrm{deriv}\, y'(x) = -n^2 \, y(x)$,
     $y(0) = y(\pi) = 0$, and there exists $x_0 \in (0,\pi)$ with $y(x_0) \neq 0$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:sin_cos_combo_solves_ode}
+    \uses{lem:sin_cos_combo_solves_ode, lem:sin_nx_nontrivial_witness}
     Apply \cref{lem:sin_cos_combo_solves_ode} with $A = 1$, $B = 0$, $s = n$
     (as a real number). The conclusion is that $y(x) = \sin(nx)$ is twice
     differentiable on $\mathbb{R}$ with $\mathrm{deriv}\, y'(x) = -n^2 y(x)$, and
     $y(0) = 0$. For $y(\pi) = \sin(n\pi) = 0$, apply \texttt{Real.sin\_nat\_mul\_pi}.
-
-    For nontriviality, take $x_0 = \pi/(2n)$. Then $0 < x_0 \le \pi/2 < \pi$ (using
-    $n \ge 1$ and $\pi > 0$), and $y(x_0) = \sin(\pi/2) = 1 \neq 0$.
+    Nontriviality is \cref{lem:sin_nx_nontrivial_witness}.
 \end{proof}
 
 \subsection{Forward direction, case $\lambda \le 0$: convexity of $y^2$}
@@ -155,48 +165,87 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
     $y'(x) \cdot y(x) + y(x) \cdot y'(x) = 2 y(x) y'(x)$.
 \end{proof}
 
+\begin{lemma}[Second derivative formula for $y^2$]
+    \label{lem:y_sq_second_deriv_formula}
+    Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
+    with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Let
+    $h(x) = 2 y(x) y'(x)$. Then for every $x \in J$, $h$ has derivative
+    $2 y'(x)^2 - 2 \lambda y(x)^2$ at $x$.
+\end{lemma}
+\begin{proof}
+    Fix $x \in J$. By hypothesis $y$ has derivative $y'(x)$ at $x$ and $y'$
+    has derivative $-\lambda y(x)$ at $x$. Apply \texttt{HasDerivAt.mul} to the
+    product $t \mapsto y(t) \cdot y'(t)$: the derivative at $x$ equals
+    $y'(x) \cdot y'(x) + y(x) \cdot (-\lambda y(x)) = y'(x)^2 - \lambda y(x)^2$.
+    Multiplying by $2$ via \texttt{HasDerivAt.const\_mul} gives the claimed
+    derivative.
+\end{proof}
+
 \begin{lemma}[Second derivative of $y^2$ is nonnegative when $\lambda \le 0$]
     \label{lem:y_sq_second_deriv_nonneg}
-    \uses{lem:y_sq_first_deriv}
+    \uses{lem:y_sq_second_deriv_formula}
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, and $\lambda \le 0$.
-    Let $f(x) = y(x)^2$ and $h(x) = 2 y(x) y'(x)$. Then for every $x \in J$,
-    $h$ has derivative $2 y'(x)^2 - 2 \lambda y(x)^2$ at $x$, and this value
-    is $\ge 0$. In particular $\mathrm{deriv}\, h\, x \ge 0$ for $x \in J$.
+    Let $h(x) = 2 y(x) y'(x)$. Then for every $x \in J$,
+    $\mathrm{deriv}\, h\, x \ge 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:y_sq_second_deriv_formula}
+    By \cref{lem:y_sq_second_deriv_formula}, $h$ has derivative
+    $2 y'(x)^2 - 2 \lambda y(x)^2$ at $x \in J$. Now $y'(x)^2 \ge 0$ and
+    $-\lambda y(x)^2 \ge 0$ (since $\lambda \le 0$ and $y(x)^2 \ge 0$), so
+    $2 y'(x)^2 - 2 \lambda y(x)^2 \ge 0$. Conclude with \texttt{HasDerivAt.deriv}.
+\end{proof}
+
+\begin{lemma}[$y^2$ is differentiable on $J$]
+    \label{lem:y_sq_differentiableOn_J}
+    \uses{lem:y_sq_first_deriv}
+    Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
+    (in the shorthand sense of the introduction). Then the function
+    $f(x) = y(x)^2$ is differentiable on $J$, and moreover
+    $\mathrm{deriv}\, f\, x = 2 y(x) y'(x)$ for every $x \in J$.
 \end{lemma}
 \begin{proof}
     \uses{lem:y_sq_first_deriv}
-    For the derivative formula at $x \in J$: $y$ has derivative $y'(x)$ at $x$,
-    and $y'$ has derivative $\mathrm{deriv}\, y'(x) = -\lambda y(x)$ at $x$ by
-    hypothesis. Apply \texttt{HasDerivAt.mul} to the product
-    $h(t) = 2 \cdot y(t) \cdot y'(t)$ (with the leading constant absorbed via
-    \texttt{HasDerivAt.const\_mul}): the derivative at $x$ equals
-    $2(y'(x) \cdot y'(x) + y(x) \cdot (-\lambda y(x)))
-       = 2 y'(x)^2 - 2 \lambda y(x)^2$.
-
-    Nonnegativity: $y'(x)^2 \ge 0$ and $- \lambda y(x)^2 \ge 0$ (the latter
-    because $\lambda \le 0$ and $y(x)^2 \ge 0$), so their sum, multiplied by
-    $2 \ge 0$, is $\ge 0$. Finally $\mathrm{deriv}\, h\, x$ equals the
-    \texttt{HasDerivAt} value by \texttt{HasDerivAt.deriv}.
+    For each $x \in J$, \cref{lem:y_sq_first_deriv} provides a \texttt{HasDerivAt}
+    witness for $f$ at $x$ with derivative $2 y(x) y'(x)$. \texttt{HasDerivAt.differentiableAt}
+    gives differentiability at $x$, so $f$ is differentiable on $J$, and
+    \texttt{HasDerivAt.deriv} gives the derivative formula.
 \end{proof}
 
-\begin{lemma}[$y^2$ is convex on $[0,\pi]$ when $\lambda \le 0$]
+\begin{lemma}[$\mathrm{deriv}\, y^2$ is differentiable on $J$]
+    \label{lem:y_sq_deriv_differentiableOn_J}
+    \uses{lem:y_sq_differentiableOn_J, lem:y_sq_second_deriv_formula}
+    Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
+    with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Let $f(x) = y(x)^2$.
+    Then $\mathrm{deriv}\, f$ is differentiable on $J$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:y_sq_differentiableOn_J, lem:y_sq_second_deriv_formula}
+    By \cref{lem:y_sq_differentiableOn_J}, $\mathrm{deriv}\, f\, x = 2 y(x) y'(x)$
+    for $x \in J$. By \cref{lem:y_sq_second_deriv_formula}, this function (call it
+    $h$) has a \texttt{HasDerivAt} witness at every $x \in J$, hence is
+    differentiable at every $x \in J$. Since $\mathrm{deriv}\, f$ and $h$ agree on
+    $J$ and $J$ is open, $\mathrm{deriv}\, f$ is differentiable on $J$ as well
+    (\texttt{Filter.EventuallyEq.differentiableAt} via \texttt{IsOpen.mem\_nhds}).
+\end{proof}
+
+\begin{lemma}[{$y^2$ is convex on $[0,\pi]$ when $\lambda \le 0$}]
     \label{lem:y_sq_convex}
-    \uses{lem:y_sq_first_deriv, lem:y_sq_second_deriv_nonneg}
+    \uses{lem:y_sq_differentiableOn_J, lem:y_sq_deriv_differentiableOn_J, lem:y_sq_second_deriv_nonneg}
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, and $\lambda \le 0$.
     Then the function $f(x) = y(x)^2$ is convex on $[0,\pi]$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:y_sq_first_deriv, lem:y_sq_second_deriv_nonneg}
-    The interval $[0,\pi]$ is contained in the open set $J$, so $f$ is continuous
-    on $[0,\pi]$ and \cref{lem:y_sq_first_deriv} shows $f$ is differentiable on
-    $J$ (hence on $\mathrm{interior}\,[0,\pi]$) with $\mathrm{deriv}\, f\, x =
-    2 y(x) y'(x)$. \Cref{lem:y_sq_second_deriv_nonneg} gives differentiability
-    of $\mathrm{deriv}\, f$ on $J$ with $\mathrm{deriv}(\mathrm{deriv}\, f)\, x
-    \ge 0$ for $x \in J \supseteq \mathrm{interior}\,[0,\pi]$. Apply
-    \texttt{convexOn\_of\_deriv2\_nonneg} (with $\mathrm{Set.Icc}\, 0\, \pi$,
-    using $\pi \ge 0$).
+    \uses{lem:y_sq_differentiableOn_J, lem:y_sq_deriv_differentiableOn_J, lem:y_sq_second_deriv_nonneg}
+    By \cref{lem:y_sq_differentiableOn_J}, $f$ is differentiable on $J$, hence
+    continuous and (since $\mathrm{interior}\,[0,\pi] \subseteq J$) differentiable
+    on $\mathrm{interior}\,[0,\pi]$. By \cref{lem:y_sq_deriv_differentiableOn_J},
+    $\mathrm{deriv}\, f$ is differentiable on $\mathrm{interior}\,[0,\pi]$, and by
+    \cref{lem:y_sq_second_deriv_nonneg}, $\mathrm{deriv}(\mathrm{deriv}\, f)\, x
+    \ge 0$ on $\mathrm{interior}\,[0,\pi]$. Apply
+    \texttt{convexOn\_of\_deriv2\_nonneg} (using $\pi \ge 0$ for $\mathrm{Set.Icc}\, 0\, \pi$).
 \end{proof}
 
 \begin{lemma}[No eigenvalue $\le 0$]
@@ -218,41 +267,55 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \subsection{Forward direction, case $\lambda > 0$: energy method}
 
+\begin{lemma}[Derivative of $(y')^2$]
+    \label{lem:yprime_sq_hasDerivAt}
+    Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
+    with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Then for every
+    $x \in J$, the function $t \mapsto y'(t)^2 = y'(t) \cdot y'(t)$ has
+    derivative $-2 \lambda y(x) y'(x)$ at $x$.
+\end{lemma}
+\begin{proof}
+    Fix $x \in J$. By hypothesis $y'$ has derivative $-\lambda y(x)$ at $x$.
+    Apply \texttt{HasDerivAt.mul} to $t \mapsto y'(t) \cdot y'(t)$: the
+    derivative at $x$ equals $(-\lambda y(x)) \cdot y'(x) + y'(x) \cdot
+    (-\lambda y(x)) = -2 \lambda y(x) y'(x)$.
+\end{proof}
+
 \begin{lemma}[Energy has derivative $0$ pointwise on $J$]
     \label{lem:energy_hasDerivAt_zero}
+    \uses{lem:y_sq_first_deriv, lem:yprime_sq_hasDerivAt}
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Then for every
     $x \in J$, the function
     $E(x) := \lambda \, y(x)^2 + y'(x)^2$ has derivative $0$ at $x$.
 \end{lemma}
 \begin{proof}
-    Fix $x \in J$. By assumption $y$ has derivative $y'(x)$ at $x$ and $y'$
-    has derivative $-\lambda y(x)$ at $x$. Applying \texttt{HasDerivAt.mul}
-    to $y(t)^2 = y(t) \cdot y(t)$ gives derivative $2 y(x) y'(x)$ at $x$,
-    and applying it to $y'(t)^2 = y'(t) \cdot y'(t)$ gives derivative
-    $2 y'(x) \cdot (-\lambda y(x)) = -2 \lambda y(x) y'(x)$ at $x$. By
-    \texttt{HasDerivAt.const\_mul} (with constant $\lambda$) and
-    \texttt{HasDerivAt.add}, $E$ has derivative
-    \[ \lambda \cdot 2 y(x) y'(x) + (-2 \lambda y(x) y'(x)) = 0 \]
-    at $x$.
+    \uses{lem:y_sq_first_deriv, lem:yprime_sq_hasDerivAt}
+    Fix $x \in J$. By \cref{lem:y_sq_first_deriv}, $y^2$ has derivative
+    $2 y(x) y'(x)$ at $x$; scaling by $\lambda$ via \texttt{HasDerivAt.const\_mul}
+    gives derivative $\lambda \cdot 2 y(x) y'(x) = 2 \lambda y(x) y'(x)$ for
+    $\lambda y^2$ at $x$. By \cref{lem:yprime_sq_hasDerivAt}, $(y')^2$ has
+    derivative $-2 \lambda y(x) y'(x)$ at $x$. Adding via \texttt{HasDerivAt.add}
+    yields derivative $2 \lambda y(x) y'(x) + (-2 \lambda y(x) y'(x)) = 0$ for
+    $E$ at $x$.
 \end{proof}
 
 \begin{lemma}[Energy conservation]
     \label{lem:energy_const}
     \uses{lem:energy_hasDerivAt_zero}
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
-    with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Then the energy
-    $E(x) = \lambda \, y(x)^2 + y'(x)^2$ is constant on $[0,\pi]$.
+    with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$. Let
+    $E(x) = \lambda \, y(x)^2 + y'(x)^2$. Then for every $x \in [0,\pi]$,
+    $E(x) = E(0)$.
 \end{lemma}
 \begin{proof}
     \uses{lem:energy_hasDerivAt_zero}
-    By \cref{lem:energy_hasDerivAt_zero}, $E$ has derivative $0$ at every point
-    of $J$. In particular, for every $x \in \mathrm{Set.Icc}\, 0\, \pi
-    \subseteq J$, $E$ has derivative $0$ at $x$, so
-    $\mathrm{derivWithin}\, E\, [0,\pi]\, x = 0$ (via
-    \texttt{HasDerivAt.derivWithin}). The set $[0,\pi]$ is convex (hence
+    By \cref{lem:energy_hasDerivAt_zero}, for every $x \in J$ the function $E$
+    has derivative $0$ at $x$, so $E$ is differentiable on $J \supseteq [0,\pi]$
+    and $\mathrm{derivWithin}\, E\, [0,\pi]\, x = 0$ for every $x \in [0,\pi]$
+    (via \texttt{HasDerivAt.derivWithin}, using that $[0,\pi]$ is convex hence
     \texttt{UniqueDiffOn}). Apply \texttt{constant\_of\_derivWithin\_zero} to
-    conclude $E$ is constant on $[0,\pi]$.
+    conclude $E(x) = E(0)$ for every $x \in [0,\pi]$.
 \end{proof}
 
 \begin{lemma}[Zero initial conditions force zero solution]
@@ -265,17 +328,66 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 \end{lemma}
 \begin{proof}
     \uses{lem:energy_const}
-    By \cref{lem:energy_const}, $E(x) = \lambda y(x)^2 + y'(x)^2$ is constant on
-    $[0,\pi]$, equal to $E(0) = \lambda \cdot 0 + 0 = 0$. Hence
-    \[ \lambda y(x)^2 + y'(x)^2 = 0 \quad \text{for every } x \in [0,\pi]. \]
-    Both summands are nonnegative (using $\lambda > 0$), so each is zero. From
-    $\lambda y(x)^2 = 0$ and $\lambda > 0$ we get $y(x) = 0$, and from
-    $y'(x)^2 = 0$ we get $y'(x) = 0$.
+    By \cref{lem:energy_const}, $E(x) = E(0) = \lambda \cdot 0 + 0 = 0$ for every
+    $x \in [0,\pi]$, i.e.\ $\lambda y(x)^2 + y'(x)^2 = 0$ on $[0,\pi]$. Both
+    summands are nonnegative (using $\lambda > 0$ and that any square is
+    $\ge 0$), so each is zero. From $\lambda y(x)^2 = 0$ and $\lambda > 0$ we get
+    $y(x) = 0$, and from $y'(x)^2 = 0$ we get $y'(x) = 0$.
+\end{proof}
+
+\begin{lemma}[$A\sin(sx) + B\cos(sx)$ solves $-y'' = \lambda y$ when $s = \sqrt{\lambda}$]
+    \label{lem:sin_cos_combo_solves_ode_lambda}
+    \uses{lem:sin_cos_combo_solves_ode}
+    Let $\lambda \ge 0$, $s = \sqrt{\lambda}$, and $A, B \in \mathbb{R}$. Then
+    the function $g(x) = A \sin(sx) + B \cos(sx)$ is twice differentiable on
+    $\mathbb{R}$ with $\mathrm{deriv}(\mathrm{deriv}\, g)\, x = -\lambda g(x)$
+    for every $x \in \mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:sin_cos_combo_solves_ode}
+    By \cref{lem:sin_cos_combo_solves_ode}, $g$ is twice differentiable on
+    $\mathbb{R}$ with $\mathrm{deriv}(\mathrm{deriv}\, g)\, x = -s^2 g(x)$.
+    By \texttt{Real.sq\_sqrt} applied to $\lambda \ge 0$, $s^2 = \sqrt{\lambda}^2
+    = \lambda$, so $-s^2 g(x) = -\lambda g(x)$.
+\end{proof}
+
+\begin{lemma}[Initial data of $g$ when $A = y'(0)/s$, $B = y(0)$]
+    \label{lem:g_match_initial_data}
+    \uses{lem:sin_cos_combo_initial_values}
+    Let $y : \mathbb{R} \to \mathbb{R}$, $s \in \mathbb{R}$ with $s \neq 0$. Set
+    $A = y'(0)/s$, $B = y(0)$, and $g(x) = A \sin(sx) + B \cos(sx)$. Then
+    $g(0) = y(0)$ and $\mathrm{deriv}\, g\, 0 = y'(0)$ (where $y'(0)$ denotes
+    $\mathrm{deriv}\, y\, 0$).
+\end{lemma}
+\begin{proof}
+    \uses{lem:sin_cos_combo_initial_values}
+    By \cref{lem:sin_cos_combo_initial_values}, $g(0) = B = y(0)$ and
+    $\mathrm{deriv}\, g\, 0 = A s = (y'(0)/s) \cdot s = y'(0)$ (using
+    $s \neq 0$).
+\end{proof}
+
+\begin{lemma}[Difference of two ODE solutions still solves the ODE]
+    \label{lem:diff_of_two_ode_solutions}
+    Suppose $J \subseteq \mathbb{R}$ is open and $y, g : \mathbb{R} \to \mathbb{R}$
+    are twice differentiable on $J$ with $\mathrm{deriv}\, y'(x) = -\lambda y(x)$
+    and $\mathrm{deriv}\, g'(x) = -\lambda g(x)$ for every $x \in J$. Let
+    $z(x) = y(x) - g(x)$. Then $z$ is twice differentiable on $J$ with
+    $\mathrm{deriv}\, z'(x) = -\lambda z(x)$ for every $x \in J$, and
+    $\mathrm{deriv}\, z\, 0 = \mathrm{deriv}\, y\, 0 - \mathrm{deriv}\, g\, 0$
+    (when $0 \in J$).
+\end{lemma}
+\begin{proof}
+    Fix $x \in J$. By hypothesis $y$ has derivative $y'(x)$ and $g$ has
+    derivative $g'(x)$ at $x$; \texttt{HasDerivAt.sub} gives $z$ a derivative
+    $y'(x) - g'(x)$ at $x$. Similarly $y'$ and $g'$ have derivatives
+    $-\lambda y(x)$ and $-\lambda g(x)$ at $x$; subtracting,
+    $\mathrm{deriv}\, z'(x) = -\lambda y(x) - (-\lambda g(x)) = -\lambda z(x)$.
+    The derivative-at-$0$ formula follows from \texttt{HasDerivAt.deriv}.
 \end{proof}
 
 \begin{lemma}[Difference $y - g$ has zero initial data and satisfies the ODE]
     \label{lem:solution_diff_is_zero_initial_solution}
-    \uses{lem:sin_cos_combo_solves_ode}
+    \uses{lem:sin_cos_combo_solves_ode_lambda, lem:g_match_initial_data, lem:diff_of_two_ode_solutions}
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$ and $\lambda > 0$.
     Let $s = \sqrt{\lambda} > 0$, $A = y'(0)/s$, $B = y(0)$, and
@@ -284,18 +396,15 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
     = -\lambda z(x)$ on $J$, $z(0) = 0$, and $\mathrm{deriv}\, z\, 0 = 0$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:sin_cos_combo_solves_ode}
-    By \cref{lem:sin_cos_combo_solves_ode}, $g$ is twice differentiable on
-    $\mathbb{R}$ with $\mathrm{deriv}(\mathrm{deriv}\, g)\, x = -s^2 g(x) =
-    -\lambda g(x)$ (using $s^2 = \lambda$ from $s = \sqrt{\lambda}$ and
-    $\lambda > 0$), and $g(0) = B = y(0)$, $\mathrm{deriv}\, g\, 0 = A s =
-    y'(0)$.
-
-    Subtract: $z = y - g$ has $\mathrm{deriv}\, z\, x = y'(x) - g'(x)$ on $J$
-    (via \texttt{HasDerivAt.sub}) and
-    $\mathrm{deriv}(\mathrm{deriv}\, z)\, x = -\lambda y(x) - (-\lambda g(x)) =
-    -\lambda z(x)$. At $x = 0$, $z(0) = y(0) - g(0) = 0$ and
-    $\mathrm{deriv}\, z\, 0 = y'(0) - \mathrm{deriv}\, g\, 0 = 0$.
+    \uses{lem:sin_cos_combo_solves_ode_lambda, lem:g_match_initial_data, lem:diff_of_two_ode_solutions}
+    By \cref{lem:sin_cos_combo_solves_ode_lambda} (with $\lambda > 0 \ge 0$),
+    $g$ is twice differentiable on $\mathbb{R}$ with $\mathrm{deriv}\, g'(x) =
+    -\lambda g(x)$, hence on $J$. By \cref{lem:diff_of_two_ode_solutions},
+    $z = y - g$ is twice differentiable on $J$ with $\mathrm{deriv}\, z'(x) =
+    -\lambda z(x)$ on $J$, and $\mathrm{deriv}\, z\, 0 = y'(0) -
+    \mathrm{deriv}\, g\, 0$. By \cref{lem:g_match_initial_data} (with $s > 0$,
+    hence $s \neq 0$), $g(0) = y(0)$ and $\mathrm{deriv}\, g\, 0 = y'(0)$, so
+    $z(0) = y(0) - g(0) = 0$ and $\mathrm{deriv}\, z\, 0 = 0$.
 \end{proof}
 
 \begin{lemma}[Explicit form of solutions, $\lambda > 0$]
@@ -345,32 +454,45 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
     $(n : \mathbb{R}) = (k : \mathbb{R}) = s$.
 \end{proof}
 
+\begin{lemma}[Nontriviality forces $y'(0) \neq 0$ when $y(0) = 0$]
+    \label{lem:yprime0_ne_zero_of_nontrivial}
+    \uses{lem:solution_form_when_y0_zero}
+    Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
+    with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, $\lambda > 0$,
+    $y(0) = 0$, and there exists $x_0 \in (0,\pi)$ with $y(x_0) \neq 0$. Then
+    $y'(0) \neq 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:solution_form_when_y0_zero}
+    Let $s = \sqrt{\lambda} > 0$. By \cref{lem:solution_form_when_y0_zero},
+    $y(x) = (y'(0)/s) \sin(sx)$ for every $x \in [0,\pi]$. Suppose for
+    contradiction $y'(0) = 0$. Then $y(x) = 0$ for every $x \in [0,\pi]$, and
+    in particular $y(x_0) = 0$ (since $x_0 \in (0,\pi) \subseteq [0,\pi]$),
+    contradicting $y(x_0) \neq 0$.
+\end{proof}
+
 \begin{lemma}[Positive eigenvalues are squares of positive naturals]
     \label{lem:pos_eigen_nat_sq}
-    \uses{lem:solution_form_when_y0_zero, lem:sin_pi_smul_eq_zero_pos_to_nat}
+    \uses{lem:solution_form_when_y0_zero, lem:sin_pi_smul_eq_zero_pos_to_nat, lem:yprime0_ne_zero_of_nontrivial}
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$, $y(0) = y(\pi) = 0$,
     there exists $x_0 \in (0,\pi)$ with $y(x_0) \neq 0$, and $\lambda > 0$. Then
     $\lambda = n^2$ for some positive natural number $n$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:solution_form_when_y0_zero, lem:sin_pi_smul_eq_zero_pos_to_nat}
+    \uses{lem:solution_form_when_y0_zero, lem:sin_pi_smul_eq_zero_pos_to_nat, lem:yprime0_ne_zero_of_nontrivial}
     Let $s = \sqrt{\lambda} > 0$. By \cref{lem:solution_form_when_y0_zero},
-    $y(x) = (y'(0)/s) \sin(sx)$ for all $x \in [0,\pi]$. Evaluating at $\pi$ and
-    using $y(\pi) = 0$ gives $(y'(0)/s) \sin(s\pi) = 0$.
-
-    If $y'(0) = 0$, then $y(x) = 0$ for all $x \in [0,\pi]$, contradicting
-    $y(x_0) \neq 0$ with $x_0 \in (0,\pi)$. Hence $y'(0) \neq 0$; combined with
-    $s > 0$, $y'(0)/s \neq 0$, so $\sin(s\pi) = 0$.
-
-    By \cref{lem:sin_pi_smul_eq_zero_pos_to_nat} (using $s > 0$), there exists a
-    positive natural $n$ with $(n : \mathbb{R}) = s$. Squaring,
+    $y(\pi) = (y'(0)/s) \sin(s\pi)$, so the boundary condition $y(\pi) = 0$ gives
+    $(y'(0)/s) \sin(s\pi) = 0$. By \cref{lem:yprime0_ne_zero_of_nontrivial},
+    $y'(0) \neq 0$; combined with $s > 0$ this forces $\sin(s\pi) = 0$. By
+    \cref{lem:sin_pi_smul_eq_zero_pos_to_nat} (using $s > 0$) there is a
+    positive natural $n$ with $(n : \mathbb{R}) = s$, and squaring yields
     $\lambda = s^2 = n^2$.
 \end{proof}
 
 \subsection{Main theorem}
 
-\begin{theorem}[Dirichlet eigenvalues of $-y'' = \lambda y$ on $[0,\pi]$]
+\begin{theorem}[{Dirichlet eigenvalues of $-y'' = \lambda y$ on $[0,\pi]$}]
     \label{thm:dirichlet_eigenvalues_eq_nat_sq}
     \uses{lem:sin_eigenfunction, lem:no_eigen_nonpos, lem:pos_eigen_nat_sq}
     A real $\lambda$ admits a nontrivial twice-differentiable Dirichlet

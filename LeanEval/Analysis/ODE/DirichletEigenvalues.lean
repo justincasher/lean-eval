@@ -1,6 +1,9 @@
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
+import LeanEval.Analysis.ODE.DirichletEigenvalues.Helpers
+import LeanEval.Analysis.ODE.DirichletEigenvalues.Nonpositive
+import LeanEval.Analysis.ODE.DirichletEigenvalues.Positive
 import EvalTools.Markers
 
 namespace LeanEval
@@ -16,10 +19,13 @@ A nontrivial `C²` solution `y` (defined on some open interval `J` containing `[
 of `-y''(x) = λ y(x)` with `y 0 = y π = 0` exists **iff** `λ = n²` for some positive
 natural number `n`.
 
-The "if" direction is straightforward (`sin (n · x)` works). The "only if" direction is
-the substantive content: it requires casing on the sign of `λ` and ruling out `λ < 0`
-(only the zero solution; uses `sinh`/`cosh` linear independence) and `λ = 0` (only the
-zero solution), and for `λ > 0` showing that `√λ` must be a positive integer.
+We follow the blueprint structure: a short backward direction (the function
+`sin(n·x)` realises eigenvalue `n²`), and a forward direction that case-splits on the
+sign of `λ`. The case `λ ≤ 0` uses convexity of `y²`; the case `λ > 0` uses an energy
+argument to pin down the explicit form `(y'(0)/√λ)·sin(√λ·x) + y(0)·cos(√λ·x)`.
+
+Helper lemmas live in `DirichletEigenvalues/Helpers.lean`,
+`DirichletEigenvalues/Nonpositive.lean`, and `DirichletEigenvalues/Positive.lean`.
 -/
 
 /-- **Dirichlet eigenvalue characterization.** A real `λ` is a Dirichlet eigenvalue of
