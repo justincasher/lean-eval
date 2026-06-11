@@ -438,7 +438,10 @@ conditions and nontriviality force $\sqrt{\lambda} \in \mathbb{N}_{>0}$.
 
 \begin{lemma}[Difference $y - g$ has zero initial data and satisfies the ODE]
     \label{lem:solution_diff_is_zero_initial_solution}
+    \lean{LeanEval.Analysis.ODE.solution_diff_is_zero_initial_solution}
+    \leanfile{LeanEval/Analysis/ODE/DirichletEigenvalues.lean}
     \uses{lem:sin_cos_combo_solves_ode_lambda, lem:g_match_initial_data, lem:diff_of_two_ode_solutions}
+    \leanok
     Suppose $y$ is twice differentiable on an open set $J \supseteq [0,\pi]$
     with $\mathrm{deriv}\, y'(x) = -\lambda \, y(x)$ on $J$ and $\lambda > 0$.
     Let $s = \sqrt{\lambda} > 0$, $A = y'(0)/s$, $B = y(0)$, and
