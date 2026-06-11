@@ -37,7 +37,9 @@ theorem cubic_decay_asymptotic
     (hy_cont : ContinuousWithinAt y (Set.Ici 0) 0)
     (hy0 : y 0 = 1) :
     Tendsto (fun t : ℝ => y t * Real.sqrt t) atTop (𝓝 (1 / Real.sqrt 2)) := by
-  sorry
+  refine closedForm_asymptotic.congr' ?_
+  filter_upwards [eventually_ge_atTop (0 : ℝ)] with t ht
+  rw [uniqueness hy_diff hy_cont hy0 t ht]
 
 end ODE
 end Analysis
