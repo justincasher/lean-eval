@@ -22,6 +22,8 @@ closed form, and a limit computation for the closed form.
 
 \begin{definition}[Closed form]
     \label{def:closed-form}
+    \lean{LeanEval.Analysis.ODE.closedForm}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     Define $g : \mathbb{R} \to \mathbb{R}$ by
     \[
         g(t) = \bigl(\sqrt{1 + 2t}\,\bigr)^{-1}.
@@ -31,6 +33,8 @@ closed form, and a limit computation for the closed form.
 
 \begin{lemma}[Initial value of the closed form]
     \label{lem:closed-form-zero}
+    \lean{LeanEval.Analysis.ODE.closedForm_zero}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form}
     $g(0) = 1$.
 \end{lemma}
@@ -42,6 +46,8 @@ closed form, and a limit computation for the closed form.
 
 \begin{lemma}[Derivative of the affine square root]
     \label{lem:sqrt-affine-deriv}
+    \lean{LeanEval.Analysis.ODE.sqrt_affine_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form}
     For every $t$ with $1 + 2t > 0$, the function $t \mapsto \sqrt{1+2t}$ has
     derivative $1/\sqrt{1+2t}$ at $t$.
@@ -54,6 +60,8 @@ closed form, and a limit computation for the closed form.
 
 \begin{lemma}[Cube identity for the closed form]
     \label{lem:closed-form-cube-identity}
+    \lean{LeanEval.Analysis.ODE.closedForm_cube_identity}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form}
     For every $t$ with $1 + 2t > 0$, writing $s = \sqrt{1+2t}$ and
     $s' = 1/\sqrt{1+2t}$,
@@ -73,6 +81,8 @@ closed form, and a limit computation for the closed form.
 
 \begin{lemma}[Closed form solves the ODE]
     \label{lem:closed-form-deriv}
+    \lean{LeanEval.Analysis.ODE.closedForm_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form, lem:sqrt-affine-deriv, lem:closed-form-cube-identity}
     For every $t$ with $1 + 2t > 0$, the function $g$ has derivative
     $-\,g(t)^3$ at $t$.
@@ -88,6 +98,8 @@ closed form, and a limit computation for the closed form.
 
 \begin{lemma}[Continuity of the closed form]
     \label{lem:closed-form-continuous}
+    \lean{LeanEval.Analysis.ODE.closedForm_continuousOn}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form, lem:closed-form-deriv}
     $g$ is continuous on $[0,\infty)$.
 \end{lemma}
@@ -106,6 +118,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Continuity of a solution]
     \label{lem:solution-continuous}
+    \lean{LeanEval.Analysis.ODE.solution_continuousOn}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     Any $y$ as above is continuous on $[0,\infty)$.
 \end{lemma}
 \begin{proof}
@@ -117,6 +131,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Derivative of the negated cube]
     \label{lem:cube-deriv}
+    \lean{LeanEval.Analysis.ODE.deriv_neg_cube}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     For every $z$, $\mathrm{deriv}\,(z \mapsto -z^3)\,(z) = -3z^2$.
 \end{lemma}
 \begin{proof}
@@ -126,6 +142,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Derivative bound for the cube]
     \label{lem:cube-deriv-bound}
+    \lean{LeanEval.Analysis.ODE.nnnorm_deriv_neg_cube_le}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{lem:cube-deriv}
     For every $M \ge 0$ and every $z \in [-M, M]$, the derivative of
     $z \mapsto -z^3$ has nonnegative norm at most $3M^2$:
@@ -139,6 +157,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Local Lipschitz bound for the cube]
     \label{lem:cube-lipschitz}
+    \lean{LeanEval.Analysis.ODE.cube_lipschitzOnWith}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{lem:cube-deriv-bound}
     For every $M \ge 0$, the map $z \mapsto -z^3$ is Lipschitz with constant
     $3M^2$ on the interval $[-M, M]$.
@@ -154,6 +174,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Solution as an $\mathrm{Ici}$ trajectory]
     \label{lem:solution-traj}
+    \lean{LeanEval.Analysis.ODE.solution_traj}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{lem:solution-continuous}
     Let $y$ be a solution as above, let $0 < a \le t$, and let $M \ge 0$ bound
     $|y|$ on $[0,t]$. Then for every $s \in [a,t]$: $y$ has derivative $-y(s)^3$
@@ -171,6 +193,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Closed form as an $\mathrm{Ici}$ trajectory]
     \label{lem:closed-form-traj}
+    \lean{LeanEval.Analysis.ODE.closedForm_traj}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form, lem:closed-form-deriv, lem:closed-form-continuous}
     Let $0 < a \le t$ and let $M \ge 0$ bound $|g|$ on $[0,t]$. Then for every
     $s \in [a,t]$: $g$ has derivative $-g(s)^3$ within $\mathrm{Ici}\,s$ at $s$,
@@ -188,6 +212,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Gr\"onwall distance bound]
     \label{lem:gronwall-bound}
+    \lean{LeanEval.Analysis.ODE.gronwall_bound}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form, lem:cube-lipschitz, lem:solution-traj, lem:closed-form-traj}
     Let $y$ be a solution as above, let $t > 0$, and let $M \ge 0$ be such that
     $|y(s)| \le M$ and $|g(s)| \le M$ for all $s \in [0,t]$. Then for every $a$
@@ -213,6 +239,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Uniform bound on a compact interval]
     \label{lem:compact-bound}
+    \lean{LeanEval.Analysis.ODE.compact_bound}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form, lem:solution-continuous, lem:closed-form-continuous}
     Let $y$ be a solution as above and let $t \ge 0$. Then there is $M \ge 0$
     with $|y(s)| \le M$ and $|g(s)| \le M$ for all $s \in [0,t]$.
@@ -227,6 +255,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[A vanishing right limit forces nonpositivity]
     \label{lem:limit-forces-nonpos}
+    \lean{LeanEval.Analysis.ODE.limit_forces_nonpos}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     Let $t > 0$, let $c \in \mathbb{R}$, and let $h : \mathbb{R} \to \mathbb{R}$
     tend to $0$ along the right neighbourhood filter $\mathcal{N}_{>0}\,0$ at
     $0$. If $c \le h(a)$ for all $a \in (0,t]$, then $c \le 0$.
@@ -240,6 +270,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[The Gr\"onwall bound vanishes at $0^+$]
     \label{lem:gronwall-rhs-tendsto}
+    \lean{LeanEval.Analysis.ODE.gronwall_rhs_tendsto}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form, lem:solution-continuous, lem:closed-form-continuous, lem:closed-form-zero}
     Let $y$ be a solution as above, let $t > 0$, and let $M \ge 0$. Then the map
     \[
@@ -260,6 +292,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Uniqueness]
     \label{lem:uniqueness}
+    \lean{LeanEval.Analysis.ODE.uniqueness}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form, lem:closed-form-zero, lem:gronwall-bound, lem:compact-bound, lem:gronwall-rhs-tendsto, lem:limit-forces-nonpos}
     Any solution $y$ as above satisfies $y(t) = g(t)$ for all $t \ge 0$.
 \end{lemma}
@@ -282,6 +316,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Reciprocal form of the ratio]
     \label{lem:ratio-eventually-eq}
+    \lean{LeanEval.Analysis.ODE.ratio_eq}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     For every $t > 0$, $\dfrac{t}{1+2t} = \dfrac{1}{1/t + 2}$.
 \end{lemma}
 \begin{proof}
@@ -292,6 +328,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Limit of the ratio]
     \label{lem:ratio-limit}
+    \lean{LeanEval.Analysis.ODE.ratio_tendsto}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{lem:ratio-eventually-eq}
     As $t \to \infty$, $\dfrac{t}{1 + 2t} \to \dfrac{1}{2}$.
 \end{lemma}
@@ -305,6 +343,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Square-root form of the scaled closed form]
     \label{lem:closed-form-sqrt-eq}
+    \lean{LeanEval.Analysis.ODE.closedForm_mul_sqrt}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form}
     For every $t > 0$, $g(t)\,\sqrt t = \sqrt{\dfrac{t}{1+2t}}$.
 \end{lemma}
@@ -319,6 +359,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{lemma}[Asymptotics of the closed form]
     \label{lem:closed-form-asymptotic}
+    \lean{LeanEval.Analysis.ODE.closedForm_asymptotic}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form, lem:ratio-limit, lem:closed-form-sqrt-eq}
     As $t \to \infty$, $g(t)\,\sqrt{t} \to \dfrac{1}{\sqrt 2}$.
 \end{lemma}
@@ -334,6 +376,8 @@ within $[0,\infty)$ at $0$, and $y(0) = 1$.
 
 \begin{theorem}[Cubic decay asymptotic]
     \label{thm:main}
+    \lean{LeanEval.Analysis.ODE.cubic_decay_asymptotic}
+    \leanfile{LeanEval/Analysis/ODE/CubicDecay.lean}
     \uses{def:closed-form, lem:uniqueness, lem:closed-form-asymptotic}
     Let $y : \mathbb{R} \to \mathbb{R}$ satisfy $y'(t) = -y(t)^3$ for all
     $t > 0$, be continuous within $[0,\infty)$ at $0$, and satisfy $y(0) = 1$.
