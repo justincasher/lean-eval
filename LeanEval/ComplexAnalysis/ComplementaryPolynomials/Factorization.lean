@@ -328,5 +328,141 @@ theorem fejer_riesz (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree �
     eq_of_leadingCoeff_roots hProd0 hH0 hlc hrootsProduct
   exact ⟨Q, hQnatDeg, hEq⟩
 
+/-- Count form of the root pairing: roots of a self-inversive `H` are nonzero and `σ`-paired. -/
+theorem fr_build_S_root_pairing (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
+    (hself : conjRecip (2 * n) H = H) (h0 : H.eval 0 ≠ 0) :
+    (∀ r ∈ H.roots, r ≠ 0) ∧
+      ∀ w : ℂ, w ≠ 0 → H.roots.count w = H.roots.count (invConj w) := by
+  sorry
+
+/-- Partition of a multiset by modulus `< 1`, `= 1`, `> 1`. -/
+theorem fr_build_S_partition (R : Multiset ℂ) :
+    R = R.filter (fun r => ‖r‖ < 1) + R.filter (fun r => ‖r‖ = 1)
+          + R.filter (fun r => ‖r‖ > 1) := by
+  sorry
+
+/-- Count transport across the modulus filters: `σ` carries the `> 1` part onto the `< 1` part and
+fixes the circle part. -/
+theorem fr_build_S_count_transport (R : Multiset ℂ) (hR : ∀ r ∈ R, r ≠ 0)
+    (hcount : ∀ w : ℂ, w ≠ 0 → R.count w = R.count (invConj w)) :
+    (∀ w : ℂ, (R.filter (fun r => ‖r‖ > 1)).count w
+        = (R.filter (fun r => ‖r‖ < 1)).count (invConj w)) ∧
+      ∀ w : ℂ, ‖w‖ = 1 → invConj w = w := by
+  sorry
+
+/-- A multiset with all-even counts has a half. -/
+theorem exists_half_of_even_count {α : Type*} [DecidableEq α] (M : Multiset α)
+    (h : ∀ w, Even (M.count w)) :
+    ∃ T : Multiset α, T + T = M ∧ ∀ w, T.count w = M.count w / 2 := by
+  sorry
+
+/-- The circle part of the root multiset has all-even counts and a `σ`-invariant half. -/
+theorem fr_build_S_circle_half (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
+    (hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H) :
+    (∀ w : ℂ, Even ((H.roots.filter (fun r => ‖r‖ = 1)).count w)) ∧
+      ∃ T : Multiset ℂ, T + T = H.roots.filter (fun r => ‖r‖ = 1) ∧
+        (∀ w : ℂ, T.count w = (H.roots.filter (fun r => ‖r‖ = 1)).count w / 2) ∧
+        T.map invConj = T := by
+  sorry
+
+/-- Constant term of a top-degree self-inversive polynomial is the conjugate of its leading
+coefficient (hence nonzero). -/
+theorem fr_multiset_H0 (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
+    (hself : conjRecip (2 * n) H = H) (hdegeq : H.natDegree = 2 * n) :
+    H.eval 0 = starRingEnd ℂ H.leadingCoeff ∧ H.eval 0 ≠ 0 := by
+  sorry
+
+/-- Multiplicity transport for the conjugate-reciprocal: mult of `w` in `Q^{†n}` equals mult of
+`1/conj w = σ w` in `Q`. -/
+theorem fr_complementary_mult (n : ℕ) (Q : ℂ[X]) (hQ0 : Q ≠ 0) (hQ : Q.natDegree ≤ n)
+    {w : ℂ} (hw : w ≠ 0) :
+    (conjRecip n Q).rootMultiplicity w = Q.rootMultiplicity (invConj w) := by
+  sorry
+
+/-- Roots of a scaled product of linear factors. -/
+theorem fr_roots_scaled_prod (c : ℂ) (hc : c ≠ 0) (S : Multiset ℂ) :
+    (C c * (S.map (fun r => X - C r)).prod) ≠ 0 ∧
+      (C c * (S.map (fun r => X - C r)).prod).roots = S := by
+  sorry
+
+/-- Root multiset of a scaled factor product and of its conjugate-reciprocal. -/
+theorem fr_complementary_roots (n : ℕ) (c : ℂ) (hc : c ≠ 0) (S : Multiset ℂ)
+    (hS : ∀ r ∈ S, r ≠ 0) (hcard : S.card ≤ n) :
+    (C c * (S.map (fun r => X - C r)).prod).roots = S ∧
+      (conjRecip n (C c * (S.map (fun r => X - C r)).prod)).roots = S.map invConj := by
+  sorry
+
+/-- The matched factor `D = Q₀ · Q₀^{†n}`: nonzero, with `σ`-paired root multiset and leading
+coefficient `ω`. -/
+theorem fr_positive_multiple_D (n : ℕ) (S : Multiset ℂ) (hS : ∀ r ∈ S, r ≠ 0)
+    (hcard : S.card ≤ n) :
+    let Q0 := (S.map (fun r => X - C r)).prod
+    let D := Q0 * conjRecip n Q0
+    let ω := starRingEnd ℂ ((S.map (fun r => -r)).prod)
+    D ≠ 0 ∧ ω ≠ 0 ∧ D.roots = S + S.map invConj ∧ D.leadingCoeff = ω := by
+  sorry
+
+/-- A circle point off the roots of a nonzero polynomial. -/
+theorem fr_positive_multiple_point (H : ℂ[X]) (hH0 : H ≠ 0) :
+    ∃ z0 : ℂ, ‖z0‖ = 1 ∧ H.eval z0 ≠ 0 := by
+  sorry
+
+/-- The matched factor is a squared modulus on the circle: `z⁻ⁿ D(z) = ‖Q₀(z)‖²`. -/
+theorem fr_D_eval_circle (n : ℕ) (S : Multiset ℂ) (hcard : S.card ≤ n) {z : ℂ} (hz : ‖z‖ = 1) :
+    let Q0 := (S.map (fun r => X - C r)).prod
+    (z ^ n)⁻¹ * (Q0 * conjRecip n Q0).eval z = ((‖Q0.eval z‖ ^ 2 : ℝ) : ℂ) := by
+  sorry
+
+/-- Positivity of the scaling factor `λ` with `H = C λ · D`. -/
+theorem fr_positive_multiple_lambda (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
+    (hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H)
+    (S : Multiset ℂ) (hS : ∀ r ∈ S, r ≠ 0) (hcard : S.card ≤ n)
+    (hroots : H.roots = S + S.map invConj)
+    (lam : ℂ)
+    (hHeq : H = C lam *
+      ((S.map (fun r => X - C r)).prod * conjRecip n (S.map (fun r => X - C r)).prod)) :
+    ∃ r : ℝ, 0 < r ∧ lam = (r : ℂ) := by
+  sorry
+
+/-- Fejér–Riesz factorization, zero-free core (`H(0) ≠ 0`). -/
+theorem fr_zero_free (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
+    (hself : conjRecip (2 * n) H = H) (h0 : H.eval 0 ≠ 0) (hpos : NonnegRealOnCircle n H) :
+    ∃ Q : ℂ[X], Q.natDegree ≤ n ∧ Q * conjRecip n Q = H := by
+  sorry
+
+/-- Zero-multiplicity of a self-inversive polynomial: `k ≤ n` and `deg H = 2n - k`. -/
+theorem fr_zero_mult_le (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
+    (hself : conjRecip (2 * n) H = H) :
+    H.rootMultiplicity 0 ≤ n ∧ H.natDegree = 2 * n - H.rootMultiplicity 0 := by
+  sorry
+
+/-- Self-inversiveness of the zero-free quotient `H₁` in `H = Xᵏ · H₁`. -/
+theorem fr_zero_factor_selfInv (n k : ℕ) (H H1 : ℂ[X]) (hself : conjRecip (2 * n) H = H)
+    (hk : k ≤ n) (hH1 : H1 ≠ 0) (hdeg1 : H1.natDegree ≤ 2 * (n - k))
+    (hfact : H = X ^ k * H1) :
+    conjRecip (2 * (n - k)) H1 = H1 := by
+  sorry
+
+/-- Nonnegativity transports to the zero-free quotient. -/
+theorem fr_zero_factor_nonneg (n k : ℕ) (H H1 : ℂ[X]) (hfact : H = X ^ k * H1)
+    (hpos : NonnegRealOnCircle n H) : NonnegRealOnCircle (n - k) H1 := by
+  sorry
+
+/-- Factoring out the zero of a self-inversive polynomial. -/
+theorem fr_zero_factor (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
+    (hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H) :
+    H.rootMultiplicity 0 ≤ n ∧
+      ∃ H1 : ℂ[X], H = X ^ (H.rootMultiplicity 0) * H1 ∧ H1.eval 0 ≠ 0 ∧
+        H1.natDegree = 2 * (n - H.rootMultiplicity 0) ∧
+        conjRecip (2 * (n - H.rootMultiplicity 0)) H1 = H1 ∧
+        NonnegRealOnCircle (n - H.rootMultiplicity 0) H1 := by
+  sorry
+
+/-- Recombining the factorization: `Q := Xᵏ · Q₁` factors `H = Xᵏ · H₁`. -/
+theorem fr_recombine (n k : ℕ) (H H1 Q1 : ℂ[X]) (hk : k ≤ n) (hfact : H = X ^ k * H1)
+    (hQ1deg : Q1.natDegree ≤ n - k) (hQ1 : Q1 * conjRecip (n - k) Q1 = H1) :
+    (X ^ k * Q1).natDegree ≤ n ∧ (X ^ k * Q1) * conjRecip n (X ^ k * Q1) = H := by
+  sorry
+
 end ComplexAnalysis
 end LeanEval

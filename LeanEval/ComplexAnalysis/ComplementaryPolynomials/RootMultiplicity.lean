@@ -128,6 +128,11 @@ private lemma dvd_reflect_transport_aux (N : ℕ) (A : ℂ[X]) (hA : A.natDegree
   refine h_dvd_reflect_pow.trans ?_
   exact dvd_mul_right (reflect k ((X - C w⁻¹) ^ k)) (reflect (N - k) B)
 
+/-- Reflection of a power of a linear factor: a unit multiple of `(X - C v⁻¹) ^ k`. -/
+theorem reflect_pow_linear {v : ℂ} (hv : v ≠ 0) (k : ℕ) :
+    reflect k ((X - C v) ^ k) = (C (-v)) ^ k * (X - C v⁻¹) ^ k := by
+  sorry
+
 /-- Divisibility transport under reflection. -/
 theorem dvd_reflect_transport (N : ℕ) (A : ℂ[X]) (hA : A.natDegree ≤ N) {w : ℂ} (hw : w ≠ 0)
     (k : ℕ) :
