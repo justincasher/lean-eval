@@ -32,6 +32,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:map-conj-eval}
     \lean{LeanEval.ComplexAnalysis.map_conj_eval}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \leanok
     For $A \in \mathbb{C}[X]$ and $w \in \mathbb{C}$,
     $(\operatorname{map}\,\overline{(\cdot)}\;A)(w) = \overline{A(\overline{w})}$.
 \end{lemma}
@@ -60,6 +61,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:reflect-eval}
     \lean{LeanEval.ComplexAnalysis.reflect_eval}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \leanok
     Let $A \in \mathbb{C}[X]$ with $\deg A \le N$ and let $z \neq 0$. Then
     $(\operatorname{reflect}_N A)(z) = z^{N}\,A(z^{-1})$.
 \end{lemma}
@@ -76,6 +78,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.conjRecip_eval}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
     \uses{def:conj-recip, lem:map-conj-eval, lem:reflect-eval}
+    \leanok
     Let $A \in \mathbb{C}[X]$, $N \ge \deg A$, and let $z$ satisfy $\|z\| = 1$.
     Then $A^{\dagger N}(z) = z^{N}\,\overline{A(z)}$.
 \end{lemma}
@@ -95,6 +98,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.conjRecip_mul_eval}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
     \uses{lem:conj-recip-eval}
+    \leanok
     Let $A \in \mathbb{C}[X]$, $N \ge \deg A$, and $\|z\| = 1$. Then
     $A(z)\cdot A^{\dagger N}(z) = z^{N}\,\bigl(\|A(z)\|^2 : \mathbb{C}\bigr)$.
 \end{lemma}
@@ -111,6 +115,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.conjRecip_mul}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
     \uses{def:conj-recip}
+    \leanok
     For $A, B \in \mathbb{C}[X]$ with $M \ge \deg A$ and $N \ge \deg B$,
     $(A\cdot B)^{\dagger (M+N)} = A^{\dagger M}\cdot B^{\dagger N}$.
 \end{lemma}
@@ -128,6 +133,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:reflect-map-comm}
     \lean{LeanEval.ComplexAnalysis.reflect_map_comm}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \leanok
     For any ring homomorphism $f$, any $A \in \mathbb{C}[X]$ and $N \in \mathbb{N}$,
     $\operatorname{reflect}_N(\operatorname{map} f\,A)
     = \operatorname{map} f\,(\operatorname{reflect}_N A)$.
@@ -144,6 +150,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.conjRecip_conjRecip}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
     \uses{def:conj-recip, lem:reflect-map-comm}
+    \leanok
     For $A \in \mathbb{C}[X]$ and $N \ge \deg A$,
     $\bigl(A^{\dagger N}\bigr)^{\dagger N} = A$.
 \end{lemma}
@@ -177,6 +184,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.auxG_natDegree_le}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/AuxiliaryG.lean}
     \uses{def:G, lem:conjrecip-natDegree}
+    \leanok
     $\deg G \le 2n$.
 \end{lemma}
 \begin{proof}
@@ -190,6 +198,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.auxG_eval_circle}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/AuxiliaryG.lean}
     \uses{def:G, lem:conj-recip-prod}
+    \leanok
     For $\|z\| = 1$, $G(z) = z^{n}\,\bigl(1 - \|P(z)\|^2\bigr)$.
 \end{lemma}
 \begin{proof}
@@ -204,6 +213,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.auxG_nonneg_circle}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/AuxiliaryG.lean}
     \uses{lem:G-eval-circle}
+    \leanok
     Assume $\|P(z)\| \le 1$ for all $z$ with $\|z\| = 1$. Then for every such
     $z$, $z^{-n}G(z) = 1 - \|P(z)\|^2$ is a nonnegative real number.
 \end{lemma}
@@ -218,6 +228,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.conjRecip_sub}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
     \uses{def:conj-recip}
+    \leanok
     For $A, B \in \mathbb{C}[X]$ and $N \in \mathbb{N}$,
     $(A - B)^{\dagger N} = A^{\dagger N} - B^{\dagger N}$.
 \end{lemma}
@@ -236,6 +247,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.conjRecip_X_pow}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
     \uses{def:conj-recip}
+    \leanok
     For $n \in \mathbb{N}$, $(X^{n})^{\dagger 2n} = X^{n}$.
 \end{lemma}
 \begin{proof}
@@ -250,6 +262,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.auxG_self_inversive}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/AuxiliaryG.lean}
     \uses{def:G, lem:conjrecip-mul, lem:conjrecip-involutive, lem:conjrecip-sub, lem:conjrecip-X-pow}
+    \leanok
     $G^{\dagger 2n} = G$.
 \end{lemma}
 \begin{proof}
@@ -272,6 +285,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:rootmult-map-conj}
     \lean{LeanEval.ComplexAnalysis.rootMultiplicity_map_conj}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
+    \leanok
     For $A \in \mathbb{C}[X]$ and $v \in \mathbb{C}$, the root multiplicity of
     $v$ in $\operatorname{map}\,\overline{(\cdot)}\,A$ equals the root
     multiplicity of $\overline{v}$ in $A$.
@@ -288,6 +302,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:reflect-linear}
     \lean{LeanEval.ComplexAnalysis.reflect_linear}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
+    \leanok
     For $v \neq 0$,
     $\operatorname{reflect}_1(X - C\,v) = C(-v)\cdot\bigl(X - C\,v^{-1}\bigr)$.
 \end{lemma}
@@ -305,6 +320,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.dvd_reflect_transport}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
     \uses{lem:reflect-linear}
+    \leanok
     Let $A \in \mathbb{C}[X]$ with $\deg A \le N$, let $w \neq 0$, and let
     $k \in \mathbb{N}$. Then
     \[
@@ -339,6 +355,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.rootMultiplicity_reflect}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
     \uses{lem:dvd-reflect-transport}
+    \leanok
     Let $A \in \mathbb{C}[X]$ be nonzero with $\deg A \le N$, and let $w \neq 0$.
     Then the root multiplicity of $w$ in $\operatorname{reflect}_N A$ equals the
     root multiplicity of $1/w$ in $A$.
@@ -379,6 +396,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:local-factorization}
     \lean{LeanEval.ComplexAnalysis.local_factorization}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
+    \leanok
     Let $H \in \mathbb{C}[X]$ be nonzero and $w \in \mathbb{C}$, and let $m$ be
     the root multiplicity of $w$ in $H$. Then $H = (X - w)^{m}\cdot g$ for some
     $g \in \mathbb{C}[X]$ with $g(w) \neq 0$.
@@ -394,6 +412,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:sign-persistence}
     \lean{LeanEval.ComplexAnalysis.sign_persistence}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    \leanok
     Let $\phi : \mathbb{R} \to \mathbb{R}$ be continuous with $\phi(0) > 0$.
     Then $\phi(t) > 0$ for all $t$ in some neighbourhood of $0$; symmetrically,
     if $\phi(0) < 0$ then $\phi < 0$ near $0$.
@@ -412,6 +431,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.nonneg_even_order}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
     \uses{lem:sign-persistence}
+    \leanok
     Let $\phi : \mathbb{R} \to \mathbb{R}$ be continuous with $\phi(0) \neq 0$,
     let $m \in \mathbb{N}$, and suppose $t^{m}\,\phi(t) \ge 0$ for all $t$ in a
     neighbourhood of $0$. Then $m$ is even.
@@ -449,6 +469,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:psi-real}
     \lean{LeanEval.ComplexAnalysis.psi_real}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    \leanok
     Let $\psi : \mathbb{R} \to \mathbb{C}$ be continuous and $m \in \mathbb{N}$,
     and suppose $t^{m}\,\psi(t)$ is real for every $t \in \mathbb{R}$. Then
     $\psi(t)$ is real for every $t$; consequently
@@ -499,6 +520,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:eq-of-leadingcoeff-roots}
     \lean{LeanEval.ComplexAnalysis.eq_of_leadingCoeff_roots}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
     Let $F, G \in \mathbb{C}[X]$ be nonzero. If $F$ and $G$ have the same leading
     coefficient and the same multiset of roots (counted with multiplicity), then
     $F = G$.
@@ -558,6 +580,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_size_bound}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:fr-build-S, lem:circle-involution}
+    \leanok
     With $H$ and $S$ as in \Cref{lem:fr-build-S}, $|S| \le n$.
 \end{lemma}
 \begin{proof}
@@ -627,6 +650,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_leadingCoeff_conjRecip}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{def:conj-recip, lem:fr-complementary}
+    \leanok
     Let $S$ be a multiset of nonzero complex numbers with $|S| \le n$, let
     $c \neq 0$, and put $Q := c\prod_{r \in S}(X - r)$, $\omega :=
     \overline{\prod_{r \in S}(-r)}$. Then
@@ -690,6 +714,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_leading_coeff}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:fr-positive-multiple, lem:fr-leadingcoeff-conjrecip}
+    \leanok
     Let $H$ be as in \Cref{lem:fr-multiset} with root-half multiset $S$. Then
     there is $c \in \mathbb{C}$, $c \neq 0$, such that
     $Q := c\prod_{r \in S}(X - r)$ satisfies
@@ -711,6 +736,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fejer_riesz}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{def:conj-recip, lem:fr-multiset, lem:fr-complementary, lem:fr-leading-coeff, lem:eq-of-leadingcoeff-roots}
+    \leanok
     Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$, satisfying
     $H^{\dagger 2n} = H$ and such that $z^{-n}H(z)$ is a nonnegative real for all
     $z$ with $\|z\| = 1$. Then there exists $Q \in \mathbb{C}[X]$ with
@@ -738,6 +764,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.main_G_zero}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials.lean}
     \uses{def:G, lem:G-eval-circle}
+    \leanok
     If $G = 0$ then $\|P(z)\| = 1$ for all $z$ with $\|z\| = 1$, and $Q := 0$
     satisfies $\deg Q \le \deg P$ and $\|P(z)\|^2 + \|Q(z)\|^2 = 1$ on the circle.
 \end{lemma}
@@ -754,6 +781,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.factorization_to_norm}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials.lean}
     \uses{def:G, lem:conj-recip-prod, lem:G-eval-circle, lem:conjrecip-natDegree}
+    \leanok
     Let $n := \deg P$, let $Q \in \mathbb{C}[X]$ with $\deg Q \le n$, and suppose
     $Q\cdot Q^{\dagger n} = G$. Then for all $z$ with $\|z\| = 1$,
     $\|P(z)\|^2 + \|Q(z)\|^2 = 1$.
@@ -772,6 +800,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.exists_complementary_polynomial_on_unit_circle}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials.lean}
     \uses{def:G, lem:G-natDegree, lem:G-self-inversive, lem:G-nonneg-circle, thm:fejer-riesz, lem:conjrecip-natDegree, lem:main-G-zero, lem:factorization-to-norm}
+    \leanok
     Let $P \in \mathbb{C}[X]$ satisfy $\|P(z)\| \le 1$ for all $z$ on the unit
     circle. Then there exists $Q \in \mathbb{C}[X]$ with $\deg Q \le \deg P$ and
     $\|P(z)\|^2 + \|Q(z)\|^2 = 1$ for all $z$ on the unit circle.
