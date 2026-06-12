@@ -848,6 +848,65 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     = c\cdot\overline{c}\,\omega = \|c\|^2\,\omega$.
 \end{proof}
 
+\begin{lemma}[The matched factor $D$]
+    \label{lem:fr-positive-multiple-D}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:fr-complementary, lem:fr-leadingcoeff-conjrecip}
+    Let $S$ be a multiset of nonzero complex numbers with $|S| \le n$, set
+    $Q_0 := \prod_{r \in S}(X - r)$, $D := Q_0\cdot Q_0^{\dagger n}$, and
+    $\omega := \overline{\prod_{r \in S}(-r)}$. Then $D \neq 0$, $\omega \neq 0$,
+    $\operatorname{roots}(D) = S \uplus \{1/\overline{r} : r \in S\}$, and
+    $\operatorname{leadingCoeff}(D) = \omega$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-complementary, lem:fr-leadingcoeff-conjrecip}
+    Apply \Cref{lem:fr-complementary} and \Cref{lem:fr-leadingcoeff-conjrecip}
+    with $c = 1$ (so $Q = Q_0$). \Cref{lem:fr-complementary} gives
+    $\operatorname{roots}(D) = S \uplus \{1/\overline{r} : r \in S\}$;
+    \Cref{lem:fr-leadingcoeff-conjrecip} gives $\omega \neq 0$ and
+    $\operatorname{leadingCoeff}(D) = \|1\|^2\,\omega = \omega$. Finally
+    $D \neq 0$ since its leading coefficient $\omega$ is nonzero.
+\end{proof}
+
+\begin{lemma}[A circle point off the roots of $H$]
+    \label{lem:fr-positive-multiple-point}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    Let $H \in \mathbb{C}[X]$ be nonzero. Then there exists $z_0 \in \mathbb{C}$
+    with $\|z_0\| = 1$ and $H(z_0) \neq 0$.
+\end{lemma}
+\begin{proof}
+    The unit circle $\{z : \|z\| = 1\}$ is infinite: the map $t \mapsto e^{i t}$
+    sends distinct points of a small interval to distinct points of the circle
+    (\texttt{Circle.exp\_injOn\_Icc} / injectivity of the circle exponential), so
+    its image is an infinite subset of the circle
+    (\texttt{Set.infinite\_image\_of\_injOn}). The root set
+    $\{z : H(z) = 0\}$ is finite because $H \neq 0$
+    (\texttt{Polynomial.finite\_setOf\_isRoot}). An infinite set is not contained
+    in a finite one, so some $z_0$ with $\|z_0\| = 1$ has $H(z_0) \neq 0$.
+\end{proof}
+
+\begin{lemma}[Positivity of the scaling factor]
+    \label{lem:fr-positive-multiple-lambda}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:conj-recip-prod, lem:fr-positive-multiple-point}
+    With $H$ as in \Cref{lem:fr-multiset}, $\omega \neq 0$, $Q_0 := \prod_{r\in S}
+    (X-r)$, $D := Q_0\cdot Q_0^{\dagger n}$, and $\lambda :=
+    \operatorname{leadingCoeff}(H)/\omega$ a complex scalar with $H = \lambda D$,
+    the number $\lambda$ is a positive real.
+\end{lemma}
+\begin{proof}
+    \uses{lem:conj-recip-prod, lem:fr-positive-multiple-point}
+    For $\|z\| = 1$, \Cref{lem:conj-recip-prod} with $A = Q_0$ gives
+    $Q_0(z)Q_0^{\dagger n}(z) = z^{n}\|Q_0(z)\|^2$, so $z^{-n}D(z)
+    = \|Q_0(z)\|^2 \ge 0$ and hence $z^{-n}H(z) = \lambda\,\|Q_0(z)\|^2$. By
+    \Cref{lem:fr-positive-multiple-point} pick $z_0$ with $\|z_0\| = 1$ and
+    $H(z_0) \neq 0$. There $z_0^{-n}H(z_0)$ is a nonnegative real (hypothesis on
+    $H$) that is nonzero, hence a strictly positive real, and
+    $\|Q_0(z_0)\|^2 > 0$. From $z_0^{-n}H(z_0) = \lambda\,\|Q_0(z_0)\|^2$ we get
+    $\lambda = z_0^{-n}H(z_0)/\|Q_0(z_0)\|^2$, a quotient of two positive reals,
+    so $\lambda$ is a positive real.
+\end{proof}
+
 \begin{lemma}[Leading coefficient is a positive real multiple of $\omega$]
     \label{lem:fr-positive-multiple}
     \lean{LeanEval.ComplexAnalysis.fr_positive_multiple}
@@ -861,25 +920,17 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     $H = \lambda\,(Q_0\cdot Q_0^{\dagger n})$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:fr-complementary, lem:conj-recip-prod, lem:eq-of-leadingcoeff-roots,
-    lem:fr-leadingcoeff-conjrecip}
-    Put $D := Q_0\cdot Q_0^{\dagger n}$ (the case $c = 1$). By
-    \Cref{lem:fr-complementary} the root multiset of $D$ is
-    $S \uplus \{1/\overline{r} : r \in S\} = \operatorname{roots}(H)$, and by
-    \Cref{lem:fr-leadingcoeff-conjrecip} $\operatorname{leadingCoeff}(D) = \omega$.
-    Set $\lambda := \operatorname{leadingCoeff}(H)/\omega$. Then $H$ and
-    $\lambda D$ are nonzero with the same leading coefficient
+    \uses{lem:fr-positive-multiple-D, lem:eq-of-leadingcoeff-roots,
+    lem:fr-positive-multiple-lambda}
+    Put $D := Q_0\cdot Q_0^{\dagger n}$. By \Cref{lem:fr-positive-multiple-D},
+    $D \neq 0$, $\operatorname{roots}(D) = S \uplus \{1/\overline{r} : r \in S\}
+    = \operatorname{roots}(H)$, and $\operatorname{leadingCoeff}(D) = \omega$.
+    Set $\lambda := \operatorname{leadingCoeff}(H)/\omega$ (so
+    $\operatorname{leadingCoeff}(H) = \lambda\,\omega$, as $\omega \neq 0$). Then
+    $H$ and $\lambda D$ are nonzero with the same leading coefficient
     $\operatorname{leadingCoeff}(H)$ and the same root multiset, so $H = \lambda D$
-    by \Cref{lem:eq-of-leadingcoeff-roots}. To see $\lambda > 0$: for $\|z\| = 1$,
-    \Cref{lem:conj-recip-prod} (with $A = Q_0$) gives
-    $Q_0(z)Q_0^{\dagger n}(z) = z^{n}\|Q_0(z)\|^2$, so
-    $z^{-n}D(z) = \|Q_0(z)\|^2 \ge 0$ and hence
-    $z^{-n}H(z) = \lambda\,\|Q_0(z)\|^2$. As $H \neq 0$ it does not vanish at
-    every point of the (infinite) circle, so there is $z_0$ with $\|z_0\| = 1$
-    and $H(z_0) \neq 0$; there $z_0^{-n}H(z_0)$ is a strictly positive real (it is
-    a nonnegative real that is nonzero), and $\|Q_0(z_0)\|^2 > 0$, whence
-    $\lambda = z_0^{-n}H(z_0)/\|Q_0(z_0)\|^2$ is a quotient of two positive reals,
-    a positive real.
+    by \Cref{lem:eq-of-leadingcoeff-roots}. Finally
+    \Cref{lem:fr-positive-multiple-lambda} shows $\lambda$ is a positive real.
 \end{proof}
 
 \begin{lemma}[Leading-coefficient and norm matching]
