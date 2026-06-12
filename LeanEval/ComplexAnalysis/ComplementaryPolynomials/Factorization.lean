@@ -75,9 +75,8 @@ theorem fr_size_bound (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree
 
 /-- The Fejér–Riesz root multiset. -/
 theorem fr_multiset (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
-    (hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H) :
-    H.eval 0 ≠ 0 ∧
-      ∃ S : Multiset ℂ, S.card ≤ n ∧ (∀ r ∈ S, r ≠ 0) ∧ H.roots = S + S.map invConj := by
+    (hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H) (h0 : H.eval 0 ≠ 0) :
+    ∃ S : Multiset ℂ, S.card ≤ n ∧ (∀ r ∈ S, r ≠ 0) ∧ H.roots = S + S.map invConj := by
   sorry
 
 /-- Roots of `Q · Q^{†n}` for a scaled factor product `Q = c ∏ (X - r)`. -/
@@ -296,37 +295,8 @@ theorem fr_leading_coeff (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDeg
       simp [h_norm_sq_eq]
     _ = H.leadingCoeff := h_hlc.symm
 
-/-- **Fejér–Riesz factorization.** A nonzero self-inversive polynomial that is nonnegative on the
-circle (after the `z⁻ⁿ` twist) factors as `Q · Q^{†n}` with `deg Q ≤ n`. -/
-theorem fejer_riesz (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
-    (hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H) :
-    ∃ Q : ℂ[X], Q.natDegree ≤ n ∧ Q * conjRecip n Q = H := by
-  rcases fr_multiset n H hH0 hdeg hself hpos with ⟨h0ne, S, hcard, hSzero, hroots⟩
-  rcases fr_leading_coeff n H hH0 hdeg hself hpos S hSzero hcard hroots with ⟨c, hc0, hlc⟩
-  set Q := C c * (S.map (fun r => X - C r)).prod with hQdef
-  have hQnatDeg : Q.natDegree ≤ n := by
-    calc
-      Q.natDegree = ((S.map (fun r => X - C r)).prod).natDegree := by
-        rw [hQdef, Polynomial.natDegree_C_mul hc0]
-      _ = S.card := Polynomial.natDegree_multiset_prod_X_sub_C_eq_card S
-      _ ≤ n := hcard
-  have hProd0 : Q * conjRecip n Q ≠ 0 := by
-    intro hzero
-    have hzeroLC : (Q * conjRecip n Q).leadingCoeff = 0 := by simp [hzero]
-    have h0lc : H.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hH0
-    apply h0lc
-    calc
-      H.leadingCoeff = (Q * conjRecip n Q).leadingCoeff := by symm; exact hlc
-      _ = 0 := hzeroLC
-  have hrootsProduct : (Q * conjRecip n Q).roots = H.roots := by
-    calc
-      (Q * conjRecip n Q).roots = S + S.map invConj := by
-        rw [hQdef]
-        exact fr_complementary n c hc0 S hSzero hcard
-      _ = H.roots := by rw [hroots]
-  have hEq : Q * conjRecip n Q = H :=
-    eq_of_leadingCoeff_roots hProd0 hH0 hlc hrootsProduct
-  exact ⟨Q, hQnatDeg, hEq⟩
+-- `fejer_riesz` (the general factorization) is defined at the end of this file, after the
+-- zero-root reduction lemmas (`fr_zero_factor`, `fr_zero_free`, `fr_recombine`) it depends on.
 
 /-- Count form of the root pairing: roots of a self-inversive `H` are nonzero and `σ`-paired. -/
 theorem fr_build_S_root_pairing (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
@@ -428,7 +398,32 @@ theorem fr_positive_multiple_lambda (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg
 theorem fr_zero_free (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
     (hself : conjRecip (2 * n) H = H) (h0 : H.eval 0 ≠ 0) (hpos : NonnegRealOnCircle n H) :
     ∃ Q : ℂ[X], Q.natDegree ≤ n ∧ Q * conjRecip n Q = H := by
-  sorry
+  rcases fr_multiset n H hH0 hdeg hself hpos h0 with ⟨S, hcard, hSzero, hroots⟩
+  rcases fr_leading_coeff n H hH0 hdeg hself hpos S hSzero hcard hroots with ⟨c, hc0, hlc⟩
+  set Q := C c * (S.map (fun r => X - C r)).prod with hQdef
+  have hQnatDeg : Q.natDegree ≤ n := by
+    calc
+      Q.natDegree = ((S.map (fun r => X - C r)).prod).natDegree := by
+        rw [hQdef, Polynomial.natDegree_C_mul hc0]
+      _ = S.card := Polynomial.natDegree_multiset_prod_X_sub_C_eq_card S
+      _ ≤ n := hcard
+  have hProd0 : Q * conjRecip n Q ≠ 0 := by
+    intro hzero
+    have hzeroLC : (Q * conjRecip n Q).leadingCoeff = 0 := by simp [hzero]
+    have h0lc : H.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hH0
+    apply h0lc
+    calc
+      H.leadingCoeff = (Q * conjRecip n Q).leadingCoeff := by symm; exact hlc
+      _ = 0 := hzeroLC
+  have hrootsProduct : (Q * conjRecip n Q).roots = H.roots := by
+    calc
+      (Q * conjRecip n Q).roots = S + S.map invConj := by
+        rw [hQdef]
+        exact fr_complementary n c hc0 S hSzero hcard
+      _ = H.roots := by rw [hroots]
+  have hEq : Q * conjRecip n Q = H :=
+    eq_of_leadingCoeff_roots hProd0 hH0 hlc hrootsProduct
+  exact ⟨Q, hQnatDeg, hEq⟩
 
 /-- Zero-multiplicity of a self-inversive polynomial: `k ≤ n` and `deg H = 2n - k`. -/
 theorem fr_zero_mult_le (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
@@ -463,6 +458,24 @@ theorem fr_recombine (n k : ℕ) (H H1 Q1 : ℂ[X]) (hk : k ≤ n) (hfact : H = 
     (hQ1deg : Q1.natDegree ≤ n - k) (hQ1 : Q1 * conjRecip (n - k) Q1 = H1) :
     (X ^ k * Q1).natDegree ≤ n ∧ (X ^ k * Q1) * conjRecip n (X ^ k * Q1) = H := by
   sorry
+
+/-- **Fejér–Riesz factorization.** A nonzero self-inversive polynomial that is nonnegative on the
+circle (after the `z⁻ⁿ` twist) factors as `Q · Q^{†n}` with `deg Q ≤ n`. The general case is
+reduced to the zero-free core `fr_zero_free` by factoring out the zero at the origin. -/
+theorem fejer_riesz (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
+    (hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H) :
+    ∃ Q : ℂ[X], Q.natDegree ≤ n ∧ Q * conjRecip n Q = H := by
+  obtain ⟨hk, H1, hfact, hH1_0, hH1_deg, hH1_self, hH1_pos⟩ :=
+    fr_zero_factor n H hH0 hdeg hself hpos
+  have hH1_ne : H1 ≠ 0 := by
+    intro h
+    rw [h, mul_zero] at hfact
+    exact hH0 hfact
+  obtain ⟨Q1, hQ1deg, hQ1fact⟩ :=
+    fr_zero_free (n - H.rootMultiplicity 0) H1 hH1_ne hH1_deg.le hH1_self hH1_0 hH1_pos
+  obtain ⟨hQdeg, hQfact⟩ :=
+    fr_recombine n (H.rootMultiplicity 0) H H1 Q1 hk hfact hQ1deg hQ1fact
+  exact ⟨X ^ (H.rootMultiplicity 0) * Q1, hQdeg, hQfact⟩
 
 end ComplexAnalysis
 end LeanEval
