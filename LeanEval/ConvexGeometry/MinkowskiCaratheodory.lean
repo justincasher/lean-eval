@@ -224,7 +224,17 @@ theorem translatedSet_convex {s : Set E} (hsconv : Convex ℝ s) (W : Submodule 
 translated set `{w : W | (w : E) + p ∈ s}` under `w ↦ (w : E) + p` is `s` itself. -/
 theorem image_translatedSet_eq {s : Set E} {p : E} (hp : p ∈ s) :
     (fun w : (vectorSpan ℝ s) => (w : E) + p) '' {w : (vectorSpan ℝ s) | (w : E) + p ∈ s} = s := by
-  sorry
+  ext z
+  constructor
+  · intro hz
+    rcases hz with ⟨w, hw, rfl⟩
+    exact hw
+  · intro hz
+    have hzW : z - p ∈ vectorSpan ℝ s := by
+      simpa [vsub_eq_sub] using vsub_mem_vectorSpan (k := ℝ) hz hp
+    refine ⟨⟨z - p, hzW⟩, ?_, ?_⟩
+    · simp [hz]
+    · simp
 
 /-- **The translated set spans its subspace.** For `p ∈ s`, the translated set
 `{w : W | (w : E) + p ∈ s}` has full affine span in `W = vectorSpan ℝ s`. -/
