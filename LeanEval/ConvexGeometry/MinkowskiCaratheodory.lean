@@ -247,7 +247,29 @@ space has `affineSpan ℝ u = ⊤`, then its intrinsic interior is its topologic
 theorem intrinsicInterior_eq_interior_of_affineSpan_eq_top {F : Type*} [NormedAddCommGroup F]
     [NormedSpace ℝ F] {u : Set F} (hu : affineSpan ℝ u = ⊤) :
     intrinsicInterior ℝ u = interior u := by
-  sorry
+  set A' : Set F := (affineSpan ℝ u : Set F) with hA'
+  set π : A' → F := Subtype.val with hπ
+  apply Set.Subset.antisymm
+  · -- intrinsicInterior ℝ u ⊆ interior u
+    intro x hx
+    rcases (mem_intrinsicInterior (𝕜 := ℝ)).mp hx with ⟨y, hy, hyx⟩
+    have hA_open : IsOpen ((affineSpan ℝ u : Set F)) := by
+      have : (affineSpan ℝ u : Set F) = Set.univ := by
+        simp [hu]
+      rw [this]
+      exact isOpen_univ
+    have h_open_map : IsOpenMap π :=
+      hA_open.isOpenMap_subtype_val
+    have h_image_sub : π '' interior (π ⁻¹' u) ⊆ interior u := by
+      calc
+        π '' interior (π ⁻¹' u) ⊆ interior (π '' (π ⁻¹' u)) :=
+          h_open_map.image_interior_subset (π ⁻¹' u)
+        _ ⊆ interior u := interior_mono (Set.image_preimage_subset π u)
+    have hx_image : x ∈ π '' interior (π ⁻¹' u) := by
+      refine ⟨y, hy, hyx⟩
+    exact h_image_sub hx_image
+  · -- interior u ⊆ intrinsicInterior ℝ u
+    exact interior_subset_intrinsicInterior
 
 /-- **Intrinsic interior via the direction subspace.** With `W = vectorSpan ℝ s` and base point
 `p ∈ s`, the intrinsic interior of `s` is the image of the topological interior of the
