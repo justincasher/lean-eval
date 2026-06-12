@@ -47,6 +47,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \label{lem:top-not-cliquefree}
     \lean{LeanEval.Combinatorics.top_not_cliqueFree}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \leanok
     Let $V$ be a finite type and $s \le \#V$. Then the complete graph
     $\top : \mathrm{SimpleGraph}\, V$ is not $s$-clique-free.
 \end{lemma}
@@ -65,6 +66,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \label{lem:induce-compl}
     \lean{LeanEval.Combinatorics.induce_compl}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \leanok
     For $G : \mathrm{SimpleGraph}\, V$ and a set $A \subseteq V$,
     \[
         (G.\mathrm{induce}\, A)^{\mathsf c} = G^{\mathsf c}.\mathrm{induce}\, A .
@@ -82,6 +84,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \label{lem:induce-lift}
     \lean{LeanEval.Combinatorics.induce_lift}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \leanok
     For $G : \mathrm{SimpleGraph}\, V$, a set $A \subseteq V$, and $k \in \mathbb{N}$:
     if $G.\mathrm{induce}\, A$ is not $k$-clique-free, then $G$ is not
     $k$-clique-free.
@@ -99,6 +102,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \label{lem:induce-clique-lift}
     \lean{LeanEval.Combinatorics.induce_clique_lift}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \leanok
     Let $G : \mathrm{SimpleGraph}\, V$, $A \subseteq V$ a finite set, $r \in \mathbb{N}$,
     and $t$ an $r$-clique of $G.\mathrm{induce}\, A$. Then there is an $r$-clique
     $t'$ of $G$ with $t' \subseteq A$ (every vertex of $t'$ lies in $A$).
@@ -118,6 +122,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \lean{LeanEval.Combinatorics.common_neighbor}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
     \uses{lem:induce-clique-lift}
+    \leanok
     Let $G : \mathrm{SimpleGraph}\, V$, $v \in V$, and $A \subseteq V$ a finite set
     with $v \notin A$ and $G.\mathrm{Adj}\, v\, a$ for every $a \in A$. If
     $G.\mathrm{induce}\, A$ is not $r$-clique-free, then $G$ is not
@@ -137,6 +142,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \label{lem:degree-split}
     \lean{LeanEval.Combinatorics.degree_split}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \leanok
     Let $V$ be finite, $G : \mathrm{SimpleGraph}\, V$, and $v \in V$. Then
     \[
         \#(G.\mathrm{neighborFinset}\, v) + \#(G^{\mathsf c}.\mathrm{neighborFinset}\, v)
@@ -156,6 +162,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \lean{LeanEval.Combinatorics.neighbor_side}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
     \uses{lem:common-neighbor, lem:induce-compl, lem:induce-lift}
+    \leanok
     Let $G : \mathrm{SimpleGraph}\, V$, $v \in V$, and write
     $A := G.\mathrm{neighborFinset}\, v$. If
     \[
@@ -183,6 +190,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \lean{LeanEval.Combinatorics.neighbor_side_compl}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
     \uses{lem:neighbor-side, lem:induce-compl}
+    \leanok
     Let $G : \mathrm{SimpleGraph}\, V$, $v \in V$, and write
     $B := G^{\mathsf c}.\mathrm{neighborFinset}\, v$. If
     \[
@@ -218,6 +226,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \lean{LeanEval.Combinatorics.base}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
     \uses{def:is-ramsey, lem:top-not-cliquefree}
+    \leanok
     For every $s$, $\mathrm{IsRamsey}\, 2\, s\, s$ holds.
 \end{lemma}
 \begin{proof}
@@ -234,6 +243,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \lean{LeanEval.Combinatorics.symm}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
     \uses{def:is-ramsey}
+    \leanok
     If $\mathrm{IsRamsey}\, r\, s\, n$ then $\mathrm{IsRamsey}\, s\, r\, n$.
 \end{lemma}
 \begin{proof}
@@ -252,6 +262,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \lean{LeanEval.Combinatorics.base_right}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
     \uses{def:is-ramsey, lem:base, lem:symm}
+    \leanok
     For every $r$, $\mathrm{IsRamsey}\, r\, 2\, r$ holds.
 \end{lemma}
 \begin{proof}
@@ -267,6 +278,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \lean{LeanEval.Combinatorics.ramsey_induce}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
     \uses{def:is-ramsey}
+    \leanok
     Let $G : \mathrm{SimpleGraph}\, V$, $A \subseteq V$ a finite set,
     $r', m', N \in \mathbb{N}$ with $N \le \#A$, and suppose
     $\mathrm{IsRamsey}\, r'\, m'\, N$. Then
@@ -290,6 +302,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \lean{LeanEval.Combinatorics.step}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
     \uses{def:is-ramsey, lem:degree-split, lem:ramsey-induce, lem:neighbor-side, lem:neighbor-side-compl}
+    \leanok
     Let $r, s, N_1, N_2 \in \mathbb{N}$. If $\mathrm{IsRamsey}\,(r{+}1)\, s\, N_1$
     and $\mathrm{IsRamsey}\, r\,(s{+}1)\, N_2$, then
     $\mathrm{IsRamsey}\,(r{+}1)\,(s{+}1)\,(N_1 + N_2 + 1)$.
@@ -322,6 +335,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \lean{LeanEval.Combinatorics.ramsey_exists}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
     \uses{def:is-ramsey, lem:base, lem:base-right, lem:step}
+    \leanok
     For all $r, s \in \mathbb{N}$ with $2 \le r$ and $2 \le s$, there exists
     $n \in \mathbb{N}$ with $\mathrm{IsRamsey}\, r\, s\, n$.
 \end{theorem}
@@ -349,6 +363,7 @@ $G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
     \lean{LeanEval.Combinatorics.finite_graph_ramsey_theorem}
     \leanfile{LeanEval/Combinatorics/Ramsey.lean}
     \uses{def:is-ramsey, thm:ramsey-exists}
+    \leanok
     For all $r, s \in \mathbb{N}$ with $2 \le r$ and $2 \le s$, there exists
     $n \in \mathbb{N}$ such that for every $G : \mathrm{SimpleGraph}\,(\mathrm{Fin}\, n)$,
     \[
