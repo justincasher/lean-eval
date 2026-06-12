@@ -520,13 +520,68 @@ theorem lineSection_zero_interior {s : Set E} (hscomp : IsCompact s) (hsconv : C
   rcases h0_int_T with ⟨h_lt, h_gt⟩
   exact ⟨h_lt, h_gt⟩
 
+/-- If `x + c • v` belongs to the intrinsic interior of `s`, then `c` is an interior point of the
+section `{t : ℝ | x + t • v ∈ s}`. -/
+private lemma lineSection_param_mem_interior {s : Set E} {x : E} (hx : x ∈ s) {v : E}
+    (hvspan : v ∈ vectorSpan ℝ s) {c : ℝ} (hc : x + c • v ∈ intrinsicInterior ℝ s) :
+    c ∈ interior {t : ℝ | x + t • v ∈ s} := by
+  set T := {t : ℝ | x + t • v ∈ s} with hT_def
+  let A := affineSpan ℝ s
+  have hx_affine : x ∈ A := subset_affineSpan ℝ s hx
+  have hv_dir : v ∈ A.direction := by
+    rw [direction_affineSpan]
+    exact hvspan
+  have hx_plus_tv_affine (t : ℝ) : x + t • v ∈ A := by
+    have h_tv_dir : t • v ∈ A.direction := A.direction.smul_mem t hv_dir
+    have hvadd := A.vadd_mem_of_mem_direction h_tv_dir hx_affine
+    simpa [add_comm, vadd_eq_add] using hvadd
+  rcases (mem_intrinsicInterior (𝕜 := ℝ)).mp hc with ⟨y, hy, hyx⟩
+  let φ : ℝ → A := fun t => ⟨x + t • v, hx_plus_tv_affine t⟩
+  have hφ_cont : Continuous φ := by
+    refine Continuous.subtype_mk ?_ (fun t => hx_plus_tv_affine t)
+    refine continuous_const.add (continuous_id.smul continuous_const)
+  have hφc : φ c = y := Subtype.ext (by
+    dsimp [φ]
+    simp [hyx])
+  have h_preimage_open : IsOpen (φ⁻¹' (interior ((↑)⁻¹' s : Set A))) :=
+    isOpen_interior.preimage hφ_cont
+  have hc_in_preimage : c ∈ φ⁻¹' (interior ((↑)⁻¹' s : Set A)) := by
+    dsimp
+    simpa [hφc] using hy
+  have h_preimage_subset_T : φ⁻¹' (interior ((↑)⁻¹' s : Set A)) ⊆ T := by
+    intro t ht
+    have hφt_preimage : φ t ∈ (↑)⁻¹' s := interior_subset ht
+    simpa [φ, T, hT_def] using hφt_preimage
+  have hU_nhds : φ⁻¹' (interior ((↑)⁻¹' s : Set A)) ∈ nhds c :=
+    h_preimage_open.mem_nhds hc_in_preimage
+  have hT_nhds : T ∈ nhds c := Filter.mem_of_superset hU_nhds h_preimage_subset_T
+  exact (mem_interior_iff_mem_nhds (x := c)).mpr hT_nhds
+
 /-- **Endpoints of the section are not interior.** With `a = sInf T` and `b = sSup T`, neither
 `x + a • v` nor `x + b • v` lies in the intrinsic interior of `s`. -/
 theorem segment_endpoints_not_interior {s : Set E} (hscomp : IsCompact s) (hsconv : Convex ℝ s)
     {x : E} (hx : x ∈ s) {v : E} (hv : v ≠ 0) (hvspan : v ∈ vectorSpan ℝ s) :
     x + (sInf {t : ℝ | x + t • v ∈ s}) • v ∉ intrinsicInterior ℝ s ∧
       x + (sSup {t : ℝ | x + t • v ∈ s}) • v ∉ intrinsicInterior ℝ s := by
-  sorry
+  set T := {t : ℝ | x + t • v ∈ s} with hT_def
+  set a := sInf T with ha_def
+  set b := sSup T with hb_def
+  have hT_eq : T = Set.Icc a b := lineSection_eq_Icc hscomp hsconv hx hv
+  have h_int_a : x + a • v ∉ intrinsicInterior ℝ s := by
+    intro h
+    have ha_int_T : a ∈ interior T := lineSection_param_mem_interior hx hvspan h
+    rw [hT_eq] at ha_int_T
+    rw [interior_Icc] at ha_int_T
+    rcases ha_int_T with ⟨ha_lt_a, _⟩
+    exact lt_irrefl a ha_lt_a
+  have h_int_b : x + b • v ∉ intrinsicInterior ℝ s := by
+    intro h
+    have hb_int_T : b ∈ interior T := lineSection_param_mem_interior hx hvspan h
+    rw [hT_eq] at hb_int_T
+    rw [interior_Icc] at hb_int_T
+    rcases hb_int_T with ⟨_, hb_gt_b⟩
+    exact lt_irrefl b hb_gt_b
+  exact ⟨h_int_a, h_int_b⟩
 
 /-- **An interior point lies between two boundary points.** If `finrank (vectorSpan ℝ s) ≥ 1`
 and `x` is in the intrinsic interior of `s`, then `x` lies on a segment between two points of `s`
