@@ -779,6 +779,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:exists-half-even-count}
     \lean{LeanEval.ComplexAnalysis.exists_half_of_even_count}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
     Let $M$ be a multiset over a type with decidable equality such that
     $\operatorname{count}_w M$ is even for every $w$. Then there is a multiset
     $T$ with $T + T = M$ and $\operatorname{count}_w T
@@ -823,6 +824,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_build_S}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:conjrecip-root-pairing, lem:circle-root-even, lem:circle-involution}
+    \leanok
     Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$,
     $H^{\dagger 2n} = H$, and $z^{-n}H(z)$ a nonnegative real for all
     $\|z\| = 1$, and suppose $0$ is not a root of $H$. Then there is a multiset
@@ -955,6 +957,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_complementary_roots}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{def:conj-recip, lem:fr-complementary-mult, lem:fr-roots-scaled-prod}
+    \leanok
     Let $c \neq 0$ and let $S$ be a multiset of nonzero complex numbers, and put
     $Q := c\prod_{r \in S}(X - r)$. Then $\operatorname{roots}(Q) = S$ and the
     root multiset of $Q^{\dagger n}$ is $\sigma(S) := \{1/\overline{r} : r \in S\}$.
@@ -978,6 +981,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_complementary}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{def:conj-recip, lem:rootmult-reflect, lem:rootmult-map-conj}
+    \leanok
     Let $Q \in \mathbb{C}[X]$ be nonzero with $\deg Q \le n$. Then for every
     $w \neq 0$ the multiplicity of $w$ in $Q^{\dagger n}$ equals the multiplicity
     of $1/\overline{w}$ in $Q$. In particular, if $Q = c\prod_{r \in S}(X - r)$
@@ -1052,6 +1056,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:fr-positive-multiple-point}
     \lean{LeanEval.ComplexAnalysis.fr_positive_multiple_point}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
     Let $H \in \mathbb{C}[X]$ be nonzero. Then there exists $z_0 \in \mathbb{C}$
     with $\|z_0\| = 1$ and $H(z_0) \neq 0$.
 \end{lemma}
@@ -1111,6 +1116,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_positive_multiple}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:fr-complementary, lem:conj-recip-prod, lem:eq-of-leadingcoeff-roots, lem:fr-leadingcoeff-conjrecip}
+    \leanok
     Let $H$ be as in \Cref{lem:fr-multiset} with root-half multiset $S$ (so
     $\operatorname{roots}(H) = S \uplus \{1/\overline{r} : r \in S\}$ and
     $0 \notin S$), and set $\omega := \overline{\prod_{r \in S}(-r)} \neq 0$ and
