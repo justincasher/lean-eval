@@ -49,12 +49,16 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.conjRecip_natDegree_le}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
     \uses{def:conj-recip}
-    For every $A$ and $N$, $\deg\bigl(A^{\dagger N}\bigr) \le N$.
+    \leanok
+    For every $A$ and $N$ with $\deg A \le N$, $\deg\bigl(A^{\dagger N}\bigr) \le N$.
+    (The hypothesis $\deg A \le N$ is necessary: e.g. $A = X^2$, $N = 1$ gives
+    $\deg(A^{\dagger 1}) = 2 > 1$.)
 \end{lemma}
 \begin{proof}
-    Coefficient conjugation does not change the support, and reflection within
-    degree $N$ sends the support into $\{0,\dots,N\}$; hence the natural degree
-    of the reflection is at most $N$.
+    Coefficient conjugation does not change the natural degree (the conjugation map
+    is injective), so $\deg(\operatorname{map}\,\overline{(\cdot)}\,A) = \deg A \le N$.
+    Reflection within degree $N$ satisfies
+    $\deg(\operatorname{reflect}_N p) \le \max(N, \deg p)$, which equals $N$ here.
 \end{proof}
 
 \begin{lemma}[Reflection-evaluation identity]

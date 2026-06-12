@@ -26,7 +26,7 @@ theorem auxG_natDegree_le (P : ℂ[X]) :
       _ ≤ P.natDegree + P.natDegree := Nat.le_add_right _ _
       _ = 2 * P.natDegree := by omega
   have hconj : (conjRecip P.natDegree P).natDegree ≤ P.natDegree :=
-    conjRecip_natDegree_le P.natDegree P
+    conjRecip_natDegree_le P.natDegree P le_rfl
   have hprod : (P * conjRecip P.natDegree P).natDegree ≤ 2 * P.natDegree := by
     calc
       (P * conjRecip P.natDegree P).natDegree ≤
@@ -102,7 +102,7 @@ theorem auxG_self_inversive (P : ℂ[X]) :
   rw [auxG_self_inversive_aux_conjRecip_X_pow P.natDegree]
   set n := P.natDegree with hn
   have hn_nat : P.natDegree ≤ n := le_rfl
-  have hconjdeg : (conjRecip n P).natDegree ≤ n := conjRecip_natDegree_le n P
+  have hconjdeg : (conjRecip n P).natDegree ≤ n := conjRecip_natDegree_le n P le_rfl
   have h_mul : conjRecip (2 * n) (P * conjRecip n P) = P * conjRecip n P := by
     calc
       conjRecip (2 * n) (P * conjRecip n P)

@@ -31,10 +31,16 @@ theorem map_conj_eval (A : ℂ[X]) (w : ℂ) :
   -- Since A.eval₂ (RingHom.id ℂ) (starRingEnd ℂ w) = A.eval (starRingEnd ℂ w), we're done
   rw [← h, show A.eval₂ (RingHom.id ℂ) (starRingEnd ℂ w) = A.eval (starRingEnd ℂ w) from rfl]
 
-/-- The conjugate-reciprocal has degree at most `N`. -/
-theorem conjRecip_natDegree_le (N : ℕ) (A : ℂ[X]) :
+/-- The conjugate-reciprocal has degree at most `N`, provided `N ≥ deg A`. -/
+theorem conjRecip_natDegree_le (N : ℕ) (A : ℂ[X]) (hA : A.natDegree ≤ N) :
     (conjRecip N A).natDegree ≤ N := by
-  sorry
+  unfold conjRecip
+  have hmap : (A.map (starRingEnd ℂ)).natDegree = A.natDegree :=
+    natDegree_map_eq_of_injective (starRingEnd ℂ).injective A
+  calc (reflect N (A.map (starRingEnd ℂ))).natDegree
+      ≤ max N (A.map (starRingEnd ℂ)).natDegree := natDegree_reflect_le
+    _ = max N A.natDegree := by rw [hmap]
+    _ = N := max_eq_left hA
 
 /-- Reflection-evaluation identity: `(reflect N A)(z) = zᴺ A(z⁻¹)` for `z ≠ 0`. -/
 theorem reflect_eval (N : ℕ) (A : ℂ[X]) (hA : A.natDegree ≤ N) {z : ℂ} (hz : z ≠ 0) :
