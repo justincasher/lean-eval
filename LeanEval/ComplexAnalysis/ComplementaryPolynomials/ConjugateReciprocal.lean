@@ -174,5 +174,19 @@ theorem conjRecip_X_pow (n : ℕ) :
           _ = n := Nat.add_sub_cancel n n
       rw [hsub]
 
+/-- Coefficient symmetry of a self-inversive polynomial: `coeff j H = conj (coeff (2n-j) H)`. -/
+theorem selfInversive_coeff_symm (n : ℕ) (H : ℂ[X]) (hself : conjRecip (2 * n) H = H)
+    {j : ℕ} (hj : j ≤ 2 * n) :
+    H.coeff j = starRingEnd ℂ (H.coeff (2 * n - j)) := by
+  sorry
+
+/-- Leading coefficient of the conjugate-reciprocal: `coeff N (A^{†N}) = conj (A 0)`, and if
+`A 0 ≠ 0` then `deg (A^{†N}) = N` with leading coefficient `conj (A 0)`. -/
+theorem conjRecip_leadingCoeff (N : ℕ) (A : ℂ[X]) (hA : A.natDegree ≤ N) :
+    (conjRecip N A).coeff N = starRingEnd ℂ (A.eval 0) ∧
+      (A.eval 0 ≠ 0 → (conjRecip N A).natDegree = N ∧
+        (conjRecip N A).leadingCoeff = starRingEnd ℂ (A.eval 0)) := by
+  sorry
+
 end ComplexAnalysis
 end LeanEval
