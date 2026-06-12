@@ -37,7 +37,14 @@ such that `ζ` is a primitive `n`-th root of unity and `ζ` lies in the range of
 theorem embedding_primitive_root (n : ℕ) [NeZero n] :
     ∃ (φ : CyclotomicField n ℚ →+* ℂ) (ζ : ℂ),
       IsPrimitiveRoot ζ n ∧ ζ ∈ φ.range := by
-  sorry
+  haveI : IsCyclotomicExtension {n} ℚ (CyclotomicField n ℚ) :=
+    CyclotomicField.isCyclotomicExtension n ℚ
+  obtain ⟨φ, hφ⟩ := cyclotomic_embeds_injective n
+  have hξ : IsPrimitiveRoot (IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ)) n :=
+    IsCyclotomicExtension.zeta_spec n ℚ (CyclotomicField n ℚ)
+  refine ⟨φ, φ (IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ)), ?_, ?_⟩
+  · exact hξ.map_of_injective hφ
+  · exact ⟨IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ), rfl⟩
 
 /-- **A complex `n`-th root of unity is a member of `rootsOfUnity`.**
 Let `n ≠ 0` and `z ∈ ℂ` with `zⁿ = 1`. Then `z` is a unit `u` of `ℂ`, and that
@@ -101,7 +108,16 @@ theorem rho_pow_exponent {G : Type*} [Group G] {V : Type*} [AddCommGroup V]
 If the identity endomorphism `1 : V → V` has eigenvalue `c`, then `c = 1`. -/
 theorem eigenvalue_id_eq_one {V : Type*} [AddCommGroup V] [Module ℂ V] {c : ℂ}
     (h : Module.End.HasEigenvalue (1 : Module.End ℂ V) c) : c = 1 := by
-  sorry
+  obtain ⟨v, hv⟩ := h.exists_hasEigenvector
+  have happ : (1 : Module.End ℂ V) v = c • v := hv.apply_eq_smul
+  have hvne : v ≠ 0 := (Module.End.hasEigenvector_iff.mp hv).2
+  rw [Module.End.one_apply] at happ
+  -- happ : v = c • v
+  have h0 : (1 - c) • v = 0 := by
+    rw [sub_smul, one_smul, ← happ, sub_self]
+  rcases smul_eq_zero.mp h0 with h1 | h2
+  · exact (sub_eq_zero.mp h1).symm
+  · exact absurd h2 hvne
 
 /-- **Eigenvalues of a finite-order operator are roots of unity.**
 Let `V` be finite-dimensional over `ℂ`, let `T : V → V` be linear, and `n ≠ 0`
