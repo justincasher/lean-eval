@@ -3,6 +3,365 @@
 
 \begin{document}
 
-% Your blueprint will go here.
+\section{Finite Ramsey theorem for graphs}
+
+We prove the finite Ramsey theorem for graphs: for all $r, s \ge 2$ there is an
+$n$ such that every simple graph $G$ on $n$ vertices contains an $r$-clique, or
+its complement $G^{\mathsf c}$ contains an $s$-clique (equivalently, $G$ contains
+an independent set of size $s$). A simple graph $G$ on $\mathrm{Fin}\,n$ together
+with its complement encodes a red/blue edge colouring of the complete graph on
+$n$ vertices, so this is exactly the statement that every two-colouring of a
+large enough complete graph has a red $K_r$ or a blue $K_s$.
+
+The argument is the classical induction on $r + s$ giving the recursive bound
+$R(r{+}1, s{+}1) \le R(r{+}1, s) + R(r, s{+}1) + 1$. To make the induction clean
+we phrase the Ramsey property so that it holds for \emph{every} finite vertex
+type with at least $n$ vertices; passing to induced subgraphs on the
+neighbourhood and non-neighbourhood of a chosen vertex is then immediate.
+
+Throughout, $G : \mathrm{SimpleGraph}\, V$ for a finite type $V$, $G^{\mathsf c}$
+is the complement, $G.\mathrm{CliqueFree}\,k$ means $G$ has no $k$-clique, and
+$G.\mathrm{induce}\,A$ is the subgraph induced on a finite set $A \subseteq V$.
+
+\subsection{The Ramsey property}
+
+\begin{definition}[Ramsey property]
+    \label{def:is-ramsey}
+    \lean{LeanEval.Combinatorics.IsRamsey}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    For $r, s, n \in \mathbb{N}$, say \emph{$\mathrm{IsRamsey}\, r\, s\, n$} holds
+    if for every finite type $V$ with $n \le \#V$ and every
+    $G : \mathrm{SimpleGraph}\, V$, either $G$ is not $r$-clique-free or
+    $G^{\mathsf c}$ is not $s$-clique-free; that is,
+    \[
+        \neg\, G.\mathrm{CliqueFree}\, r \ \lor\ \neg\, G^{\mathsf c}.\mathrm{CliqueFree}\, s .
+    \]
+    Because the condition is required for \emph{all} $V$ with at least $n$
+    vertices, the property transfers verbatim to any induced subgraph on a set of
+    at least $n$ vertices.
+\end{definition}
+
+\subsection{Graph-theoretic preliminaries}
+
+\begin{lemma}[Complete graph has large cliques]
+    \label{lem:top-not-cliquefree}
+    \lean{LeanEval.Combinatorics.top_not_cliqueFree}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    Let $V$ be a finite type and $s \le \#V$. Then the complete graph
+    $\top : \mathrm{SimpleGraph}\, V$ is not $s$-clique-free.
+\end{lemma}
+\begin{proof}
+    From $s \le \#V$ there is an injection $f : \mathrm{Fin}\, s \hookrightarrow V$
+    (\texttt{Fintype.card\_le} / \texttt{Function.Embedding}). It induces a graph
+    embedding of complete graphs
+    $\mathrm{Embedding.completeGraph}\, f : \mathrm{completeGraph}\,(\mathrm{Fin}\,s)
+    \hookrightarrow_g \top$, hence $\mathrm{completeGraph}\,(\mathrm{Fin}\,s)$ is
+    contained in $\top$. By \texttt{SimpleGraph.IsContained.not\_cliqueFree\_card},
+    $\top$ is not $(\#(\mathrm{Fin}\,s))$-clique-free, and
+    $\#(\mathrm{Fin}\,s) = s$.
+\end{proof}
+
+\begin{lemma}[Complement commutes with induction on a set]
+    \label{lem:induce-compl}
+    \lean{LeanEval.Combinatorics.induce_compl}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    For $G : \mathrm{SimpleGraph}\, V$ and a set $A \subseteq V$,
+    \[
+        (G.\mathrm{induce}\, A)^{\mathsf c} = G^{\mathsf c}.\mathrm{induce}\, A .
+    \]
+\end{lemma}
+\begin{proof}
+    Both sides are graphs on the subtype $\{x \mathbin{//} x \in A\}$. For distinct
+    $a, b$ in this subtype, each side is adjacent iff $\neg\, G.\mathrm{Adj}\, a\, b$
+    (unfolding \texttt{SimpleGraph.induce} = \texttt{comap} and
+    \texttt{SimpleGraph.compl\_adj}). Conclude by \texttt{SimpleGraph.ext} /
+    extensionality of adjacency.
+\end{proof}
+
+\begin{lemma}[Cliques lift from induced subgraphs]
+    \label{lem:induce-lift}
+    \lean{LeanEval.Combinatorics.induce_lift}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    For $G : \mathrm{SimpleGraph}\, V$, a set $A \subseteq V$, and $k \in \mathbb{N}$:
+    if $G.\mathrm{induce}\, A$ is not $k$-clique-free, then $G$ is not
+    $k$-clique-free.
+\end{lemma}
+\begin{proof}
+    The induced subgraph embeds into $G$ via
+    $\mathrm{Embedding.induce}\, A : G.\mathrm{induce}\, A \hookrightarrow_g G$, so
+    $G.\mathrm{induce}\, A$ is contained in $G$. Contrapositively, if $G$ were
+    $k$-clique-free then so would be any contained graph by
+    \texttt{SimpleGraph.CliqueFree.comap}; hence non-$k$-clique-freeness of the
+    induced subgraph forces it for $G$.
+\end{proof}
+
+\begin{lemma}[Lifting a clique out of an induced subgraph]
+    \label{lem:induce-clique-lift}
+    \lean{LeanEval.Combinatorics.induce_clique_lift}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    Let $G : \mathrm{SimpleGraph}\, V$, $A \subseteq V$ a finite set, $r \in \mathbb{N}$,
+    and $t$ an $r$-clique of $G.\mathrm{induce}\, A$. Then there is an $r$-clique
+    $t'$ of $G$ with $t' \subseteq A$ (every vertex of $t'$ lies in $A$).
+\end{lemma}
+\begin{proof}
+    Map $t$ through the graph embedding
+    $\mathrm{Embedding.induce}\, A : G.\mathrm{induce}\, A \hookrightarrow_g G$,
+    whose underlying vertex map is the subtype inclusion
+    $\{x \mathbin{//} x \in A\} \hookrightarrow V$, using
+    \texttt{SimpleGraph.IsNClique.map}. The image $t'$ is the \texttt{Finset.map} of
+    $t$ along this inclusion, so each of its vertices is the image of a subtype
+    element and hence lies in $A$ (\texttt{Finset.mem\_map}, \texttt{Subtype.property}).
+\end{proof}
+
+\begin{lemma}[Extending a clique by a common neighbour]
+    \label{lem:common-neighbor}
+    \lean{LeanEval.Combinatorics.common_neighbor}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \uses{lem:induce-clique-lift}
+    Let $G : \mathrm{SimpleGraph}\, V$, $v \in V$, and $A \subseteq V$ a finite set
+    with $v \notin A$ and $G.\mathrm{Adj}\, v\, a$ for every $a \in A$. If
+    $G.\mathrm{induce}\, A$ is not $r$-clique-free, then $G$ is not
+    $(r{+}1)$-clique-free.
+\end{lemma}
+\begin{proof}
+    \uses{lem:induce-clique-lift}
+    From non-$r$-clique-freeness extract an $r$-clique $t$ of $G.\mathrm{induce}\,A$.
+    By \cref{lem:induce-clique-lift} it lifts to an $r$-clique $t'$ of $G$ with
+    $t' \subseteq A$. Every vertex of $t'$ is therefore adjacent to $v$, and
+    $v \notin t'$ (since $v \notin A$). By \texttt{SimpleGraph.IsNClique.insert},
+    $\mathrm{insert}\, v\, t'$ is an $(r{+}1)$-clique of $G$, so by
+    \texttt{SimpleGraph.IsNClique.not\_cliqueFree} $G$ is not $(r{+}1)$-clique-free.
+\end{proof}
+
+\begin{lemma}[Degrees split the other vertices]
+    \label{lem:degree-split}
+    \lean{LeanEval.Combinatorics.degree_split}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    Let $V$ be finite, $G : \mathrm{SimpleGraph}\, V$, and $v \in V$. Then
+    \[
+        \#(G.\mathrm{neighborFinset}\, v) + \#(G^{\mathsf c}.\mathrm{neighborFinset}\, v)
+        = \#V - 1 .
+    \]
+\end{lemma}
+\begin{proof}
+    The cardinalities are the degrees $G.\deg v$ and $G^{\mathsf c}.\deg v$
+    (\texttt{SimpleGraph.card\_neighborFinset\_eq\_degree}). By
+    \texttt{SimpleGraph.degree\_compl}, $G^{\mathsf c}.\deg v = \#V - 1 - G.\deg v$,
+    and $G.\deg v \le \#V - 1$ (\texttt{SimpleGraph.degree\_lt\_card\_verts}).
+    The identity follows by natural-number arithmetic (\texttt{omega}).
+\end{proof}
+
+\begin{lemma}[Neighbourhood side of the recursion]
+    \label{lem:neighbor-side}
+    \lean{LeanEval.Combinatorics.neighbor_side}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \uses{lem:common-neighbor, lem:induce-compl, lem:induce-lift}
+    Let $G : \mathrm{SimpleGraph}\, V$, $v \in V$, and write
+    $A := G.\mathrm{neighborFinset}\, v$. If
+    \[
+        \neg\,(G.\mathrm{induce}\, A).\mathrm{CliqueFree}\, r \ \lor\
+        \neg\,\bigl((G.\mathrm{induce}\, A)^{\mathsf c}\bigr).\mathrm{CliqueFree}\, m ,
+    \]
+    then
+    $\neg\, G.\mathrm{CliqueFree}\,(r{+}1) \lor \neg\, G^{\mathsf c}.\mathrm{CliqueFree}\, m$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:common-neighbor, lem:induce-compl, lem:induce-lift}
+    Every $a \in A$ satisfies $G.\mathrm{Adj}\, v\, a$
+    (\texttt{SimpleGraph.mem\_neighborFinset}) and $v \notin A$ (a vertex is not
+    its own neighbour). Case on the disjunction. If $G.\mathrm{induce}\, A$ is not
+    $r$-clique-free, \cref{lem:common-neighbor} gives
+    $\neg\, G.\mathrm{CliqueFree}\,(r{+}1)$, the left disjunct. Otherwise
+    $(G.\mathrm{induce}\, A)^{\mathsf c}$ is not $m$-clique-free; by
+    \cref{lem:induce-compl} this graph is $G^{\mathsf c}.\mathrm{induce}\, A$, so by
+    \cref{lem:induce-lift} (applied to $G^{\mathsf c}$) $G^{\mathsf c}$ is not
+    $m$-clique-free, the right disjunct.
+\end{proof}
+
+\begin{lemma}[Complement-neighbourhood side of the recursion]
+    \label{lem:neighbor-side-compl}
+    \lean{LeanEval.Combinatorics.neighbor_side_compl}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \uses{lem:neighbor-side, lem:induce-compl}
+    Let $G : \mathrm{SimpleGraph}\, V$, $v \in V$, and write
+    $B := G^{\mathsf c}.\mathrm{neighborFinset}\, v$. If
+    \[
+        \neg\,(G.\mathrm{induce}\, B).\mathrm{CliqueFree}\, a \ \lor\
+        \neg\,\bigl((G.\mathrm{induce}\, B)^{\mathsf c}\bigr).\mathrm{CliqueFree}\, b ,
+    \]
+    then
+    $\neg\, G.\mathrm{CliqueFree}\, a \ \lor\ \neg\, G^{\mathsf c}.\mathrm{CliqueFree}\,(b{+}1)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:neighbor-side, lem:induce-compl}
+    This is \cref{lem:neighbor-side} applied to the complement graph
+    $G^{\mathsf c}$, the same vertex $v$ (so that
+    $A := G^{\mathsf c}.\mathrm{neighborFinset}\, v = B$), and parameters $r := b$,
+    $m := a$. Its hypothesis
+    $\neg\,(G^{\mathsf c}.\mathrm{induce}\, B).\mathrm{CliqueFree}\, b \lor
+    \neg\,((G^{\mathsf c}.\mathrm{induce}\, B)^{\mathsf c}).\mathrm{CliqueFree}\, a$
+    coincides with our hypothesis after rewriting
+    $(G.\mathrm{induce}\, B)^{\mathsf c} = G^{\mathsf c}.\mathrm{induce}\, B$ and
+    $G.\mathrm{induce}\, B = (G^{\mathsf c}.\mathrm{induce}\, B)^{\mathsf c}$
+    (\cref{lem:induce-compl}, \texttt{compl\_compl}) and commuting the disjunction.
+    Its conclusion
+    $\neg\, G^{\mathsf c}.\mathrm{CliqueFree}\,(b{+}1) \lor
+    \neg\,(G^{\mathsf c})^{\mathsf c}.\mathrm{CliqueFree}\, a$ becomes, via
+    \texttt{compl\_compl}, the desired
+    $\neg\, G.\mathrm{CliqueFree}\, a \lor \neg\, G^{\mathsf c}.\mathrm{CliqueFree}\,(b{+}1)$.
+\end{proof}
+
+\subsection{Base cases and symmetry}
+
+\begin{lemma}[Base case $r = 2$]
+    \label{lem:base}
+    \lean{LeanEval.Combinatorics.base}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \uses{def:is-ramsey, lem:top-not-cliquefree}
+    For every $s$, $\mathrm{IsRamsey}\, 2\, s\, s$ holds.
+\end{lemma}
+\begin{proof}
+    \uses{lem:top-not-cliquefree}
+    Let $V$ have $s \le \#V$ and $G : \mathrm{SimpleGraph}\, V$. If $G$ is not
+    $2$-clique-free, take the left disjunct. Otherwise $G.\mathrm{CliqueFree}\, 2$,
+    so $G = \bot$ (\texttt{SimpleGraph.cliqueFree\_two}); then
+    $G^{\mathsf c} = \bot^{\mathsf c} = \top$ (\texttt{compl\_bot}), which is not
+    $s$-clique-free by \cref{lem:top-not-cliquefree}. Take the right disjunct.
+\end{proof}
+
+\begin{lemma}[Symmetry of the Ramsey property]
+    \label{lem:symm}
+    \lean{LeanEval.Combinatorics.symm}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \uses{def:is-ramsey}
+    If $\mathrm{IsRamsey}\, r\, s\, n$ then $\mathrm{IsRamsey}\, s\, r\, n$.
+\end{lemma}
+\begin{proof}
+    Let $V$ have $n \le \#V$ and $G : \mathrm{SimpleGraph}\, V$. Apply the
+    hypothesis to $G^{\mathsf c}$: it gives
+    $\neg\, G^{\mathsf c}.\mathrm{CliqueFree}\, r \lor \neg\,
+    (G^{\mathsf c})^{\mathsf c}.\mathrm{CliqueFree}\, s$. Since
+    $(G^{\mathsf c})^{\mathsf c} = G$ (\texttt{compl\_compl}), this is
+    $\neg\, G^{\mathsf c}.\mathrm{CliqueFree}\, r \lor \neg\, G.\mathrm{CliqueFree}\, s$,
+    whose commuted form $\neg\, G.\mathrm{CliqueFree}\, s \lor \neg\,
+    G^{\mathsf c}.\mathrm{CliqueFree}\, r$ is the desired conclusion.
+\end{proof}
+
+\begin{lemma}[Base case $s = 2$]
+    \label{lem:base-right}
+    \lean{LeanEval.Combinatorics.base_right}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \uses{def:is-ramsey, lem:base, lem:symm}
+    For every $r$, $\mathrm{IsRamsey}\, r\, 2\, r$ holds.
+\end{lemma}
+\begin{proof}
+    \uses{lem:base, lem:symm}
+    By \cref{lem:base}, $\mathrm{IsRamsey}\, 2\, r\, r$ holds; apply
+    \cref{lem:symm} to obtain $\mathrm{IsRamsey}\, r\, 2\, r$.
+\end{proof}
+
+\subsection{Inductive step and conclusion}
+
+\begin{lemma}[Ramsey property on an induced subgraph]
+    \label{lem:ramsey-induce}
+    \lean{LeanEval.Combinatorics.ramsey_induce}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \uses{def:is-ramsey}
+    Let $G : \mathrm{SimpleGraph}\, V$, $A \subseteq V$ a finite set,
+    $r', m', N \in \mathbb{N}$ with $N \le \#A$, and suppose
+    $\mathrm{IsRamsey}\, r'\, m'\, N$. Then
+    \[
+        \neg\,(G.\mathrm{induce}\, A).\mathrm{CliqueFree}\, r' \ \lor\
+        \neg\,\bigl((G.\mathrm{induce}\, A)^{\mathsf c}\bigr).\mathrm{CliqueFree}\, m' .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{def:is-ramsey}
+    The vertex type of $G.\mathrm{induce}\, A$ is the subtype
+    $\{x \mathbin{//} x \in A\}$, whose cardinality is $\#A$
+    (\texttt{Fintype.card\_coe}); since $N \le \#A$ we have
+    $N \le \#\{x \mathbin{//} x \in A\}$. Apply the hypothesis
+    $\mathrm{IsRamsey}\, r'\, m'\, N$ to this subtype and the graph
+    $G.\mathrm{induce}\, A$ to obtain the disjunction directly.
+\end{proof}
+
+\begin{lemma}[Inductive step]
+    \label{lem:step}
+    \lean{LeanEval.Combinatorics.step}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \uses{def:is-ramsey, lem:degree-split, lem:ramsey-induce, lem:neighbor-side, lem:neighbor-side-compl}
+    Let $r, s, N_1, N_2 \in \mathbb{N}$. If $\mathrm{IsRamsey}\,(r{+}1)\, s\, N_1$
+    and $\mathrm{IsRamsey}\, r\,(s{+}1)\, N_2$, then
+    $\mathrm{IsRamsey}\,(r{+}1)\,(s{+}1)\,(N_1 + N_2 + 1)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:degree-split, lem:ramsey-induce, lem:neighbor-side, lem:neighbor-side-compl}
+    Let $V$ have $N_1 + N_2 + 1 \le \#V$ and $G : \mathrm{SimpleGraph}\, V$. Since
+    $\#V \ge 1$, pick $v \in V$ (\texttt{Fintype.card\_pos\_iff}). Set
+    $A := G.\mathrm{neighborFinset}\, v$ and $B := G^{\mathsf c}.\mathrm{neighborFinset}\, v$.
+    By \cref{lem:degree-split}, $\#A + \#B = \#V - 1 \ge N_1 + N_2$, so by
+    pigeonhole (\texttt{omega}) either $N_2 \le \#A$ or $N_1 \le \#B$; case on this
+    disjunction (\texttt{rcases}).
+
+    If $N_2 \le \#A$, \cref{lem:ramsey-induce} applied to
+    $\mathrm{IsRamsey}\, r\,(s{+}1)\, N_2$ and $A$ gives
+    $\neg\,(G.\mathrm{induce}\, A).\mathrm{CliqueFree}\, r \lor
+    \neg\,((G.\mathrm{induce}\, A)^{\mathsf c}).\mathrm{CliqueFree}\,(s{+}1)$;
+    feeding it to \cref{lem:neighbor-side} (with $m = s{+}1$) closes the goal.
+
+    If $N_1 \le \#B$, \cref{lem:ramsey-induce} applied to
+    $\mathrm{IsRamsey}\,(r{+}1)\, s\, N_1$ and $B$ gives
+    $\neg\,(G.\mathrm{induce}\, B).\mathrm{CliqueFree}\,(r{+}1) \lor
+    \neg\,((G.\mathrm{induce}\, B)^{\mathsf c}).\mathrm{CliqueFree}\, s$;
+    feeding it to \cref{lem:neighbor-side-compl} (with $a = r{+}1$, $b = s$) closes
+    the goal.
+\end{proof}
+
+\begin{theorem}[Existence of the Ramsey number]
+    \label{thm:ramsey-exists}
+    \lean{LeanEval.Combinatorics.ramsey_exists}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \uses{def:is-ramsey, lem:base, lem:base-right, lem:step}
+    For all $r, s \in \mathbb{N}$ with $2 \le r$ and $2 \le s$, there exists
+    $n \in \mathbb{N}$ with $\mathrm{IsRamsey}\, r\, s\, n$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:base, lem:base-right, lem:step}
+    It suffices to prove, by ordinary induction on a single natural number $k$, the
+    statement $P(k)$: for all $r, s \ge 2$ with $r + s \le k$ there exists $n$ with
+    $\mathrm{IsRamsey}\, r\, s\, n$; the theorem is then $P(r+s)$ applied at the
+    given $r, s$.
+
+    The base cases $k = 0, \dots, 3$ are vacuous since $r, s \ge 2$ forces
+    $r + s \ge 4$. For the step, assume $P(k)$ and take $r, s \ge 2$ with
+    $r + s \le k + 1$. If $r = 2$, then $n = s$ works by \cref{lem:base}; if
+    $s = 2$, then $n = r$ works by \cref{lem:base-right}. Otherwise $r \ge 3$ and
+    $s \ge 3$, so the pairs $(r, s{-}1)$ and $(r{-}1, s)$ each satisfy
+    $\ge 2$ in both coordinates and have sum $\le k$. The induction hypothesis
+    $P(k)$ thus gives $N_1$ with $\mathrm{IsRamsey}\, r\,(s{-}1)\, N_1$ and $N_2$
+    with $\mathrm{IsRamsey}\,(r{-}1)\, s\, N_2$. Writing $r = (r{-}1){+}1$ and
+    $s = (s{-}1){+}1$, \cref{lem:step} yields
+    $\mathrm{IsRamsey}\, r\, s\,(N_1 + N_2 + 1)$, so $n = N_1 + N_2 + 1$ works.
+\end{proof}
+
+\begin{theorem}[Finite Ramsey theorem for graphs]
+    \label{thm:main}
+    \lean{LeanEval.Combinatorics.finite_graph_ramsey_theorem}
+    \leanfile{LeanEval/Combinatorics/Ramsey.lean}
+    \uses{def:is-ramsey, thm:ramsey-exists}
+    For all $r, s \in \mathbb{N}$ with $2 \le r$ and $2 \le s$, there exists
+    $n \in \mathbb{N}$ such that for every $G : \mathrm{SimpleGraph}\,(\mathrm{Fin}\, n)$,
+    \[
+        \neg\, G.\mathrm{CliqueFree}\, r \ \lor\ \neg\, G^{\mathsf c}.\mathrm{CliqueFree}\, s .
+    \]
+\end{theorem}
+\begin{proof}
+    \uses{thm:ramsey-exists}
+    By \cref{thm:ramsey-exists} there is $n$ with $\mathrm{IsRamsey}\, r\, s\, n$.
+    Instantiate the Ramsey property at $V = \mathrm{Fin}\, n$, whose cardinality is
+    $n$ (\texttt{Fintype.card\_fin}), so $n \le \#V$; applying it to any
+    $G : \mathrm{SimpleGraph}\,(\mathrm{Fin}\, n)$ gives exactly the stated
+    disjunction.
+\end{proof}
 
 \end{document}
