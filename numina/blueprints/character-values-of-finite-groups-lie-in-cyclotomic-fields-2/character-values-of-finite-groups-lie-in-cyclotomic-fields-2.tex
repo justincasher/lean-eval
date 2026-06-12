@@ -363,3 +363,175 @@ unity.
 \end{proof}
 
 \end{document}
+% Blueprint: Character values of finite groups lie in cyclotomic fields 2
+% Created by Numina
+
+\begin{document}
+
+\section{Character values lie in cyclotomic fields}
+
+Let $G$ be a finite group with exponent $n = \exp(G)$. We fix once and for all a
+ring embedding $\varphi : \mathbb{Q}(\zeta_n) \hookrightarrow \mathbb{C}$ of the
+cyclotomic field, and show that the trace $\operatorname{tr}(\rho(g))$ of every
+finite-dimensional complex representation $\rho$ of $G$ at every $g \in G$ lies in
+the image $\varphi(\mathbb{Q}(\zeta_n))$.
+
+The argument is elementary and does not use Brauer's induction theorem: since $g^n
+= 1$, the operator $\rho(g)$ satisfies $\rho(g)^n = 1$, so each of its eigenvalues
+is an $n$-th root of unity. The trace is the sum of these eigenvalues, and the
+range of $\varphi$ is a subring of $\mathbb{C}$ containing every $n$-th root of
+unity.
+
+\begin{lemma}[Injective embedding of the cyclotomic field]
+    \label{lem:cyclotomic-embeds-injective}
+    Let $n \neq 0$. There is an injective ring homomorphism
+    $\varphi : \mathbb{Q}(\zeta_n) \to \mathbb{C}$.
+\end{lemma}
+\begin{proof}
+    The cyclotomic field $\mathbb{Q}(\zeta_n)$ is a number field, hence algebraic
+    over $\mathbb{Q}$, while $\mathbb{C}$ is an algebraically closed
+    $\mathbb{Q}$-algebra. By \texttt{IsAlgClosed.lift} (lifting of embeddings
+    along algebraic extensions into an algebraically closed field) there is a
+    $\mathbb{Q}$-algebra homomorphism $\mathbb{Q}(\zeta_n) \to \mathbb{C}$; let
+    $\varphi$ be its underlying ring homomorphism (\texttt{AlgHom.toRingHom}). A
+    ring homomorphism out of a field is injective, so $\varphi$ is injective.
+\end{proof}
+
+\begin{lemma}[Embedding carrying a primitive root]
+    \label{lem:embedding-primitive-root}
+    \uses{lem:cyclotomic-embeds-injective}
+    Let $n \neq 0$. There is a ring embedding
+    $\varphi : \mathbb{Q}(\zeta_n) \to \mathbb{C}$ and an element
+    $\zeta \in \mathbb{C}$ such that $\zeta$ is a primitive $n$-th root of unity
+    and $\zeta$ lies in the range of $\varphi$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:cyclotomic-embeds-injective}
+    By Lemma~\ref{lem:cyclotomic-embeds-injective} fix an injective ring
+    homomorphism $\varphi : \mathbb{Q}(\zeta_n) \to \mathbb{C}$. As a cyclotomic
+    extension, $\mathbb{Q}(\zeta_n)$ contains a primitive $n$-th root of unity
+    $\xi$. Set $\zeta = \varphi(\xi)$. Because $\varphi$ is injective,
+    \texttt{IsPrimitiveRoot.map\_of\_injective} (transport of primitive roots
+    along injective monoid homomorphisms) shows $\zeta$ is again a primitive
+    $n$-th root of unity, and $\zeta = \varphi(\xi)$ lies in the range of
+    $\varphi$.
+\end{proof}
+
+\begin{lemma}[A complex $n$-th root of unity is a member of \texttt{rootsOfUnity}]
+    \label{lem:mem-rootsOfUnity-of-pow-eq-one}
+    Let $n \neq 0$ and let $z \in \mathbb{C}$ with $z^n = 1$. Then $z$ is a unit
+    $u$ of $\mathbb{C}$, and that unit lies in
+    $\operatorname{rootsOfUnity}(n, \mathbb{C})$.
+\end{lemma}
+\begin{proof}
+    Since $z^n = 1$ and $n \neq 0$, we have $z \neq 0$, so $z$ is a unit $u$ of
+    $\mathbb{C}$. The coercion of units to $\mathbb{C}$ is a monoid homomorphism,
+    so $(u^n : \mathbb{C}) = z^n = 1$ forces $u^n = 1$ in the units. By the
+    membership characterization \texttt{mem\_rootsOfUnity} (a unit $u$ lies in
+    $\operatorname{rootsOfUnity}(n, \mathbb{C})$ iff $u^n = 1$), the unit $u$ lies
+    in $\operatorname{rootsOfUnity}(n, \mathbb{C})$.
+\end{proof}
+
+\begin{lemma}[Roots of unity lie in a subring containing a primitive root]
+    \label{lem:rootsOfUnity-mem}
+    \uses{lem:mem-rootsOfUnity-of-pow-eq-one}
+    Let $n \neq 0$, let $S \subseteq \mathbb{C}$ be a subring, and let
+    $\zeta \in S$ be a primitive $n$-th root of unity. Then every $z \in
+    \mathbb{C}$ with $z^n = 1$ belongs to $S$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:mem-rootsOfUnity-of-pow-eq-one}
+    By Lemma~\ref{lem:mem-rootsOfUnity-of-pow-eq-one}, $z$ is a unit $u$ lying in
+    $\operatorname{rootsOfUnity}(n, \mathbb{C})$. As $\zeta$ is a primitive $n$-th
+    root of unity, \texttt{IsPrimitiveRoot.eq\_pow\_of\_mem\_rootsOfUnity} gives
+    $i$ with $\zeta^i = u$; in particular $z = \zeta^i$ in $\mathbb{C}$. Because
+    $\zeta \in S$ and $S$ is closed under multiplication, $z = \zeta^i \in S$.
+\end{proof}
+
+\begin{lemma}[The image of $g$ has finite order]
+    \label{lem:rho-pow-exponent}
+    Let $\rho$ be a complex representation of $G$ on $V$ and let $g \in G$. Then
+    $\rho(g)^{\exp(G)} = 1$ as an endomorphism of $V$.
+\end{lemma}
+\begin{proof}
+    The representation $\rho$ is a monoid homomorphism, so
+    $\rho(g)^{\exp(G)} = \rho(g^{\exp(G)})$. By definition of the exponent,
+    $g^{\exp(G)} = 1$, and $\rho(1) = 1$. Hence $\rho(g)^{\exp(G)} = 1$.
+\end{proof}
+
+\begin{lemma}[The only eigenvalue of the identity is one]
+    \label{lem:eigenvalue-id-eq-one}
+    Let $V$ be a complex vector space and let $c \in \mathbb{C}$. If the identity
+    endomorphism $1 : V \to V$ has eigenvalue $c$, then $c = 1$.
+\end{lemma}
+\begin{proof}
+    By \texttt{HasEigenvalue.exists\_hasEigenvector} there is a nonzero $v \in V$
+    with $1 \cdot v = c \cdot v$, i.e.\ $v = c \cdot v = 1 \cdot v$. Since $v \neq
+    0$, scalar multiplication by a fixed nonzero vector is injective in the scalar
+    over a field, so cancelling $v$ gives $c = 1$.
+\end{proof}
+
+\begin{lemma}[Eigenvalues of a finite-order operator are roots of unity]
+    \label{lem:eigenvalue-root-of-unity}
+    \uses{lem:eigenvalue-id-eq-one}
+    Let $V$ be a finite-dimensional complex vector space, let $T : V \to V$ be a
+    linear endomorphism, and let $n \neq 0$ with $T^n = 1$. Then every root $\mu$
+    of the characteristic polynomial of $T$ satisfies $\mu^n = 1$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:eigenvalue-id-eq-one}
+    By \texttt{Module.End.hasEigenvalue\_iff\_isRoot\_charpoly}, a root $\mu$ of
+    the characteristic polynomial is an eigenvalue of $T$. Then $T^n$ has
+    eigenvalue $\mu^n$ (\texttt{HasEigenvalue.pow}). Since $T^n = 1$, the identity
+    has eigenvalue $\mu^n$, so $\mu^n = 1$ by
+    Lemma~\ref{lem:eigenvalue-id-eq-one}.
+\end{proof}
+
+\begin{lemma}[Roots of the characteristic polynomial lie in the subring]
+    \label{lem:charpoly-roots-mem-range}
+    \uses{lem:eigenvalue-root-of-unity, lem:rootsOfUnity-mem}
+    Let $V$ be a finite-dimensional complex vector space, let $T : V \to V$ be a
+    linear endomorphism with $T^n = 1$ for some $n \neq 0$, and let
+    $S \subseteq \mathbb{C}$ be a subring containing a primitive $n$-th root of
+    unity $\zeta$. Then every $r$ in the multiset of roots of the characteristic
+    polynomial of $T$ lies in $S$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:eigenvalue-root-of-unity, lem:rootsOfUnity-mem}
+    Let $r$ be a root of the characteristic polynomial $p$ of $T$. By
+    \texttt{Polynomial.mem\_roots} (using $p \neq 0$, which holds as it is monic),
+    $r$ is a root of $p$, so by Lemma~\ref{lem:eigenvalue-root-of-unity} we have
+    $r^n = 1$. Then Lemma~\ref{lem:rootsOfUnity-mem}, applied to $S$ and $\zeta$,
+    gives $r \in S$.
+\end{proof}
+
+\begin{theorem}[Character values lie in a cyclotomic field]
+    \label{thm:brauer-character-in-cyclotomic}
+    \uses{lem:embedding-primitive-root, lem:rho-pow-exponent, lem:charpoly-roots-mem-range}
+    Let $G$ be a finite group with exponent $n = \exp(G)$. There is a ring
+    embedding $\varphi : \mathbb{Q}(\zeta_n) \to \mathbb{C}$ such that for every
+    finite-dimensional complex representation $\rho$ of $G$ on a space $V$ and
+    every $g \in G$, the trace $\operatorname{tr}_{\mathbb{C}}(\rho(g))$ lies in
+    the range of $\varphi$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:embedding-primitive-root, lem:rho-pow-exponent, lem:charpoly-roots-mem-range}
+    Since $G$ is finite, $n = \exp(G) \neq 0$. By
+    Lemma~\ref{lem:embedding-primitive-root} choose an embedding $\varphi$ and a
+    primitive $n$-th root of unity $\zeta$ with $\zeta$ in the range of $\varphi$;
+    use this $\varphi$ and set $S = \operatorname{range}(\varphi)$, a subring of
+    $\mathbb{C}$ containing $\zeta$. Fix a finite-dimensional representation
+    $\rho$ on $V$ and $g \in G$, and write $T = \rho(g)$. By
+    Lemma~\ref{lem:rho-pow-exponent}, $T^n = 1$.
+
+    As $\mathbb{C}$ is algebraically closed, the characteristic polynomial of $T$
+    splits, so by \texttt{Module.End.trace\_eq\_sum\_roots\_charpoly\_of\_splits}
+    the trace $\operatorname{tr}_{\mathbb{C}}(T)$ equals the sum of the multiset of
+    roots of that polynomial. By Lemma~\ref{lem:charpoly-roots-mem-range}, every
+    root in that multiset lies in $S$. Since $S$ is closed under multiset sums
+    (\texttt{Subring.multiset\_sum\_mem}), the sum of the roots---namely
+    $\operatorname{tr}_{\mathbb{C}}(\rho(g))$---lies in $S$, the range of
+    $\varphi$.
+\end{proof}
+
+\end{document}
