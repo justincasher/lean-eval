@@ -1,0 +1,1384 @@
+% Blueprint: Complementary polynomial on the unit circle
+% Created by Numina
+
+\begin{document}
+
+\section{Complementary polynomial on the unit circle}
+
+We work over $\mathbb{C}[X]$. For a complex number $z$ on the unit circle
+($\|z\| = 1$) we use throughout that $\overline{z} = z^{-1}$. The goal is: if
+$P$ has modulus at most $1$ on the unit circle, then there is a polynomial $Q$
+of degree at most $\deg P$ with $\|P(z)\|^2 + \|Q(z)\|^2 = 1$ for every $z$ on
+the unit circle. The strategy is spectral factorization (Fejér--Riesz): the
+nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2$.
+
+\subsection{The conjugate-reciprocal polynomial}
+
+\begin{definition}[Conjugate-reciprocal polynomial]
+    \label{def:conj-recip}
+    \lean{LeanEval.ComplexAnalysis.conjRecip}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \leanok
+    For $A \in \mathbb{C}[X]$ and $N \in \mathbb{N}$, the
+    \emph{conjugate-reciprocal} $A^{\dagger N}$ is obtained by conjugating the
+    coefficients of $A$ and reversing the coefficient list within degree $N$:
+    $A^{\dagger N} := \operatorname{reflect}_N\bigl(\operatorname{map}\,
+    \overline{(\cdot)}\; A\bigr)$, where $\overline{(\cdot)}$ is complex
+    conjugation. Informally, $A^{\dagger N}(z) = z^{N}\,\overline{A}(1/z)$ for
+    $z \neq 0$, where $\overline{A}$ has the conjugated coefficients of $A$.
+\end{definition}
+
+\begin{lemma}[Evaluation of a conjugated polynomial]
+    \label{lem:map-conj-eval}
+    \lean{LeanEval.ComplexAnalysis.map_conj_eval}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \leanok
+    For $A \in \mathbb{C}[X]$ and $w \in \mathbb{C}$,
+    $(\operatorname{map}\,\overline{(\cdot)}\;A)(w) = \overline{A(\overline{w})}$.
+\end{lemma}
+\begin{proof}
+    Conjugation is a ring homomorphism, so evaluation of the coefficient-mapped
+    polynomial commutes with it: evaluating $\operatorname{map}\,\overline{(\cdot)}\,A$
+    at $w$ equals applying conjugation to each coefficient and to the powers of
+    $\overline{w}$, i.e. $\overline{A(\overline{w})}$. This is the
+    ring-homomorphism/evaluation commutation lemma applied to complex conjugation.
+\end{proof}
+
+\begin{lemma}[Degree of the conjugate-reciprocal]
+    \label{lem:conjrecip-natDegree}
+    \lean{LeanEval.ComplexAnalysis.conjRecip_natDegree_le}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \uses{def:conj-recip}
+    \leanok
+    For every $A$ and $N$ with $\deg A \le N$, $\deg\bigl(A^{\dagger N}\bigr) \le N$.
+    (The hypothesis $\deg A \le N$ is necessary: e.g. $A = X^2$, $N = 1$ gives
+    $\deg(A^{\dagger 1}) = 2 > 1$.)
+\end{lemma}
+\begin{proof}
+    Coefficient conjugation does not change the natural degree (the conjugation map
+    is injective), so $\deg(\operatorname{map}\,\overline{(\cdot)}\,A) = \deg A \le N$.
+    Reflection within degree $N$ satisfies
+    $\deg(\operatorname{reflect}_N p) \le \max(N, \deg p)$, which equals $N$ here.
+\end{proof}
+
+\begin{lemma}[Reflection-evaluation identity]
+    \label{lem:reflect-eval}
+    \lean{LeanEval.ComplexAnalysis.reflect_eval}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \leanok
+    Let $A \in \mathbb{C}[X]$ with $\deg A \le N$ and let $z \neq 0$. Then
+    $(\operatorname{reflect}_N A)(z) = z^{N}\,A(z^{-1})$.
+\end{lemma}
+\begin{proof}
+    Apply \texttt{Polynomial.eval\_2\_reflect\_mul\_pow} with the identity ring
+    homomorphism and the invertible element $z^{-1}$ (whose inverse is $z$): it
+    gives $(\operatorname{reflect}_N A)(z)\cdot (z^{-1})^{N} = A(z^{-1})$.
+    Multiplying both sides by $z^{N}$ and using $z^{N}(z^{-1})^{N} = 1$ yields
+    $(\operatorname{reflect}_N A)(z) = z^{N}\,A(z^{-1})$.
+\end{proof}
+
+\begin{lemma}[Evaluation of the conjugate-reciprocal on the circle]
+    \label{lem:conj-recip-eval}
+    \lean{LeanEval.ComplexAnalysis.conjRecip_eval}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \uses{def:conj-recip, lem:map-conj-eval, lem:reflect-eval}
+    \leanok
+    Let $A \in \mathbb{C}[X]$, $N \ge \deg A$, and let $z$ satisfy $\|z\| = 1$.
+    Then $A^{\dagger N}(z) = z^{N}\,\overline{A(z)}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:reflect-eval, lem:map-conj-eval}
+    Write $g := \operatorname{map}\,\overline{(\cdot)}\,A$, so $\deg g \le N$.
+    Since $z \neq 0$, \Cref{lem:reflect-eval} applied to $g$ gives
+    $A^{\dagger N}(z) = (\operatorname{reflect}_N g)(z) = z^{N}\, g(z^{-1})$.
+    By \Cref{lem:map-conj-eval},
+    $g(z^{-1}) = \overline{A(\overline{z^{-1}})}$. On the unit circle
+    $z^{-1} = \overline{z}$, so $\overline{z^{-1}} = z$, hence
+    $g(z^{-1}) = \overline{A(z)}$ and $A^{\dagger N}(z) = z^{N}\overline{A(z)}$.
+\end{proof}
+
+\begin{lemma}[Modulus identity via the conjugate-reciprocal]
+    \label{lem:conj-recip-prod}
+    \lean{LeanEval.ComplexAnalysis.conjRecip_mul_eval}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \uses{lem:conj-recip-eval}
+    \leanok
+    Let $A \in \mathbb{C}[X]$, $N \ge \deg A$, and $\|z\| = 1$. Then
+    $A(z)\cdot A^{\dagger N}(z) = z^{N}\,\bigl(\|A(z)\|^2 : \mathbb{C}\bigr)$.
+\end{lemma}
+\begin{proof}
+    By \Cref{lem:conj-recip-eval},
+    $A(z)A^{\dagger N}(z) = A(z)\,z^{N}\overline{A(z)}
+    = z^{N}\,\bigl(A(z)\overline{A(z)}\bigr)$.
+    Finally $A(z)\overline{A(z)} = \|A(z)\|^2$ as a complex number
+    (product of a complex number with its conjugate is its squared modulus).
+\end{proof}
+
+\begin{lemma}[Multiplicativity of the conjugate-reciprocal]
+    \label{lem:conjrecip-mul}
+    \lean{LeanEval.ComplexAnalysis.conjRecip_mul}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \uses{def:conj-recip}
+    \leanok
+    For $A, B \in \mathbb{C}[X]$ with $M \ge \deg A$ and $N \ge \deg B$,
+    $(A\cdot B)^{\dagger (M+N)} = A^{\dagger M}\cdot B^{\dagger N}$.
+\end{lemma}
+\begin{proof}
+    Coefficient conjugation is a ring homomorphism, so
+    $\operatorname{map}\,\overline{(\cdot)}\,(AB)
+    = (\operatorname{map}\,\overline{(\cdot)}\,A)(\operatorname{map}\,\overline{(\cdot)}\,B)$.
+    Reflection of a product splits the degree:
+    $\operatorname{reflect}_{M+N}(fg) = \operatorname{reflect}_M f \cdot
+    \operatorname{reflect}_N g$ when $\deg f \le M$, $\deg g \le N$. Combining
+    gives the claim.
+\end{proof}
+
+\begin{lemma}[Reflection commutes with coefficient mapping]
+    \label{lem:reflect-map-comm}
+    \lean{LeanEval.ComplexAnalysis.reflect_map_comm}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \leanok
+    For any ring homomorphism $f$, any $A \in \mathbb{C}[X]$ and $N \in \mathbb{N}$,
+    $\operatorname{reflect}_N(\operatorname{map} f\,A)
+    = \operatorname{map} f\,(\operatorname{reflect}_N A)$.
+\end{lemma}
+\begin{proof}
+    Both sides agree coefficient by coefficient: reflection within degree $N$
+    only permutes the coefficient indices, while $\operatorname{map} f$ acts
+    coefficientwise, so the two operations commute. This is
+    \texttt{Polynomial.reflect\_map}.
+\end{proof}
+
+\begin{lemma}[The conjugate-reciprocal is an involution]
+    \label{lem:conjrecip-involutive}
+    \lean{LeanEval.ComplexAnalysis.conjRecip_conjRecip}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \uses{def:conj-recip, lem:reflect-map-comm}
+    \leanok
+    For $A \in \mathbb{C}[X]$ and $N \ge \deg A$,
+    $\bigl(A^{\dagger N}\bigr)^{\dagger N} = A$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:reflect-map-comm}
+    Write $c := \operatorname{map}\,\overline{(\cdot)}$ for coefficient
+    conjugation. Then
+    $\bigl(A^{\dagger N}\bigr)^{\dagger N}
+    = \operatorname{reflect}_N\bigl(c(\operatorname{reflect}_N(c\,A))\bigr)$.
+    By \Cref{lem:reflect-map-comm}, $c$ commutes with $\operatorname{reflect}_N$,
+    so this equals
+    $\operatorname{reflect}_N\bigl(\operatorname{reflect}_N(c(c\,A))\bigr)$.
+    Reflecting twice within the same degree $N$ is the identity
+    (\texttt{Polynomial.reflect\_reflect}), and applying conjugation twice is the
+    identity, so the result is $A$.
+\end{proof}
+
+\begin{lemma}[Coefficient symmetry of a self-inversive polynomial]
+    \label{lem:selfinversive-coeff-symm}
+    \lean{LeanEval.ComplexAnalysis.selfInversive_coeff_symm}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \uses{def:conj-recip}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ with $H^{\dagger 2n} = H$. Then for every
+    $j \le 2n$, $\operatorname{coeff}_j H
+    = \overline{\operatorname{coeff}_{2n-j} H}$.
+\end{lemma}
+\begin{proof}
+    Since $H = H^{\dagger 2n}
+    = \operatorname{reflect}_{2n}(\operatorname{map}\,\overline{(\cdot)}\,H)$,
+    \texttt{Polynomial.coeff\_reflect} gives $\operatorname{coeff}_j H
+    = \operatorname{coeff}_{\operatorname{revAt}_{2n} j}
+    (\operatorname{map}\,\overline{(\cdot)}\,H)$, and for $j \le 2n$ one has
+    $\operatorname{revAt}_{2n} j = 2n - j$. By \texttt{Polynomial.coeff\_map}
+    this equals $\overline{\operatorname{coeff}_{2n-j} H}$.
+\end{proof}
+
+\begin{lemma}[Leading coefficient of the conjugate-reciprocal]
+    \label{lem:conjrecip-leadingcoeff}
+    \lean{LeanEval.ComplexAnalysis.conjRecip_leadingCoeff}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \uses{def:conj-recip, lem:conjrecip-natDegree}
+    \leanok
+    Let $A \in \mathbb{C}[X]$ with $\deg A \le N$. Then
+    $\operatorname{coeff}_N(A^{\dagger N}) = \overline{A(0)}$. In particular, if
+    $A(0) \neq 0$ then $\deg(A^{\dagger N}) = N$ and
+    $\operatorname{leadingCoeff}(A^{\dagger N}) = \overline{A(0)}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:conjrecip-natDegree}
+    Since $A^{\dagger N}
+    = \operatorname{reflect}_N(\operatorname{map}\,\overline{(\cdot)}\,A)$,
+    \texttt{Polynomial.coeff\_reflect} (with $\operatorname{revAt}_N N = 0$),
+    \texttt{Polynomial.coeff\_map} and \texttt{Polynomial.coeff\_zero\_eq\_eval\_zero}
+    give $\operatorname{coeff}_N(A^{\dagger N})
+    = \operatorname{coeff}_0(\operatorname{map}\,\overline{(\cdot)}\,A)
+    = \overline{\operatorname{coeff}_0 A} = \overline{A(0)}$. If $A(0) \neq 0$
+    this coefficient is nonzero while \Cref{lem:conjrecip-natDegree} bounds
+    $\deg(A^{\dagger N}) \le N$, so $\deg(A^{\dagger N}) = N$ and the degree-$N$
+    coefficient is the leading one.
+\end{proof}
+
+\subsection{The auxiliary polynomial $G$}
+
+\begin{definition}[Auxiliary polynomial $G$]
+    \label{def:G}
+    \lean{LeanEval.ComplexAnalysis.auxG}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/AuxiliaryG.lean}
+    \uses{def:conj-recip}
+    \leanok
+    Let $n := \deg P$. Define $G := X^{n} - P\cdot P^{\dagger n}$.
+\end{definition}
+
+\begin{lemma}[Degree of $G$]
+    \label{lem:G-natDegree}
+    \lean{LeanEval.ComplexAnalysis.auxG_natDegree_le}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/AuxiliaryG.lean}
+    \uses{def:G, lem:conjrecip-natDegree}
+    \leanok
+    $\deg G \le 2n$.
+\end{lemma}
+\begin{proof}
+    $X^{n}$ has degree $n \le 2n$. By \Cref{lem:conjrecip-natDegree},
+    $\deg P^{\dagger n} \le n$, so $\deg(P\cdot P^{\dagger n}) \le n + n = 2n$.
+    A difference of polynomials of degree $\le 2n$ has degree $\le 2n$.
+\end{proof}
+
+\begin{lemma}[Value of $G$ on the circle]
+    \label{lem:G-eval-circle}
+    \lean{LeanEval.ComplexAnalysis.auxG_eval_circle}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/AuxiliaryG.lean}
+    \uses{def:G, lem:conj-recip-prod}
+    \leanok
+    For $\|z\| = 1$, $G(z) = z^{n}\,\bigl(1 - \|P(z)\|^2\bigr)$.
+\end{lemma}
+\begin{proof}
+    By definition $G(z) = z^{n} - P(z)P^{\dagger n}(z)$. Applying
+    \Cref{lem:conj-recip-prod} to $A = P$, $N = n$ gives
+    $P(z)P^{\dagger n}(z) = z^{n}\|P(z)\|^2$. Hence
+    $G(z) = z^{n} - z^{n}\|P(z)\|^2 = z^{n}(1 - \|P(z)\|^2)$.
+\end{proof}
+
+\begin{lemma}[Nonnegativity of $G$ on the circle]
+    \label{lem:G-nonneg-circle}
+    \lean{LeanEval.ComplexAnalysis.auxG_nonneg_circle}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/AuxiliaryG.lean}
+    \uses{lem:G-eval-circle}
+    \leanok
+    Assume $\|P(z)\| \le 1$ for all $z$ with $\|z\| = 1$. Then for every such
+    $z$, $z^{-n}G(z) = 1 - \|P(z)\|^2$ is a nonnegative real number.
+\end{lemma}
+\begin{proof}
+    By \Cref{lem:G-eval-circle}, $z^{-n}G(z) = 1 - \|P(z)\|^2$ (using
+    $z \neq 0$). Since $\|P(z)\| \le 1$ we have $\|P(z)\|^2 \le 1$, so
+    $1 - \|P(z)\|^2 \ge 0$; it is real as the difference of two reals.
+\end{proof}
+
+\begin{lemma}[Conjugate-reciprocal of a difference]
+    \label{lem:conjrecip-sub}
+    \lean{LeanEval.ComplexAnalysis.conjRecip_sub}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \uses{def:conj-recip}
+    \leanok
+    For $A, B \in \mathbb{C}[X]$ and $N \in \mathbb{N}$,
+    $(A - B)^{\dagger N} = A^{\dagger N} - B^{\dagger N}$.
+\end{lemma}
+\begin{proof}
+    Coefficient conjugation is a ring homomorphism, hence distributes over
+    subtraction (\texttt{Polynomial.map\_sub}):
+    $\operatorname{map}\,\overline{(\cdot)}\,(A - B)
+    = \operatorname{map}\,\overline{(\cdot)}\,A
+    - \operatorname{map}\,\overline{(\cdot)}\,B$. Reflection within degree $N$
+    likewise distributes over a difference (\texttt{Polynomial.reflect\_sub}).
+    Composing the two gives $(A-B)^{\dagger N} = A^{\dagger N} - B^{\dagger N}$.
+\end{proof}
+
+\begin{lemma}[Conjugate-reciprocal of $X^{n}$]
+    \label{lem:conjrecip-X-pow}
+    \lean{LeanEval.ComplexAnalysis.conjRecip_X_pow}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
+    \uses{def:conj-recip}
+    \leanok
+    For $n \in \mathbb{N}$, $(X^{n})^{\dagger 2n} = X^{n}$.
+\end{lemma}
+\begin{proof}
+    Coefficient conjugation fixes $X^{n}$, whose only nonzero coefficient is the
+    real number $1$. Reflecting the monomial $X^{n}$ within degree $2n$ yields
+    $X^{2n - n} = X^{n}$ (\texttt{Polynomial.reflect\_monomial}). Hence
+    $(X^{n})^{\dagger 2n} = X^{n}$.
+\end{proof}
+
+\begin{lemma}[$G$ is self-inversive]
+    \label{lem:G-self-inversive}
+    \lean{LeanEval.ComplexAnalysis.auxG_self_inversive}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/AuxiliaryG.lean}
+    \uses{def:G, lem:conjrecip-mul, lem:conjrecip-involutive, lem:conjrecip-sub, lem:conjrecip-X-pow}
+    \leanok
+    $G^{\dagger 2n} = G$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:conjrecip-sub, lem:conjrecip-X-pow, lem:conjrecip-mul,
+    lem:conjrecip-involutive}
+    By \Cref{lem:conjrecip-sub} the conjugate-reciprocal distributes over the
+    subtraction defining $G$, so
+    $G^{\dagger 2n} = (X^{n})^{\dagger 2n} - (P\cdot P^{\dagger n})^{\dagger 2n}$.
+    By \Cref{lem:conjrecip-X-pow}, $(X^{n})^{\dagger 2n} = X^{n}$. Next, by
+    \Cref{lem:conjrecip-mul} with $M = N = n$,
+    $(P\cdot P^{\dagger n})^{\dagger 2n} = P^{\dagger n}\cdot (P^{\dagger n})^{\dagger n}$,
+    and by \Cref{lem:conjrecip-involutive}, $(P^{\dagger n})^{\dagger n} = P$.
+    Thus $(P\cdot P^{\dagger n})^{\dagger 2n} = P^{\dagger n}\cdot P = P\cdot P^{\dagger n}$,
+    and $G^{\dagger 2n} = X^{n} - P\cdot P^{\dagger n} = G$.
+\end{proof}
+
+\subsection{Fejér--Riesz factorization}
+
+\begin{lemma}[Multiplicity transport under conjugation]
+    \label{lem:rootmult-map-conj}
+    \lean{LeanEval.ComplexAnalysis.rootMultiplicity_map_conj}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
+    \leanok
+    For $A \in \mathbb{C}[X]$ and $v \in \mathbb{C}$, the root multiplicity of
+    $v$ in $\operatorname{map}\,\overline{(\cdot)}\,A$ equals the root
+    multiplicity of $\overline{v}$ in $A$.
+\end{lemma}
+\begin{proof}
+    Complex conjugation is an injective ring homomorphism. Root multiplicity is
+    preserved under an injective coefficient map, with the evaluation point
+    transported by the map (\texttt{Polynomial.eq\_rootMultiplicity\_map}):
+    the multiplicity of $v$ in $\operatorname{map}\,\overline{(\cdot)}\,A$ equals
+    the multiplicity of the conjugate preimage $\overline{v}$ in $A$.
+\end{proof}
+
+\begin{lemma}[Reflection of a linear factor]
+    \label{lem:reflect-linear}
+    \lean{LeanEval.ComplexAnalysis.reflect_linear}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
+    \leanok
+    For $v \neq 0$,
+    $\operatorname{reflect}_1(X - C\,v) = C(-v)\cdot\bigl(X - C\,v^{-1}\bigr)$.
+\end{lemma}
+\begin{proof}
+    Write $X - C\,v = C\,1\cdot X^{1} + C(-v)\cdot X^{0}$. By
+    \texttt{Polynomial.reflect\_add} and \texttt{Polynomial.reflect\_C\_mul\_X\_pow}
+    (with $\operatorname{revAt}_1$ swapping the exponents $0 \leftrightarrow 1$),
+    $\operatorname{reflect}_1(X - C\,v) = C\,1\cdot X^{0} + C(-v)\cdot X^{1}
+    = 1 - v\,X$. Since $v\,v^{-1} = 1$, $1 - v\,X = -v\,(X - v^{-1})
+    = C(-v)\,(X - C\,v^{-1})$.
+\end{proof}
+
+\begin{lemma}[Reflection of a power of a linear factor]
+    \label{lem:reflect-pow-linear}
+    \lean{LeanEval.ComplexAnalysis.reflect_pow_linear}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
+    \uses{lem:reflect-linear}
+    \leanok
+    For $v \neq 0$ and $k \in \mathbb{N}$,
+    $\operatorname{reflect}_k\bigl((X - C\,v)^{k}\bigr)
+    = \bigl(C(-v)\bigr)^{k}\,(X - C\,v^{-1})^{k}$, a unit multiple of
+    $(X - C\,v^{-1})^{k}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:reflect-linear}
+    Iterating \texttt{Polynomial.reflect\_mul} over the $k$ factors (each
+    $X - C\,v$ has degree $\le 1$) gives $\operatorname{reflect}_k\bigl(
+    (X - C\,v)^{k}\bigr) = \bigl(\operatorname{reflect}_1(X - C\,v)\bigr)^{k}$.
+    By \Cref{lem:reflect-linear}, $\operatorname{reflect}_1(X - C\,v)
+    = C(-v)\,(X - C\,v^{-1})$, so the $k$-th power is
+    $\bigl(C(-v)\bigr)^{k}\,(X - C\,v^{-1})^{k}$; since $-v \neq 0$ the scalar
+    $\bigl(C(-v)\bigr)^{k}$ is a unit.
+\end{proof}
+
+\begin{lemma}[Divisibility transport under reflection]
+    \label{lem:dvd-reflect-transport}
+    \lean{LeanEval.ComplexAnalysis.dvd_reflect_transport}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
+    \uses{lem:reflect-pow-linear}
+    \leanok
+    Let $A \in \mathbb{C}[X]$ with $\deg A \le N$, let $w \neq 0$, and let
+    $k \in \mathbb{N}$. Then
+    \[
+        (X - C\,w)^{k} \mid \operatorname{reflect}_N A
+        \quad\Longleftrightarrow\quad
+        (X - C\,w^{-1})^{k} \mid A .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:reflect-pow-linear}
+    ($\Leftarrow$) Suppose $A = (X - C\,w^{-1})^{k}\cdot B$. As
+    $\deg\bigl((X - C\,w^{-1})^{k}\bigr) \le k$ and $\deg B \le N - k$,
+    \texttt{Polynomial.reflect\_mul} gives $\operatorname{reflect}_N A
+    = \operatorname{reflect}_k\bigl((X - C\,w^{-1})^{k}\bigr)\cdot
+    \operatorname{reflect}_{N-k} B$. By \Cref{lem:reflect-pow-linear} (with
+    $v = w^{-1}$, using $(w^{-1})^{-1} = w$),
+    $\operatorname{reflect}_k\bigl((X - C\,w^{-1})^{k}\bigr)$ is a unit multiple
+    of $(X - C\,w)^{k}$. Hence
+    $(X - C\,w)^{k} \mid \operatorname{reflect}_N A$.
+    ($\Rightarrow$) Apply the ($\Leftarrow$) direction to
+    $\operatorname{reflect}_N A$ (which has degree $\le N$) in place of $A$, with
+    $w^{-1}$ in place of $w$ and $(w^{-1})^{-1} = w$: it gives
+    $(X - C\,w^{-1})^{k} \mid \operatorname{reflect}_N(\operatorname{reflect}_N A)$,
+    and $\operatorname{reflect}_N(\operatorname{reflect}_N A) = A$ by
+    \texttt{Polynomial.reflect\_reflect}.
+\end{proof}
+
+\begin{lemma}[Multiplicity transport under reflection]
+    \label{lem:rootmult-reflect}
+    \lean{LeanEval.ComplexAnalysis.rootMultiplicity_reflect}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
+    \uses{lem:dvd-reflect-transport}
+    \leanok
+    Let $A \in \mathbb{C}[X]$ be nonzero with $\deg A \le N$, and let $w \neq 0$.
+    Then the root multiplicity of $w$ in $\operatorname{reflect}_N A$ equals the
+    root multiplicity of $1/w$ in $A$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:dvd-reflect-transport}
+    Since $A \neq 0$, also $\operatorname{reflect}_N A \neq 0$
+    (\texttt{Polynomial.reflect\_eq\_zero\_iff}). For each $k \in \mathbb{N}$,
+    \texttt{Polynomial.le\_rootMultiplicity\_iff} gives
+    $k \le \operatorname{rootMultiplicity}_w(\operatorname{reflect}_N A)
+    \iff (X - C\,w)^{k} \mid \operatorname{reflect}_N A$ and
+    $k \le \operatorname{rootMultiplicity}_{1/w}(A)
+    \iff (X - C\,w^{-1})^{k} \mid A$. By \Cref{lem:dvd-reflect-transport} the two
+    divisibility conditions are equivalent, so the two multiplicities have the
+    same lower bounds $k$ and are therefore equal.
+\end{proof}
+
+\begin{lemma}[Inverse-conjugate root pairing]
+    \label{lem:conjrecip-root-pairing}
+    \lean{LeanEval.ComplexAnalysis.conjRecip_root_pairing}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
+    \uses{def:conj-recip, lem:rootmult-map-conj, lem:rootmult-reflect}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$ and
+    $H^{\dagger 2n} = H$, and let $w \neq 0$. Then the root multiplicity of $w$
+    in $H$ equals the root multiplicity of $1/\overline{w}$ in $H$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:rootmult-map-conj, lem:rootmult-reflect}
+    Since $H = H^{\dagger 2n} = \operatorname{reflect}_{2n}(\operatorname{map}\,
+    \overline{(\cdot)}\,H)$, the multiplicity of $w$ in $H$ equals, by
+    \Cref{lem:rootmult-reflect}, the multiplicity of $1/w$ in
+    $\operatorname{map}\,\overline{(\cdot)}\,H$, which by
+    \Cref{lem:rootmult-map-conj} equals the multiplicity of
+    $\overline{1/w} = 1/\overline{w}$ in $H$.
+\end{proof}
+
+\begin{lemma}[Local factorization at a root]
+    \label{lem:local-factorization}
+    \lean{LeanEval.ComplexAnalysis.local_factorization}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ be nonzero and $w \in \mathbb{C}$, and let $m$ be
+    the root multiplicity of $w$ in $H$. Then $H = (X - w)^{m}\cdot g$ for some
+    $g \in \mathbb{C}[X]$ with $g(w) \neq 0$.
+\end{lemma}
+\begin{proof}
+    By \texttt{Polynomial.exists\_eq\_pow\_rootMultiplicity\_mul\_and\_not\_dvd},
+    $H = (X - w)^{m}\cdot g$ with $(X - w) \nmid g$. Since $X - w$ is monic of
+    degree $1$, $(X - w) \nmid g$ is equivalent to $g(w) \neq 0$ (a linear
+    factor divides $g$ iff its root is a root of $g$).
+\end{proof}
+
+\begin{lemma}[Sign persistence for continuous functions]
+    \label{lem:sign-persistence}
+    \lean{LeanEval.ComplexAnalysis.sign_persistence}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    \leanok
+    Let $\phi : \mathbb{R} \to \mathbb{R}$ be continuous with $\phi(0) > 0$.
+    Then $\phi(t) > 0$ for all $t$ in some neighbourhood of $0$; symmetrically,
+    if $\phi(0) < 0$ then $\phi < 0$ near $0$.
+\end{lemma}
+\begin{proof}
+    The set $\{t : \phi(t) > 0\}$ is the preimage of the open set $(0,\infty)$
+    under the continuous map $\phi$, hence open
+    (\texttt{IsOpen.preimage} / \texttt{continuous\_def}), and it contains $0$;
+    therefore it is a neighbourhood of $0$. Equivalently, continuity at $0$
+    yields $\phi(t) > 0$ eventually as $t \to 0$. The case $\phi(0) < 0$ follows
+    by applying this to $-\phi$.
+\end{proof}
+
+\begin{lemma}[Nonnegativity forces even order (positive case)]
+    \label{lem:nonneg-even-order-pos}
+    \lean{LeanEval.ComplexAnalysis.nonneg_even_order_pos}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    \uses{lem:sign-persistence}
+    \leanok
+    Let $\phi : \mathbb{R} \to \mathbb{R}$ be continuous with $\phi(0) > 0$, let
+    $m \in \mathbb{N}$, and suppose $t^{m}\,\phi(t) \ge 0$ for all $t$ in a
+    neighbourhood of $0$. Then $m$ is even.
+\end{lemma}
+\begin{proof}
+    \uses{lem:sign-persistence}
+    By \Cref{lem:sign-persistence} there is $\varepsilon > 0$ with $\phi(t) > 0$
+    on $(-\varepsilon, \varepsilon)$, and we may shrink $\varepsilon$ so that
+    $t^{m}\phi(t) \ge 0$ holds there too. Suppose $m$ is odd and pick
+    $t \in (-\varepsilon, 0)$; then $t < 0$, so $t^{m} < 0$
+    (\texttt{Odd.pow\_neg}), while $\phi(t) > 0$, giving $t^{m}\phi(t) < 0$, a
+    contradiction. Hence $m$ is even.
+\end{proof}
+
+\begin{lemma}[Nonnegativity forces even order]
+    \label{lem:nonneg-even-order}
+    \lean{LeanEval.ComplexAnalysis.nonneg_even_order}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    \uses{lem:nonneg-even-order-pos, lem:sign-persistence}
+    \leanok
+    Let $\phi : \mathbb{R} \to \mathbb{R}$ be continuous with $\phi(0) \neq 0$,
+    let $m \in \mathbb{N}$, and suppose $t^{m}\,\phi(t) \ge 0$ for all $t$ in a
+    neighbourhood of $0$. Then $m$ is even.
+\end{lemma}
+\begin{proof}
+    \uses{lem:nonneg-even-order-pos, lem:sign-persistence}
+    If $\phi(0) > 0$ this is \Cref{lem:nonneg-even-order-pos}. Otherwise
+    $\phi(0) < 0$; by \Cref{lem:sign-persistence} there is $\varepsilon > 0$ with
+    $\phi(t) < 0$ on $(-\varepsilon, \varepsilon)$, and we may shrink
+    $\varepsilon$ so $t^{m}\phi(t) \ge 0$ holds there. If $m$ were odd, taking
+    $t \in (0, \varepsilon)$ gives $t^{m} > 0$ and $\phi(t) < 0$, so
+    $t^{m}\phi(t) < 0$, a contradiction. Hence $m$ is even.
+\end{proof}
+
+\begin{lemma}[The slope of $e^{it} - 1$ at $0$]
+    \label{lem:exp-slope-tendsto}
+    \lean{LeanEval.ComplexAnalysis.exp_slope_tendsto}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    The function $t \mapsto (e^{i t} - 1)/(i t)$ tends to $1$ as $t \to 0$ along
+    $t \neq 0$.
+\end{lemma}
+\begin{proof}
+    The map $z \mapsto e^{z}$ has derivative $1$ at $0$
+    (\texttt{hasDerivAt\_exp\_zero}), and precomposing with the linear map
+    $t \mapsto i t$ shows $t \mapsto e^{i t}$ has derivative $i$ at $0$. By
+    \texttt{hasDerivAt\_iff\_tendsto\_slope}, the slope
+    $(e^{i t} - e^{i 0})/(t - 0) = (e^{i t} - 1)/t$ tends to $i$ as $t \to 0$
+    along $t \neq 0$. Dividing by the nonzero constant $i$ gives
+    $(e^{i t} - 1)/(i t) \to 1$.
+\end{proof}
+
+\begin{lemma}[Linear expansion of $e^{it} - 1$]
+    \label{lem:exp-expansion}
+    \lean{LeanEval.ComplexAnalysis.exp_sub_one_expansion}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    \uses{lem:exp-slope-tendsto}
+    \leanok
+    There is a continuous function $u : \mathbb{R} \to \mathbb{C}$ with
+    $u(0) = 1$ such that $e^{i t} - 1 = i t\,u(t)$ for all $t \in \mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:exp-slope-tendsto}
+    Define $u(t) := (e^{i t} - 1)/(i t)$ for $t \neq 0$ and $u(0) := 1$. The
+    identity $e^{i t} - 1 = i t\,u(t)$ holds by construction for $t \neq 0$ and
+    trivially at $t = 0$ (both sides are $0$). Away from $0$, $u$ is continuous
+    as a quotient of continuous functions with nonvanishing denominator. At $0$,
+    \Cref{lem:exp-slope-tendsto} gives $u(t) \to 1 = u(0)$ as $t \to 0$ along
+    $t \neq 0$, so $u$ is continuous at $0$.
+\end{proof}
+
+\begin{lemma}[Real-valuedness of a reduced factor]
+    \label{lem:psi-real}
+    \lean{LeanEval.ComplexAnalysis.psi_real}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    \leanok
+    Let $\psi : \mathbb{R} \to \mathbb{C}$ be continuous and $m \in \mathbb{N}$,
+    and suppose $t^{m}\,\psi(t)$ is real for every $t \in \mathbb{R}$. Then
+    $\psi(t)$ is real for every $t$; consequently
+    $\phi(t) := \operatorname{Re}\psi(t)$ is a continuous real function with
+    $\phi(t) = \psi(t)$ (as complex numbers) for all $t$.
+\end{lemma}
+\begin{proof}
+    For $t \neq 0$, $t^{m}$ is a nonzero real, so
+    $\psi(t) = (t^{m}\psi(t))/t^{m}$ is a quotient of reals, hence real, i.e.
+    $\operatorname{Im}\psi(t) = 0$. The map $t \mapsto \operatorname{Im}\psi(t)$
+    is continuous (\texttt{Complex.continuous\_im} composed with $\psi$) and
+    vanishes on $\mathbb{R}\setminus\{0\}$, which is dense, so it vanishes at $0$
+    too; thus $\operatorname{Im}\psi \equiv 0$ and $\psi(t)$ is real for all $t$.
+    Then $\phi = \operatorname{Re}\psi$ is continuous and $\phi(t) = \psi(t)$ as
+    complex numbers.
+\end{proof}
+
+\begin{lemma}[Continuity of the reduced circle factor]
+    \label{lem:psi-continuous}
+    \lean{LeanEval.ComplexAnalysis.psi_continuous}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    \uses{lem:exp-expansion}
+    \leanok
+    Let $w \in \mathbb{C}$ with $\|w\| = 1$, let $n, m \in \mathbb{N}$, let
+    $g \in \mathbb{C}[X]$, and let $u : \mathbb{R} \to \mathbb{C}$ be the
+    continuous function of \Cref{lem:exp-expansion}. Then
+    \[
+        \psi(t) := (w e^{i t})^{-n}\,(i w)^{m}\, u(t)^{m}\, g(w e^{i t})
+    \]
+    is continuous on $\mathbb{R}$, and $\psi(0) = w^{-n}(i w)^{m} g(w)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:exp-expansion}
+    The map $t \mapsto w e^{i t}$ is continuous (\texttt{Complex.continuous\_exp}
+    composed with $t \mapsto i t$) and never zero (as $\|w\| = 1$), so the power
+    $(w e^{i t})^{-n}$ is continuous; $u$ is continuous (\Cref{lem:exp-expansion}),
+    polynomial evaluation $g(\cdot)$ is continuous, and products of continuous
+    functions are continuous, so $\psi$ is continuous. At $t = 0$, $u(0) = 1$ and
+    $w e^{i 0} = w$, so $\psi(0) = w^{-n}(i w)^{m} g(w)$.
+\end{proof}
+
+\begin{lemma}[The reduced circle factor $\psi$]
+    \label{lem:circle-root-even-psi}
+    \lean{LeanEval.ComplexAnalysis.circle_root_even_psi}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    \uses{lem:exp-expansion, lem:psi-continuous}
+    Let $w \in \mathbb{C}$ with $\|w\| = 1$, let $n, m \in \mathbb{N}$, let
+    $g \in \mathbb{C}[X]$ with $g(w) \neq 0$, and let $u : \mathbb{R} \to
+    \mathbb{C}$ be the continuous function of \Cref{lem:exp-expansion} (so
+    $u(0) = 1$ and $e^{i t} - 1 = i t\,u(t)$). Define
+    \[
+        \psi(t) := (w e^{i t})^{-n}\,(i w)^{m}\, u(t)^{m}\, g(w e^{i t}).
+    \]
+    Then $\psi$ is continuous, $\psi(0) = w^{-n}(i w)^{m} g(w) \neq 0$, and for
+    the polynomial $H := (X - C\,w)^{m}\,g$ one has, for every $t \in \mathbb{R}$,
+    $(w e^{i t})^{-n}\,H(w e^{i t}) = t^{m}\,\psi(t)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:exp-expansion, lem:psi-continuous}
+    Continuity of $\psi$ and the value $\psi(0) = w^{-n}(i w)^{m} g(w)$ are
+    \Cref{lem:psi-continuous}; this value is nonzero because $w \neq 0$ (from
+    $\|w\| = 1$), $i w \neq 0$, and $g(w) \neq 0$. For the identity, put
+    $z := w e^{i t}$; evaluating $H = (X - C\,w)^{m} g$ gives
+    $H(z) = (z - w)^{m}\,g(z)$. By \Cref{lem:exp-expansion},
+    $z - w = w(e^{i t} - 1) = w\,(i t\,u(t)) = i w t\,u(t)$, hence
+    $(z - w)^{m} = (i w)^{m} t^{m} u(t)^{m}$ and
+    $z^{-n} H(z) = z^{-n}(i w)^{m} t^{m} u(t)^{m} g(z) = t^{m}\,\psi(t)$.
+\end{proof}
+
+\begin{lemma}[Even multiplicity at circle roots]
+    \label{lem:circle-root-even}
+    \lean{LeanEval.ComplexAnalysis.circle_root_even}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    \uses{lem:local-factorization, lem:nonneg-even-order, lem:exp-expansion, lem:psi-real}
+    Let $H \in \mathbb{C}[X]$ be nonzero, $n \in \mathbb{N}$, and suppose that
+    for all $z$ with $\|z\| = 1$ the number $z^{-n}H(z)$ is a nonnegative real.
+    If $w$ has $\|w\| = 1$, then the root multiplicity $m$ of $w$ in $H$ is even.
+\end{lemma}
+\begin{proof}
+    \uses{lem:local-factorization, lem:circle-root-even-psi, lem:nonneg-even-order,
+    lem:exp-expansion, lem:psi-real}
+    By \Cref{lem:local-factorization}, $H = (X - w)^{m} g$ with $g(w) \neq 0$.
+    Let $u$ be as in \Cref{lem:exp-expansion} and let $\psi$ be the function of
+    \Cref{lem:circle-root-even-psi}; that lemma gives $\psi$ continuous,
+    $\psi(0) \neq 0$, and $(w e^{i t})^{-n} H(w e^{i t}) = t^{m}\,\psi(t)$ for all
+    $t$. Each $z(t) := w e^{i t}$ lies on the unit circle (since $\|w\| = 1$), so
+    by hypothesis $(w e^{i t})^{-n} H(w e^{i t})$ is a nonnegative real for every
+    $t$; hence $t^{m}\psi(t)$ is real for all $t$. By \Cref{lem:psi-real},
+    $\phi := \operatorname{Re}\psi$ is a continuous real function with
+    $\phi = \psi$, so $\phi(0) \neq 0$ and $t^{m}\phi(t) = t^{m}\psi(t)
+    = (w e^{i t})^{-n} H(w e^{i t}) \ge 0$ for all $t$.
+    \Cref{lem:nonneg-even-order} now gives that $m$ is even.
+\end{proof}
+
+\begin{lemma}[Equality from leading coefficient and root multiset]
+    \label{lem:eq-of-leadingcoeff-roots}
+    \lean{LeanEval.ComplexAnalysis.eq_of_leadingCoeff_roots}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
+    Let $F, G \in \mathbb{C}[X]$ be nonzero. If $F$ and $G$ have the same leading
+    coefficient and the same multiset of roots (counted with multiplicity), then
+    $F = G$.
+\end{lemma}
+\begin{proof}
+    Over the algebraically closed field $\mathbb{C}$ the number of roots of a
+    nonzero polynomial equals its degree (\texttt{IsAlgClosed.card\_roots\_eq\_natDegree}),
+    so every nonzero $F$ equals
+    $C(\operatorname{leadingCoeff} F)\cdot\!\!\prod_{r \in \operatorname{roots} F}\!\!(X - r)$
+    (\texttt{Polynomial.C\_leadingCoeff\_mul\_prod\_multiset\_X\_sub\_C}). If $F$
+    and $G$ share leading coefficient and root multiset, the two product
+    expressions coincide, whence $F = G$.
+\end{proof}
+
+\begin{lemma}[The inversion-conjugation involution]
+    \label{lem:circle-involution}
+    \lean{LeanEval.ComplexAnalysis.invConj_invConj}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
+    Define $\sigma(w) := 1/\overline{w}$ on $\mathbb{C}^{\times}$. Then
+    $\sigma(\sigma(w)) = w$ for all $w \neq 0$, and $\sigma(w) = w$ if and only if
+    $\|w\| = 1$.
+\end{lemma}
+\begin{proof}
+    Since $\overline{1/\overline{w}} = 1/w$, we get
+    $\sigma(\sigma(w)) = 1/\overline{1/\overline{w}} = 1/(1/w) = w$. Next,
+    $\sigma(w) = w \iff 1 = w\overline{w} = \|w\|^2 \iff \|w\| = 1$.
+\end{proof}
+
+\begin{lemma}[Count form of the root pairing]
+    \label{lem:fr-build-S-root-pairing}
+    \lean{LeanEval.ComplexAnalysis.fr_build_S_root_pairing}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:conjrecip-root-pairing, lem:circle-involution}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$ and
+    $H^{\dagger 2n} = H$, and write $\sigma(w) := 1/\overline{w}$. Then $0$ is
+    not in $\operatorname{roots}(H)$ once $H(0) \neq 0$, every $r \in
+    \operatorname{roots}(H)$ is nonzero, and for every $w \neq 0$ the count of $w$
+    in $\operatorname{roots}(H)$ equals the count of $\sigma(w)$, i.e.
+    $\operatorname{count}_w\operatorname{roots}(H)
+    = \operatorname{count}_{\sigma(w)}\operatorname{roots}(H)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:conjrecip-root-pairing, lem:circle-involution}
+    By \texttt{Polynomial.count\_roots} the count of any $v$ in
+    $\operatorname{roots}(H)$ is the root multiplicity of $v$ in $H$. For
+    $w \neq 0$, \Cref{lem:conjrecip-root-pairing} gives that the multiplicity of
+    $w$ in $H$ equals the multiplicity of $1/\overline{w} = \sigma(w)$ in $H$,
+    which is the claimed count equality. A member $r \in \operatorname{roots}(H)$
+    is a root, so $H(r) = 0$; if $H(0) \neq 0$ then $r \neq 0$.
+\end{proof}
+
+\begin{lemma}[Partition of the root multiset by modulus]
+    \label{lem:fr-build-S-partition}
+    \lean{LeanEval.ComplexAnalysis.fr_build_S_partition}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
+    Let $R$ be a multiset of complex numbers, and let $R_{<}$, $R_{=}$, $R_{>}$
+    be the submultisets obtained by filtering $R$ on $\|r\| < 1$, $\|r\| = 1$,
+    $\|r\| > 1$ respectively (\texttt{Multiset.filter}). Then
+    $R = R_{<} + R_{=} + R_{>}$.
+\end{lemma}
+\begin{proof}
+    The three predicates $\|r\| < 1$, $\|r\| = 1$, $\|r\| > 1$ are pairwise
+    exclusive and exhaustive. Applying \texttt{Multiset.filter\_add\_not} first
+    to the predicate $\|r\| < 1$ (splitting $R$ into $R_{<}$ and the part with
+    $\|r\| \ge 1$) and then to $\|r\| = 1$ on that remainder (splitting it into
+    $R_{=}$ and $R_{>}$) writes $R = R_{<} + R_{=} + R_{>}$.
+\end{proof}
+
+\begin{lemma}[Count transport across the modulus filters]
+    \label{lem:fr-build-S-count-transport}
+    \lean{LeanEval.ComplexAnalysis.fr_build_S_count_transport}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:circle-involution}
+    \leanok
+    Let $R$ be a multiset of nonzero complex numbers with
+    $\operatorname{count}_w R = \operatorname{count}_{\sigma(w)} R$ for all
+    $w \neq 0$, where $\sigma(w) = 1/\overline{w}$, and let $R_{<}$, $R_{=}$,
+    $R_{>}$ be the submultisets of $R$ filtered by $\|r\| < 1$, $\|r\| = 1$,
+    $\|r\| > 1$. Then $\operatorname{count}_w R_{>}
+    = \operatorname{count}_{\sigma(w)} R_{<}$ for all $w$, and for $w$ with
+    $\|w\| = 1$ one has $\sigma(w) = w$, so $R_{=}$ is $\sigma$-invariant.
+\end{lemma}
+\begin{proof}
+    \uses{lem:circle-involution}
+    By \Cref{lem:circle-involution} $\sigma$ is an involution with
+    $\|\sigma(w)\| = 1/\|w\|$, so it sends $\{\|w\| < 1\}$ to $\{\|w\| > 1\}$ and
+    fixes $\{\|w\| = 1\}$ pointwise. Filtering commutes with counts
+    (\texttt{Multiset.count\_filter}): $\operatorname{count}_w R_{>}$ equals
+    $\operatorname{count}_w R$ when $\|w\| > 1$ and $0$ otherwise, similarly for
+    $R_{<}$. For $\|w\| > 1$ we have $\|\sigma(w)\| < 1$, so
+    $\operatorname{count}_w R_{>} = \operatorname{count}_w R
+    = \operatorname{count}_{\sigma(w)} R = \operatorname{count}_{\sigma(w)} R_{<}$;
+    when $\|w\| \le 1$ both sides are $0$. On the circle $\sigma(w) = w$, so
+    $R_{=}$ is $\sigma$-invariant.
+\end{proof}
+
+\begin{lemma}[A multiset with even counts has a half]
+    \label{lem:exists-half-even-count}
+    \lean{LeanEval.ComplexAnalysis.exists_half_of_even_count}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
+    Let $M$ be a multiset over a type with decidable equality such that
+    $\operatorname{count}_w M$ is even for every $w$. Then there is a multiset
+    $T$ with $T + T = M$ and $\operatorname{count}_w T
+    = \tfrac{1}{2}\operatorname{count}_w M$ for all $w$.
+\end{lemma}
+\begin{proof}
+    Strong induction on the cardinality of $M$. If $M = 0$ take $T = 0$.
+    Otherwise pick $w \in M$; its count is even and positive, so
+    $\operatorname{count}_w M \ge 2$ and $M' := M - \{w, w\}$ has all counts even
+    and strictly smaller cardinality. By induction there is $T'$ with
+    $T' + T' = M'$; set $T := T' + \{w\}$. Then $T + T = T' + T' + \{w, w\}
+    = M' + \{w, w\} = M$ (\texttt{Multiset.count\_add}), and the counts halve as
+    claimed.
+\end{proof}
+
+\begin{lemma}[The circle part has a half]
+    \label{lem:fr-build-S-circle-half}
+    \lean{LeanEval.ComplexAnalysis.fr_build_S_circle_half}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:circle-root-even, lem:exists-half-even-count}
+    \leanok
+    With $H$, $n$ as in \Cref{lem:fr-build-S} and $R_{=}$ the circle part of
+    $\operatorname{roots}(H)$ (those $r$ with $\|r\| = 1$), every $w$ with
+    $\|w\| = 1$ has even count in $R_{=}$. Hence there is a multiset $T$ with
+    $T + T = R_{=}$ and $\operatorname{count}_w T
+    = \tfrac{1}{2}\operatorname{count}_w R_{=}$ for all $w$, and $\sigma(T) = T$
+    (as $\sigma$ fixes every element of $R_{=}$).
+\end{lemma}
+\begin{proof}
+    \uses{lem:circle-root-even, lem:exists-half-even-count}
+    For $\|w\| = 1$, \texttt{Polynomial.count\_roots} and \Cref{lem:circle-root-even}
+    give that $\operatorname{count}_w R_{=} = \operatorname{rootMultiplicity}_w(H)$
+    is even; for $w$ off the circle $\operatorname{count}_w R_{=} = 0$, also even.
+    Thus all counts of $R_{=}$ are even, so \Cref{lem:exists-half-even-count}
+    yields $T$ with $T + T = R_{=}$ and $\operatorname{count}_w T
+    = \tfrac{1}{2}\operatorname{count}_w R_{=}$. Since every element of $R_{=}$
+    lies on the circle, $\sigma$ fixes it, so $\sigma(T) = T$.
+\end{proof}
+
+\begin{lemma}[Halving the root multiset]
+    \label{lem:fr-build-S}
+    \lean{LeanEval.ComplexAnalysis.fr_build_S}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:conjrecip-root-pairing, lem:circle-root-even, lem:circle-involution}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$,
+    $H^{\dagger 2n} = H$, and $z^{-n}H(z)$ a nonnegative real for all
+    $\|z\| = 1$, and suppose $0$ is not a root of $H$. Then there is a multiset
+    $S$ of nonzero complex numbers with
+    $\operatorname{roots}(H) = S \uplus \sigma(S)$, where
+    $\sigma(w) = 1/\overline{w}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-build-S-root-pairing, lem:fr-build-S-partition,
+    lem:fr-build-S-count-transport, lem:fr-build-S-circle-half}
+    By \Cref{lem:fr-build-S-root-pairing} every root of $H$ is nonzero and the
+    root multiset $R := \operatorname{roots}(H)$ satisfies
+    $\operatorname{count}_w R = \operatorname{count}_{\sigma(w)} R$ for $w \neq 0$.
+    Partition $R = R_{<} + R_{=} + R_{>}$ by \Cref{lem:fr-build-S-partition}; by
+    \Cref{lem:fr-build-S-count-transport} $\sigma$ carries $R_{<}$ onto $R_{>}$
+    count-for-count and fixes $R_{=}$. Let $T$ be the half of the circle part from
+    \Cref{lem:fr-build-S-circle-half} ($T + T = R_{=}$, $\sigma(T) = T$). Set
+    $S := R_{<} + T$. Then every element of $S$ is nonzero, and
+    \[
+        S \uplus \sigma(S) = R_{<} + T + \sigma(R_{<}) + \sigma(T)
+        = R_{<} + R_{>} + (T + T) = R_{<} + R_{>} + R_{=} = R,
+    \]
+    using $\sigma(R_{<}) = R_{>}$ (same counts), $\sigma(T) = T$, and
+    $T + T = R_{=}$. Hence $\operatorname{roots}(H) = S \uplus \sigma(S)$, proved
+    by \texttt{Multiset.ext} comparing counts on each side.
+\end{proof}
+
+\begin{lemma}[Size bound for the root half]
+    \label{lem:fr-size-bound}
+    \lean{LeanEval.ComplexAnalysis.fr_size_bound}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:fr-build-S, lem:circle-involution}
+    \leanok
+    With $H$ and $S$ as in \Cref{lem:fr-build-S}, $|S| \le n$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:circle-involution}
+    Since $\sigma$ is an involution (\Cref{lem:circle-involution}), the map
+    $r \mapsto \sigma(r)$ is a bijection, so $|\sigma(S)| = |S|$ and
+    $|\operatorname{roots}(H)| = |S \uplus \sigma(S)| = 2|S|$. Because $H \neq 0$,
+    $|\operatorname{roots}(H)| \le \deg H \le 2n$
+    (\texttt{Polynomial.card\_roots'} / \texttt{natDegree\_eq\_card\_roots'}).
+    Hence $2|S| \le 2n$, i.e. $|S| \le n$.
+\end{proof}
+
+\begin{lemma}[Constant term of a self-inversive polynomial]
+    \label{lem:fr-multiset-H0}
+    \lean{LeanEval.ComplexAnalysis.fr_multiset_H0}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:selfinversive-coeff-symm}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$ and
+    $H^{\dagger 2n} = H$, and suppose $\deg H = 2n$. Then the constant term of
+    $H$ is the conjugate of its leading coefficient, $H(0)
+    = \overline{\operatorname{leadingCoeff}(H)}$, and in particular $H(0) \neq 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:selfinversive-coeff-symm}
+    By \Cref{lem:selfinversive-coeff-symm} with $j = 0$,
+    $\operatorname{coeff}_0 H = \overline{\operatorname{coeff}_{2n} H}$. With
+    $\deg H = 2n$, $\operatorname{coeff}_{2n} H = \operatorname{leadingCoeff}(H)$,
+    and $H(0) = \operatorname{coeff}_0 H$
+    (\texttt{Polynomial.coeff\_zero\_eq\_eval\_zero}); hence $H(0)
+    = \overline{\operatorname{leadingCoeff}(H)}$. As $H \neq 0$ its leading
+    coefficient is nonzero, so its conjugate $H(0)$ is nonzero.
+\end{proof}
+
+\begin{lemma}[The Fejér--Riesz root multiset]
+    \label{lem:fr-multiset}
+    \lean{LeanEval.ComplexAnalysis.fr_multiset}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:fr-build-S, lem:fr-size-bound}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$, $H^{\dagger 2n} = H$,
+    $z^{-n}H(z)$ a nonnegative real for all $\|z\| = 1$, and $H(0) \neq 0$. Then
+    there is a multiset $S$ with $|S| \le n$, all of whose entries are nonzero,
+    whose disjoint union with $\{1/\overline{r} : r \in S\}$ is the root multiset
+    of $H$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-build-S, lem:fr-size-bound}
+    Since $H(0) \neq 0$, the point $0$ is not a root of $H$, so
+    \Cref{lem:fr-build-S} applies (its hypothesis $h_0 : H(0) \neq 0$ holds) and
+    yields a multiset $S$ of nonzero numbers with
+    $\operatorname{roots}(H) = S \uplus \sigma(S)
+    = S \uplus \{1/\overline{r} : r \in S\}$. \Cref{lem:fr-size-bound} gives
+    $|S| \le n$.
+\end{proof}
+
+\begin{lemma}[Multiplicity transport for the conjugate-reciprocal]
+    \label{lem:fr-complementary-mult}
+    \lean{LeanEval.ComplexAnalysis.fr_complementary_mult}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip, lem:rootmult-reflect, lem:rootmult-map-conj}
+    \leanok
+    Let $Q \in \mathbb{C}[X]$ be nonzero with $\deg Q \le n$. Then for every
+    $w \neq 0$ the root multiplicity of $w$ in $Q^{\dagger n}$ equals the root
+    multiplicity of $1/\overline{w}$ in $Q$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:rootmult-reflect, lem:rootmult-map-conj}
+    Write $Q^{\dagger n} = \operatorname{reflect}_n(\operatorname{map}\,
+    \overline{(\cdot)}\,Q)$; since $Q \neq 0$ and coefficient conjugation is
+    injective, $\operatorname{map}\,\overline{(\cdot)}\,Q \neq 0$ with degree
+    $\le n$. \Cref{lem:rootmult-reflect} gives that the multiplicity of $w$ in
+    $Q^{\dagger n}$ equals the multiplicity of $1/w$ in
+    $\operatorname{map}\,\overline{(\cdot)}\,Q$, and \Cref{lem:rootmult-map-conj}
+    rewrites this as the multiplicity of $\overline{1/w} = 1/\overline{w}$ in $Q$.
+\end{proof}
+
+\begin{lemma}[Roots of a scaled product of linear factors]
+    \label{lem:fr-roots-scaled-prod}
+    \lean{LeanEval.ComplexAnalysis.fr_roots_scaled_prod}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
+    Let $c \neq 0$ and let $S$ be a multiset of complex numbers, and put
+    $Q := c\prod_{r \in S}(X - r)$. Then $Q \neq 0$ and
+    $\operatorname{roots}(Q) = S$.
+\end{lemma}
+\begin{proof}
+    The product $\prod_{r\in S}(X - r)$ is monic, hence nonzero, and $c \neq 0$,
+    so $Q \neq 0$. By \texttt{Polynomial.roots\_C\_mul} (with $c \neq 0$) and
+    \texttt{Polynomial.roots\_multiset\_prod\_X\_sub\_C},
+    $\operatorname{roots}(Q) = \operatorname{roots}\bigl(\prod_{r\in S}(X-r)\bigr)
+    = S$.
+\end{proof}
+
+\begin{lemma}[Root multiset of a scaled factor product]
+    \label{lem:fr-complementary-roots}
+    \lean{LeanEval.ComplexAnalysis.fr_complementary_roots}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip, lem:fr-complementary-mult, lem:fr-roots-scaled-prod}
+    \leanok
+    Let $c \neq 0$ and let $S$ be a multiset of nonzero complex numbers, and put
+    $Q := c\prod_{r \in S}(X - r)$. Then $\operatorname{roots}(Q) = S$ and the
+    root multiset of $Q^{\dagger n}$ is $\sigma(S) := \{1/\overline{r} : r \in S\}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-complementary-mult, lem:fr-roots-scaled-prod}
+    By \Cref{lem:fr-roots-scaled-prod}, $\operatorname{roots}(Q) = S$. For each
+    $w \neq 0$, by \Cref{lem:fr-complementary-mult} and
+    \texttt{Polynomial.count\_roots}, $\operatorname{count}_w
+    \operatorname{roots}(Q^{\dagger n}) = \operatorname{rootMultiplicity}_w
+    (Q^{\dagger n}) = \operatorname{rootMultiplicity}_{1/\overline{w}}(Q)
+    = \operatorname{count}_{1/\overline{w}} S$, which equals
+    $\operatorname{count}_w \sigma(S)$ because $\sigma(w) = 1/\overline{w}$ is an
+    injective map on the nonzero $r \in S$ (\texttt{Multiset.count\_map\_eq\_count});
+    for $w = 0$ both counts are $0$ (no root is zero). By \texttt{Multiset.ext},
+    $\operatorname{roots}(Q^{\dagger n}) = \sigma(S)$.
+\end{proof}
+
+\begin{lemma}[Roots of the conjugate-reciprocal of a factor]
+    \label{lem:fr-complementary}
+    \lean{LeanEval.ComplexAnalysis.fr_complementary}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip, lem:rootmult-reflect, lem:rootmult-map-conj}
+    \leanok
+    Let $Q \in \mathbb{C}[X]$ be nonzero with $\deg Q \le n$. Then for every
+    $w \neq 0$ the multiplicity of $w$ in $Q^{\dagger n}$ equals the multiplicity
+    of $1/\overline{w}$ in $Q$. In particular, if $Q = c\prod_{r \in S}(X - r)$
+    with $c \neq 0$ and all $r \neq 0$, then the root multiset of $Q^{\dagger n}$
+    is $\{1/\overline{r} : r \in S\}$ and, moreover, the root multiset of
+    $Q\cdot Q^{\dagger n}$ is $S \uplus \{1/\overline{r} : r \in S\}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-complementary-mult, lem:fr-complementary-roots}
+    The multiplicity transport is \Cref{lem:fr-complementary-mult}. For the
+    special form $Q = c\prod_{r\in S}(X-r)$, \Cref{lem:fr-complementary-roots}
+    gives $\operatorname{roots}(Q) = S$ and
+    $\operatorname{roots}(Q^{\dagger n}) = \{1/\overline{r} : r \in S\}$. Since
+    $c \neq 0$ and all $r \neq 0$, both $Q$ and $Q^{\dagger n}$ are nonzero (the
+    latter has leading coefficient $\overline{Q(0)} \neq 0$), so
+    $Q\cdot Q^{\dagger n} \neq 0$ and \texttt{Polynomial.roots\_mul} gives
+    $\operatorname{roots}(Q\cdot Q^{\dagger n})
+    = \operatorname{roots}(Q) + \operatorname{roots}(Q^{\dagger n})
+    = S \uplus \{1/\overline{r} : r \in S\}$.
+\end{proof}
+
+\begin{lemma}[Leading coefficient of a scaled factor product]
+    \label{lem:fr-leadingcoeff-conjrecip}
+    \lean{LeanEval.ComplexAnalysis.fr_leadingCoeff_conjRecip}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:fr-complementary, lem:conjrecip-leadingcoeff}
+    \leanok
+    Let $S$ be a multiset of nonzero complex numbers with $|S| \le n$, let
+    $c \neq 0$, and put $Q := c\prod_{r \in S}(X - r)$, $\omega :=
+    \overline{\prod_{r \in S}(-r)}$. Then
+    $\operatorname{leadingCoeff}(Q^{\dagger n}) = \overline{c}\,\omega
+    = \overline{Q(0)}$ and
+    $\operatorname{leadingCoeff}(Q\cdot Q^{\dagger n}) = \|c\|^2\,\omega$, with
+    $\omega \neq 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-complementary, lem:conjrecip-leadingcoeff}
+    The leading coefficient of $Q$ is $c$. Its constant term is
+    $Q(0) = c\prod_{r \in S}(-r)$, nonzero since $c \neq 0$ and every $r \neq 0$;
+    hence $\omega = \overline{\prod_{r \in S}(-r)} \neq 0$ and
+    $\overline{Q(0)} = \overline{c}\,\omega \neq 0$. By
+    \Cref{lem:conjrecip-leadingcoeff} (with $A = Q$, $N = n$, using $Q(0) \neq 0$),
+    $\operatorname{leadingCoeff}(Q^{\dagger n}) = \overline{Q(0)}
+    = \overline{c}\,\omega$. By \texttt{Polynomial.leadingCoeff\_mul},
+    $\operatorname{leadingCoeff}(Q\cdot Q^{\dagger n})
+    = c\cdot\overline{c}\,\omega = \|c\|^2\,\omega$.
+\end{proof}
+
+\begin{lemma}[The matched factor $D$]
+    \label{lem:fr-positive-multiple-D}
+    \lean{LeanEval.ComplexAnalysis.fr_positive_multiple_D}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:fr-complementary, lem:fr-leadingcoeff-conjrecip}
+    \leanok
+    Let $S$ be a multiset of nonzero complex numbers with $|S| \le n$, set
+    $Q_0 := \prod_{r \in S}(X - r)$, $D := Q_0\cdot Q_0^{\dagger n}$, and
+    $\omega := \overline{\prod_{r \in S}(-r)}$. Then $D \neq 0$, $\omega \neq 0$,
+    $\operatorname{roots}(D) = S \uplus \{1/\overline{r} : r \in S\}$, and
+    $\operatorname{leadingCoeff}(D) = \omega$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-complementary, lem:fr-leadingcoeff-conjrecip}
+    Apply \Cref{lem:fr-complementary} and \Cref{lem:fr-leadingcoeff-conjrecip}
+    with $c = 1$ (so $Q = Q_0$). \Cref{lem:fr-complementary} gives
+    $\operatorname{roots}(D) = S \uplus \{1/\overline{r} : r \in S\}$;
+    \Cref{lem:fr-leadingcoeff-conjrecip} gives $\omega \neq 0$ and
+    $\operatorname{leadingCoeff}(D) = \|1\|^2\,\omega = \omega$. Finally
+    $D \neq 0$ since its leading coefficient $\omega$ is nonzero.
+\end{proof}
+
+\begin{lemma}[A circle point off the roots of $H$]
+    \label{lem:fr-positive-multiple-point}
+    \lean{LeanEval.ComplexAnalysis.fr_positive_multiple_point}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ be nonzero. Then there exists $z_0 \in \mathbb{C}$
+    with $\|z_0\| = 1$ and $H(z_0) \neq 0$.
+\end{lemma}
+\begin{proof}
+    The unit circle is infinite: $t \mapsto e^{i t}$ maps distinct points of a
+    small interval to distinct points of the circle
+    (\texttt{Circle.exp\_injOn\_Icc}), so its image is infinite
+    (\texttt{Set.Infinite.image}). The root set $\{z : H(z) = 0\}$ is finite
+    since $H \neq 0$ (\texttt{Polynomial.finite\_setOf\_isRoot}). An infinite set
+    is not contained in a finite one, so some $z_0$ on the circle has
+    $H(z_0) \neq 0$.
+\end{proof}
+
+\begin{lemma}[The matched factor is a squared modulus on the circle]
+    \label{lem:fr-D-eval-circle}
+    \lean{LeanEval.ComplexAnalysis.fr_D_eval_circle}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:conj-recip-prod}
+    \leanok
+    Let $S$ be a multiset of complex numbers with $|S| \le n$, set
+    $Q_0 := \prod_{r\in S}(X-r)$ and $D := Q_0\cdot Q_0^{\dagger n}$. Then for
+    every $z$ with $\|z\| = 1$, $z^{-n}D(z) = \|Q_0(z)\|^2$, a nonnegative real.
+\end{lemma}
+\begin{proof}
+    \uses{lem:conj-recip-prod}
+    Since $\deg Q_0 \le |S| \le n$, \Cref{lem:conj-recip-prod} with $A = Q_0$,
+    $N = n$ gives $Q_0(z)Q_0^{\dagger n}(z) = z^{n}\|Q_0(z)\|^2$, so
+    $D(z) = z^{n}\|Q_0(z)\|^2$; as $z \neq 0$, $z^{-n}D(z) = \|Q_0(z)\|^2 \ge 0$.
+\end{proof}
+
+\begin{lemma}[Positivity of the scaling factor]
+    \label{lem:fr-positive-multiple-lambda}
+    \lean{LeanEval.ComplexAnalysis.fr_positive_multiple_lambda}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:fr-D-eval-circle, lem:fr-positive-multiple-point}
+    \leanok
+    With $H$ as in \Cref{lem:fr-multiset}, $\omega \neq 0$, $Q_0 := \prod_{r\in S}
+    (X-r)$, $D := Q_0\cdot Q_0^{\dagger n}$, and $\lambda :=
+    \operatorname{leadingCoeff}(H)/\omega$ a complex scalar with $H = \lambda D$,
+    the number $\lambda$ is a positive real.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-D-eval-circle, lem:fr-positive-multiple-point}
+    By \Cref{lem:fr-D-eval-circle}, for $\|z\| = 1$, $z^{-n}D(z)
+    = \|Q_0(z)\|^2 \ge 0$, so $z^{-n}H(z) = \lambda\,z^{-n}D(z)
+    = \lambda\,\|Q_0(z)\|^2$. By \Cref{lem:fr-positive-multiple-point} pick $z_0$
+    with $\|z_0\| = 1$ and $H(z_0) \neq 0$. There $z_0^{-n}H(z_0)$ is a
+    nonnegative real (hypothesis on $H$) that is nonzero, hence strictly
+    positive, and $\|Q_0(z_0)\|^2 > 0$. From
+    $z_0^{-n}H(z_0) = \lambda\,\|Q_0(z_0)\|^2$ we get
+    $\lambda = z_0^{-n}H(z_0)/\|Q_0(z_0)\|^2$, a quotient of positive reals, so
+    $\lambda$ is a positive real.
+\end{proof}
+
+\begin{lemma}[Leading coefficient is a positive real multiple of $\omega$]
+    \label{lem:fr-positive-multiple}
+    \lean{LeanEval.ComplexAnalysis.fr_positive_multiple}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:fr-complementary, lem:conj-recip-prod, lem:eq-of-leadingcoeff-roots, lem:fr-leadingcoeff-conjrecip}
+    \leanok
+    Let $H$ be as in \Cref{lem:fr-multiset} with root-half multiset $S$ (so
+    $\operatorname{roots}(H) = S \uplus \{1/\overline{r} : r \in S\}$ and
+    $0 \notin S$), and set $\omega := \overline{\prod_{r \in S}(-r)} \neq 0$ and
+    $Q_0 := \prod_{r \in S}(X - r)$. Then there is a real $\lambda > 0$ with
+    $\operatorname{leadingCoeff}(H) = \lambda\,\omega$ and
+    $H = \lambda\,(Q_0\cdot Q_0^{\dagger n})$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-positive-multiple-D, lem:eq-of-leadingcoeff-roots,
+    lem:fr-positive-multiple-lambda}
+    Put $D := Q_0\cdot Q_0^{\dagger n}$. By \Cref{lem:fr-positive-multiple-D},
+    $D \neq 0$, $\operatorname{roots}(D) = S \uplus \{1/\overline{r} : r \in S\}
+    = \operatorname{roots}(H)$, and $\operatorname{leadingCoeff}(D) = \omega$.
+    Set $\lambda := \operatorname{leadingCoeff}(H)/\omega$ (so
+    $\operatorname{leadingCoeff}(H) = \lambda\,\omega$, as $\omega \neq 0$). Then
+    $H$ and $\lambda D$ are nonzero with the same leading coefficient
+    $\operatorname{leadingCoeff}(H)$ and the same root multiset, so $H = \lambda D$
+    by \Cref{lem:eq-of-leadingcoeff-roots}. Finally
+    \Cref{lem:fr-positive-multiple-lambda} shows $\lambda$ is a positive real.
+\end{proof}
+
+\begin{lemma}[Leading-coefficient and norm matching]
+    \label{lem:fr-leading-coeff}
+    \lean{LeanEval.ComplexAnalysis.fr_leading_coeff}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:fr-positive-multiple, lem:fr-leadingcoeff-conjrecip}
+    \leanok
+    Let $H$ be as in \Cref{lem:fr-multiset} with root-half multiset $S$. Then
+    there is $c \in \mathbb{C}$, $c \neq 0$, such that
+    $Q := c\prod_{r \in S}(X - r)$ satisfies
+    $\operatorname{leadingCoeff}(Q\cdot Q^{\dagger n})
+    = \operatorname{leadingCoeff}(H)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-positive-multiple, lem:fr-leadingcoeff-conjrecip}
+    By \Cref{lem:fr-positive-multiple}, $\operatorname{leadingCoeff}(H)
+    = \lambda\,\omega$ with $\lambda > 0$ real and
+    $\omega = \overline{\prod_{r \in S}(-r)}$. Choose $c := \sqrt{\lambda}$, so
+    $c \neq 0$ and $\|c\|^2 = \lambda$. By \Cref{lem:fr-leadingcoeff-conjrecip},
+    $\operatorname{leadingCoeff}(Q\cdot Q^{\dagger n}) = \|c\|^2\,\omega
+    = \lambda\,\omega = \operatorname{leadingCoeff}(H)$.
+\end{proof}
+
+\begin{lemma}[Fejér--Riesz factorization, zero-free core]
+    \label{lem:fr-zero-free}
+    \lean{LeanEval.ComplexAnalysis.fr_zero_free}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip, lem:fr-multiset, lem:fr-complementary, lem:fr-leading-coeff, lem:eq-of-leadingcoeff-roots}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$, satisfying
+    $H^{\dagger 2n} = H$, $H(0) \neq 0$, and such that $z^{-n}H(z)$ is a
+    nonnegative real for all $z$ with $\|z\| = 1$. Then there exists
+    $Q \in \mathbb{C}[X]$ with $\deg Q \le n$ and $Q\cdot Q^{\dagger n} = H$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-multiset, lem:fr-complementary, lem:fr-leading-coeff,
+    lem:eq-of-leadingcoeff-roots}
+    By \Cref{lem:fr-multiset} (whose hypothesis $H(0) \neq 0$ now holds) choose
+    the multiset $S$ with $|S| \le n$, all entries nonzero, whose disjoint union
+    with $\{1/\overline{r} : r \in S\}$ is the root multiset of $H$. By
+    \Cref{lem:fr-leading-coeff} choose $c \neq 0$ and set
+    $Q := c\prod_{r \in S}(X - r)$; then $\deg Q = |S| \le n$ and
+    $Q\cdot Q^{\dagger n}$ has the same leading coefficient as $H$. By
+    \Cref{lem:fr-complementary} (applied to this nonzero $Q$) the root multiset of
+    $Q\cdot Q^{\dagger n}$ is $S \uplus \{1/\overline{r} : r \in S\}$, which is the
+    root multiset of $H$. Equal leading coefficient and equal root multiset give
+    $Q\cdot Q^{\dagger n} = H$ by \Cref{lem:eq-of-leadingcoeff-roots}.
+\end{proof}
+
+\begin{lemma}[Zero-multiplicity of a self-inversive polynomial]
+    \label{lem:fr-zero-mult-le}
+    \lean{LeanEval.ComplexAnalysis.fr_zero_mult_le}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:selfinversive-coeff-symm}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$ and
+    $H^{\dagger 2n} = H$, and let $k := \operatorname{rootMultiplicity}_0(H)$.
+    Then $k \le n$ and $\deg H = 2n - k$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:selfinversive-coeff-symm}
+    By \Cref{lem:selfinversive-coeff-symm}, $\operatorname{coeff}_j H
+    = \overline{\operatorname{coeff}_{2n-j} H}$ for every $j \le 2n$. The root
+    multiplicity at $0$ is characterised by divisibility by powers of $X$
+    (\texttt{Polynomial.le\_rootMultiplicity\_iff} with $X - C\,0 = X$, together
+    with \texttt{Polynomial.X\_pow\_dvd\_iff}): $\operatorname{coeff}_d H = 0$ for
+    all $d < k$ while $\operatorname{coeff}_k H \neq 0$. For $j > 2n - k$ we have
+    $2n - j < k$, so $\operatorname{coeff}_j H = \overline{\operatorname{coeff}_{2n-j} H}
+    = 0$; hence $\deg H \le 2n - k$. Conversely
+    $\operatorname{coeff}_{2n-k} H = \overline{\operatorname{coeff}_k H} \neq 0$,
+    so $\deg H \ge 2n - k$. Thus $\deg H = 2n - k$, and since
+    $k \le \deg H = 2n - k$ we get $2k \le 2n$, i.e. $k \le n$.
+\end{proof}
+
+\begin{lemma}[Self-inversiveness of the zero-free quotient]
+    \label{lem:fr-zero-factor-selfinv}
+    \lean{LeanEval.ComplexAnalysis.fr_zero_factor_selfInv}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:conjrecip-mul, lem:conjrecip-X-pow}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ satisfy $H^{\dagger 2n} = H$, and suppose
+    $H = X^{k}\cdot H_1$ with $k \le n$, $H_1 \neq 0$, and $\deg H_1 \le 2(n-k)$.
+    Then $H_1^{\dagger 2(n-k)} = H_1$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:conjrecip-mul, lem:conjrecip-X-pow}
+    By \Cref{lem:conjrecip-mul} with $M = 2k \ge \deg X^{k}$ and
+    $N = 2(n-k) \ge \deg H_1$ (so $M + N = 2n$),
+    $H = H^{\dagger 2n} = (X^{k})^{\dagger 2k}\cdot H_1^{\dagger 2(n-k)}
+    = X^{k}\cdot H_1^{\dagger 2(n-k)}$, using \Cref{lem:conjrecip-X-pow} that
+    $(X^{k})^{\dagger 2k} = X^{k}$. Thus $X^{k} H_1 = X^{k} H_1^{\dagger 2(n-k)}$;
+    cancelling the nonzero $X^{k}$ in the integral domain $\mathbb{C}[X]$ gives
+    $H_1^{\dagger 2(n-k)} = H_1$.
+\end{proof}
+
+\begin{lemma}[Nonnegativity transports to the zero-free quotient]
+    \label{lem:fr-zero-factor-nonneg}
+    \lean{LeanEval.ComplexAnalysis.fr_zero_factor_nonneg}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
+    Suppose $H = X^{k}\cdot H_1$ and $z^{-n}H(z)$ is a nonnegative real for all
+    $\|z\| = 1$. Then $z^{-(n-k)}H_1(z)$ is a nonnegative real for all
+    $\|z\| = 1$.
+\end{lemma}
+\begin{proof}
+    For $\|z\| = 1$ we have $z \neq 0$ and $H(z) = z^{k} H_1(z)$, so
+    $z^{-(n-k)} H_1(z) = z^{-n} z^{k} H_1(z) = z^{-n} H(z)$, a nonnegative real
+    by hypothesis.
+\end{proof}
+
+\begin{lemma}[Factoring out the zero of a self-inversive polynomial]
+    \label{lem:fr-zero-factor}
+    \lean{LeanEval.ComplexAnalysis.fr_zero_factor}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:fr-zero-mult-le, lem:fr-zero-factor-selfinv, lem:fr-zero-factor-nonneg}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$, $H^{\dagger 2n} = H$,
+    and $z^{-n}H(z)$ a nonnegative real for all $\|z\| = 1$; let
+    $k := \operatorname{rootMultiplicity}_0(H)$. Then $k \le n$ and there is a
+    polynomial $H_1$ with $H = X^{k}\cdot H_1$, $H_1(0) \neq 0$,
+    $\deg H_1 = 2(n-k)$, $H_1^{\dagger 2(n-k)} = H_1$, and $z^{-(n-k)}H_1(z)$ a
+    nonnegative real for all $\|z\| = 1$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-zero-mult-le, lem:fr-zero-factor-selfinv, lem:fr-zero-factor-nonneg}
+    By \texttt{Polynomial.exists\_eq\_pow\_rootMultiplicity\_mul\_and\_not\_dvd}
+    at $a = 0$, $H = X^{k}\cdot H_1$ with $X \nmid H_1$; since $X \nmid H_1$ is
+    equivalent to $H_1(0) \neq 0$ (\texttt{Polynomial.X\_dvd\_iff},
+    \texttt{Polynomial.coeff\_zero\_eq\_eval\_zero}), $H_1(0) \neq 0$ and hence
+    $H_1 \neq 0$. By \Cref{lem:fr-zero-mult-le}, $k \le n$ and $\deg H = 2n - k$;
+    as $\deg H = k + \deg H_1$ (\texttt{Polynomial.natDegree\_mul}, both factors
+    nonzero), $\deg H_1 = 2(n-k)$. \Cref{lem:fr-zero-factor-selfinv} gives
+    $H_1^{\dagger 2(n-k)} = H_1$, and \Cref{lem:fr-zero-factor-nonneg} gives that
+    $z^{-(n-k)}H_1(z)$ is a nonnegative real for all $\|z\| = 1$.
+\end{proof}
+
+\begin{lemma}[Recombining the factorization]
+    \label{lem:fr-recombine}
+    \lean{LeanEval.ComplexAnalysis.fr_recombine}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip, lem:conjrecip-mul}
+    \leanok
+    Let $k \le n$, let $H = X^{k}\cdot H_1$, and let $Q_1 \in \mathbb{C}[X]$ with
+    $\deg Q_1 \le n - k$ and $Q_1\cdot Q_1^{\dagger (n-k)} = H_1$. Then
+    $Q := X^{k}\cdot Q_1$ satisfies $\deg Q \le n$ and $Q\cdot Q^{\dagger n} = H$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:conjrecip-mul}
+    First $\deg Q \le \deg(X^{k}) + \deg Q_1 = k + \deg Q_1 \le k + (n-k) = n$
+    (\texttt{Polynomial.natDegree\_mul\_le}). By \Cref{lem:conjrecip-mul} with
+    $M = k \ge \deg X^{k}$ and $N = n - k \ge \deg Q_1$ (so $M + N = n$),
+    $Q^{\dagger n} = (X^{k}\cdot Q_1)^{\dagger n}
+    = (X^{k})^{\dagger k}\cdot Q_1^{\dagger (n-k)}$. Reflecting the monomial
+    $X^{k}$ within degree $k$ gives $(X^{k})^{\dagger k}
+    = X^{\operatorname{revAt}_k k} = X^{0} = 1$
+    (\texttt{Polynomial.reflect\_monomial}, with coefficient conjugation fixing the
+    real coefficient $1$), so $Q^{\dagger n} = Q_1^{\dagger (n-k)}$. Hence
+    $Q\cdot Q^{\dagger n} = X^{k} Q_1\cdot Q_1^{\dagger (n-k)}
+    = X^{k}\cdot H_1 = H$.
+\end{proof}
+
+\begin{theorem}[Fejér--Riesz factorization]
+    \label{thm:fejer-riesz}
+    \lean{LeanEval.ComplexAnalysis.fejer_riesz}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip, lem:fr-zero-free, lem:fr-zero-factor, lem:fr-recombine}
+    \leanok
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$, satisfying
+    $H^{\dagger 2n} = H$ and such that $z^{-n}H(z)$ is a nonnegative real for all
+    $z$ with $\|z\| = 1$. Then there exists $Q \in \mathbb{C}[X]$ with
+    $\deg Q \le n$ and $Q\cdot Q^{\dagger n} = H$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:fr-zero-free, lem:fr-zero-factor, lem:fr-recombine}
+    Let $k := \operatorname{rootMultiplicity}_0(H)$. By \Cref{lem:fr-zero-factor}
+    we have $k \le n$ and may write $H = X^{k}\cdot H_1$ with $H_1(0) \neq 0$,
+    $\deg H_1 = 2(n-k)$, $H_1^{\dagger 2(n-k)} = H_1$, and $z^{-(n-k)}H_1(z)$ a
+    nonnegative real for all $\|z\| = 1$. Apply \Cref{lem:fr-zero-free} to $H_1$
+    at degree $n - k$ (its hypotheses hold, including $H_1(0) \neq 0$ and
+    $\deg H_1 \le 2(n-k)$): there is $Q_1$ with $\deg Q_1 \le n - k$ and
+    $Q_1\cdot Q_1^{\dagger (n-k)} = H_1$. By \Cref{lem:fr-recombine},
+    $Q := X^{k}\cdot Q_1$ satisfies $\deg Q \le n$ and $Q\cdot Q^{\dagger n} = H$.
+    (When $k = 0$, $H_1 = H$ and $Q = Q_1$.)
+\end{proof}
+
+\subsection{Main theorem}
+
+\begin{lemma}[The degenerate case $G = 0$]
+    \label{lem:main-G-zero}
+    \lean{LeanEval.ComplexAnalysis.main_G_zero}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials.lean}
+    \uses{def:G, lem:G-eval-circle}
+    \leanok
+    If $G = 0$ then $\|P(z)\| = 1$ for all $z$ with $\|z\| = 1$, and $Q := 0$
+    satisfies $\deg Q \le \deg P$ and $\|P(z)\|^2 + \|Q(z)\|^2 = 1$ on the circle.
+\end{lemma}
+\begin{proof}
+    \uses{lem:G-eval-circle}
+    Fix $z$ with $\|z\| = 1$. By \Cref{lem:G-eval-circle},
+    $0 = G(z) = z^{n}(1 - \|P(z)\|^2)$, and $z^{n} \neq 0$, so
+    $\|P(z)\|^2 = 1$. With $Q = 0$ we have $\|Q(z)\|^2 = 0$ and $\deg Q \le \deg P$,
+    hence $\|P(z)\|^2 + \|Q(z)\|^2 = 1$.
+\end{proof}
+
+\begin{lemma}[From the factorization to the norm identity]
+    \label{lem:factorization-to-norm}
+    \lean{LeanEval.ComplexAnalysis.factorization_to_norm}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials.lean}
+    \uses{def:G, lem:conj-recip-prod, lem:G-eval-circle, lem:conjrecip-natDegree}
+    \leanok
+    Let $n := \deg P$, let $Q \in \mathbb{C}[X]$ with $\deg Q \le n$, and suppose
+    $Q\cdot Q^{\dagger n} = G$. Then for all $z$ with $\|z\| = 1$,
+    $\|P(z)\|^2 + \|Q(z)\|^2 = 1$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:conj-recip-prod, lem:G-eval-circle}
+    Fix $z$ with $\|z\| = 1$. By \Cref{lem:conj-recip-prod} applied to $A = Q$,
+    $N = n$, $Q(z)Q^{\dagger n}(z) = z^{n}\|Q(z)\|^2$. By \Cref{lem:G-eval-circle},
+    $G(z) = z^{n}(1 - \|P(z)\|^2)$. Since $Q(z)Q^{\dagger n}(z) = G(z)$ and
+    $z^{n} \neq 0$, we get $\|Q(z)\|^2 = 1 - \|P(z)\|^2$, i.e.
+    $\|P(z)\|^2 + \|Q(z)\|^2 = 1$.
+\end{proof}
+
+\begin{theorem}[Complementary polynomial on the unit circle]
+    \label{thm:main}
+    \lean{LeanEval.ComplexAnalysis.exists_complementary_polynomial_on_unit_circle}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials.lean}
+    \uses{def:G, lem:G-natDegree, lem:G-self-inversive, lem:G-nonneg-circle, thm:fejer-riesz, lem:conjrecip-natDegree, lem:main-G-zero, lem:factorization-to-norm}
+    \leanok
+    Let $P \in \mathbb{C}[X]$ satisfy $\|P(z)\| \le 1$ for all $z$ on the unit
+    circle. Then there exists $Q \in \mathbb{C}[X]$ with $\deg Q \le \deg P$ and
+    $\|P(z)\|^2 + \|Q(z)\|^2 = 1$ for all $z$ on the unit circle.
+\end{theorem}
+\begin{proof}
+    \uses{lem:main-G-zero, lem:factorization-to-norm}
+    Let $n := \deg P$ and let $G$ be as in \Cref{def:G}. If $G = 0$ then
+    \Cref{lem:main-G-zero} gives $Q = 0$ with the required properties. Otherwise
+    apply \Cref{thm:fejer-riesz} to $H = G$, whose hypotheses hold by
+    \Cref{lem:G-natDegree}, \Cref{lem:G-self-inversive} and
+    \Cref{lem:G-nonneg-circle}. This yields $Q$ with $\deg Q \le n = \deg P$ and
+    $Q\cdot Q^{\dagger n} = G$. By \Cref{lem:factorization-to-norm},
+    $\|P(z)\|^2 + \|Q(z)\|^2 = 1$ for all $z$ on the unit circle.
+\end{proof}
+
+\end{document}
