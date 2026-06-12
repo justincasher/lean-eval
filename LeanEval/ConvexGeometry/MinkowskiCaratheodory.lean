@@ -612,7 +612,8 @@ theorem interior_in_segment {s : Set E} (hscomp : IsCompact s) (hsconv : Convex 
 
 /-- **Zero-dimensional base case.** If `finrank (vectorSpan ℝ s) = 0` and `x ∈ s`, then `x` is an
 extreme point of `s` (indeed `s = {x}`). -/
-theorem base_case {s : Set E} {x : E} (h : Module.finrank ℝ (vectorSpan ℝ s) = 0) (hx : x ∈ s) :
+theorem base_case [FiniteDimensional ℝ E] {s : Set E} {x : E}
+    (h : Module.finrank ℝ (vectorSpan ℝ s) = 0) (hx : x ∈ s) :
     x ∈ s.extremePoints ℝ := by
   sorry
 
