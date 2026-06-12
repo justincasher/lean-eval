@@ -53,7 +53,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Convolution form of the solution]
     \label{lem:heatSolution_eq_kernel_integral}
+    \lean{LeanEval.Analysis.ODE.heatSolution_eq_kernel_integral}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{def:kernel, def:heatSolution}
+    \leanok
     For every $t > 0$ and $x \in \mathbb{R}$,
     \[ \mathrm{heatSolution}\,f\,t\,x = \int_{\mathbb{R}} G_t(x-y)\, f(y)\, dy. \]
 \end{lemma}
@@ -67,7 +70,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Translated kernel is integrable]
     \label{lem:kernel_translate_integrable}
+    \lean{LeanEval.Analysis.ODE.kernel_translate_integrable}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{def:kernel}
+    \leanok
     For every $t > 0$ and $x \in \mathbb{R}$, the function $y \mapsto G_t(x-y)$ is
     integrable on $\mathbb{R}$.
 \end{lemma}
@@ -83,7 +89,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Integrand is integrable]
     \label{lem:kernel_integrand_integrable}
+    \lean{LeanEval.Analysis.ODE.kernel_integrand_integrable}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:kernel_translate_integrable}
+    \leanok
     Suppose $\lvert f \rvert \le M$ pointwise and $f$ is continuous. Then for every
     $t > 0$ and $x \in \mathbb{R}$ the function $y \mapsto G_t(x-y)\, f(y)$ is
     integrable on $\mathbb{R}$.
@@ -99,7 +108,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[First spatial derivative of the kernel]
     \label{lem:kernel_hasDerivAt_space}
+    \lean{LeanEval.Analysis.ODE.kernel_hasDerivAt_space}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{def:kernel}
+    \leanok
     For every $t > 0$ and $x \in \mathbb{R}$, the function $z \mapsto G_t(z)$ has
     derivative $-\tfrac{x}{2t}\,G_t(x)$ at $x$, i.e.\
     $\mathrm{HasDerivAt}\,(z \mapsto G_t(z))\,\bigl(-\tfrac{x}{2t} G_t(x)\bigr)\, x$.
@@ -116,7 +128,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Second spatial derivative of the kernel]
     \label{lem:kernel_hasDerivAt_space_second}
+    \lean{LeanEval.Analysis.ODE.kernel_hasDerivAt_space_second}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:kernel_hasDerivAt_space}
+    \leanok
     For every $t > 0$ and $x \in \mathbb{R}$, the function
     $z \mapsto -\tfrac{z}{2t}\,G_t(z)$ has derivative
     $\bigl(\tfrac{x^2}{4t^2} - \tfrac{1}{2t}\bigr) G_t(x)$ at $x$.
@@ -149,7 +164,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Time derivative of the kernel]
     \label{lem:kernel_hasDerivAt_time}
+    \lean{LeanEval.Analysis.ODE.kernel_hasDerivAt_time}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:prefactor_hasDerivAt, def:kernel}
+    \leanok
     For every $x \in \mathbb{R}$ and $t > 0$, the function $s \mapsto G_s(x)$ has
     derivative $\bigl(\tfrac{x^2}{4t^2} - \tfrac{1}{2t}\bigr) G_t(x)$ at $t$.
 \end{lemma}
@@ -170,7 +188,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Kernel solves the heat equation pointwise]
     \label{lem:kernel_heat_identity}
+    \lean{LeanEval.Analysis.ODE.kernel_heat_identity}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:kernel_hasDerivAt_space_second, lem:kernel_hasDerivAt_time}
+    \leanok
     For every $x \in \mathbb{R}$ and $t > 0$, the second spatial derivative and the
     time derivative of the kernel agree: both
     \cref{lem:kernel_hasDerivAt_space_second} and \cref{lem:kernel_hasDerivAt_time}
@@ -187,6 +208,9 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Absolute-value-times-Gaussian is integrable]
     \label{lem:integrable_abs_mul_gaussian}
+    \lean{LeanEval.Analysis.ODE.integrable_abs_mul_gaussian}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
     Let $c > 0$. Then the function $y \mapsto \lvert y\rvert\,\exp(-c\,y^2)$ is
     integrable on $\mathbb{R}$.
 \end{lemma}
@@ -199,6 +223,9 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Square-times-Gaussian is integrable]
     \label{lem:integrable_sq_mul_gaussian}
+    \lean{LeanEval.Analysis.ODE.integrable_sq_mul_gaussian}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
     Let $c > 0$. Then the function $y \mapsto y^2\,\exp(-c\,y^2)$ is integrable
     on $\mathbb{R}$.
 \end{lemma}
@@ -215,7 +242,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Polynomial-times-Gaussian is integrable (centered case)]
     \label{lem:gaussian_poly_integrable_zero}
+    \lean{LeanEval.Analysis.ODE.gaussian_poly_integrable_zero}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:integrable_abs_mul_gaussian, lem:integrable_sq_mul_gaussian}
+    \leanok
     Let $c > 0$ and $a, b, d \ge 0$. Then the function
     \[ y \mapsto \bigl(a + b\,\lvert y\rvert + d\,y^2\bigr)\,\exp(-c\,y^2) \]
     is integrable on $\mathbb{R}$.
@@ -233,7 +263,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Shifted polynomial-times-Gaussian is integrable]
     \label{lem:shifted_gaussian_integrable}
+    \lean{LeanEval.Analysis.ODE.shifted_gaussian_integrable}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:gaussian_poly_integrable_zero}
+    \leanok
     Let $x_0 \in \mathbb{R}$, $c > 0$, and $a, b, d \ge 0$. Then the function
     \[ y \mapsto \bigl(a + b\,\lvert y - x_0\rvert + d\,(y-x_0)^2\bigr)\,
         \exp\!\bigl(-c\,(y-x_0)^2\bigr) \]
@@ -250,6 +283,9 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[A uniform quadratic lower bound]
     \label{lem:gaussian_quadratic_lower_bound}
+    \lean{LeanEval.Analysis.ODE.gaussian_quadratic_lower_bound}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
     For all $x, y, x_0 \in \mathbb{R}$ with $\lvert x - x_0\rvert \le 1$,
     \[ (x-y)^2 \;\ge\; \tfrac12 (y - x_0)^2 - 2. \]
 \end{lemma}
@@ -265,7 +301,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Gaussian exponential domination]
     \label{lem:gaussian_exp_domination}
+    \lean{LeanEval.Analysis.ODE.gaussian_exp_domination}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:gaussian_quadratic_lower_bound}
+    \leanok
     For all $x, y, x_0 \in \mathbb{R}$ and $t > 0$ with $\lvert x - x_0\rvert \le 1$,
     \[ \exp\!\Bigl(-\tfrac{(x-y)^2}{4t}\Bigr) \;\le\;
        \exp\!\Bigl(\tfrac{1}{2t}\Bigr)\,\exp\!\Bigl(-\tfrac{(y-x_0)^2}{8t}\Bigr). \]
@@ -299,7 +338,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Uniform domination of the first spatial derivative]
     \label{lem:bound_space}
+    \lean{LeanEval.Analysis.ODE.bound_space}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:shifted_gaussian_integrable, lem:bound_space_pointwise}
+    \leanok
     Fix $t > 0$, $x_0 \in \mathbb{R}$, and suppose $\lvert f\rvert \le M$. There is an
     integrable function $g : \mathbb{R} \to \mathbb{R}$ such that for every $x$ with
     $\lvert x - x_0\rvert \le 1$ and every $y \in \mathbb{R}$,
@@ -315,7 +357,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Pointwise estimate for the second spatial derivative]
     \label{lem:bound_space_second_pointwise}
+    \lean{LeanEval.Analysis.ODE.bound_space_second_pointwise}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:gaussian_exp_domination}
+    \leanok
     Fix $t > 0$, $x_0 \in \mathbb{R}$, and suppose $\lvert f\rvert \le M$. Set
     \[ g_2(y) := M(4\pi t)^{-1/2} e^{1/(2t)}
         \Bigl(\tfrac{(1+\lvert y-x_0\rvert)^2}{4t^2} + \tfrac{1}{2t}\Bigr)
@@ -339,7 +384,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Uniform domination of the second spatial derivative]
     \label{lem:bound_space_second}
+    \lean{LeanEval.Analysis.ODE.bound_space_second}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:shifted_gaussian_integrable, lem:bound_space_second_pointwise}
+    \leanok
     Fix $t > 0$, $x_0 \in \mathbb{R}$, and suppose $\lvert f\rvert \le M$. There is an
     integrable function $g : \mathbb{R} \to \mathbb{R}$ such that for every $x$ with
     $\lvert x - x_0\rvert \le 1$ and every $y \in \mathbb{R}$,
@@ -358,6 +406,9 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Pointwise estimate for the time derivative]
     \label{lem:bound_time_pointwise}
+    \lean{LeanEval.Analysis.ODE.bound_time_pointwise}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
     Fix $t_0 > 0$, $x_0 \in \mathbb{R}$, and suppose $\lvert f\rvert \le M$. Set
     \[ g_3(y) := M(2\pi t_0)^{-1/2}\Bigl(\tfrac{(x_0-y)^2}{t_0^2} + \tfrac{1}{t_0}\Bigr)
         \exp\!\bigl(-(x_0-y)^2/(8t_0)\bigr). \]
@@ -379,7 +430,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Uniform domination of the time derivative]
     \label{lem:bound_time}
+    \lean{LeanEval.Analysis.ODE.bound_time}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:shifted_gaussian_integrable, lem:bound_time_pointwise}
+    \leanok
     Fix $t_0 > 0$, $x_0 \in \mathbb{R}$, and suppose $\lvert f\rvert \le M$. There is an
     integrable function $g : \mathbb{R} \to \mathbb{R}$ such that for every
     $s \in (t_0/2,\, 2t_0)$ and every $y \in \mathbb{R}$,
@@ -399,6 +453,9 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Shifted, scaled kernel has a derivative]
     \label{lem:shift_scale_hasDerivAt}
+    \lean{LeanEval.Analysis.ODE.shift_scale_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
     Let $k : \mathbb{R} \to \mathbb{R}$ and $y, c, d, v \in \mathbb{R}$. If
     $\mathrm{HasDerivAt}\,k\,d\,(c-y)$, then
     \[ \mathrm{HasDerivAt}\,\bigl(z \mapsto k(z-y)\cdot v\bigr)\,(d\cdot v)\,c. \]
@@ -412,6 +469,9 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Integrand is a.e.\ strongly measurable]
     \label{lem:shift_scale_aestronglyMeasurable}
+    \lean{LeanEval.Analysis.ODE.shift_scale_aestronglyMeasurable}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
     Let $k : \mathbb{R} \to \mathbb{R}$ be continuous and $f : \mathbb{R} \to \mathbb{R}$
     be continuous. Then for every $z \in \mathbb{R}$ the function
     $y \mapsto k(z-y)\, f(y)$ is \texttt{AEStronglyMeasurable} with respect to Lebesgue
@@ -453,7 +513,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[First spatial derivative of the solution]
     \label{lem:hasDerivAt_space}
+    \lean{LeanEval.Analysis.ODE.hasDerivAt_space}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:heatSolution_eq_kernel_integral, lem:kernel_integrand_integrable, lem:kernel_hasDerivAt_space, lem:shift_scale_hasDerivAt, lem:shift_scale_aestronglyMeasurable, lem:bound_space, lem:hasDerivAt_under_integral}
+    \leanok
     Assume $f$ continuous with $\lvert f\rvert \le M$. For every $t > 0$ and every
     $x \in \mathbb{R}$,
     \[ \mathrm{HasDerivAt}\Bigl(z \mapsto \mathrm{heatSolution}\,f\,t\,z\Bigr)
@@ -500,7 +563,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Solution agrees with the kernel integral near positive times]
     \label{lem:heatSolution_eventuallyEq_kernel_integral}
+    \lean{LeanEval.Analysis.ODE.heatSolution_eventuallyEq_kernel_integral}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:heatSolution_eq_kernel_integral}
+    \leanok
     For every $t > 0$ and $x \in \mathbb{R}$, the two functions
     $s \mapsto \mathrm{heatSolution}\,f\,s\,x$ and $s \mapsto \int_{\mathbb{R}} G_s(x-y)\,f(y)\,dy$
     are eventually equal as $s \to t$ (i.e.\ equal on a neighborhood of $t$).
@@ -515,7 +581,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Time derivative of the solution]
     \label{lem:hasDerivAt_time}
+    \lean{LeanEval.Analysis.ODE.hasDerivAt_time}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:heatSolution_eventuallyEq_kernel_integral, lem:kernel_integrand_integrable, lem:kernel_hasDerivAt_time, lem:shift_scale_aestronglyMeasurable, lem:bound_time, lem:hasDerivAt_under_integral}
+    \leanok
     Assume $f$ continuous with $\lvert f\rvert \le M$. For every $t > 0$ and every
     $x \in \mathbb{R}$,
     \[ \mathrm{HasDerivAt}\Bigl(s \mapsto \mathrm{heatSolution}\,f\,s\,x\Bigr)
@@ -541,7 +610,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Time derivative equals the second spatial derivative]
     \label{lem:time_eq_space_second}
+    \lean{LeanEval.Analysis.ODE.time_eq_space_second}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:kernel_heat_identity}
+    \leanok
     For every $t > 0$ and $x \in \mathbb{R}$, the time-derivative value of
     \cref{lem:hasDerivAt_time} equals the second-spatial-derivative value of
     \cref{lem:hasDerivAt_space_second}; both equal
@@ -560,7 +632,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Heat equation half]
     \label{lem:pde_part}
+    \lean{LeanEval.Analysis.ODE.pde_part}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:hasDerivAt_space, lem:hasDerivAt_space_second, lem:hasDerivAt_time, lem:time_eq_space_second}
+    \leanok
     Assume $f$ continuous with $\lvert f\rvert \le M$. For every $t > 0$ and every
     $x \in \mathbb{R}$ there exist $u_x : \mathbb{R} \to \mathbb{R}$ and
     $u_{xx} \in \mathbb{R}$ such that: $u_x$ is the spatial derivative of
@@ -583,6 +658,9 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Total Gaussian mass]
     \label{lem:gaussian_total_mass}
+    \lean{LeanEval.Analysis.ODE.gaussian_total_mass}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
     $\int_{\mathbb{R}} \exp(-z^2)\, dz = \sqrt{\pi}$.
 \end{lemma}
 \begin{proof}
@@ -592,6 +670,9 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Exponent simplifies under the scaling substitution]
     \label{lem:gaussian_exponent_simplify}
+    \lean{LeanEval.Analysis.ODE.gaussian_exponent_simplify}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
     For every $t > 0$ and $z \in \mathbb{R}$,
     \[ \exp\!\Bigl(-\tfrac{(2\sqrt{t}\,z)^2}{4t}\Bigr) = \exp(-z^2). \]
 \end{lemma}
@@ -626,7 +707,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Substitution form of the solution]
     \label{lem:heatSolution_eq_subst}
+    \lean{LeanEval.Analysis.ODE.heatSolution_eq_subst}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:heatSolution_change_of_variables}
+    \leanok
     For every $t > 0$ and $x \in \mathbb{R}$,
     \[ \mathrm{heatSolution}\,f\,t\,x
        = \pi^{-1/2} \int_{\mathbb{R}} \exp(-z^2)\, f\bigl(x - 2\sqrt{t}\,z\bigr)\, dz. \]
@@ -640,6 +724,9 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Dominating bound for the substituted integrand]
     \label{lem:subst_integrand_bound}
+    \lean{LeanEval.Analysis.ODE.subst_integrand_bound}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
     Suppose $\lvert f\rvert \le M$. For every $t > 0$, $x \in \mathbb{R}$ and
     $z \in \mathbb{R}$,
     \[ \bigl\lvert \exp(-z^2)\, f(x - 2\sqrt{t}\,z)\bigr\rvert \le M\exp(-z^2), \]
@@ -654,6 +741,9 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Pointwise convergence of the substituted integrand]
     \label{lem:subst_integrand_tendsto}
+    \lean{LeanEval.Analysis.ODE.subst_integrand_tendsto}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
     Suppose $f$ is continuous. For every $x, z \in \mathbb{R}$,
     \[ \exp(-z^2)\, f(x - 2\sqrt{t}\,z) \;\longrightarrow\; \exp(-z^2)\, f(x)
        \quad\text{as } t \downarrow 0. \]
@@ -668,7 +758,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Gaussian integral of a constant]
     \label{lem:gaussian_integral_const_mul}
+    \lean{LeanEval.Analysis.ODE.gaussian_integral_const_mul}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:gaussian_total_mass}
+    \leanok
     For every $c \in \mathbb{R}$, $\int_{\mathbb{R}} \exp(-z^2)\, c\, dz = \sqrt{\pi}\, c$.
 \end{lemma}
 \begin{proof}
@@ -680,7 +773,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Convergence of the substituted integral]
     \label{lem:subst_integral_tendsto}
+    \lean{LeanEval.Analysis.ODE.subst_integral_tendsto}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:subst_integrand_bound, lem:subst_integrand_tendsto, lem:gaussian_integral_const_mul}
+    \leanok
     Suppose $f$ continuous with $\lvert f\rvert \le M$. For every $x \in \mathbb{R}$,
     \[ \int_{\mathbb{R}} \exp(-z^2)\, f(x - 2\sqrt{t}\,z)\, dz
        \;\longrightarrow\; \sqrt{\pi}\, f(x) \quad\text{as } t \downarrow 0. \]
@@ -698,7 +794,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Initial-condition half]
     \label{lem:initial_condition}
+    \lean{LeanEval.Analysis.ODE.initial_condition}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:heatSolution_eq_subst, lem:subst_integral_tendsto}
+    \leanok
     Suppose $f$ continuous with $\lvert f\rvert \le M$. For every $x \in \mathbb{R}$,
     \[ \mathrm{heatSolution}\,f\,t\,x \;\longrightarrow\; f(x)
        \quad\text{as } t \downarrow 0. \]
@@ -717,7 +816,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{theorem}[Gaussian heat kernel solves the 1D heat equation]
     \label{thm:heat_kernel_solves_heat_equation}
+    \lean{LeanEval.Analysis.ODE.heat_kernel_solves_heat_equation}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:pde_part, lem:initial_condition}
+    \leanok
     Let $f : \mathbb{R} \to \mathbb{R}$ be continuous and bounded ($\lvert f\rvert \le M$
     for some $M$). Then $u = \mathrm{heatSolution}\,f$ satisfies the 1D heat equation
     $\partial_t u = \partial_x^2 u$ on $(0,\infty)\times\mathbb{R}$ — the spatial first
