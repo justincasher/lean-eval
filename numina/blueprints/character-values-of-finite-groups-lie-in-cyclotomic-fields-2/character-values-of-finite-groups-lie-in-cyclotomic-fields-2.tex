@@ -21,6 +21,7 @@ unity.
     \label{lem:cyclotomic-embeds-injective}
     \lean{LeanEval.RepresentationTheory.cyclotomic_embeds_injective}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
+    \leanok
     Let $n \neq 0$. There is an injective ring homomorphism
     $\varphi : \mathbb{Q}(\zeta_n) \to \mathbb{C}$.
 \end{lemma}
@@ -60,6 +61,7 @@ unity.
     \label{lem:mem-rootsOfUnity-of-pow-eq-one}
     \lean{LeanEval.RepresentationTheory.mem_rootsOfUnity_of_pow_eq_one}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
+    \leanok
     Let $n \neq 0$ and let $z \in \mathbb{C}$ with $z^n = 1$. Then $z$ is a unit
     $u$ of $\mathbb{C}$, and that unit lies in
     $\operatorname{rootsOfUnity}(n, \mathbb{C})$.
@@ -78,6 +80,7 @@ unity.
     \lean{LeanEval.RepresentationTheory.rootsOfUnity_mem}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:mem-rootsOfUnity-of-pow-eq-one}
+    \leanok
     Let $n \neq 0$, let $S \subseteq \mathbb{C}$ be a subring, and let
     $\zeta \in S$ be a primitive $n$-th root of unity. Then every $z \in
     \mathbb{C}$ with $z^n = 1$ belongs to $S$.
@@ -95,6 +98,7 @@ unity.
     \label{lem:rho-pow-exponent}
     \lean{LeanEval.RepresentationTheory.rho_pow_exponent}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
+    \leanok
     Let $\rho$ be a complex representation of $G$ on $V$ and let $g \in G$. Then
     $\rho(g)^{\exp(G)} = 1$ as an endomorphism of $V$.
 \end{lemma}
@@ -123,6 +127,7 @@ unity.
     \lean{LeanEval.RepresentationTheory.eigenvalue_root_of_unity}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:eigenvalue-id-eq-one}
+    \leanok
     Let $V$ be a finite-dimensional complex vector space, let $T : V \to V$ be a
     linear endomorphism, and let $n \neq 0$ with $T^n = 1$. Then every root $\mu$
     of the characteristic polynomial of $T$ satisfies $\mu^n = 1$.
@@ -141,6 +146,7 @@ unity.
     \lean{LeanEval.RepresentationTheory.charpoly_roots_mem_range}
     \leanfile{LeanEval/RepresentationTheory/BrauerSplittingField.lean}
     \uses{lem:eigenvalue-root-of-unity, lem:rootsOfUnity-mem}
+    \leanok
     Let $V$ be a finite-dimensional complex vector space, let $T : V \to V$ be a
     linear endomorphism with $T^n = 1$ for some $n \neq 0$, and let
     $S \subseteq \mathbb{C}$ be a subring containing a primitive $n$-th root of
