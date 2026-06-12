@@ -615,7 +615,18 @@ extreme point of `s` (indeed `s = {x}`). -/
 theorem base_case [FiniteDimensional ℝ E] {s : Set E} {x : E}
     (h : Module.finrank ℝ (vectorSpan ℝ s) = 0) (hx : x ∈ s) :
     x ∈ s.extremePoints ℝ := by
-  sorry
+  -- finrank 0 implies vectorSpan ℝ s = ⊥
+  have hspan_bot : vectorSpan ℝ s = ⊥ :=
+    (Submodule.finrank_eq_zero (R := ℝ) (S := vectorSpan ℝ s)).mp h
+  -- vectorSpan ℝ s = ⊥ implies s is subsingleton
+  have hsubsingleton : s.Subsingleton :=
+    (vectorSpan_eq_bot_iff_subsingleton (k := ℝ)).mp hspan_bot
+  -- Show x is an extreme point of s
+  rw [mem_extremePoints_iff_left]
+  refine ⟨hx, ?_⟩
+  intro x₁ hx₁ x₂ hx₂ hx_mem
+  -- Since s is subsingleton, all points in s are equal
+  exact hsubsingleton hx₁ hx
 
 /-- **Reduction at a relative boundary point.** A relative boundary point `y` of a nonempty
 compact convex set `s` lies in a compact convex face `F ⊆ s` of strictly smaller affine dimension
