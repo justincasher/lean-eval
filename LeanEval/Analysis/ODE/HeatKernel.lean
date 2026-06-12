@@ -181,7 +181,7 @@ theorem prefactor_hasDerivAt {t : ℝ} (ht : 0 < t) :
             _ = (4 * Real.pi) * (4 * Real.pi * t) ^ (0 : ℝ) := by ring
             _ = (4 * Real.pi) * 1 := by rw [Real.rpow_zero]
             _ = 4 * Real.pi := by ring
-            _ = (1 / t) * (4 * Real.pi * t) := by field_simp [ht_ne_zero]; ring
+            _ = (1 / t) * (4 * Real.pi * t) := by field_simp [ht_ne_zero]
             _ = (1 / t) * ((4 * Real.pi * t) ^ (1 : ℝ)) := by norm_num
             _ = (1 / t) * ((4 * Real.pi * t) ^ (((-1 : ℝ) / 2) + ((3 : ℝ) / 2))) := by ring
             _ = (1 / t) * ((4 * Real.pi * t) ^ ((-1 : ℝ) / 2) * (4 * Real.pi * t) ^ ((3 : ℝ) / 2)) := by
