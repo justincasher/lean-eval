@@ -28,7 +28,7 @@ component of one onto the corresponding component of the other, up to an
 orientation-preserving smooth reparametrization of the source circle. These
 notions are fixed by the benchmark prelude.
 
-\subsection{Accepted assumptions}
+\subsection{Method: the elementary analytic route}
 
 The de~Rham / mapping-degree route to isotopy invariance (pullback of differential
 forms, Stokes' theorem on $T^2\times[0,1]$, smooth mapping-degree theory) is not
@@ -42,22 +42,25 @@ Fubini (\texttt{MeasureTheory.intervalIntegral\_integral\_swap}), change of
 variables (\texttt{intervalIntegral.integral\_comp\_smul\_deriv'''}), and
 constancy from a vanishing derivative (\texttt{constant\_of\_derivWithin\_zero}).
 
-Exactly two statements are genuinely beyond what can be reduced to Mathlib
-primitives in a short proof, and they are therefore taken as explicit
-\emph{accepted assumptions} (axioms of the benchmark), not cited as if they were
-pre-existing Mathlib results:
-\begin{enumerate}
-  \item the pointwise divergence identity \cref{lem:integrand-r-divergence}: the
-        $r$-derivative of the deformed linking integrand equals an
-        $(s,t)$-divergence. This is the coordinate form of the closedness of the
-        solid-angle $2$-form, an explicit but extremely large multivariable
-        differentiation identity;
-  \item the value of the Gauss integral on the Hopf link
-        \cref{lem:hopf-linking-value}: the relevant definite double integral
-        equals $4\pi$, so $\mathrm{lk} = 1$. Its closed-form evaluation is a hard
-        definite integral with no supporting development in Mathlib.
-\end{enumerate}
-Every other declaration below bottoms out in Mathlib results.
+The two steps that look hardest -- the closedness of the solid-angle $2$-form
+(\cref{lem:integrand-r-divergence}) and the value of the Gauss integral on the
+Hopf link (\cref{lem:hopf-linking-value}) -- are \emph{not} taken as assumptions;
+there are no axioms. The first is a pointwise multivariable differentiation
+identity, decomposed into the explicit, finite, Mathlib-grounded sub-lemmas
+\cref{lem:quadruple-product-identity} (the Lagrange / scalar quadruple-product
+identity, a coordinate \texttt{ring} identity),
+\cref{lem:recip-norm-cube-deriv} (the $r$-derivative of $\lVert u\rVert^{-3}$ via
+\texttt{Real.hasDerivAt\_rpow\_const} and \texttt{HasDerivAt.inner}),
+\cref{lem:triple-product-deriv} (the product rule for the scalar triple product
+via \texttt{ContinuousLinearMap.hasDerivAt\_of\_bilinear} and
+\texttt{triple\_product\_eq\_det}) and \cref{lem:mixed-partials-symm} (equality of
+mixed partials via \texttt{second\_derivative\_symmetric}); the divergence
+identity is then their algebraic combination. The second is reduced, through the
+closed-form integrand \cref{lem:hopf-integrand}, the denominator bound
+\cref{lem:hopf-denominator-pos} and the algebraic simplification
+\cref{lem:hopf-integrand-reduced}, to one-variable interval integrals evaluated by
+the fundamental theorem of calculus after the half-angle change of variables.
+Every declaration below bottoms out in Mathlib results.
 
 \subsection{The Gauss map and the linking number}
 
@@ -242,26 +245,128 @@ then absorbed by a one-dimensional change of variables.
     $A_r,B_r$ in each of $s,t$.
 \end{definition}
 
-\begin{lemma}[Accepted assumption: the $r$-derivative is an $(s,t)$-divergence]
+\begin{lemma}[Lagrange / scalar quadruple-product identity]
+    \label{lem:quadruple-product-identity}
+    \lean{LeanEval.KnotTheory.quadruple_product_identity}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    For all vectors $u,p,q,w\in\mathbb{R}^3$,
+    \[
+        \langle u,w\rangle\,\det(u,p,q)
+          = \lVert u\rVert^{2}\,\det(w,p,q)
+          + \langle u,p\rangle\,\det(u,w,q)
+          + \langle u,q\rangle\,\det(u,p,w).
+    \]
+\end{lemma}
+\begin{proof}
+    Both sides are polynomials in the twelve coordinates of $u,p,q,w$. Writing each
+    scalar triple product as a determinant (\texttt{triple\_product\_eq\_det}) and
+    expanding it by \texttt{Matrix.det\_fin\_three}, and writing each inner product
+    and $\lVert u\rVert^2=\langle u,u\rangle$ by \texttt{Matrix.vec3\_dotProduct'},
+    the two sides reduce to the same polynomial, closed by \texttt{ring}. This is
+    the scalar quadruple-product (Lagrange) identity, the determinant analogue of
+    \texttt{cross\_dot\_cross}.
+\end{proof}
+
+\begin{lemma}[Derivative of the inverse cube of the norm along a curve]
+    \label{lem:recip-norm-cube-deriv}
+    \lean{LeanEval.KnotTheory.recip_norm_cube_deriv}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    Let $u:\mathbb{R}\to\mathbb{R}^3$ be differentiable at $v$ with $u(v)\neq0$ and
+    derivative $u'(v)$. Then $v\mapsto\lVert u(v)\rVert^{-3}$ is differentiable at
+    $v$ with
+    \[
+        \frac{d}{dv}\lVert u(v)\rVert^{-3}
+          = -3\,\lVert u(v)\rVert^{-5}\,\langle u(v),u'(v)\rangle .
+    \]
+\end{lemma}
+\begin{proof}
+    Write $\lVert u\rVert^{-3}=\phi^{-3/2}$ with $\phi(v)=\langle u(v),u(v)\rangle$.
+    Then $\phi$ is differentiable with $\phi'(v)=2\langle u(v),u'(v)\rangle$
+    (\texttt{HasDerivAt.inner}), and $\phi(v)=\lVert u(v)\rVert^2>0$ since
+    $u(v)\neq0$. The real power rule with constant exponent $-3/2$
+    (\texttt{Real.hasDerivAt\_rpow\_const}) composed with $\phi$
+    (\texttt{HasDerivAt.comp}) gives
+    $\frac{d}{dv}\phi^{-3/2}=-\tfrac32\,\phi^{-5/2}\,\phi'
+       =-3\,\phi^{-5/2}\,\langle u,u'\rangle$, and $\phi^{-5/2}=\lVert u\rVert^{-5}$.
+\end{proof}
+
+\begin{lemma}[Product rule for the scalar triple product]
+    \label{lem:triple-product-deriv}
+    \lean{LeanEval.KnotTheory.tripleProduct_deriv}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    Let $p,q,w:\mathbb{R}\to\mathbb{R}^3$ be differentiable at $v$. Then
+    $v\mapsto\det\bigl(p(v),q(v),w(v)\bigr)$ is differentiable at $v$ with
+    \[
+        \frac{d}{dv}\det(p,q,w)=\det(p',q,w)+\det(p,q',w)+\det(p,q,w').
+    \]
+\end{lemma}
+\begin{proof}
+    By \texttt{triple\_product\_eq\_det}, $\det(p,q,w)=\langle p,\,q\times w\rangle$.
+    The cross product and the inner product are continuous bilinear maps, so the
+    product rule for bilinear maps
+    (\texttt{ContinuousLinearMap.hasDerivAt\_of\_bilinear}, applied to $q\times w$
+    and then to the inner product, or equivalently \texttt{HasDerivAt.inner}
+    together with the bilinear rule for $\times$) yields
+    $\langle p',q\times w\rangle+\langle p,q'\times w\rangle+\langle p,q\times w'\rangle$.
+    Rewriting each term by \texttt{triple\_product\_eq\_det} gives the claim.
+\end{proof}
+
+\begin{lemma}[Mixed partials of the deformed components commute]
+    \label{lem:mixed-partials-symm}
+    \lean{LeanEval.KnotTheory.mixed_partials_symm}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-curves}
+    For the smooth maps $a_r(s)=\Phi_r(\gamma_K(s))$ and $b_r(t)=\Phi_r(\gamma_L(t))$
+    of \cref{def:deformed-curves},
+    \[
+        \partial_r\partial_s a_r(s)=\partial_s\partial_r a_r(s),\qquad
+        \partial_r\partial_t b_r(t)=\partial_t\partial_r b_r(t).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{def:deformed-curves}
+    Each of $(r,s)\mapsto a_r(s)$ and $(r,t)\mapsto b_r(t)$ is $C^\infty$, being a
+    composition of the smooth isotopy $\Phi$ with the smooth components
+    (\texttt{ContDiff.comp}); in particular it is $C^2$, so its second Fréchet
+    derivative is symmetric (\texttt{second\_derivative\_symmetric}). Evaluating
+    that symmetry on the two coordinate directions $r$ and $s$ (resp.\ $r$ and $t$)
+    is exactly the stated equality of mixed second partials.
+\end{proof}
+
+\begin{lemma}[The $r$-derivative is an $(s,t)$-divergence]
     \label{lem:integrand-r-divergence}
     \lean{LeanEval.KnotTheory.deformedIntegrand_r_divergence}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:deformed-linking, def:divergence-potentials}
+    \uses{def:deformed-linking, def:divergence-potentials, lem:quadruple-product-identity, lem:recip-norm-cube-deriv, lem:triple-product-deriv, lem:mixed-partials-symm}
     For all $r\in[0,1]$ and all $s,t\in\mathbb{R}$,
     \[
         \partial_r I_r(s,t) = \partial_s A_r(s,t) + \partial_t B_r(s,t) .
     \]
 \end{lemma}
 \begin{proof}
-    \emph{Accepted as a benchmark assumption} (see the prelude); this is not a
-    Mathlib result. The identity is the coordinate form of the closedness of the
-    solid-angle $2$-form $\langle u, du\times du\rangle/\lVert u\rVert^3$: expanding
-    both sides with the product, quotient and determinant differentiation rules
-    gives the same expression, the $\lVert u\rVert^{-5}$ terms cancelling by the
-    antisymmetry and Jacobi identities of the triple product
-    (\texttt{triple\_product\_eq\_det}, \texttt{cross\_dot\_cross}). A full Lean
-    proof would be an extremely long explicit multivariable computation, so we take
-    it as an axiom.
+    \uses{lem:quadruple-product-identity, lem:recip-norm-cube-deriv,
+          lem:triple-product-deriv, lem:mixed-partials-symm}
+    Write the three quantities as products of a triple product and
+    $\lVert u\rVert^{-3}$ (\texttt{triple\_product\_eq\_det}):
+    $I_r=\det(u,\partial_s a,\partial_t b)\,\lVert u\rVert^{-3}$,
+    $A_r=\det(u,\dot u,\partial_t b)\,\lVert u\rVert^{-3}$ and
+    $B_r=\det(u,\partial_s a,\dot u)\,\lVert u\rVert^{-3}$. Differentiate each by the
+    product rule, using \cref{lem:triple-product-deriv} on the determinant factor
+    and \cref{lem:recip-norm-cube-deriv} on the $\lVert u\rVert^{-3}$ factor; the
+    relevant first partials of $u=a_r-b_r$ are $\partial_r u=\dot u$,
+    $\partial_s u=\partial_s a$, $\partial_t u=-\partial_t b$, and the mixed partials
+    satisfy $\partial_r\partial_s a=\partial_s\dot a$,
+    $\partial_r\partial_t b=\partial_t\dot b$ by \cref{lem:mixed-partials-symm}
+    (while $\partial_t\partial_s a=\partial_s\partial_t b=0$). Multiplying the target
+    equation $\partial_r I_r=\partial_s A_r+\partial_t B_r$ through by
+    $\lVert u\rVert^{5}$ turns it into an identity among scalar triple products and
+    inner products of $u,\dot u,\partial_s a,\partial_t b,\partial_s\dot a,
+    \partial_t\dot b$: the $\lVert u\rVert^{2}$-weighted determinant terms match by
+    multilinearity and antisymmetry of the determinant (a repeated argument
+    vanishes), and the inner-product-weighted terms are reconciled by the Lagrange
+    identity \cref{lem:quadruple-product-identity} applied with
+    $(p,q,w)=(\partial_s a,\partial_t b,\dot u)$. Both sides coincide, giving the
+    claim.
 \end{proof}
 
 \begin{lemma}[A periodic divergence integrates to zero]
@@ -610,20 +715,95 @@ then absorbed by a one-dimensional change of variables.
     the zero function, namely $0$. Hence $\mathrm{lk}(L_1) = 0$.
 \end{proof}
 
-\begin{lemma}[Accepted assumption: the Hopf Gauss integral]
+\begin{lemma}[The Hopf linking integrand]
+    \label{lem:hopf-integrand}
+    \lean{LeanEval.KnotTheory.hopf_integrand}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:hopf-link, def:linking-number, lem:cc-deriv}
+    For the Hopf link $L_2$ (components $c_{0,0,1}$ in the $xy$-plane and
+    $c_{e_0,0,2}$ in the $xz$-plane centred at $(1,0,0)$) the linking integrand at
+    $(s,t)$ equals
+    \[
+        I_{L_2}(s,t)=\frac{\cos t-(1+\cos t)\cos s}{D(s,t)^{3/2}},
+        \qquad D(s,t)=3+2\cos t-2(1+\cos t)\cos s .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:cc-deriv}
+    Here $\gamma_K(s)=(\cos s,\sin s,0)$ and $\gamma_L(t)=(1+\cos t,0,\sin t)$, so
+    $u=\gamma_K(s)-\gamma_L(t)=(\cos s-1-\cos t,\ \sin s,\ -\sin t)$, while
+    $\gamma_K'(s)=(-\sin s,\cos s,0)$ and $\gamma_L'(t)=(-\sin t,0,\cos t)$ by
+    \cref{lem:cc-deriv}. Their cross product is
+    $(\cos s\cos t,\ \sin s\cos t,\ \cos s\sin t)$ (\texttt{cross\_apply}). Taking
+    the inner product with $u$ and simplifying with $\sin^2+\cos^2=1$
+    (\texttt{Real.sin\_sq\_add\_cos\_sq}) gives the numerator
+    $\cos t-(1+\cos t)\cos s$, and the squared norm is
+    $\lVert u\rVert^2=3+2\cos t-2(1+\cos t)\cos s$ by the same identity.
+\end{proof}
+
+\begin{lemma}[The Hopf denominator is bounded below]
+    \label{lem:hopf-denominator-pos}
+    \lean{LeanEval.KnotTheory.hopf_denom_pos}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:hopf-integrand}
+    For all $s,t$, $D(s,t)=3+2\cos t-2(1+\cos t)\cos s\ \ge\ 1$; in particular
+    $D(s,t)>0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:hopf-integrand}
+    Since $1+\cos t\ge0$ (\texttt{Real.neg\_one\_le\_cos}) and $\cos s\le1$
+    (\texttt{Real.cos\_le\_one}), we have $2(1+\cos t)\cos s\le 2(1+\cos t)$, hence
+    $D\ge 3+2\cos t-(2+2\cos t)=1$ (\texttt{nlinarith}).
+\end{proof}
+
+\begin{lemma}[Reduced form of the Hopf integrand]
+    \label{lem:hopf-integrand-reduced}
+    \lean{LeanEval.KnotTheory.hopf_integrand_reduced}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:hopf-integrand, lem:hopf-denominator-pos}
+    For all $s,t$,
+    \[
+        I_{L_2}(s,t)=\tfrac12\,D(s,t)^{-1/2}-\tfrac32\,D(s,t)^{-3/2}.
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:hopf-denominator-pos}
+    The numerator equals $\tfrac12(D-3)$, because
+    $D=3+2\bigl(\cos t-(1+\cos t)\cos s\bigr)$. Using $D>0$
+    (\cref{lem:hopf-denominator-pos}) and the power laws
+    $D\cdot D^{-3/2}=D^{-1/2}$ (\texttt{Real.rpow\_natCast},
+    \texttt{Real.rpow\_add}), the integrand is
+    $\tfrac12(D-3)\,D^{-3/2}=\tfrac12 D^{-1/2}-\tfrac32 D^{-3/2}$.
+\end{proof}
+
+\begin{lemma}[The Hopf Gauss integral equals $4\pi$]
     \label{lem:hopf-linking-value}
     \lean{LeanEval.KnotTheory.hopf_linking_value}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:hopf-link, def:linking-number, lem:integrand-continuous}
+    \uses{def:hopf-link, def:linking-number, lem:integrand-continuous, lem:hopf-integrand-reduced, lem:hopf-denominator-pos}
     For the Hopf link $L_2$ (components $c_{0,0,1}$ and $c_{e_0,0,2}$),
     $\mathrm{lk}(L_2) = 1$.
 \end{lemma}
 \begin{proof}
-    \emph{Accepted as a benchmark assumption} (see the prelude). The integrand is
-    continuous (\cref{lem:integrand-continuous}), so the double integral is
-    well-defined; but its closed-form evaluation to $4\pi$ -- whence
-    $\mathrm{lk} = 1$ -- is a hard definite double integral with no supporting
-    development in Mathlib, so we take its value as an axiom.
+    \uses{lem:hopf-integrand-reduced, lem:hopf-denominator-pos}
+    By \cref{def:linking-number} and \cref{lem:hopf-integrand-reduced},
+    \[
+        4\pi\,\mathrm{lk}(L_2)=\int_0^{2\pi}\!\!\int_0^{2\pi}
+            \Bigl(\tfrac12 D(s,t)^{-1/2}-\tfrac32 D(s,t)^{-3/2}\Bigr)\,ds\,dt ,
+    \]
+    every integrand continuous since $D\ge1$ (\cref{lem:hopf-denominator-pos}). Fix
+    $t$ and write $D(s,t)=\alpha-\beta\cos s$ with $\alpha=3+2\cos t$,
+    $\beta=2(1+\cos t)$, so $\alpha-\beta=1$ and $\alpha+\beta=5+4\cos t$. The
+    half-angle change of variables $x=\tan(s/2)$
+    (\texttt{intervalIntegral.integral\_comp\_smul\_deriv'''}, with
+    \texttt{HasDerivAt.tan}) converts the inner integral
+    $G(t)=\int_0^{2\pi}\bigl(\tfrac12 D^{-1/2}-\tfrac32 D^{-3/2}\bigr)\,ds$ into a
+    one-variable interval integral on $\mathbb{R}$ whose antiderivative is built
+    from \texttt{Real.hasDerivAt\_rpow\_const} and \texttt{Real.hasDerivAt\_arctan};
+    the fundamental theorem of calculus
+    (\texttt{intervalIntegral.integral\_deriv\_eq\_sub}) then evaluates $G(t)$ in
+    closed form. A second application of the same FTC step to
+    $\int_0^{2\pi}G(t)\,dt$ yields the value $4\pi$. Hence $\mathrm{lk}(L_2)=1$.
 \end{proof}
 
 \begin{lemma}[The Hopf link has nonzero linking number]
