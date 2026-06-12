@@ -870,7 +870,89 @@ theorem fr_zero_free (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree 
 theorem fr_zero_mult_le (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
     (hself : conjRecip (2 * n) H = H) :
     H.rootMultiplicity 0 ≤ n ∧ H.natDegree = 2 * n - H.rootMultiplicity 0 := by
-  sorry
+  set k := H.rootMultiplicity 0 with hk_def
+  have hXk_dvd : X ^ k ∣ H := by
+    have hle : k ≤ H.rootMultiplicity 0 := le_refl _
+    rw [Polynomial.le_rootMultiplicity_iff hH0 (a := 0) (n := k)] at hle
+    have : (X : ℂ[X]) - C (0 : ℂ) = X := by simp
+    simpa [this] using hle
+  have hcoeff_lt_k : ∀ d < k, coeff H d = 0 := by
+    rw [← Polynomial.X_pow_dvd_iff]
+    exact hXk_dvd
+  have hcoeff_k_ne_zero : coeff H k ≠ 0 := by
+    by_contra hzero
+    have hXkp1_dvd : X ^ (k + 1) ∣ H := by
+      rw [Polynomial.X_pow_dvd_iff]
+      intro d hd
+      by_cases hd_lt_k : d < k
+      · exact hcoeff_lt_k d hd_lt_k
+      · have : d = k := by omega
+        subst this
+        exact hzero
+    have h_not_le : ¬ (k + 1 ≤ H.rootMultiplicity 0) := by omega
+    apply h_not_le
+    rw [Polynomial.le_rootMultiplicity_iff hH0 (a := 0) (n := k + 1)]
+    simpa [sub_eq_add_neg] using hXkp1_dvd
+  have h_symm : ∀ j, j ≤ 2 * n → coeff H j = starRingEnd ℂ (coeff H (2 * n - j)) :=
+    λ j hj => selfInversive_coeff_symm n H hself hj
+  have hk_le_natDegree : k ≤ H.natDegree := by
+    have hXk_natDegree : ((X : ℂ[X]) ^ k).natDegree = k := by simp
+    rcases hXk_dvd with ⟨G, hG⟩
+    have hXk_ne_zero : ((X : ℂ[X]) ^ k) ≠ 0 := by
+      intro hzero
+      have : H = 0 := by
+        calc
+          H = ((X : ℂ[X]) ^ k) * G := hG
+          _ = 0 * G := by rw [hzero]
+          _ = 0 := by simp
+      exact hH0 this
+    have hG_ne_zero : G ≠ 0 := by
+      intro hzero
+      rw [hzero, mul_zero] at hG
+      exact hH0 hG
+    have h_natDegree_mul : (((X : ℂ[X]) ^ k) * G).natDegree =
+        ((X : ℂ[X]) ^ k).natDegree + G.natDegree :=
+      Polynomial.natDegree_mul (R := ℂ) hXk_ne_zero hG_ne_zero
+    have : H.natDegree = k + G.natDegree := by
+      calc
+        H.natDegree = (((X : ℂ[X]) ^ k) * G).natDegree := by rw [hG]
+        _ = ((X : ℂ[X]) ^ k).natDegree + G.natDegree := h_natDegree_mul
+        _ = k + G.natDegree := by simp
+    omega
+  have hk_le_2n : k ≤ 2 * n := by
+    calc
+      k ≤ H.natDegree := hk_le_natDegree
+      _ ≤ 2 * n := hdeg
+  have h_natDegree_le : H.natDegree ≤ 2 * n - k := by
+    by_contra! hgt
+    have hcoeff_natDegree_ne_zero : coeff H (H.natDegree) ≠ 0 := by
+      rw [Polynomial.coeff_natDegree]
+      exact Polynomial.leadingCoeff_ne_zero.mpr hH0
+    have hcoeff_natDegree_eq_zero : coeff H (H.natDegree) = 0 := by
+      by_cases hn : H.natDegree ≤ 2 * n
+      · rw [h_symm H.natDegree hn]
+        have hsub_lt_k : 2 * n - H.natDegree < k := by
+          omega
+        simp [hcoeff_lt_k (2 * n - H.natDegree) hsub_lt_k]
+      · omega
+    exact hcoeff_natDegree_ne_zero hcoeff_natDegree_eq_zero
+  have h_natDegree_ge : 2 * n - k ≤ H.natDegree := by
+    have hcoeff_2n_sub_k_ne_zero : coeff H (2 * n - k) ≠ 0 := by
+      have h2n_sub_k_le_2n : 2 * n - k ≤ 2 * n := Nat.sub_le _ _
+      rw [h_symm (2 * n - k) h2n_sub_k_le_2n]
+      have h_eq : 2 * n - (2 * n - k) = k := by omega
+      rw [h_eq]
+      exact star_ne_zero.mpr hcoeff_k_ne_zero
+    by_contra! hlt
+    have hcoeff_zero : coeff H (2 * n - k) = 0 :=
+      coeff_eq_zero_of_natDegree_lt hlt
+    exact hcoeff_2n_sub_k_ne_zero hcoeff_zero
+  have h_natDegree_eq : H.natDegree = 2 * n - k :=
+    le_antisymm h_natDegree_le h_natDegree_ge
+  have hk_le_n : k ≤ n := by
+    rw [h_natDegree_eq] at hk_le_natDegree
+    omega
+  exact ⟨hk_le_n, h_natDegree_eq⟩
 
 /-- Self-inversiveness of the zero-free quotient `H₁` in `H = Xᵏ · H₁`. -/
 theorem fr_zero_factor_selfInv (n k : ℕ) (H H1 : ℂ[X]) (hself : conjRecip (2 * n) H = H)
@@ -920,7 +1002,38 @@ theorem fr_zero_factor (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegre
 theorem fr_recombine (n k : ℕ) (H H1 Q1 : ℂ[X]) (hk : k ≤ n) (hfact : H = X ^ k * H1)
     (hQ1deg : Q1.natDegree ≤ n - k) (hQ1 : Q1 * conjRecip (n - k) Q1 = H1) :
     (X ^ k * Q1).natDegree ≤ n ∧ (X ^ k * Q1) * conjRecip n (X ^ k * Q1) = H := by
-  sorry
+  have hXk_deg : (X ^ k : ℂ[X]).natDegree ≤ k := by
+    simp
+  have h_sum_eq : k + (n - k) = n := Nat.add_sub_cancel' hk
+  have h_conj_k_Xk : conjRecip k (X ^ k) = (1 : ℂ[X]) := by
+    unfold conjRecip
+    calc
+      reflect k ((X ^ k : ℂ[X]).map (starRingEnd ℂ)) = reflect k (X ^ k) := by simp
+      _ = X ^ revAt k k := by rw [Polynomial.reflect_monomial]
+      _ = X ^ (0 : ℕ) := by
+        have hk_le_k : k ≤ k := le_refl k
+        rw [Polynomial.revAt_le hk_le_k, Nat.sub_self]
+      _ = 1 := by simp
+  have h_mul_conj : conjRecip n (X ^ k * Q1) = conjRecip (n - k) Q1 := by
+    calc
+      conjRecip n (X ^ k * Q1) = conjRecip (k + (n - k)) (X ^ k * Q1) := by rw [h_sum_eq]
+      _ = conjRecip k (X ^ k) * conjRecip (n - k) Q1 :=
+        conjRecip_mul k (n - k) (X ^ k) Q1 hXk_deg hQ1deg
+      _ = (1 : ℂ[X]) * conjRecip (n - k) Q1 := by rw [h_conj_k_Xk]
+      _ = conjRecip (n - k) Q1 := by simp
+  have h_deg : (X ^ k * Q1).natDegree ≤ n := by
+    calc
+      (X ^ k * Q1).natDegree ≤ (X ^ k).natDegree + Q1.natDegree :=
+        Polynomial.natDegree_mul_le
+      _ ≤ k + (n - k) := add_le_add hXk_deg hQ1deg
+      _ = n := h_sum_eq
+  have h_prod : (X ^ k * Q1) * conjRecip n (X ^ k * Q1) = H := by
+    calc
+      (X ^ k * Q1) * conjRecip n (X ^ k * Q1) = (X ^ k * Q1) * conjRecip (n - k) Q1 := by rw [h_mul_conj]
+      _ = X ^ k * (Q1 * conjRecip (n - k) Q1) := by ring
+      _ = X ^ k * H1 := by rw [hQ1]
+      _ = H := by rw [hfact]
+  exact And.intro h_deg h_prod
 
 /-- **Fejér–Riesz factorization.** A nonzero self-inversive polynomial that is nonnegative on the
 circle (after the `z⁻ⁿ` twist) factors as `Q · Q^{†n}` with `deg Q ≤ n`. The general case is

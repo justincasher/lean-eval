@@ -1185,6 +1185,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_zero_mult_le}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:selfinversive-coeff-symm}
+    \leanok
     Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$ and
     $H^{\dagger 2n} = H$, and let $k := \operatorname{rootMultiplicity}_0(H)$.
     Then $k \le n$ and $\deg H = 2n - k$.
@@ -1269,6 +1270,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_recombine}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{def:conj-recip, lem:conjrecip-mul}
+    \leanok
     Let $k \le n$, let $H = X^{k}\cdot H_1$, and let $Q_1 \in \mathbb{C}[X]$ with
     $\deg Q_1 \le n - k$ and $Q_1\cdot Q_1^{\dagger (n-k)} = H_1$. Then
     $Q := X^{k}\cdot Q_1$ satisfies $\deg Q \le n$ and $Q\cdot Q^{\dagger n} = H$.
