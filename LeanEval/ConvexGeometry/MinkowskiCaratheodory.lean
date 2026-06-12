@@ -336,7 +336,45 @@ theorem intrinsicInterior_eq_image {s : Set E} {p : E} (hp : p ∈ s) :
     intrinsicInterior ℝ s =
       (fun w : (vectorSpan ℝ s) => (w : E) + p) ''
         interior {w : (vectorSpan ℝ s) | (w : E) + p ∈ s} := by
-  sorry
+  set W := vectorSpan ℝ s with hW
+  set s' : Set W := {w : W | (w : E) + p ∈ s} with hs'
+  -- Build the affine isometry φ : W →ᵃⁱ[ℝ] E, φ w = (w : E) + p
+  let φ : W →ᵃⁱ[ℝ] E :=
+    (AffineIsometryEquiv.vaddConst ℝ p).toAffineIsometry.comp
+      (W.subtypeₗᵢ).toAffineIsometry
+  have hφ : ∀ w : W, φ w = (w : E) + p := by
+    intro w
+    calc
+      φ w = ((AffineIsometryEquiv.vaddConst ℝ p).toAffineIsometry) (((W.subtypeₗᵢ).toAffineIsometry) w) := rfl
+      _ = (AffineIsometryEquiv.vaddConst ℝ p) ((W.subtypeₗᵢ) w) := rfl
+      _ = (AffineIsometryEquiv.vaddConst ℝ p) (w : E) := rfl
+      _ = (w : E) +ᵥ p := by rw [AffineIsometryEquiv.coe_vaddConst]
+      _ = (w : E) + p := rfl
+  -- Step 1: φ '' s' = s  (via the pre-proved lemma)
+  have h_image : φ '' s' = s := by
+    calc
+      φ '' s' = ((fun w : W => (w : E) + p) '' s') := by
+        refine Set.image_congr ?_
+        intro w hw
+        rw [hφ w]
+      _ = s := image_translatedSet_eq hp
+  -- Step 2: intrinsicInterior ℝ s = φ '' intrinsicInterior ℝ s'
+  have h_intrinsic_image : intrinsicInterior ℝ s = φ '' intrinsicInterior ℝ s' := by
+    calc
+      intrinsicInterior ℝ s = intrinsicInterior ℝ (φ '' s') := by rw [h_image]
+      _ = φ '' intrinsicInterior ℝ s' := by rw [AffineIsometry.image_intrinsicInterior]
+  -- Step 3: intrinsicInterior ℝ s' = interior s'
+  have h_intrinsic_s' : intrinsicInterior ℝ s' = interior s' :=
+    intrinsicInterior_eq_interior_of_affineSpan_eq_top (affineSpan_translatedSet_eq_top hp)
+  -- Step 4: combine
+  calc
+    intrinsicInterior ℝ s = φ '' intrinsicInterior ℝ s' := h_intrinsic_image
+    _ = φ '' interior s' := by rw [h_intrinsic_s']
+    _ = ((fun w : W => (w : E) + p) '' interior s') := by
+      refine Set.image_congr ?_
+      intro w hw
+      rw [hφ w]
+    _ = (fun w : W => (w : E) + p) '' interior {w : W | (w : E) + p ∈ s} := rfl
 
 /-- **The interior in the direction subspace is nonempty.** If `s` is nonempty (and convex),
 the topological interior of the translated set in `W = vectorSpan ℝ s` is nonempty. -/
