@@ -393,7 +393,7 @@ theorem interior_translatedSet_nonempty [FiniteDimensional ℝ E] {s : Set E} (h
 `y - p` which is not in the interior of the translated set, and is strictly separated from it by
 a continuous linear functional `g` on `W = vectorSpan ℝ s`. -/
 theorem separation_in_direction {s : Set E} (hsconv : Convex ℝ s) {p : E} (hp : p ∈ s)
-    {y : E} (hy : y ∈ s) (hynotin : y ∉ intrinsicInterior ℝ s)
+    {y : E} (_hy : y ∈ s) (hynotin : y ∉ intrinsicInterior ℝ s)
     (hyW : y - p ∈ vectorSpan ℝ s) :
     (⟨y - p, hyW⟩ : (vectorSpan ℝ s)) ∉ interior {w : (vectorSpan ℝ s) | (w : E) + p ∈ s} ∧
       ∃ g : (vectorSpan ℝ s) →L[ℝ] ℝ,
@@ -491,7 +491,7 @@ theorem bound_passes_to_closure [FiniteDimensional ℝ E] {s : Set E} (hsconv : 
     have hw_s' : w ∈ s' := interior_subset hw
     have hz' : (w : E) + p ∈ s := hw_s'
     have hz'W : ((w : E) + p) - p ∈ W := by
-      simpa [add_sub_cancel_right] using w.2
+      simp only [add_sub_cancel_right]; exact w.2
     have hw_interior : (⟨((w : E) + p) - p, hz'W⟩ : W) ∈ interior s' := by
       have h_eq : (⟨((w : E) + p) - p, hz'W⟩ : W) = w := Subtype.ext (by simp)
       simpa [h_eq] using hw
@@ -574,7 +574,7 @@ theorem exists_direction_vector {s : Set E} (h : 1 ≤ Module.finrank ℝ (vecto
 /-- **The line section is compact and convex.** For `x ∈ s` and a nonzero direction `v`, the
 section `{t | x + t • v ∈ s}` is compact and convex. -/
 theorem lineSection_isCompact_convex {s : Set E} (hscomp : IsCompact s) (hsconv : Convex ℝ s)
-    {x : E} (hx : x ∈ s) {v : E} (hv : v ≠ 0) :
+    {x : E} (_hx : x ∈ s) {v : E} (hv : v ≠ 0) :
     IsCompact {t : ℝ | x + t • v ∈ s} ∧ Convex ℝ {t : ℝ | x + t • v ∈ s} := by
   set T := {t : ℝ | x + t • v ∈ s} with hT
   haveI : T2Space E := by infer_instance
