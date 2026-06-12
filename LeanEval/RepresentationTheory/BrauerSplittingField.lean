@@ -90,7 +90,7 @@ theorem rootsOfUnity_mem (n : ℕ) [NeZero n] (S : Subring ℂ) {ζ : ℂ}
   have hz_eq : z = ζ ^ i := by
     calc
       z = (u : ℂ) := hu.symm
-      _ = ((ζu ^ i : ℂˣ) : ℂ) := by simpa [hpow]
+      _ = ((ζu ^ i : ℂˣ) : ℂ) := by simp [hpow]
       _ = (ζu : ℂ) ^ i := by simp
       _ = ζ ^ i := by simp [hζu_spec]
   rw [hz_eq]
@@ -124,7 +124,7 @@ Let `V` be finite-dimensional over `ℂ`, let `T : V → V` be linear, and `n �
 with `Tⁿ = 1`. Then every root `μ` of the characteristic polynomial of `T`
 satisfies `μⁿ = 1`. -/
 theorem eigenvalue_root_of_unity {V : Type*} [AddCommGroup V] [Module ℂ V]
-    [FiniteDimensional ℂ V] (T : Module.End ℂ V) {n : ℕ} (hn : n ≠ 0)
+    [FiniteDimensional ℂ V] (T : Module.End ℂ V) {n : ℕ} (_hn : n ≠ 0)
     (hT : T ^ n = 1) {μ : ℂ} (hμ : T.charpoly.IsRoot μ) : μ ^ n = 1 := by
   have h_eig : T.HasEigenvalue μ :=
     (Module.End.hasEigenvalue_iff_isRoot_charpoly T μ).mpr hμ
