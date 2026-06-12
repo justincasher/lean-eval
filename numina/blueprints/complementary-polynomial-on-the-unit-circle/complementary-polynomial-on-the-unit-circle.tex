@@ -735,18 +735,19 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:fr-build-S, lem:fr-size-bound}
     Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$, $H^{\dagger 2n} = H$,
-    and $z^{-n}H(z)$ a nonnegative real for all $\|z\| = 1$. Then $0$ is not a
-    root of $H$, and there is a multiset $S$ with $|S| \le n$ whose disjoint union
-    with $\{1/\overline{r} : r \in S\}$ is the root multiset of $H$.
+    $z^{-n}H(z)$ a nonnegative real for all $\|z\| = 1$, and $H(0) \neq 0$. Then
+    there is a multiset $S$ with $|S| \le n$, all of whose entries are nonzero,
+    whose disjoint union with $\{1/\overline{r} : r \in S\}$ is the root multiset
+    of $H$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:fr-multiset-H0, lem:fr-build-S, lem:fr-size-bound}
-    By \Cref{lem:fr-multiset-H0} (using $\deg H = 2n$), the constant term of $H$
-    is the conjugate of its leading coefficient, which is nonzero; thus
-    $H(0) \neq 0$ and $0$ is not a root. By \Cref{lem:fr-build-S} there is a
-    multiset $S$ of nonzero numbers with $\operatorname{roots}(H) = S \uplus
-    \sigma(S) = S \uplus \{1/\overline{r} : r \in S\}$, and
-    \Cref{lem:fr-size-bound} gives $|S| \le n$.
+    \uses{lem:fr-build-S, lem:fr-size-bound}
+    Since $H(0) \neq 0$, the point $0$ is not a root of $H$, so
+    \Cref{lem:fr-build-S} applies (its hypothesis $h_0 : H(0) \neq 0$ holds) and
+    yields a multiset $S$ of nonzero numbers with
+    $\operatorname{roots}(H) = S \uplus \sigma(S)
+    = S \uplus \{1/\overline{r} : r \in S\}$. \Cref{lem:fr-size-bound} gives
+    $|S| \le n$.
 \end{proof}
 
 \begin{lemma}[Multiplicity transport for the conjugate-reciprocal]
@@ -955,11 +956,115 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     = \lambda\,\omega = \operatorname{leadingCoeff}(H)$.
 \end{proof}
 
+\begin{lemma}[Fejér--Riesz factorization, zero-free core]
+    \label{lem:fr-zero-free}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip, lem:fr-multiset, lem:fr-complementary, lem:fr-leading-coeff, lem:eq-of-leadingcoeff-roots}
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$, satisfying
+    $H^{\dagger 2n} = H$, $H(0) \neq 0$, and such that $z^{-n}H(z)$ is a
+    nonnegative real for all $z$ with $\|z\| = 1$. Then there exists
+    $Q \in \mathbb{C}[X]$ with $\deg Q \le n$ and $Q\cdot Q^{\dagger n} = H$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-multiset, lem:fr-complementary, lem:fr-leading-coeff,
+    lem:eq-of-leadingcoeff-roots}
+    By \Cref{lem:fr-multiset} (whose hypothesis $H(0) \neq 0$ now holds) choose
+    the multiset $S$ with $|S| \le n$, all entries nonzero, whose disjoint union
+    with $\{1/\overline{r} : r \in S\}$ is the root multiset of $H$. By
+    \Cref{lem:fr-leading-coeff} choose $c \neq 0$ and set
+    $Q := c\prod_{r \in S}(X - r)$; then $\deg Q = |S| \le n$ and
+    $Q\cdot Q^{\dagger n}$ has the same leading coefficient as $H$. By
+    \Cref{lem:fr-complementary} (applied to this nonzero $Q$) the root multiset of
+    $Q\cdot Q^{\dagger n}$ is $S \uplus \{1/\overline{r} : r \in S\}$, which is the
+    root multiset of $H$. Equal leading coefficient and equal root multiset give
+    $Q\cdot Q^{\dagger n} = H$ by \Cref{lem:eq-of-leadingcoeff-roots}.
+\end{proof}
+
+\begin{lemma}[Zero-multiplicity of a self-inversive polynomial]
+    \label{lem:fr-zero-mult-le}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip}
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$ and
+    $H^{\dagger 2n} = H$, and let $k := \operatorname{rootMultiplicity}_0(H)$.
+    Then $k \le n$ and $\deg H = 2n - k$.
+\end{lemma}
+\begin{proof}
+    From $H = H^{\dagger 2n} = \operatorname{reflect}_{2n}(\operatorname{map}\,
+    \overline{(\cdot)}\,H)$, \texttt{Polynomial.coeff\_reflect} and
+    \texttt{Polynomial.coeff\_map} give the coefficient symmetry
+    $\operatorname{coeff}_j H = \overline{\operatorname{coeff}_{2n-j} H}$ for every
+    $j \le 2n$ (there $\operatorname{revAt}_{2n} j = 2n - j$). The root
+    multiplicity at $0$ is characterised by divisibility by powers of $X$
+    (\texttt{Polynomial.le\_rootMultiplicity\_iff} with $X - C\,0 = X$, together
+    with \texttt{Polynomial.X\_pow\_dvd\_iff}): $\operatorname{coeff}_d H = 0$ for
+    all $d < k$ while $\operatorname{coeff}_k H \neq 0$. For $j > 2n - k$ we have
+    $2n - j < k$, so $\operatorname{coeff}_j H = \overline{\operatorname{coeff}_{2n-j} H}
+    = 0$; hence $\deg H \le 2n - k$. Conversely
+    $\operatorname{coeff}_{2n-k} H = \overline{\operatorname{coeff}_k H} \neq 0$,
+    so $\deg H \ge 2n - k$. Thus $\deg H = 2n - k$, and since
+    $k \le \deg H = 2n - k$ we get $2k \le 2n$, i.e. $k \le n$.
+\end{proof}
+
+\begin{lemma}[Factoring out the zero of a self-inversive polynomial]
+    \label{lem:fr-zero-factor}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip, lem:fr-zero-mult-le, lem:conjrecip-mul, lem:conjrecip-X-pow}
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$, $H^{\dagger 2n} = H$,
+    and $z^{-n}H(z)$ a nonnegative real for all $\|z\| = 1$; let
+    $k := \operatorname{rootMultiplicity}_0(H)$. Then $k \le n$ and there is a
+    polynomial $H_1$ with $H = X^{k}\cdot H_1$, $H_1(0) \neq 0$,
+    $\deg H_1 = 2(n-k)$, $H_1^{\dagger 2(n-k)} = H_1$, and $z^{-(n-k)}H_1(z)$ a
+    nonnegative real for all $\|z\| = 1$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-zero-mult-le, lem:conjrecip-mul, lem:conjrecip-X-pow}
+    By \texttt{Polynomial.exists\_eq\_pow\_rootMultiplicity\_mul\_and\_not\_dvd}
+    applied at $a = 0$, $H = (X - C\,0)^{k}\cdot H_1 = X^{k}\cdot H_1$ with
+    $X \nmid H_1$; since $X \nmid H_1$ is equivalent to $H_1(0) \neq 0$
+    (\texttt{Polynomial.X\_dvd\_iff}, \texttt{Polynomial.coeff\_zero\_eq\_eval\_zero}),
+    we get $H_1(0) \neq 0$ and hence $H_1 \neq 0$. By \Cref{lem:fr-zero-mult-le},
+    $k \le n$ and $\deg H = 2n - k$; as $\deg H = \deg(X^{k}) + \deg H_1
+    = k + \deg H_1$ (\texttt{Polynomial.natDegree\_mul}, both factors nonzero),
+    $\deg H_1 = 2n - 2k = 2(n-k)$. For self-inversiveness, by
+    \Cref{lem:conjrecip-mul} with $M = 2k \ge \deg X^{k}$ and
+    $N = 2(n-k) \ge \deg H_1$ (so $M + N = 2n$),
+    $H = H^{\dagger 2n} = (X^{k})^{\dagger 2k}\cdot H_1^{\dagger 2(n-k)}
+    = X^{k}\cdot H_1^{\dagger 2(n-k)}$, using \Cref{lem:conjrecip-X-pow} that
+    $(X^{k})^{\dagger 2k} = X^{k}$. Cancelling the nonzero $X^{k}$ in the domain
+    $\mathbb{C}[X]$ from $X^{k} H_1 = X^{k} H_1^{\dagger 2(n-k)}$ gives
+    $H_1^{\dagger 2(n-k)} = H_1$. Finally, for $\|z\| = 1$ we have $z \neq 0$ and
+    $H(z) = z^{k} H_1(z)$, so $z^{-(n-k)} H_1(z) = z^{-n} z^{k} H_1(z)
+    = z^{-n} H(z)$, a nonnegative real by hypothesis.
+\end{proof}
+
+\begin{lemma}[Recombining the factorization]
+    \label{lem:fr-recombine}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip, lem:conjrecip-mul}
+    Let $k \le n$, let $H = X^{k}\cdot H_1$, and let $Q_1 \in \mathbb{C}[X]$ with
+    $\deg Q_1 \le n - k$ and $Q_1\cdot Q_1^{\dagger (n-k)} = H_1$. Then
+    $Q := X^{k}\cdot Q_1$ satisfies $\deg Q \le n$ and $Q\cdot Q^{\dagger n} = H$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:conjrecip-mul}
+    First $\deg Q \le \deg(X^{k}) + \deg Q_1 = k + \deg Q_1 \le k + (n-k) = n$
+    (\texttt{Polynomial.natDegree\_mul\_le}). By \Cref{lem:conjrecip-mul} with
+    $M = k \ge \deg X^{k}$ and $N = n - k \ge \deg Q_1$ (so $M + N = n$),
+    $Q^{\dagger n} = (X^{k}\cdot Q_1)^{\dagger n}
+    = (X^{k})^{\dagger k}\cdot Q_1^{\dagger (n-k)}$. Reflecting the monomial
+    $X^{k}$ within degree $k$ gives $(X^{k})^{\dagger k}
+    = X^{\operatorname{revAt}_k k} = X^{0} = 1$
+    (\texttt{Polynomial.reflect\_monomial}, with coefficient conjugation fixing the
+    real coefficient $1$), so $Q^{\dagger n} = Q_1^{\dagger (n-k)}$. Hence
+    $Q\cdot Q^{\dagger n} = X^{k} Q_1\cdot Q_1^{\dagger (n-k)}
+    = X^{k}\cdot H_1 = H$.
+\end{proof}
+
 \begin{theorem}[Fejér--Riesz factorization]
     \label{thm:fejer-riesz}
     \lean{LeanEval.ComplexAnalysis.fejer_riesz}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
-    \uses{def:conj-recip, lem:fr-multiset, lem:fr-complementary, lem:fr-leading-coeff, lem:eq-of-leadingcoeff-roots}
+    \uses{def:conj-recip, lem:fr-zero-free, lem:fr-zero-factor, lem:fr-recombine}
     \leanok
     Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$, satisfying
     $H^{\dagger 2n} = H$ and such that $z^{-n}H(z)$ is a nonnegative real for all
@@ -967,18 +1072,16 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     $\deg Q \le n$ and $Q\cdot Q^{\dagger n} = H$.
 \end{theorem}
 \begin{proof}
-    \uses{lem:fr-multiset, lem:fr-complementary, lem:fr-leading-coeff,
-    lem:eq-of-leadingcoeff-roots}
-    By \Cref{lem:fr-multiset} choose the multiset $S$ with $|S| \le n$ whose
-    disjoint union with $\{1/\overline{r} : r \in S\}$ is the root multiset of
-    $H$ (and $0 \notin S$ since $0$ is not a root). By \Cref{lem:fr-leading-coeff}
-    choose $c \neq 0$ and set $Q := c\prod_{r \in S}(X - r)$; then
-    $\deg Q = |S| \le n$ and $Q\cdot Q^{\dagger n}$ has the same leading
-    coefficient as $H$. By \Cref{lem:fr-complementary} (applied to this $Q$, which
-    is nonzero) the root multiset of $Q\cdot Q^{\dagger n}$ is
-    $S \uplus \{1/\overline{r} : r \in S\}$, which is the root multiset of $H$.
-    Equal leading coefficient and equal root multiset give
-    $Q\cdot Q^{\dagger n} = H$ by \Cref{lem:eq-of-leadingcoeff-roots}.
+    \uses{lem:fr-zero-free, lem:fr-zero-factor, lem:fr-recombine}
+    Let $k := \operatorname{rootMultiplicity}_0(H)$. By \Cref{lem:fr-zero-factor}
+    we have $k \le n$ and may write $H = X^{k}\cdot H_1$ with $H_1(0) \neq 0$,
+    $\deg H_1 = 2(n-k)$, $H_1^{\dagger 2(n-k)} = H_1$, and $z^{-(n-k)}H_1(z)$ a
+    nonnegative real for all $\|z\| = 1$. Apply \Cref{lem:fr-zero-free} to $H_1$
+    at degree $n - k$ (its hypotheses hold, including $H_1(0) \neq 0$ and
+    $\deg H_1 \le 2(n-k)$): there is $Q_1$ with $\deg Q_1 \le n - k$ and
+    $Q_1\cdot Q_1^{\dagger (n-k)} = H_1$. By \Cref{lem:fr-recombine},
+    $Q := X^{k}\cdot Q_1$ satisfies $\deg Q \le n$ and $Q\cdot Q^{\dagger n} = H$.
+    (When $k = 0$, $H_1 = H$ and $Q = Q_1$.)
 \end{proof}
 
 \subsection{Main theorem}
