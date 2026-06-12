@@ -177,6 +177,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.selfInversive_coeff_symm}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
     \uses{def:conj-recip}
+    \leanok
     Let $H \in \mathbb{C}[X]$ with $H^{\dagger 2n} = H$. Then for every
     $j \le 2n$, $\operatorname{coeff}_j H
     = \overline{\operatorname{coeff}_{2n-j} H}$.
@@ -196,6 +197,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.conjRecip_leadingCoeff}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/ConjugateReciprocal.lean}
     \uses{def:conj-recip, lem:conjrecip-natDegree}
+    \leanok
     Let $A \in \mathbb{C}[X]$ with $\deg A \le N$. Then
     $\operatorname{coeff}_N(A^{\dagger N}) = \overline{A(0)}$. In particular, if
     $A(0) \neq 0$ then $\deg(A^{\dagger N}) = N$ and
@@ -367,6 +369,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.reflect_pow_linear}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/RootMultiplicity.lean}
     \uses{lem:reflect-linear}
+    \leanok
     For $v \neq 0$ and $k \in \mathbb{N}$,
     $\operatorname{reflect}_k\bigl((X - C\,v)^{k}\bigr)
     = \bigl(C(-v)\bigr)^{k}\,(X - C\,v^{-1})^{k}$, a unit multiple of
@@ -498,6 +501,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.nonneg_even_order_pos}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
     \uses{lem:sign-persistence}
+    \leanok
     Let $\phi : \mathbb{R} \to \mathbb{R}$ be continuous with $\phi(0) > 0$, let
     $m \in \mathbb{N}$, and suppose $t^{m}\,\phi(t) \ge 0$ for all $t$ in a
     neighbourhood of $0$. Then $m$ is even.
@@ -595,6 +599,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.psi_continuous}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
     \uses{lem:exp-expansion}
+    \leanok
     Let $w \in \mathbb{C}$ with $\|w\| = 1$, let $n, m \in \mathbb{N}$, let
     $g \in \mathbb{C}[X]$, and let $u : \mathbb{R} \to \mathbb{C}$ be the
     continuous function of \Cref{lem:exp-expansion}. Then
@@ -689,6 +694,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:circle-involution}
     \lean{LeanEval.ComplexAnalysis.invConj_invConj}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
     Define $\sigma(w) := 1/\overline{w}$ on $\mathbb{C}^{\times}$. Then
     $\sigma(\sigma(w)) = w$ for all $w \neq 0$, and $\sigma(w) = w$ if and only if
     $\|w\| = 1$.
@@ -704,6 +710,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_build_S_root_pairing}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:conjrecip-root-pairing, lem:circle-involution}
+    \leanok
     Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$ and
     $H^{\dagger 2n} = H$, and write $\sigma(w) := 1/\overline{w}$. Then $0$ is
     not in $\operatorname{roots}(H)$ once $H(0) \neq 0$, every $r \in
@@ -726,6 +733,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:fr-build-S-partition}
     \lean{LeanEval.ComplexAnalysis.fr_build_S_partition}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
     Let $R$ be a multiset of complex numbers, and let $R_{<}$, $R_{=}$, $R_{>}$
     be the submultisets obtained by filtering $R$ on $\|r\| < 1$, $\|r\| = 1$,
     $\|r\| > 1$ respectively (\texttt{Multiset.filter}). Then
@@ -744,6 +752,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_build_S_count_transport}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:circle-involution}
+    \leanok
     Let $R$ be a multiset of nonzero complex numbers with
     $\operatorname{count}_w R = \operatorname{count}_{\sigma(w)} R$ for all
     $w \neq 0$, where $\sigma(w) = 1/\overline{w}$, and let $R_{<}$, $R_{=}$,
@@ -790,6 +799,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_build_S_circle_half}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:circle-root-even, lem:exists-half-even-count}
+    \leanok
     With $H$, $n$ as in \Cref{lem:fr-build-S} and $R_{=}$ the circle part of
     $\operatorname{roots}(H)$ (those $r$ with $\|r\| = 1$), every $w$ with
     $\|w\| = 1$ has even count in $R_{=}$. Hence there is a multiset $T$ with
@@ -863,6 +873,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_multiset_H0}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:selfinversive-coeff-symm}
+    \leanok
     Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$ and
     $H^{\dagger 2n} = H$, and suppose $\deg H = 2n$. Then the constant term of
     $H$ is the conjugate of its leading coefficient, $H(0)
@@ -884,6 +895,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_multiset}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:fr-build-S, lem:fr-size-bound}
+    \leanok
     Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$, $H^{\dagger 2n} = H$,
     $z^{-n}H(z)$ a nonnegative real for all $\|z\| = 1$, and $H(0) \neq 0$. Then
     there is a multiset $S$ with $|S| \le n$, all of whose entries are nonzero,
@@ -905,6 +917,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_complementary_mult}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{def:conj-recip, lem:rootmult-reflect, lem:rootmult-map-conj}
+    \leanok
     Let $Q \in \mathbb{C}[X]$ be nonzero with $\deg Q \le n$. Then for every
     $w \neq 0$ the root multiplicity of $w$ in $Q^{\dagger n}$ equals the root
     multiplicity of $1/\overline{w}$ in $Q$.
@@ -924,6 +937,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:fr-roots-scaled-prod}
     \lean{LeanEval.ComplexAnalysis.fr_roots_scaled_prod}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
     Let $c \neq 0$ and let $S$ be a multiset of complex numbers, and put
     $Q := c\prod_{r \in S}(X - r)$. Then $Q \neq 0$ and
     $\operatorname{roots}(Q) = S$.
@@ -1017,6 +1031,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_positive_multiple_D}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:fr-complementary, lem:fr-leadingcoeff-conjrecip}
+    \leanok
     Let $S$ be a multiset of nonzero complex numbers with $|S| \le n$, set
     $Q_0 := \prod_{r \in S}(X - r)$, $D := Q_0\cdot Q_0^{\dagger n}$, and
     $\omega := \overline{\prod_{r \in S}(-r)}$. Then $D \neq 0$, $\omega \neq 0$,
@@ -1055,6 +1070,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_D_eval_circle}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:conj-recip-prod}
+    \leanok
     Let $S$ be a multiset of complex numbers with $|S| \le n$, set
     $Q_0 := \prod_{r\in S}(X-r)$ and $D := Q_0\cdot Q_0^{\dagger n}$. Then for
     every $z$ with $\|z\| = 1$, $z^{-n}D(z) = \|Q_0(z)\|^2$, a nonnegative real.
@@ -1071,6 +1087,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_positive_multiple_lambda}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:fr-D-eval-circle, lem:fr-positive-multiple-point}
+    \leanok
     With $H$ as in \Cref{lem:fr-multiset}, $\omega \neq 0$, $Q_0 := \prod_{r\in S}
     (X-r)$, $D := Q_0\cdot Q_0^{\dagger n}$, and $\lambda :=
     \operatorname{leadingCoeff}(H)/\omega$ a complex scalar with $H = \lambda D$,
@@ -1192,6 +1209,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_zero_factor_selfInv}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:conjrecip-mul, lem:conjrecip-X-pow}
+    \leanok
     Let $H \in \mathbb{C}[X]$ satisfy $H^{\dagger 2n} = H$, and suppose
     $H = X^{k}\cdot H_1$ with $k \le n$, $H_1 \neq 0$, and $\deg H_1 \le 2(n-k)$.
     Then $H_1^{\dagger 2(n-k)} = H_1$.

@@ -40,7 +40,50 @@ noncomputable def invConj (w : ℂ) : ℂ := (starRingEnd ℂ w)⁻¹
 /-- `σ` is an involution on `ℂ⁰`, with fixed points exactly the unit circle. -/
 theorem invConj_invConj {w : ℂ} (hw : w ≠ 0) :
     invConj (invConj w) = w ∧ (invConj w = w ↔ ‖w‖ = 1) := by
-  sorry
+  have h1 : invConj (invConj w) = w := by
+    dsimp [invConj]
+    calc
+      (starRingEnd ℂ ((starRingEnd ℂ w)⁻¹))⁻¹ = (((starRingEnd ℂ (starRingEnd ℂ w))⁻¹))⁻¹ := by
+        rw [Complex.conj_inv (starRingEnd ℂ w)]
+      _ = (w⁻¹)⁻¹ := by simp
+      _ = w := by simp
+  have h2 : invConj w = w ↔ ‖w‖ = 1 := by
+    dsimp [invConj]
+    constructor
+    · intro h
+      have hstar : starRingEnd ℂ w ≠ 0 := star_ne_zero.mpr hw
+      field_simp [hstar] at h
+      -- h : 1 = starRingEnd ℂ w * w
+      have h_mul : starRingEnd ℂ w * w = (Complex.normSq w : ℂ) := by
+        calc
+          starRingEnd ℂ w * w = w * starRingEnd ℂ w := mul_comm _ _
+          _ = (Complex.normSq w : ℂ) := Complex.mul_conj w
+      rw [h_mul] at h
+      -- h : 1 = (Complex.normSq w : ℂ)
+      have h_normSq : Complex.normSq w = (1 : ℝ) := by
+        exact_mod_cast h.symm
+      have h_norm_sq_eq : Complex.normSq w = ‖w‖ ^ 2 := by
+        simp [Complex.normSq_eq_norm_sq]
+      rw [h_norm_sq_eq] at h_normSq
+      have h_nonneg : 0 ≤ ‖w‖ := norm_nonneg _
+      nlinarith
+    · intro h
+      have h_norm_sq : Complex.normSq w = (1 : ℝ) := by
+        calc
+          Complex.normSq w = ‖w‖ ^ 2 := by simp [Complex.normSq_eq_norm_sq]
+          _ = 1 := by nlinarith
+      have h_mul : starRingEnd ℂ w * w = 1 := by
+        calc
+          starRingEnd ℂ w * w = (Complex.normSq w : ℂ) := by
+            calc
+              starRingEnd ℂ w * w = w * starRingEnd ℂ w := mul_comm _ _
+              _ = (Complex.normSq w : ℂ) := Complex.mul_conj w
+          _ = (1 : ℂ) := by exact_mod_cast h_norm_sq
+      have hstar : starRingEnd ℂ w ≠ 0 := star_ne_zero.mpr hw
+      field_simp [hstar]
+      -- goal: 1 = starRingEnd ℂ w * w
+      rw [h_mul]
+  exact And.intro h1 h2
 
 /-- Halving the root multiset of a self-inversive, circle-nonnegative polynomial. -/
 theorem fr_build_S (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
@@ -77,7 +120,9 @@ theorem fr_size_bound (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree
 theorem fr_multiset (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
     (hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H) (h0 : H.eval 0 ≠ 0) :
     ∃ S : Multiset ℂ, S.card ≤ n ∧ (∀ r ∈ S, r ≠ 0) ∧ H.roots = S + S.map invConj := by
-  sorry
+  rcases fr_build_S n H hH0 hdeg hself hpos h0 with ⟨S, hSzero, hroots⟩
+  refine ⟨S, ?_, hSzero, hroots⟩
+  exact fr_size_bound n H hH0 hdeg hroots
 
 /-- Roots of `Q · Q^{†n}` for a scaled factor product `Q = c ∏ (X - r)`. -/
 theorem fr_complementary (n : ℕ) (c : ℂ) (hc : c ≠ 0) (S : Multiset ℂ)
@@ -303,13 +348,40 @@ theorem fr_build_S_root_pairing (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H
     (hself : conjRecip (2 * n) H = H) (h0 : H.eval 0 ≠ 0) :
     (∀ r ∈ H.roots, r ≠ 0) ∧
       ∀ w : ℂ, w ≠ 0 → H.roots.count w = H.roots.count (invConj w) := by
-  sorry
+  have h_roots_nonzero : ∀ r ∈ H.roots, r ≠ 0 := by
+    intro r hr
+    have h_isRoot : IsRoot H r := (Polynomial.mem_roots hH0).mp hr
+    intro hzero
+    have : H.eval 0 = 0 := by simpa [hzero] using h_isRoot
+    exact h0 this
+  have h_count_eq : ∀ w : ℂ, w ≠ 0 → H.roots.count w = H.roots.count (invConj w) := by
+    intro w hw
+    calc
+      H.roots.count w = H.rootMultiplicity w := by rw [Polynomial.count_roots]
+      _ = H.rootMultiplicity ((starRingEnd ℂ w)⁻¹) :=
+        conjRecip_root_pairing n H hH0 hdeg hself hw
+      _ = H.rootMultiplicity (invConj w) := rfl
+      _ = H.roots.count (invConj w) := by rw [Polynomial.count_roots]
+  exact And.intro h_roots_nonzero h_count_eq
 
 /-- Partition of a multiset by modulus `< 1`, `= 1`, `> 1`. -/
 theorem fr_build_S_partition (R : Multiset ℂ) :
     R = R.filter (fun r => ‖r‖ < 1) + R.filter (fun r => ‖r‖ = 1)
           + R.filter (fun r => ‖r‖ > 1) := by
-  sorry
+  ext a
+  simp [Multiset.count_add, Multiset.count_filter]
+  by_cases hlt : ‖a‖ < 1
+  · have h_not_eq : ‖a‖ ≠ 1 := by linarith
+    have h_not_gt : ¬ 1 < ‖a‖ := by linarith
+    simp [hlt, h_not_eq, h_not_gt]
+  · by_cases heq : ‖a‖ = 1
+    · simp [hlt, heq]
+    · have hge : 1 ≤ ‖a‖ := not_lt.mp hlt
+      have hgt : 1 < ‖a‖ := by
+        by_contra! hle
+        have : ‖a‖ = 1 := le_antisymm hle hge
+        exact heq this
+      simp [hlt, heq, hgt]
 
 /-- Count transport across the modulus filters: `σ` carries the `> 1` part onto the `< 1` part and
 fixes the circle part. -/
@@ -318,13 +390,196 @@ theorem fr_build_S_count_transport (R : Multiset ℂ) (hR : ∀ r ∈ R, r ≠ 0
     (∀ w : ℂ, (R.filter (fun r => ‖r‖ > 1)).count w
         = (R.filter (fun r => ‖r‖ < 1)).count (invConj w)) ∧
       ∀ w : ℂ, ‖w‖ = 1 → invConj w = w := by
-  sorry
+  -- helper: on the unit circle, σ(w) = w
+  have h_circle_fixed : ∀ w : ℂ, ‖w‖ = 1 → invConj w = w := by
+    intro w hw
+    have hw_ne_zero : w ≠ 0 := by
+      intro hzero
+      rw [hzero, norm_zero] at hw
+      linarith
+    have h_mul_conj_eq_one : w * starRingEnd ℂ w = (1 : ℂ) := by
+      calc
+        w * starRingEnd ℂ w = Complex.normSq w := Complex.mul_conj w
+        _ = ((Complex.normSq w : ℝ) : ℂ) := rfl
+        _ = ((‖w‖ ^ 2 : ℝ) : ℂ) := by
+          simp [Complex.normSq_eq_norm_sq]
+        _ = ((1 : ℝ) : ℂ) := by simp [hw]
+        _ = (1 : ℂ) := by norm_num
+    have h_conj_eq_inv : starRingEnd ℂ w = w⁻¹ := by
+      calc
+        starRingEnd ℂ w = (1 : ℂ) * starRingEnd ℂ w := by simp
+        _ = (w⁻¹ * w) * starRingEnd ℂ w := by field_simp [hw_ne_zero]
+        _ = w⁻¹ * (w * starRingEnd ℂ w) := by ring
+        _ = w⁻¹ * (1 : ℂ) := by rw [h_mul_conj_eq_one]
+        _ = w⁻¹ := by simp
+    calc
+      invConj w = (starRingEnd ℂ w)⁻¹ := rfl
+      _ = (w⁻¹)⁻¹ := by rw [h_conj_eq_inv]
+      _ = w := by field_simp [hw_ne_zero]
+  -- helper: ‖invConj w‖ = ‖w‖⁻¹ for w ≠ 0
+  have h_norm_invConj (w : ℂ) (hw : w ≠ 0) : ‖invConj w‖ = ‖w‖⁻¹ := by
+    simp [invConj, norm_inv]
+  refine ⟨?_, h_circle_fixed⟩
+  intro w
+  rw [Multiset.count_filter, Multiset.count_filter]
+  by_cases h_gt : ‖w‖ > 1
+  · -- Case ‖w‖ > 1: both sides equal R.count (invConj w)
+    have hw_ne_zero : w ≠ 0 := by
+      intro hzero
+      rw [hzero, norm_zero] at h_gt
+      linarith
+    have h_inv_norm_lt_one : ‖invConj w‖ < 1 := by
+      rw [h_norm_invConj w hw_ne_zero]
+      -- ‖w‖ > 1, so 0 < ‖w‖ and therefore ‖w‖⁻¹ < 1
+      have hpos : 0 < ‖w‖ := by linarith
+      have h_one_pos : (0 : ℝ) < 1 := by norm_num
+      have h := (one_div_lt_one_div hpos h_one_pos).mpr h_gt
+      simpa using h
+    simp [h_gt, h_inv_norm_lt_one, hcount w hw_ne_zero]
+  · -- Case ¬(‖w‖ > 1)
+    have h_le : ‖w‖ ≤ 1 := by linarith
+    by_cases hw0 : w = 0
+    · subst w
+      have h_invConj_zero : invConj (0 : ℂ) = 0 := by
+        simp [invConj]
+      have h0_not_mem : (0 : ℂ) ∉ R := by
+        intro h; exact hR 0 h rfl
+      have h0_count : R.count (0 : ℂ) = 0 := Multiset.count_eq_zero_of_notMem h0_not_mem
+      simp [h_invConj_zero, h0_count]
+    · have h_not_inv_lt_one : ¬ ‖invConj w‖ < 1 := by
+        rw [h_norm_invConj w hw0]
+        by_cases h_eq1 : ‖w‖ = 1
+        · rw [h_eq1, inv_one]
+          linarith
+        · have h_lt1 : ‖w‖ < 1 := h_le.lt_of_ne h_eq1
+          have h_pos : 0 < ‖w‖ := by
+            -- w ≠ 0 and norm is nonnegative, so ‖w‖ > 0
+            have h_nonzero_norm : ‖w‖ ≠ 0 := mt Complex.norm_eq_zero_iff.mp hw0
+            have h_nonneg_norm : 0 ≤ ‖w‖ := norm_nonneg _
+            exact lt_of_le_of_ne h_nonneg_norm h_nonzero_norm.symm
+          have h_one_pos : (0 : ℝ) < 1 := by norm_num
+          have h := (one_div_lt_one_div h_one_pos h_pos).mpr h_lt1
+          -- h : 1 / 1 < 1 / ‖w‖, which simplifies to 1 < ‖w‖⁻¹
+          have : 1 < ‖w‖⁻¹ := by simpa using h
+          linarith
+      simp [h_gt, h_not_inv_lt_one]
 
 /-- A multiset with all-even counts has a half. -/
 theorem exists_half_of_even_count {α : Type*} [DecidableEq α] (M : Multiset α)
     (h : ∀ w, Even (M.count w)) :
     ∃ T : Multiset α, T + T = M ∧ ∀ w, T.count w = M.count w / 2 := by
-  sorry
+  -- Strong induction on the cardinality of M
+  let P : ℕ → Prop := λ n => ∀ (M' : Multiset α), M'.card = n → (∀ w, Even (M'.count w)) →
+    ∃ T' : Multiset α, T' + T' = M' ∧ ∀ w, T'.count w = M'.count w / 2
+  have hP : ∀ n, (∀ m < n, P m) → P n := by
+    intro n IH M' hcard h_even
+    by_cases hM'zero : M' = 0
+    · subst hM'zero
+      refine ⟨0, ?_, λ _ => ?_⟩
+      · simp
+      · simp
+    · have hpos : 0 < M'.card := Multiset.card_pos.mpr hM'zero
+      rcases Multiset.card_pos_iff_exists_mem.mp hpos with ⟨a, ha⟩
+      have ha_count_even : Even (M'.count a) := h_even a
+      have ha_count_pos : 0 < M'.count a := Multiset.count_pos.mpr ha
+      rcases ha_count_even with ⟨k, hk⟩
+      have hk_pos : 0 < k := by
+        by_contra! hkzero
+        have hzero : M'.count a = 0 := by omega
+        linarith
+      -- a's count is even and positive, so 2k = M'.count a ≥ 2
+      set A := (M'.erase a).erase a with hA_def
+      have hcard_A_lt : A.card < M'.card := by
+        have hmem1 : a ∈ M'.erase a := by
+          -- (M'.erase a).count a = M'.count a - 1 ≥ 1 > 0
+          have hpos_count : 0 < (M'.erase a).count a := by
+            calc
+              0 < 1 := by norm_num
+              _ ≤ M'.count a - 1 := by omega
+              _ = (M'.erase a).count a := (Multiset.count_erase_self a M').symm
+          exact (Multiset.count_pos.mp hpos_count)
+        calc
+          A.card = ((M'.erase a).erase a).card := rfl
+          _ < (M'.erase a).card := Multiset.card_erase_lt_of_mem hmem1
+          _ < M'.card := Multiset.card_erase_lt_of_mem ha
+      have hcard_A_lt_n : A.card < n := by
+        rw [← hcard]
+        exact hcard_A_lt
+      have hA_all_even : ∀ x, Even (A.count x) :=
+        λ x => by
+          by_cases hx : x = a
+          · subst hx
+            have hA_count_a : A.count a = M'.count a - 2 := by
+              calc
+                A.count a = ((M'.erase a).erase a).count a := rfl
+                _ = (M'.erase a).count a - 1 := Multiset.count_erase_self a (M'.erase a)
+                _ = (M'.count a - 1) - 1 := by rw [Multiset.count_erase_self a M']
+                _ = M'.count a - 2 := by omega
+            rw [hA_count_a, hk]
+            refine ⟨k - 1, ?_⟩
+            omega
+          · have hA_count_eq : A.count x = M'.count x := by
+              calc
+                A.count x = ((M'.erase a).erase a).count x := rfl
+                _ = (M'.erase a).count x := Multiset.count_erase_of_ne hx (M'.erase a)
+                _ = M'.count x := Multiset.count_erase_of_ne hx M'
+            rw [hA_count_eq]
+            exact h_even x
+      have hP_A : P (A.card) := IH (A.card) hcard_A_lt_n
+      rcases hP_A A rfl hA_all_even with ⟨S, hS, hS_count⟩
+      set T := S + {a} with hT_def
+      have h_T_plus_T_eq_M' : T + T = M' := by
+        calc
+          T + T = (S + {a}) + (S + {a}) := rfl
+          _ = (S + S) + ({a} + {a}) := by simp [add_assoc, add_comm, add_left_comm]
+          _ = A + ({a} + {a}) := by rw [hS]
+          _ = M' := by
+            apply Multiset.ext.mpr
+            intro x
+            by_cases hx : x = a
+            · subst hx
+              simp [Multiset.count_add, Multiset.count_erase_self, hA_def]
+              omega
+            · simp [Multiset.count_add, Multiset.count_erase_of_ne hx, hA_def]
+      have h_T_count : ∀ x, T.count x = M'.count x / 2 :=
+        λ x => by
+          by_cases hx : x = a
+          · subst hx
+            calc
+              T.count a = (S + {a}).count a := rfl
+              _ = S.count a + ({a}).count a := by simp
+              _ = S.count a + 1 := by simp
+              _ = A.count a / 2 + 1 := by rw [hS_count a]
+              _ = (M'.count a - 2) / 2 + 1 := by
+                have : A.count a = M'.count a - 2 := by
+                  calc
+                    A.count a = ((M'.erase a).erase a).count a := rfl
+                    _ = (M'.erase a).count a - 1 := Multiset.count_erase_self a (M'.erase a)
+                    _ = (M'.count a - 1) - 1 := by rw [Multiset.count_erase_self a M']
+                    _ = M'.count a - 2 := by omega
+                rw [this]
+              _ = (2 * k - 2) / 2 + 1 := by rw [hk]
+              _ = (k - 1) + 1 := by omega
+              _ = k := by omega
+              _ = (2 * k) / 2 := by omega
+              _ = M'.count a / 2 := by rw [hk]
+          · calc
+              T.count x = (S + {a}).count x := rfl
+              _ = S.count x + ({a}).count x := by simp
+              _ = S.count x + 0 := by
+                simp [Multiset.count_singleton, hx]
+              _ = S.count x := Nat.add_zero _
+              _ = A.count x / 2 := by rw [hS_count x]
+              _ = M'.count x / 2 := by
+                have : A.count x = M'.count x := by
+                  calc
+                    A.count x = ((M'.erase a).erase a).count x := rfl
+                    _ = (M'.erase a).count x := Multiset.count_erase_of_ne hx (M'.erase a)
+                    _ = M'.count x := Multiset.count_erase_of_ne hx M'
+                rw [this]
+      exact ⟨T, h_T_plus_T_eq_M', h_T_count⟩
+  have h_total : P (M.card) := Nat.strong_induction_on (M.card) hP
+  exact h_total M rfl h
 
 /-- The circle part of the root multiset has all-even counts and a `σ`-invariant half. -/
 theorem fr_build_S_circle_half (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
@@ -333,27 +588,104 @@ theorem fr_build_S_circle_half (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.
       ∃ T : Multiset ℂ, T + T = H.roots.filter (fun r => ‖r‖ = 1) ∧
         (∀ w : ℂ, T.count w = (H.roots.filter (fun r => ‖r‖ = 1)).count w / 2) ∧
         T.map invConj = T := by
-  sorry
+  set F := H.roots.filter (fun r => ‖r‖ = 1) with hF
+  have hF_circle : ∀ r ∈ F, ‖r‖ = 1 := by
+    intro r hr
+    exact (Multiset.mem_filter.mp hr).2
+  have h_even_all : ∀ w : ℂ, Even (F.count w) := by
+    intro w
+    by_cases hw_circle : ‖w‖ = 1
+    · have hcount_eq : F.count w = H.rootMultiplicity w := by
+        calc
+          F.count w = (H.roots.filter (fun r => ‖r‖ = 1)).count w := rfl
+          _ = H.roots.count w := Multiset.count_filter_of_pos hw_circle
+          _ = H.rootMultiplicity w := by rw [Polynomial.count_roots]
+      rw [hcount_eq]
+      exact circle_root_even n H hH0 hpos hw_circle
+    · have hcount0 : F.count w = 0 := Multiset.count_filter_of_neg hw_circle
+      rw [hcount0]
+      exact ⟨0, by simp⟩
+  rcases exists_half_of_even_count F h_even_all with ⟨T, hTadd, hTcount⟩
+  have hTmap_invConj_eq : T.map invConj = T := by
+    have hT_circle : ∀ r ∈ T, ‖r‖ = 1 := by
+      intro r hr
+      have hmem : r ∈ T + T := Multiset.mem_add.mpr (Or.inl hr)
+      rw [hTadd] at hmem
+      exact hF_circle r hmem
+    have h_invConj_fix : ∀ r ∈ T, invConj r = r := by
+      intro r hr
+      have hcircle := hT_circle r hr
+      have h_ne_zero : r ≠ 0 := by
+        intro hzero
+        rw [hzero] at hcircle
+        norm_num at hcircle
+      exact ((invConj_invConj h_ne_zero).2).mpr hcircle
+    calc
+      T.map invConj = T.map (fun x : ℂ => x) := Multiset.map_congr rfl h_invConj_fix
+      _ = T := Multiset.map_id T
+  exact ⟨h_even_all, T, hTadd, hTcount, hTmap_invConj_eq⟩
 
 /-- Constant term of a top-degree self-inversive polynomial is the conjugate of its leading
 coefficient (hence nonzero). -/
 theorem fr_multiset_H0 (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
     (hself : conjRecip (2 * n) H = H) (hdegeq : H.natDegree = 2 * n) :
     H.eval 0 = starRingEnd ℂ H.leadingCoeff ∧ H.eval 0 ≠ 0 := by
-  sorry
+  have hcoeff_symm : coeff H 0 = starRingEnd ℂ (coeff H (2 * n)) := by
+    apply selfInversive_coeff_symm n H hself (j := 0)
+    omega
+  have hcoeff0_eval0 : coeff H 0 = H.eval 0 := by
+    rw [Polynomial.coeff_zero_eq_eval_zero]
+  have hcoeff_leading : coeff H (2 * n) = H.leadingCoeff := by
+    calc
+      coeff H (2 * n) = coeff H (H.natDegree) := by rw [hdegeq]
+      _ = H.leadingCoeff := Polynomial.coeff_natDegree
+  have h_eq : H.eval 0 = starRingEnd ℂ H.leadingCoeff := by
+    calc
+      H.eval 0 = coeff H 0 := by rw [Polynomial.coeff_zero_eq_eval_zero]
+      _ = starRingEnd ℂ (coeff H (2 * n)) := hcoeff_symm
+      _ = starRingEnd ℂ H.leadingCoeff := by rw [hcoeff_leading]
+  have h_ne_zero : H.eval 0 ≠ 0 := by
+    rw [h_eq]
+    have h_lc_ne_zero : H.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hH0
+    intro hzero
+    apply h_lc_ne_zero
+    exact star_injective (by simpa using hzero)
+  exact ⟨h_eq, h_ne_zero⟩
 
 /-- Multiplicity transport for the conjugate-reciprocal: mult of `w` in `Q^{†n}` equals mult of
 `1/conj w = σ w` in `Q`. -/
 theorem fr_complementary_mult (n : ℕ) (Q : ℂ[X]) (hQ0 : Q ≠ 0) (hQ : Q.natDegree ≤ n)
     {w : ℂ} (hw : w ≠ 0) :
     (conjRecip n Q).rootMultiplicity w = Q.rootMultiplicity (invConj w) := by
-  sorry
+  unfold conjRecip
+  have hmap_ne_zero : Q.map (starRingEnd ℂ) ≠ 0 := Polynomial.map_ne_zero hQ0
+  have hmap_natDegree : (Q.map (starRingEnd ℂ)).natDegree ≤ n := by
+    calc
+      (Q.map (starRingEnd ℂ)).natDegree ≤ Q.natDegree := Polynomial.natDegree_map_le
+      _ ≤ n := hQ
+  calc
+    (reflect n (Q.map (starRingEnd ℂ))).rootMultiplicity w
+        = (Q.map (starRingEnd ℂ)).rootMultiplicity w⁻¹ :=
+      rootMultiplicity_reflect n (Q.map (starRingEnd ℂ)) hmap_ne_zero hmap_natDegree hw
+    _ = Q.rootMultiplicity (starRingEnd ℂ (w⁻¹)) := rootMultiplicity_map_conj Q (w⁻¹)
+    _ = Q.rootMultiplicity ((starRingEnd ℂ w)⁻¹) := by simp
+    _ = Q.rootMultiplicity (invConj w) := rfl
 
 /-- Roots of a scaled product of linear factors. -/
 theorem fr_roots_scaled_prod (c : ℂ) (hc : c ≠ 0) (S : Multiset ℂ) :
     (C c * (S.map (fun r => X - C r)).prod) ≠ 0 ∧
       (C c * (S.map (fun r => X - C r)).prod).roots = S := by
-  sorry
+  have hprod_nonzero : (S.map (fun r => X - C r)).prod ≠ 0 :=
+    Polynomial.Monic.ne_zero (Polynomial.monic_multiset_prod_of_monic S (fun r => X - C r) (fun r hr =>
+      Polynomial.monic_X_sub_C r))
+  have h_nonzero : C c * (S.map (fun r => X - C r)).prod ≠ 0 :=
+    mul_ne_zero (Polynomial.C_ne_zero.mpr hc) hprod_nonzero
+  have h_roots : (C c * (S.map (fun r => X - C r)).prod).roots = S := by
+    calc
+      (C c * (S.map (fun r => X - C r)).prod).roots = ((S.map (fun r => X - C r)).prod).roots := by
+        rw [Polynomial.roots_C_mul _ hc]
+      _ = S := by simp
+  exact And.intro h_nonzero h_roots
 
 /-- Root multiset of a scaled factor product and of its conjugate-reciprocal. -/
 theorem fr_complementary_roots (n : ℕ) (c : ℂ) (hc : c ≠ 0) (S : Multiset ℂ)
@@ -370,7 +702,39 @@ theorem fr_positive_multiple_D (n : ℕ) (S : Multiset ℂ) (hS : ∀ r ∈ S, r
     let D := Q0 * conjRecip n Q0
     let ω := starRingEnd ℂ ((S.map (fun r => -r)).prod)
     D ≠ 0 ∧ ω ≠ 0 ∧ D.roots = S + S.map invConj ∧ D.leadingCoeff = ω := by
-  sorry
+  intro Q0 D ω
+  have hc_ne_zero : (1 : ℂ) ≠ 0 := by norm_num
+  -- ω ≠ 0 from fr_leadingCoeff_conjRecip with c = 1
+  have h_omega_ne_zero : ω ≠ 0 := by
+    have h_full := fr_leadingCoeff_conjRecip n (1 : ℂ) hc_ne_zero S hS hcard
+      (C (1 : ℂ) * (S.map (fun r => X - C r)).prod) (by simp) ω rfl
+    rcases h_full with ⟨hω_ne_zero, _, _, _⟩
+    exact hω_ne_zero
+  -- D.roots = S + S.map invConj from fr_complementary with c = 1
+  have h_roots : D.roots = S + S.map invConj := by
+    dsimp [D, Q0]
+    simpa using fr_complementary n (1 : ℂ) hc_ne_zero S hS hcard
+  -- D.leadingCoeff = ω from fr_leadingCoeff_conjRecip with c = 1
+  have h_lc : D.leadingCoeff = ω := by
+    dsimp [D, Q0]
+    have h_full := fr_leadingCoeff_conjRecip n (1 : ℂ) hc_ne_zero S hS hcard
+      (C (1 : ℂ) * (S.map (fun r => X - C r)).prod) (by simp) ω rfl
+    rcases h_full with ⟨_, _, _, h_lc_prod⟩
+    calc
+      ((S.map (fun r => X - C r)).prod * conjRecip n ((S.map (fun r => X - C r)).prod)).leadingCoeff
+          = ((C (1 : ℂ) * (S.map (fun r => X - C r)).prod) *
+              conjRecip n (C (1 : ℂ) * (S.map (fun r => X - C r)).prod)).leadingCoeff := by simp
+      _ = ((‖(1 : ℂ)‖ ^ 2 : ℝ) : ℂ) * ω := h_lc_prod
+      _ = (1 : ℂ) * ω := by norm_num
+      _ = ω := by simp
+  -- D ≠ 0 because its leading coefficient ω is nonzero
+  have h_D_ne_zero : D ≠ 0 := by
+    intro hzero
+    have hzero_lc : D.leadingCoeff = 0 := by
+      simpa [hzero] using Polynomial.leadingCoeff_zero
+    rw [h_lc] at hzero_lc
+    exact h_omega_ne_zero hzero_lc
+  exact ⟨h_D_ne_zero, h_omega_ne_zero, h_roots, h_lc⟩
 
 /-- A circle point off the roots of a nonzero polynomial. -/
 theorem fr_positive_multiple_point (H : ℂ[X]) (hH0 : H ≠ 0) :
@@ -381,7 +745,25 @@ theorem fr_positive_multiple_point (H : ℂ[X]) (hH0 : H ≠ 0) :
 theorem fr_D_eval_circle (n : ℕ) (S : Multiset ℂ) (hcard : S.card ≤ n) {z : ℂ} (hz : ‖z‖ = 1) :
     let Q0 := (S.map (fun r => X - C r)).prod
     (z ^ n)⁻¹ * (Q0 * conjRecip n Q0).eval z = ((‖Q0.eval z‖ ^ 2 : ℝ) : ℂ) := by
-  sorry
+  intro Q0
+  have hz_ne_zero : z ≠ 0 := by
+    intro hzero
+    have : ‖z‖ = 0 := by simp [hzero]
+    rw [hz] at this
+    norm_num at this
+  have hQ0_natDegree : Q0.natDegree ≤ n := by
+    calc
+      Q0.natDegree = S.card := Polynomial.natDegree_multiset_prod_X_sub_C_eq_card S
+      _ ≤ n := hcard
+  have h_pow_ne_zero : z ^ n ≠ 0 := pow_ne_zero n hz_ne_zero
+  calc
+    (z ^ n)⁻¹ * (Q0 * conjRecip n Q0).eval z = (z ^ n)⁻¹ * (Q0.eval z * (conjRecip n Q0).eval z) := by
+      rw [Polynomial.eval_mul]
+    _ = (z ^ n)⁻¹ * (z ^ n * ((‖Q0.eval z‖ ^ 2 : ℝ) : ℂ)) := by
+      rw [conjRecip_mul_eval n Q0 hQ0_natDegree hz]
+    _ = ((z ^ n)⁻¹ * z ^ n) * ((‖Q0.eval z‖ ^ 2 : ℝ) : ℂ) := by ring
+    _ = (1 : ℂ) * ((‖Q0.eval z‖ ^ 2 : ℝ) : ℂ) := by simp [h_pow_ne_zero]
+    _ = ((‖Q0.eval z‖ ^ 2 : ℝ) : ℂ) := by simp
 
 /-- Positivity of the scaling factor `λ` with `H = C λ · D`. -/
 theorem fr_positive_multiple_lambda (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
@@ -392,7 +774,66 @@ theorem fr_positive_multiple_lambda (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg
     (hHeq : H = C lam *
       ((S.map (fun r => X - C r)).prod * conjRecip n (S.map (fun r => X - C r)).prod)) :
     ∃ r : ℝ, 0 < r ∧ lam = (r : ℂ) := by
-  sorry
+  set Q0 := (S.map (fun r => X - C r)).prod with hQ0
+  have hQ0_eval_ne_zero (z : ℂ) (hz : ‖z‖ = 1) (hz_ne : H.eval z ≠ 0) : Q0.eval z ≠ 0 := by
+    intro hzero
+    have hD_eval_zero : (Q0 * conjRecip n Q0).eval z = 0 := by
+      simp [hzero, eval_mul]
+    have hH_eval_zero : H.eval z = 0 := by
+      rw [hHeq, eval_mul, eval_C, hD_eval_zero, mul_zero]
+    exact hz_ne hH_eval_zero
+  rcases fr_positive_multiple_point H hH0 with ⟨z0, hz0_norm, hz0_ne⟩
+  have hz0_ne_zero : z0 ≠ 0 := by
+    intro hzero
+    rw [hzero, norm_zero] at hz0_norm
+    norm_num at hz0_norm
+  rcases hpos z0 hz0_norm with ⟨r, hr_nonneg, hr_eq⟩
+  have hr_pos : 0 < r := by
+    have h_nonzero : (z0 ^ n)⁻¹ * H.eval z0 ≠ 0 := by
+      have h_pow_ne_zero : z0 ^ n ≠ 0 := pow_ne_zero n hz0_ne_zero
+      have h_eval_ne_zero : H.eval z0 ≠ 0 := hz0_ne
+      apply mul_ne_zero (inv_ne_zero h_pow_ne_zero) h_eval_ne_zero
+    by_contra! hrle
+    have hrzero : r = 0 := by linarith
+    apply h_nonzero
+    rw [hr_eq, hrzero]
+    simp
+  have hD_eq : (z0 ^ n)⁻¹ * (Q0 * conjRecip n Q0).eval z0 = ((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ) := by
+    dsimp [Q0]
+    exact fr_D_eval_circle n S hcard hz0_norm
+  have hQ0_eval_ne_zero' : Q0.eval z0 ≠ 0 :=
+    hQ0_eval_ne_zero z0 hz0_norm hz0_ne
+  have h_norm_sq_pos : 0 < ‖Q0.eval z0‖ ^ 2 := by
+    have h_nonzero_norm : ‖Q0.eval z0‖ ≠ 0 := mt norm_eq_zero.mp hQ0_eval_ne_zero'
+    have hpos_norm : 0 < ‖Q0.eval z0‖ :=
+      lt_of_le_of_ne (norm_nonneg _) (Ne.symm h_nonzero_norm)
+    exact pow_pos hpos_norm 2
+  have h_norm_sq_ne_zero : ((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ) ≠ 0 := by
+    exact_mod_cast h_norm_sq_pos.ne'
+  have h_lam_eq : (r : ℂ) = lam * ((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ) := by
+    calc
+      (r : ℂ) = (z0 ^ n)⁻¹ * H.eval z0 := hr_eq.symm
+      _ = (z0 ^ n)⁻¹ * ((C lam * (Q0 * conjRecip n Q0)).eval z0) := by rw [hHeq, hQ0]
+      _ = (z0 ^ n)⁻¹ * (lam * (Q0 * conjRecip n Q0).eval z0) := by simp
+      _ = lam * ((z0 ^ n)⁻¹ * (Q0 * conjRecip n Q0).eval z0) := by ring
+      _ = lam * ((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ) := by rw [hD_eq]
+  set t := r / (‖Q0.eval z0‖ ^ 2) with ht_def
+  have ht_pos : 0 < t := div_pos hr_pos h_norm_sq_pos
+  have hlam_real : lam = (t : ℂ) := by
+    have h_eq' : lam * ((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ) = (r : ℂ) := by
+      symm; exact h_lam_eq
+    calc
+      lam = lam * 1 := by simp
+      _ = lam * (((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ) * ((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ)⁻¹) := by
+        field_simp [h_norm_sq_ne_zero]
+      _ = (lam * ((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ)) * ((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ)⁻¹ := by ring
+      _ = (r : ℂ) * ((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ)⁻¹ := by rw [h_eq']
+      _ = ((r : ℂ) / ((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ)) := by
+        simp [div_eq_mul_inv]
+      _ = ((r / (‖Q0.eval z0‖ ^ 2) : ℝ) : ℂ) := by
+        simpa using (map_div₀ (algebraMap ℝ ℂ) r (‖Q0.eval z0‖ ^ 2)).symm
+      _ = (t : ℂ) := rfl
+  exact ⟨t, ht_pos, hlam_real⟩
 
 /-- Fejér–Riesz factorization, zero-free core (`H(0) ≠ 0`). -/
 theorem fr_zero_free (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
@@ -436,7 +877,29 @@ theorem fr_zero_factor_selfInv (n k : ℕ) (H H1 : ℂ[X]) (hself : conjRecip (2
     (hk : k ≤ n) (hH1 : H1 ≠ 0) (hdeg1 : H1.natDegree ≤ 2 * (n - k))
     (hfact : H = X ^ k * H1) :
     conjRecip (2 * (n - k)) H1 = H1 := by
-  sorry
+  have hXk_deg : (X ^ k : ℂ[X]).natDegree ≤ 2 * k := by
+    have hXk_natDegree : (X ^ k : ℂ[X]).natDegree = k := by simp
+    rw [hXk_natDegree]
+    omega
+  have h_sum_eq : 2 * n = 2 * k + 2 * (n - k) := by omega
+  have h_mul : conjRecip (2 * n) (X ^ k * H1) = conjRecip (2 * k) (X ^ k) * conjRecip (2 * (n - k)) H1 := by
+    rw [h_sum_eq]
+    exact conjRecip_mul (2 * k) (2 * (n - k)) (X ^ k) H1 hXk_deg hdeg1
+  have hH_self : conjRecip (2 * n) (X ^ k * H1) = X ^ k * H1 := by
+    calc
+      conjRecip (2 * n) (X ^ k * H1) = conjRecip (2 * n) H := by rw [hfact]
+      _ = H := hself
+      _ = X ^ k * H1 := hfact
+  have hXk_conj : conjRecip (2 * k) (X ^ k) = X ^ k := by
+    simpa using conjRecip_X_pow k
+  have h_eq : X ^ k * H1 = X ^ k * conjRecip (2 * (n - k)) H1 := by
+    calc
+      X ^ k * H1 = conjRecip (2 * n) (X ^ k * H1) := by symm; exact hH_self
+      _ = conjRecip (2 * k) (X ^ k) * conjRecip (2 * (n - k)) H1 := h_mul
+      _ = X ^ k * conjRecip (2 * (n - k)) H1 := by rw [hXk_conj]
+  have hXk_ne_zero : (X : ℂ[X]) ^ k ≠ 0 := pow_ne_zero k (by
+    exact Polynomial.X_ne_zero)
+  exact (mul_left_cancel₀ hXk_ne_zero h_eq).symm
 
 /-- Nonnegativity transports to the zero-free quotient. -/
 theorem fr_zero_factor_nonneg (n k : ℕ) (H H1 : ℂ[X]) (hfact : H = X ^ k * H1)

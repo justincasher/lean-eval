@@ -178,7 +178,13 @@ theorem conjRecip_X_pow (n : ℕ) :
 theorem selfInversive_coeff_symm (n : ℕ) (H : ℂ[X]) (hself : conjRecip (2 * n) H = H)
     {j : ℕ} (hj : j ≤ 2 * n) :
     H.coeff j = starRingEnd ℂ (H.coeff (2 * n - j)) := by
-  sorry
+  unfold conjRecip at hself
+  have hcoeff : (reflect (2 * n) (H.map (starRingEnd ℂ))).coeff j = H.coeff j := by
+    rw [hself]
+  rw [Polynomial.coeff_reflect] at hcoeff
+  rw [Polynomial.revAt_le hj] at hcoeff
+  rw [Polynomial.coeff_map] at hcoeff
+  exact hcoeff.symm
 
 /-- Leading coefficient of the conjugate-reciprocal: `coeff N (A^{†N}) = conj (A 0)`, and if
 `A 0 ≠ 0` then `deg (A^{†N}) = N` with leading coefficient `conj (A 0)`. -/
@@ -186,7 +192,46 @@ theorem conjRecip_leadingCoeff (N : ℕ) (A : ℂ[X]) (hA : A.natDegree ≤ N) :
     (conjRecip N A).coeff N = starRingEnd ℂ (A.eval 0) ∧
       (A.eval 0 ≠ 0 → (conjRecip N A).natDegree = N ∧
         (conjRecip N A).leadingCoeff = starRingEnd ℂ (A.eval 0)) := by
-  sorry
+  -- Part 1: coefficient at degree N
+  have hcoeffN : (conjRecip N A).coeff N = starRingEnd ℂ (A.eval 0) := by
+    unfold conjRecip
+    calc
+      (reflect N (A.map (starRingEnd ℂ))).coeff N = (A.map (starRingEnd ℂ)).coeff (revAt N N) := by
+        rw [coeff_reflect]
+      _ = (A.map (starRingEnd ℂ)).coeff 0 := by
+        simp
+      _ = starRingEnd ℂ (A.coeff 0) := by rw [coeff_map]
+      _ = starRingEnd ℂ (A.eval 0) := by rw [coeff_zero_eq_eval_zero]
+
+  -- Part 2: degree and leading coefficient when the constant term is nonzero
+  have h_deg_le_N : (conjRecip N A).natDegree ≤ N :=
+    conjRecip_natDegree_le N A hA
+
+  refine ⟨hcoeffN, ?_⟩
+
+  intro hA0_ne
+
+  -- The coefficient at N is nonzero, because star is injective
+  have hcoeffN_ne_zero : (conjRecip N A).coeff N ≠ 0 := by
+    rw [hcoeffN]
+    intro hzero
+    apply hA0_ne
+    have hstar_inj : Function.Injective (starRingEnd ℂ) := star_injective
+    apply hstar_inj
+    simpa using hzero
+
+  have h_natDegree_eq_N : (conjRecip N A).natDegree = N := by
+    apply le_antisymm h_deg_le_N
+    by_contra hlt
+    have hlt' : (conjRecip N A).natDegree < N := Nat.lt_of_not_ge hlt
+    have hcoeffN_zero : (conjRecip N A).coeff N = 0 :=
+      coeff_eq_zero_of_natDegree_lt hlt'
+    exact hcoeffN_ne_zero hcoeffN_zero
+
+  have h_leadingCoeff : (conjRecip N A).leadingCoeff = starRingEnd ℂ (A.eval 0) := by
+    rw [leadingCoeff, h_natDegree_eq_N, hcoeffN]
+
+  exact ⟨h_natDegree_eq_N, h_leadingCoeff⟩
 
 end ComplexAnalysis
 end LeanEval
