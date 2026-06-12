@@ -875,7 +875,64 @@ theorem hasDerivAt_space_second {f : ℝ → ℝ} (hf_cont : Continuous f) {M : 
     HasDerivAt
       (fun z : ℝ => ∫ y : ℝ, -((z - y) / (2 * t)) * gaussianHeatKernel t (z - y) * f y)
       (∫ y : ℝ, ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) * gaussianHeatKernel t (x - y) * f y) x := by
-  sorry
+  -- Set up the integrand and its derivative
+  set F := fun (r y : ℝ) => -((r - y) / (2 * t)) * gaussianHeatKernel t (r - y) * f y with hF_def
+  set F' := fun (r y : ℝ) => ((r - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) * gaussianHeatKernel t (r - y) * f y with hF'_def
+  set s := Metric.closedBall x 1 with hs_def
+  have hs : s ∈ nhds x := by
+    simpa [hs_def] using Metric.closedBall_mem_nhds x (by norm_num : (0 : ℝ) < 1)
+  -- Obtain the integrable dominating function g from bound_space_second
+  rcases bound_space_second hf_bdd ht x with ⟨g, hg_int, h_bound⟩
+  -- Hypothesis (1): integrability of F at the base point x
+  have hF₀ : Integrable (fun y => F x y) := by
+    dsimp [F]
+    -- Use bound_space to dominate |F x y|
+    rcases bound_space hf_bdd ht x with ⟨g0, hg0_int, h_bound0⟩
+    have h_abs_bound : ∀ y, |(-((x - y) / (2 * t)) * gaussianHeatKernel t (x - y) * f y)| ≤ g0 y := by
+      intro y
+      exact h_bound0 x (by simp) y
+    have h_meas : AEStronglyMeasurable (fun y => -((x - y) / (2 * t)) * gaussianHeatKernel t (x - y) * f y) volume := by
+      have hk_cont : Continuous (fun z : ℝ => -(z / (2 * t)) * gaussianHeatKernel t z) := by
+        refine (Continuous.neg ?_).mul ?_
+        · exact continuous_id.div_const (2*t)
+        · unfold gaussianHeatKernel
+          refine (continuous_const.mul ?_)
+          exact Real.continuous_exp.comp ((Continuous.neg (continuous_id.pow 2)).div_const (4*t))
+      exact shift_scale_aestronglyMeasurable hk_cont hf_cont x
+    have h_norm_bound : ∀ᵐ y ∂volume, ‖(-((x - y) / (2 * t)) * gaussianHeatKernel t (x - y) * f y)‖ ≤ g0 y := by
+      filter_upwards [] with y
+      rw [Real.norm_eq_abs]
+      exact h_abs_bound y
+    exact hg0_int.mono' h_meas h_norm_bound
+  -- Hypothesis (2): a.e. strong measurability of F(r,·) for each r ∈ s
+  have hk_cont : Continuous (fun z : ℝ => -(z / (2 * t)) * gaussianHeatKernel t z) := by
+    refine (Continuous.neg ?_).mul ?_
+    · exact continuous_id.div_const (2*t)
+    · unfold gaussianHeatKernel
+      refine (continuous_const.mul ?_)
+      exact Real.continuous_exp.comp ((Continuous.neg (continuous_id.pow 2)).div_const (4*t))
+  have hmeas : ∀ r ∈ s, AEStronglyMeasurable (fun y => F r y) volume := by
+    intro r hr
+    dsimp [F]
+    exact shift_scale_aestronglyMeasurable hk_cont hf_cont r
+  -- Hypothesis (3): uniform domination bound
+  have hbound' : ∀ y : ℝ, ∀ r ∈ s, |F' r y| ≤ g y := by
+    intro y r hr
+    dsimp [F']
+    have hdist : dist r x ≤ 1 := Metric.mem_closedBall.mp hr
+    have hx : |r - x| ≤ 1 := by simpa [dist_eq] using hdist
+    exact h_bound r hx y
+  -- Hypothesis (4): pointwise derivative
+  have hderiv : ∀ y : ℝ, ∀ r ∈ s, HasDerivAt (fun r' => F r' y) (F' r y) r := by
+    intro y r hr
+    dsimp [F, F']
+    have hk_deriv : HasDerivAt (fun z : ℝ => -(z / (2 * t)) * gaussianHeatKernel t z)
+        (((r - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) * gaussianHeatKernel t (r - y)) (r - y) :=
+      kernel_hasDerivAt_space_second ht (r - y)
+    exact shift_scale_hasDerivAt hk_deriv
+  -- Apply the Leibniz rule
+  have h_result := hasDerivAt_under_integral hs hg_int hF₀ hmeas hbound' hderiv
+  exact h_result.2
 
 /-- **Solution agrees with the kernel integral near positive times.** -/
 theorem heatSolution_eventuallyEq_kernel_integral (f : ℝ → ℝ) {t : ℝ} (ht : 0 < t) (x : ℝ) :

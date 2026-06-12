@@ -542,7 +542,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Second spatial derivative of the solution]
     \label{lem:hasDerivAt_space_second}
+    \lean{LeanEval.Analysis.ODE.hasDerivAt_space_second}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:kernel_integrand_integrable, lem:shifted_gaussian_integrable, lem:kernel_hasDerivAt_space_second, lem:shift_scale_hasDerivAt, lem:shift_scale_aestronglyMeasurable, lem:bound_space_second, lem:hasDerivAt_under_integral}
+    \leanok
     Assume $f$ continuous with $\lvert f\rvert \le M$. For every $t > 0$ and every
     $x \in \mathbb{R}$, writing $u_x(z) = \int_{\mathbb{R}} -\tfrac{z-y}{2t}\,G_t(z-y)\,f(y)\,dy$,
     \[ \mathrm{HasDerivAt}\,u_x
