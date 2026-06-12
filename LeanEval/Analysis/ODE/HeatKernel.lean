@@ -353,7 +353,83 @@ theorem bound_space_pointwise {f : ℝ → ℝ} {M : ℝ} (hf_bdd : ∀ x, |f x|
     |-((x - y) / (2 * t)) * gaussianHeatKernel t (x - y) * f y| ≤
       M / (2 * t) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) * Real.exp (1 / (2 * t)) *
         (1 + |y - x₀|) * Real.exp (-((y - x₀) ^ 2) / (8 * t)) := by
-  sorry
+  have hM_nonneg : 0 ≤ M := by
+    have h0 := hf_bdd 0
+    have h_abs_nonneg : 0 ≤ |f 0| := abs_nonneg _
+    linarith
+  have hG_nonneg : 0 ≤ gaussianHeatKernel t (x - y) := by
+    unfold gaussianHeatKernel; positivity
+  have h2t_pos : 0 < 2 * t := by linarith
+  have h_tri : |x - y| ≤ 1 + |y - x₀| := by
+    have h_abs_sub : |(x - x₀) - (y - x₀)| ≤ |x - x₀| + |y - x₀| := abs_sub _ _
+    have h_eq : (x - x₀) - (y - x₀) = x - y := by ring
+    calc
+      |x - y| = |(x - x₀) - (y - x₀)| := by rw [h_eq]
+      _ ≤ |x - x₀| + |y - x₀| := h_abs_sub
+      _ ≤ 1 + |y - x₀| := by nlinarith
+  have h_exp_bound : Real.exp (-((x - y) ^ 2) / (4 * t)) ≤
+      Real.exp (1 / (2 * t)) * Real.exp (-((y - x₀) ^ 2) / (8 * t)) :=
+    gaussian_exp_domination hx ht y
+  have h_f_abs : |f y| ≤ M := hf_bdd y
+  have h_pre_nonneg : 0 ≤ (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) := by positivity
+  have h_exp_pos : 0 ≤ Real.exp (1 / (2 * t)) := (Real.exp_pos _).le
+  have h_exp_y_nonneg : 0 ≤ Real.exp (-((y - x₀) ^ 2) / (8 * t)) := (Real.exp_pos _).le
+  have h_prod_nonneg : 0 ≤ M / (2 * t) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) *
+      Real.exp (1 / (2 * t)) * Real.exp (-((y - x₀) ^ 2) / (8 * t)) := by
+    refine mul_nonneg (mul_nonneg (mul_nonneg ?_ ?_) ?_) ?_
+    · exact div_nonneg hM_nonneg (by linarith)
+    · exact h_pre_nonneg
+    · exact h_exp_pos
+    · exact h_exp_y_nonneg
+  -- Factor the absolute value into |x-y|/(2t) * kernel * |f(y)|
+  have h_abs_factor : |-((x - y) / (2 * t)) * gaussianHeatKernel t (x - y) * f y| =
+      (|x - y| / (2 * t)) * gaussianHeatKernel t (x - y) * |f y| := by
+    calc
+      |-((x - y) / (2 * t)) * gaussianHeatKernel t (x - y) * f y|
+          = |(-((x - y) / (2 * t)) * gaussianHeatKernel t (x - y)) * f y| := by ring
+      _ = |(-((x - y) / (2 * t)) * gaussianHeatKernel t (x - y))| * |f y| := by rw [abs_mul]
+      _ = (|(-((x - y) / (2 * t)))| * |gaussianHeatKernel t (x - y)|) * |f y| := by rw [abs_mul]
+      _ = (|-(x - y) / (2 * t)| * |gaussianHeatKernel t (x - y)|) * |f y| := by
+        rw [show |(-((x - y) / (2 * t)))| = |-(x - y) / (2 * t)| by rw [neg_div]]
+      _ = (|x - y| / |2 * t|) * |gaussianHeatKernel t (x - y)| * |f y| := by rw [abs_div, abs_neg]
+      _ = (|x - y| / (2 * t)) * |gaussianHeatKernel t (x - y)| * |f y| := by
+        rw [abs_of_nonneg (show 0 ≤ 2 * t from by linarith)]
+      _ = (|x - y| / (2 * t)) * gaussianHeatKernel t (x - y) * |f y| := by rw [abs_of_nonneg hG_nonneg]
+  rw [h_abs_factor]
+  have h_mul_nonneg : 0 ≤ (|x - y| / (2 * t)) * gaussianHeatKernel t (x - y) :=
+    mul_nonneg (div_nonneg (abs_nonneg _) (by linarith)) hG_nonneg
+  calc
+    (|x - y| / (2 * t)) * gaussianHeatKernel t (x - y) * |f y|
+        ≤ (|x - y| / (2 * t)) * gaussianHeatKernel t (x - y) * M :=
+      mul_le_mul_of_nonneg_left h_f_abs h_mul_nonneg
+    _ = (|x - y| / (2 * t)) * ((4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) * Real.exp (-((x - y) ^ 2) / (4 * t))) * M := by
+      simp [gaussianHeatKernel]
+    _ = (|x - y| / (2 * t)) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) * Real.exp (-((x - y) ^ 2) / (4 * t)) * M := by ring
+    _ ≤ (|x - y| / (2 * t)) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) *
+        (Real.exp (1 / (2 * t)) * Real.exp (-((y - x₀) ^ 2) / (8 * t))) * M := by
+      have h_nonneg_left : 0 ≤ (|x - y| / (2 * t)) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) * M :=
+        mul_nonneg (mul_nonneg (div_nonneg (abs_nonneg _) (by linarith)) h_pre_nonneg) hM_nonneg
+      nlinarith
+    _ = (|x - y| / (2 * t)) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) * Real.exp (1 / (2 * t)) *
+        Real.exp (-((y - x₀) ^ 2) / (8 * t)) * M := by ring
+    _ = M * (|x - y| / (2 * t)) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) *
+        Real.exp (1 / (2 * t)) * Real.exp (-((y - x₀) ^ 2) / (8 * t)) := by ring
+    _ = (M / (2 * t)) * |x - y| * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) *
+        Real.exp (1 / (2 * t)) * Real.exp (-((y - x₀) ^ 2) / (8 * t)) := by ring
+    _ ≤ (M / (2 * t)) * (1 + |y - x₀|) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) *
+        Real.exp (1 / (2 * t)) * Real.exp (-((y - x₀) ^ 2) / (8 * t)) := by
+      calc
+        (M / (2 * t)) * |x - y| * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) *
+            Real.exp (1 / (2 * t)) * Real.exp (-((y - x₀) ^ 2) / (8 * t))
+            = ((M / (2 * t)) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) *
+                Real.exp (1 / (2 * t)) * Real.exp (-((y - x₀) ^ 2) / (8 * t))) * |x - y| := by ring
+        _ ≤ ((M / (2 * t)) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) *
+                Real.exp (1 / (2 * t)) * Real.exp (-((y - x₀) ^ 2) / (8 * t))) * (1 + |y - x₀|) :=
+          mul_le_mul_of_nonneg_left h_tri h_prod_nonneg
+        _ = (M / (2 * t)) * (1 + |y - x₀|) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) *
+            Real.exp (1 / (2 * t)) * Real.exp (-((y - x₀) ^ 2) / (8 * t)) := by ring
+    _ = M / (2 * t) * (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) * Real.exp (1 / (2 * t)) *
+        (1 + |y - x₀|) * Real.exp (-((y - x₀) ^ 2) / (8 * t)) := by ring
 
 /-- **Uniform domination of the first spatial derivative.** -/
 theorem bound_space {f : ℝ → ℝ} {M : ℝ} (hf_bdd : ∀ x, |f x| ≤ M)
@@ -929,7 +1005,53 @@ theorem heatSolution_change_of_variables (f : ℝ → ℝ) {t : ℝ} (ht : 0 < t
     heatSolution f t x =
       (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) * (2 * Real.sqrt t) *
         ∫ z : ℝ, Real.exp (-z ^ 2) * f (x - 2 * Real.sqrt t * z) := by
-  sorry
+  rw [heatSolution, if_pos ht]
+  set h := 2 * Real.sqrt t with hh
+  have ha_pos : 0 < h := mul_pos (by norm_num) (Real.sqrt_pos.mpr ht)
+  have ha_ne_zero : h ≠ 0 := by linarith
+  set g := fun (y : ℝ) => Real.exp (-((x - y) ^ 2) / (4 * t)) * f y with hg
+  set gx := fun (w : ℝ) => Real.exp (-(w ^ 2) / (4 * t)) * f (x + w) with hgx
+  have h_gx_eq' : gx = fun w => g (x + w) := by
+    ext w
+    dsimp [gx, g]
+    ring_nf
+  have h_trans : (∫ w : ℝ, gx w) = (∫ y : ℝ, g y) := by
+    calc
+      (∫ w : ℝ, gx w) = (∫ w : ℝ, g (x + w)) := by rw [h_gx_eq']
+      _ = (∫ y : ℝ, g y) := by
+        simpa [add_comm] using MeasureTheory.integral_add_right_eq_self g x
+  have h_scaling : (∫ z : ℝ, gx ((-h) * z)) = h⁻¹ * (∫ w : ℝ, gx w) := by
+    have h_int := MeasureTheory.Measure.integral_comp_mul_left gx (-h)
+    have h_smul : |((-h : ℝ)⁻¹)| • (∫ w : ℝ, gx w) = h⁻¹ * (∫ w : ℝ, gx w) := by
+      calc
+        |((-h : ℝ)⁻¹)| • (∫ w : ℝ, gx w) = |-(h⁻¹ : ℝ)| • (∫ w : ℝ, gx w) := by rw [neg_inv]
+        _ = |h⁻¹| • (∫ w : ℝ, gx w) := by rw [abs_neg]
+        _ = h⁻¹ * (∫ w : ℝ, gx w) := by
+          simp [abs_of_pos (inv_pos.mpr ha_pos)]
+    rw [h_int, h_smul]
+  have h_simplify : ∀ z, gx ((-h) * z) = Real.exp (-z ^ 2) * f (x - h * z) := by
+    intro z
+    calc
+      gx ((-h) * z) = Real.exp (-((-(2 * Real.sqrt t) * z) ^ 2) / (4 * t)) * f (x + (-(2 * Real.sqrt t) * z)) := by
+        dsimp [gx, h]
+      _ = Real.exp (-((2 * Real.sqrt t * z) ^ 2) / (4 * t)) * f (x - 2 * Real.sqrt t * z) := by
+        ring_nf
+      _ = Real.exp (-z ^ 2) * f (x - 2 * Real.sqrt t * z) := by
+        rw [gaussian_exponent_simplify ht z]
+      _ = Real.exp (-z ^ 2) * f (x - h * z) := by dsimp [h]
+  have h_main : (∫ y : ℝ, g y) = h * (∫ z : ℝ, Real.exp (-z ^ 2) * f (x - h * z)) := by
+    calc
+      (∫ y : ℝ, g y) = (∫ w : ℝ, gx w) := by symm; exact h_trans
+      _ = h * (h⁻¹ * (∫ w : ℝ, gx w)) := by
+        field_simp [ha_ne_zero]
+      _ = h * (∫ z : ℝ, gx ((-h) * z)) := by rw [h_scaling]
+      _ = h * (∫ z : ℝ, Real.exp (-z ^ 2) * f (x - h * z)) := by
+        refine congrArg (fun (F : ℝ → ℝ) => h * (∫ z : ℝ, F z)) ?_
+        ext z; exact h_simplify z
+  dsimp [g] at h_main
+  rw [h_main]
+  dsimp [h]
+  simp [mul_assoc]
 
 /-- **Substitution form of the solution.** -/
 theorem heatSolution_eq_subst (f : ℝ → ℝ) {t : ℝ} (ht : 0 < t) (x : ℝ) :

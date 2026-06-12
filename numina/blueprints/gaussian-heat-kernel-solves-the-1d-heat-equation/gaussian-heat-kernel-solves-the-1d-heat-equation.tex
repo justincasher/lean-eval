@@ -687,7 +687,10 @@ and concludes by dominated convergence as $t \downarrow 0$.
 
 \begin{lemma}[Change of variables in the solution]
     \label{lem:heatSolution_change_of_variables}
+    \lean{LeanEval.Analysis.ODE.heatSolution_change_of_variables}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
     \uses{lem:heatSolution_eq_kernel_integral, lem:gaussian_exponent_simplify}
+    \leanok
     For every $t > 0$ and $x \in \mathbb{R}$,
     \[ \mathrm{heatSolution}\,f\,t\,x
        = (4\pi t)^{-1/2}\cdot 2\sqrt{t} \int_{\mathbb{R}}
