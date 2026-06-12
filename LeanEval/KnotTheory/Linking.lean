@@ -2,6 +2,7 @@ import LeanEval.KnotTheory.Prelude
 import Mathlib.LinearAlgebra.CrossProduct
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.Analysis.SpecialFunctions.Sqrt
+import Mathlib.Analysis.Calculus.ContDiff.Deriv
 import EvalTools.Markers
 
 namespace LeanEval
@@ -53,7 +54,9 @@ theorem TwoLink.gaussMap_smooth (Lk : TwoLink) :
 /-- **Continuity of a knot's velocity.** A knot is smooth, hence its derivative
 is continuous. -/
 theorem Knot.continuous_deriv (γ : Knot) : Continuous (deriv γ.curve) := by
-  sorry
+  have hderiv_smooth : ContDiff ℝ (⊤ : ℕ∞) (deriv γ.curve) :=
+    ((contDiff_succ_iff_deriv (n := (⊤ : ℕ∞))).mp γ.smooth).2.2
+  exact hderiv_smooth.continuous
 
 /-- The scalar triple product `⟨u, v × w⟩` of three vectors in `ℝ³`, computed
 through the underlying coordinate vectors. Equals `det (u, v, w)`. -/
@@ -411,7 +414,9 @@ theorem hopf_integrand (s t : ℝ) :
 `D(s,t) = 3 + 2 cos t - 2 (1 + cos t) cos s ≥ 1`; in particular `D(s,t) > 0`. -/
 theorem hopf_denom_pos (s t : ℝ) :
     (1 : ℝ) ≤ 3 + 2 * Real.cos t - 2 * (1 + Real.cos t) * Real.cos s := by
-  sorry
+  have hcos_s : Real.cos s ≤ 1 := Real.cos_le_one _
+  have hcos_t : -1 ≤ Real.cos t := Real.neg_one_le_cos _
+  nlinarith
 
 /-- **Reduced form of the Hopf integrand.** Since the numerator is `½(D - 3)`,
 `I_{L₂}(s,t) = ½ D(s,t)^{-1/2} - 3/2 D(s,t)^{-3/2}`. -/
