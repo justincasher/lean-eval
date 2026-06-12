@@ -3,6 +3,654 @@
 
 \begin{document}
 
-% Your blueprint will go here.
+\section{Existence of a non-isotopic pair of oriented two-component links}
+
+We exhibit two oriented smooth two-component links in $\mathbb{R}^3$ that are not
+ambient-isotopic. The two links are the \emph{unlink} (two unit circles in the
+parallel planes $z = 0$ and $z = 2$) and the \emph{Hopf link} (the unit circle
+in the $xy$-plane together with a unit circle in the $xz$-plane centred at
+$(1,0,0)$). They are distinguished by the \emph{Gauss linking integral}
+\[
+  \mathrm{lk}(L) \;=\; \frac{1}{4\pi}\int_0^{2\pi}\!\!\int_0^{2\pi}
+    \frac{\bigl\langle \gamma_K(s) - \gamma_L(t),\ \gamma_K'(s)\times\gamma_L'(t)\bigr\rangle}
+         {\lVert \gamma_K(s) - \gamma_L(t)\rVert^{3}}\, ds\, dt ,
+\]
+a real number attached to a two-component link $L$ with parametrized components
+$\gamma_K,\gamma_L : \mathbb{R}\to\mathbb{R}^3$. It is an ambient-isotopy
+invariant, vanishes on the unlink, and is nonzero on the Hopf link.
+
+Here a \emph{knot} is a smooth, $2\pi$-periodic immersion $\mathbb{R}\to\mathbb{R}^3$
+injective on $[0,2\pi)$, a \emph{two-component link} (\texttt{TwoLink}) is a pair
+of knots with disjoint images, and two links are \emph{ambient-isotopic}
+(\texttt{TwoLink.Isotopic}) when a smooth one-parameter family of
+diffeomorphisms of $\mathbb{R}^3$ starting at the identity carries each oriented
+component of one onto the corresponding component of the other, up to an
+orientation-preserving smooth reparametrization of the source circle. These
+notions are fixed by the benchmark prelude.
+
+\subsection{Accepted assumptions}
+
+The de~Rham / mapping-degree route to isotopy invariance (pullback of differential
+forms, Stokes' theorem on $T^2\times[0,1]$, smooth mapping-degree theory) is not
+available in Mathlib, so we use the elementary analytic route throughout:
+$\mathrm{lk}$ is kept as the concrete double integral of \cref{def:linking-number}
+and every invariance and computation statement is reduced to one-variable
+calculus -- the fundamental theorem of calculus
+(\texttt{intervalIntegral.integral\_deriv\_eq\_sub}), differentiation under the
+integral sign (\texttt{hasDerivAt\_integral\_of\_dominated\_loc\_of\_deriv\_le}),
+Fubini (\texttt{MeasureTheory.intervalIntegral\_integral\_swap}), change of
+variables (\texttt{intervalIntegral.integral\_comp\_smul\_deriv'''}), and
+constancy from a vanishing derivative (\texttt{constant\_of\_derivWithin\_zero}).
+
+Exactly two statements are genuinely beyond what can be reduced to Mathlib
+primitives in a short proof, and they are therefore taken as explicit
+\emph{accepted assumptions} (axioms of the benchmark), not cited as if they were
+pre-existing Mathlib results:
+\begin{enumerate}
+  \item the pointwise divergence identity \cref{lem:integrand-r-divergence}: the
+        $r$-derivative of the deformed linking integrand equals an
+        $(s,t)$-divergence. This is the coordinate form of the closedness of the
+        solid-angle $2$-form, an explicit but extremely large multivariable
+        differentiation identity;
+  \item the value of the Gauss integral on the Hopf link
+        \cref{lem:hopf-linking-value}: the relevant definite double integral
+        equals $4\pi$, so $\mathrm{lk} = 1$. Its closed-form evaluation is a hard
+        definite integral with no supporting development in Mathlib.
+\end{enumerate}
+Every other declaration below bottoms out in Mathlib results.
+
+\subsection{The Gauss map and the linking number}
+
+\begin{lemma}[Components have disjoint values]
+    \label{lem:components-nonzero}
+    \lean{LeanEval.KnotTheory.TwoLink.components_nonzero}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    Let $L$ be a two-component link with components $\gamma_K,\gamma_L$. Then for
+    all $s,t\in\mathbb{R}$ we have $\gamma_K(s) - \gamma_L(t) \neq 0$.
+\end{lemma}
+\begin{proof}
+    If $\gamma_K(s) = \gamma_L(t)$ for some $s,t$, then this point lies in both
+    $\operatorname{range}\gamma_K$ and $\operatorname{range}\gamma_L$, contradicting
+    that these ranges are disjoint (\texttt{TwoLink.disjoint}, via
+    \texttt{Set.disjoint\_left} and \texttt{Set.mem\_range}). Hence the difference
+    is nonzero.
+\end{proof}
+
+\begin{definition}[Gauss map of a two-component link]
+    \label{def:gauss-map}
+    \lean{LeanEval.KnotTheory.TwoLink.gaussMap}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:components-nonzero}
+    For a two-component link $L$ with components $\gamma_K,\gamma_L$, its
+    \emph{Gauss map} is
+    \[
+        g_L : \mathbb{R}^2 \to S^2 \subseteq \mathbb{R}^3, \qquad
+        g_L(s,t) = \frac{\gamma_K(s) - \gamma_L(t)}{\lVert \gamma_K(s) - \gamma_L(t)\rVert}.
+    \]
+    It is well-defined by \cref{lem:components-nonzero}, takes values on the unit
+    sphere, and is $2\pi$-periodic in each variable, hence descends to a map on the
+    torus $T^2 = (\mathbb{R}/2\pi\mathbb{Z})^2$.
+\end{definition}
+
+\begin{lemma}[Smoothness of the Gauss map]
+    \label{lem:gauss-map-smooth}
+    \lean{LeanEval.KnotTheory.TwoLink.gaussMap_smooth}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:gauss-map, lem:components-nonzero}
+    The Gauss map $g_L : \mathbb{R}^2 \to \mathbb{R}^3$ is $C^\infty$.
+\end{lemma}
+\begin{proof}
+    The numerator $(s,t)\mapsto \gamma_K(s) - \gamma_L(t)$ is smooth, being a
+    difference of the smooth component maps precomposed with the smooth
+    coordinate projections (\texttt{Knot.smooth}, \texttt{ContDiff.sub},
+    \texttt{ContDiff.comp}). Its norm is smooth and nonvanishing away from $0$ by
+    \cref{lem:components-nonzero} (\texttt{ContDiff.norm}). The quotient of a
+    smooth vector field by a smooth nonvanishing scalar is smooth
+    (\texttt{ContDiff.div}).
+\end{proof}
+
+\begin{lemma}[Continuity of a knot's velocity]
+    \label{lem:knot-deriv-continuous}
+    \lean{LeanEval.KnotTheory.Knot.continuous_deriv}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    For a knot $\gamma$, the derivative $\gamma' : \mathbb{R}\to\mathbb{R}^3$ is
+    continuous.
+\end{lemma}
+\begin{proof}
+    A knot is $C^\infty$ (\texttt{Knot.smooth}), hence $C^1$; the derivative of a
+    $C^1$ function is continuous (\texttt{ContDiff.continuous\_deriv}, using
+    $1\le\infty$).
+\end{proof}
+
+\begin{lemma}[Continuity of the linking integrand]
+    \label{lem:integrand-continuous}
+    \lean{LeanEval.KnotTheory.TwoLink.linkingIntegrand_continuous}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:components-nonzero, lem:knot-deriv-continuous}
+    For a two-component link $L$, the function
+    \[
+        (s,t)\longmapsto
+        \frac{\bigl\langle \gamma_K(s)-\gamma_L(t),\ \gamma_K'(s)\times\gamma_L'(t)\bigr\rangle}
+             {\lVert \gamma_K(s)-\gamma_L(t)\rVert^{3}}
+    \]
+    is continuous on $\mathbb{R}^2$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:knot-deriv-continuous}
+    The maps $\gamma_K,\gamma_L$ are continuous (\texttt{Knot.smooth}) and their
+    derivatives $\gamma_K',\gamma_L'$ are continuous by
+    \cref{lem:knot-deriv-continuous}. The
+    inner product and the cross product $\times$ (\texttt{crossProduct}) are
+    continuous bilinear, so the numerator is continuous. The denominator
+    $\lVert\gamma_K(s)-\gamma_L(t)\rVert^3$ is continuous and, by
+    \cref{lem:components-nonzero}, never zero, so the quotient is continuous
+    (\texttt{Continuous.div}).
+\end{proof}
+
+\begin{definition}[Gauss linking number]
+    \label{def:linking-number}
+    \lean{LeanEval.KnotTheory.TwoLink.linkingNumber}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:integrand-continuous}
+    For a two-component link $L$ the \emph{linking number} is the Gauss double
+    integral
+    \[
+        \mathrm{lk}(L) \;=\; \frac{1}{4\pi}\int_0^{2\pi}\!\!\int_0^{2\pi}
+            \frac{\bigl\langle \gamma_K(s)-\gamma_L(t),\ \gamma_K'(s)\times\gamma_L'(t)\bigr\rangle}
+                 {\lVert \gamma_K(s)-\gamma_L(t)\rVert^{3}}\, ds\, dt \ \in\ \mathbb{R}.
+    \]
+    The iterated interval integral exists because the integrand is continuous on
+    the compact square $[0,2\pi]^2$ (\cref{lem:integrand-continuous}).
+\end{definition}
+
+\subsection{Ambient-isotopy invariance of the linking number}
+
+We prove invariance analytically, with no differential forms or degree theory.
+Given an ambient isotopy we deform the two components by the time-$r$
+diffeomorphism, obtain a real-valued function $r\mapsto\mathrm{lk}(L_r)$, and show
+it is constant by differentiating under the integral sign: its $r$-derivative is
+the integral over a full period of an $(s,t)$-divergence, which vanishes by Fubini,
+the fundamental theorem of calculus, and $2\pi$-periodicity. A reparametrization is
+then absorbed by a one-dimensional change of variables.
+
+\begin{definition}[Deformed components]
+    \label{def:deformed-curves}
+    \lean{LeanEval.KnotTheory.deformedDiff}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:components-nonzero}
+    Let $L_1$ be a two-component link with components $\gamma_K,\gamma_L$ and let
+    $\Phi : [0,1]\times\mathbb{R}^3\to\mathbb{R}^3$ be a smooth ambient isotopy, each
+    $\Phi_r$ a diffeomorphism with $\Phi_0 = \mathrm{id}$. For $r\in[0,1]$ set
+    \[
+        a_r(s) = \Phi_r(\gamma_K(s)), \qquad b_r(t) = \Phi_r(\gamma_L(t)),
+        \qquad u_r(s,t) = a_r(s) - b_r(t).
+    \]
+    Since each $\Phi_r$ is injective and $\gamma_K(s)\neq\gamma_L(t)$ by
+    \cref{lem:components-nonzero}, we have $u_r(s,t)\neq 0$ for all $r,s,t$.
+\end{definition}
+
+\begin{definition}[Deformed linking integrand and integral]
+    \label{def:deformed-linking}
+    \lean{LeanEval.KnotTheory.deformedLinking}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-curves}
+    With the notation of \cref{def:deformed-curves} put
+    \[
+        I_r(s,t) = \frac{\bigl\langle u_r(s,t),\ \partial_s a_r(s)\times\partial_t b_r(t)\bigr\rangle}
+                        {\lVert u_r(s,t)\rVert^{3}},
+        \qquad
+        F(r) = \frac{1}{4\pi}\int_0^{2\pi}\!\!\int_0^{2\pi} I_r(s,t)\,ds\,dt .
+    \]
+    At $r=0$, $\Phi_0=\mathrm{id}$ gives $a_0=\gamma_K$, $b_0=\gamma_L$, so
+    $I_0$ is the integrand of \cref{def:linking-number} and $F(0) = \mathrm{lk}(L_1)$.
+\end{definition}
+
+\begin{lemma}[Joint smoothness of the deformed integrand]
+    \label{lem:deformed-integrand-smooth}
+    \lean{LeanEval.KnotTheory.deformedIntegrand_smooth}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-linking, lem:components-nonzero}
+    The map $(r,s,t)\mapsto I_r(s,t)$ is $C^\infty$ on $[0,1]\times\mathbb{R}^2$, and
+    so is $(r,s,t)\mapsto\partial_r I_r(s,t)$; in particular both are continuous.
+\end{lemma}
+\begin{proof}
+    \uses{lem:components-nonzero}
+    The numerator is assembled from $\Phi$, the components $\gamma_K,\gamma_L$ and
+    their derivatives by composition, subtraction, cross product and inner product,
+    all smooth (\texttt{ContDiff.comp}, \texttt{ContDiff.sub}, bilinearity of
+    \texttt{crossProduct} and of the inner product). The denominator
+    $\lVert u_r\rVert^3$ is smooth and nonvanishing by \cref{def:deformed-curves},
+    so the quotient is smooth (\texttt{ContDiff.div}); its $r$-derivative is again
+    a function of the same form, hence smooth and continuous.
+\end{proof}
+
+\begin{definition}[Divergence potentials]
+    \label{def:divergence-potentials}
+    \lean{LeanEval.KnotTheory.divergenceA}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-curves}
+    With $\dot a := \partial_r a_r$, $\dot b := \partial_r b_r$ and
+    $\dot u_r = \dot a - \dot b$, define
+    \[
+        A_r(s,t) = \frac{\det\bigl(u_r,\ \dot u_r,\ \partial_t b_r\bigr)}{\lVert u_r\rVert^{3}},
+        \qquad
+        B_r(s,t) = \frac{\det\bigl(u_r,\ \partial_s a_r,\ \dot u_r\bigr)}{\lVert u_r\rVert^{3}} .
+    \]
+    Both are $C^\infty$ in $(s,t)$ and, since $\gamma_K,\gamma_L$ are
+    $2\pi$-periodic (\cref{lem:cc-periodic} for the concrete links), so are
+    $A_r,B_r$ in each of $s,t$.
+\end{definition}
+
+\begin{lemma}[Accepted assumption: the $r$-derivative is an $(s,t)$-divergence]
+    \label{lem:integrand-r-divergence}
+    \lean{LeanEval.KnotTheory.deformedIntegrand_r_divergence}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-linking, def:divergence-potentials}
+    For all $r\in[0,1]$ and all $s,t\in\mathbb{R}$,
+    \[
+        \partial_r I_r(s,t) = \partial_s A_r(s,t) + \partial_t B_r(s,t) .
+    \]
+\end{lemma}
+\begin{proof}
+    \emph{Accepted as a benchmark assumption} (see the prelude); this is not a
+    Mathlib result. The identity is the coordinate form of the closedness of the
+    solid-angle $2$-form $\langle u, du\times du\rangle/\lVert u\rVert^3$: expanding
+    both sides with the product, quotient and determinant differentiation rules
+    gives the same expression, the $\lVert u\rVert^{-5}$ terms cancelling by the
+    antisymmetry and Jacobi identities of the triple product
+    (\texttt{triple\_product\_eq\_det}, \texttt{cross\_dot\_cross}). A full Lean
+    proof would be an extremely long explicit multivariable computation, so we take
+    it as an axiom.
+\end{proof}
+
+\begin{lemma}[A periodic divergence integrates to zero]
+    \label{lem:periodic-divergence-integral-zero}
+    \lean{LeanEval.KnotTheory.periodic_divergence_integral_zero}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    Let $A,B : \mathbb{R}^2\to\mathbb{R}$ be $C^1$ and $2\pi$-periodic in each
+    variable. Then
+    \[
+        \int_0^{2\pi}\!\!\int_0^{2\pi}\bigl(\partial_s A(s,t) + \partial_t B(s,t)\bigr)\,ds\,dt = 0 .
+    \]
+\end{lemma}
+\begin{proof}
+    For fixed $t$ the inner integral $\int_0^{2\pi}\partial_s A(s,t)\,ds$ equals
+    $A(2\pi,t) - A(0,t)$ by the fundamental theorem of calculus
+    (\texttt{intervalIntegral.integral\_deriv\_eq\_sub}), and this is $0$ by
+    $2\pi$-periodicity (\texttt{Function.Periodic}); integrating over $t$ leaves
+    the $\partial_s A$ term equal to $0$. For the $\partial_t B$ term, swap the
+    order of integration (\texttt{MeasureTheory.intervalIntegral\_integral\_swap})
+    and argue identically in $t$, getting
+    $\int_0^{2\pi}\bigl(B(s,2\pi)-B(s,0)\bigr)\,ds = 0$. Adding gives $0$.
+\end{proof}
+
+\begin{lemma}[Differentiating the linking integral under the integral sign]
+    \label{lem:deformed-linking-hasDerivAt}
+    \lean{LeanEval.KnotTheory.deformedLinking_hasDerivAt}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-linking, lem:deformed-integrand-smooth}
+    For each $r\in[0,1]$ the function $F$ of \cref{def:deformed-linking} is
+    differentiable, with
+    \[
+        F'(r) = \frac{1}{4\pi}\int_0^{2\pi}\!\!\int_0^{2\pi}\partial_r I_r(s,t)\,ds\,dt .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-integrand-smooth}
+    On the compact set $[0,1]\times[0,2\pi]^2$ both $I_r(s,t)$ and $\partial_r I_r(s,t)$
+    are continuous (\cref{lem:deformed-integrand-smooth}), hence bounded; a constant
+    bound is an integrable dominating function on $[0,2\pi]^2$. The Leibniz integral
+    rule (\texttt{hasDerivAt\_integral\_of\_dominated\_loc\_of\_deriv\_le}), applied
+    to each interval integral in turn, allows differentiation under both integral
+    signs and yields the stated formula.
+\end{proof}
+
+\begin{lemma}[The deformed linking number has zero derivative]
+    \label{lem:deformed-linking-deriv-zero}
+    \lean{LeanEval.KnotTheory.deformedLinking_deriv_zero}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:integrand-r-divergence, lem:periodic-divergence-integral-zero, lem:deformed-linking-hasDerivAt, def:divergence-potentials}
+    For all $r\in[0,1]$, $F'(r) = 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:integrand-r-divergence, lem:periodic-divergence-integral-zero,
+          lem:deformed-linking-hasDerivAt}
+    By \cref{lem:deformed-linking-hasDerivAt},
+    $4\pi\,F'(r) = \int_0^{2\pi}\!\int_0^{2\pi}\partial_r I_r$. By
+    \cref{lem:integrand-r-divergence} the integrand equals
+    $\partial_s A_r + \partial_t B_r$ with $A_r,B_r$ as in
+    \cref{def:divergence-potentials}, which are $C^1$ and $2\pi$-periodic in each of
+    $s,t$. By \cref{lem:periodic-divergence-integral-zero} that integral is $0$, so
+    $F'(r) = 0$.
+\end{proof}
+
+\begin{lemma}[Reparametrization invariance of the linking number]
+    \label{lem:reparam-invariant}
+    \lean{LeanEval.KnotTheory.linkingNumber_reparam}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:linking-number}
+    Let $\sigma,\tau$ be orientation-preserving smooth circle reparametrizations
+    (strictly increasing with $\sigma(s+2\pi)=\sigma(s)+2\pi$, similarly $\tau$). If
+    $L'$ has components $\gamma_K\circ\sigma,\ \gamma_L\circ\tau$ and $L$ has
+    components $\gamma_K,\gamma_L$, then $\mathrm{lk}(L') = \mathrm{lk}(L)$.
+\end{lemma}
+\begin{proof}
+    The chain rule gives $(\gamma_K\circ\sigma)'(s) = \sigma'(s)\,\gamma_K'(\sigma(s))$
+    and likewise for $\tau$, so the integrand of $\mathrm{lk}(L')$ at $(s,t)$ equals
+    $\sigma'(s)\,\tau'(t)$ times the integrand $h$ of $\mathrm{lk}(L)$ evaluated at
+    $(\sigma(s),\tau(t))$ (the cross product is bilinear and the denominator depends
+    only on $\gamma_K(\sigma(s))-\gamma_L(\tau(t))$). The one-dimensional change of
+    variables (\texttt{intervalIntegral.integral\_comp\_smul\_deriv'''}) turns
+    $\int_0^{2\pi}\sigma'(s)\,h(\sigma(s),\cdot)\,ds$ into
+    $\int_{\sigma(0)}^{\sigma(0)+2\pi} h$, which equals $\int_0^{2\pi} h$ by
+    $2\pi$-periodicity of the integrand; applying this in $s$ and then in $t$ shows
+    the two double integrals agree.
+\end{proof}
+
+\begin{theorem}[The linking number is an ambient-isotopy invariant]
+    \label{thm:linking-isotopy-invariant}
+    \lean{LeanEval.KnotTheory.TwoLink.linkingNumber_isotopy_invariant}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:linking-number, def:deformed-linking, lem:deformed-linking-deriv-zero, lem:reparam-invariant}
+    If $L_1 \cong L_2$ (i.e.\ \texttt{TwoLink.Isotopic} $L_1\ L_2$) then
+    $\mathrm{lk}(L_1) = \mathrm{lk}(L_2)$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:deformed-linking-deriv-zero, lem:reparam-invariant}
+    Let $\Phi$ be the ambient isotopy and $\sigma,\tau$ the orientation-preserving
+    reparametrizations witnessing $L_1\cong L_2$, and let $F$ be as in
+    \cref{def:deformed-linking}. By \cref{lem:deformed-linking-deriv-zero}
+    $F'\equiv 0$ on $[0,1]$, so $F$ is constant there
+    (\texttt{constant\_of\_derivWithin\_zero} on the convex set $[0,1]$); in
+    particular $F(0) = F(1)$. Now $F(0) = \mathrm{lk}(L_1)$, while at $r=1$ the
+    isotopy relations $\Phi_1\circ\gamma_{K_1} = \gamma_{K_2}\circ\sigma$ and
+    $\Phi_1\circ\gamma_{L_1} = \gamma_{L_2}\circ\tau$ identify $F(1)$ with the
+    linking number of the reparametrized link
+    $(\gamma_{K_2}\circ\sigma,\ \gamma_{L_2}\circ\tau)$, which equals
+    $\mathrm{lk}(L_2)$ by \cref{lem:reparam-invariant}. Hence
+    $\mathrm{lk}(L_1) = \mathrm{lk}(L_2)$.
+\end{proof}
+
+\subsection{The unlink and the Hopf link}
+
+\begin{definition}[Round circle in a coordinate plane]
+    \label{def:coordinate-circle}
+    \lean{LeanEval.KnotTheory.coordinateCircle}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    Given a centre $p_0\in\mathbb{R}^3$ and two distinct standard basis indices
+    $i\neq j$ in $\{0,1,2\}$, let
+    \[
+        c_{p_0,i,j}(t) = p_0 + \cos t\, e_i + \sin t\, e_j .
+    \]
+    This is the unit circle in the affine $2$-plane through $p_0$ spanned by
+    $e_i, e_j$.
+\end{definition}
+
+\begin{lemma}[Smoothness of a coordinate circle]
+    \label{lem:cc-smooth}
+    \lean{LeanEval.KnotTheory.coordinateCircle_smooth}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:coordinate-circle}
+    The curve $c_{p_0,i,j}$ is $C^\infty$.
+\end{lemma}
+\begin{proof}
+    Each coordinate of $c_{p_0,i,j}$ is a constant plus a scalar multiple of
+    $\cos$ or $\sin$, all of which are smooth (\texttt{Real.contDiff\_cos},
+    \texttt{Real.contDiff\_sin}, \texttt{contDiff\_const}); smoothness into
+    $\mathbb{R}^3$ follows coordinatewise.
+\end{proof}
+
+\begin{lemma}[Periodicity of a coordinate circle]
+    \label{lem:cc-periodic}
+    \lean{LeanEval.KnotTheory.coordinateCircle_periodic}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:coordinate-circle}
+    For all $t$, $c_{p_0,i,j}(t + 2\pi) = c_{p_0,i,j}(t)$.
+\end{lemma}
+\begin{proof}
+    Immediate from $\cos(t+2\pi) = \cos t$ and $\sin(t+2\pi) = \sin t$
+    (\texttt{Real.cos\_add\_two\_pi}, \texttt{Real.sin\_add\_two\_pi}).
+\end{proof}
+
+\begin{lemma}[Velocity of a coordinate circle]
+    \label{lem:cc-deriv}
+    \lean{LeanEval.KnotTheory.coordinateCircle_deriv}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:coordinate-circle}
+    The derivative of $c_{p_0,i,j}$ is
+    $c_{p_0,i,j}'(t) = -\sin t\, e_i + \cos t\, e_j$.
+\end{lemma}
+\begin{proof}
+    Differentiate coordinatewise: the constant $p_0$ contributes $0$, the term
+    $\cos t\, e_i$ has derivative $-\sin t\, e_i$ and the term $\sin t\, e_j$ has
+    derivative $\cos t\, e_j$ (\texttt{Real.deriv\_cos}, \texttt{Real.deriv\_sin},
+    \texttt{deriv\_const}, and linearity of the derivative).
+\end{proof}
+
+\begin{lemma}[Immersion property of a coordinate circle]
+    \label{lem:cc-immersion}
+    \lean{LeanEval.KnotTheory.coordinateCircle_immersion}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:coordinate-circle, lem:cc-deriv}
+    For all $t$, the derivative $c_{p_0,i,j}'(t) = -\sin t\, e_i + \cos t\, e_j$
+    is nonzero.
+\end{lemma}
+\begin{proof}
+    \uses{lem:cc-deriv}
+    By \cref{lem:cc-deriv} the $e_i$- and $e_j$-components of the derivative are
+    $-\sin t$ and $\cos t$. If both vanished then $\sin^2 t + \cos^2 t = 0$,
+    contradicting $\sin^2 t + \cos^2 t = 1$ (\texttt{Real.sin\_sq\_add\_cos\_sq}).
+    Hence the derivative is nonzero.
+\end{proof}
+
+\begin{lemma}[Injectivity of a coordinate circle on a period]
+    \label{lem:cc-injective}
+    \lean{LeanEval.KnotTheory.coordinateCircle_injOn}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:coordinate-circle}
+    The curve $c_{p_0,i,j}$ is injective on $[0,2\pi)$.
+\end{lemma}
+\begin{proof}
+    If $c_{p_0,i,j}(s) = c_{p_0,i,j}(t)$ then, reading off the $e_i$- and
+    $e_j$-coordinates, $\cos s = \cos t$ and $\sin s = \sin t$. A point of the
+    circle determines its angle modulo $2\pi$ (\texttt{Real.Angle.cos\_sin\_inj}),
+    so $s \equiv t \pmod{2\pi}$; for $s,t\in[0,2\pi)$ this forces $s = t$.
+\end{proof}
+
+\begin{lemma}[A coordinate circle is a knot]
+    \label{lem:coordinate-circle-knot}
+    \lean{LeanEval.KnotTheory.coordinateCircleKnot}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:coordinate-circle, lem:cc-smooth, lem:cc-periodic, lem:cc-immersion, lem:cc-injective}
+    The curve $c_{p_0,i,j}$ together with \cref{lem:cc-smooth},
+    \cref{lem:cc-periodic}, \cref{lem:cc-injective} and \cref{lem:cc-immersion}
+    is the data of a \texttt{Knot}.
+\end{lemma}
+\begin{proof}
+    \uses{lem:cc-smooth, lem:cc-periodic, lem:cc-immersion, lem:cc-injective}
+    The four fields of \texttt{Knot} (smoothness, $2\pi$-periodicity, injectivity
+    on $[0,2\pi)$, and the immersion condition $c'(t)\neq 0$) are supplied
+    respectively by \cref{lem:cc-smooth}, \cref{lem:cc-periodic},
+    \cref{lem:cc-injective} and \cref{lem:cc-immersion}.
+\end{proof}
+
+\begin{lemma}[Unlink components are disjoint]
+    \label{lem:unlink-disjoint}
+    \lean{LeanEval.KnotTheory.unlink_disjoint}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:coordinate-circle}
+    The images of $c_{0,0,1}$ (the circle in the plane $z=0$) and $c_{2e_2,0,1}$
+    (the circle in the plane $z=2$) are disjoint.
+\end{lemma}
+\begin{proof}
+    Every point of $\operatorname{range} c_{0,0,1}$ has third coordinate $0$, while
+    every point of $\operatorname{range} c_{2e_2,0,1}$ has third coordinate $2$.
+    Since $0\neq 2$, the ranges are disjoint (\texttt{Set.disjoint\_left}).
+\end{proof}
+
+\begin{definition}[The unlink]
+    \label{def:unlink}
+    \lean{LeanEval.KnotTheory.unlink}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:coordinate-circle-knot, lem:unlink-disjoint}
+    Let $L_1$ be the two-component link whose components are the knots
+    $c_{0,0,1}$ (unit circle in the plane $z=0$) and $c_{2e_2,0,1}$ (unit circle in
+    the plane $z=2$), both built via \cref{lem:coordinate-circle-knot}, with
+    disjointness from \cref{lem:unlink-disjoint}.
+\end{definition}
+
+\begin{lemma}[Coordinate constraints for a Hopf common point]
+    \label{lem:hopf-common-point-coords}
+    \lean{LeanEval.KnotTheory.hopf_common_point_coords}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:coordinate-circle}
+    Suppose $c_{0,0,1}(s) = c_{e_0,0,2}(t)$ for some $s,t$, and write the common
+    point as $(x,y,z)$. Then $y = 0$ and $z = 0$, and moreover $x^2 = 1$ (from the
+    first circle) and $(x-1)^2 = 1$ (from the second circle).
+\end{lemma}
+\begin{proof}
+    The first circle $c_{0,0,1}$ lies in the plane $z=0$ and the second
+    $c_{e_0,0,2}$ in the plane $y=0$, so a common point has $z=0$ and $y=0$. On the
+    first circle the point is $(\cos s,\sin s,0)$, so $x^2 = \cos^2 s
+    = 1 - \sin^2 s = 1$ (since $y=\sin s=0$ and $\sin^2 s+\cos^2 s=1$,
+    \texttt{Real.sin\_sq\_add\_cos\_sq}); on the second circle the point is
+    $(1+\cos t,0,\sin t)$, so $(x-1)^2 = \cos^2 t = 1$ (since $z=\sin t=0$).
+\end{proof}
+
+\begin{lemma}[Hopf-link components are disjoint]
+    \label{lem:hopf-disjoint}
+    \lean{LeanEval.KnotTheory.hopf_disjoint}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:coordinate-circle, lem:hopf-common-point-coords}
+    The images of $c_{0,0,1}$ (unit circle in the $xy$-plane) and $c_{e_0,0,2}$
+    (unit circle in the $xz$-plane centred at $(1,0,0)$) are disjoint.
+\end{lemma}
+\begin{proof}
+    \uses{lem:hopf-common-point-coords}
+    A common point would, by \cref{lem:hopf-common-point-coords}, satisfy both
+    $x^2 = 1$ and $(x-1)^2 = 1$. Subtracting gives $2x - 1 = 0$, i.e.\ $x = 1/2$,
+    whence $x^2 = 1/4 \neq 1$ -- a contradiction (\texttt{nlinarith}). Hence no
+    common point exists and the ranges are disjoint (\texttt{Set.disjoint\_left}).
+\end{proof}
+
+\begin{definition}[The Hopf link]
+    \label{def:hopf-link}
+    \lean{LeanEval.KnotTheory.hopfLink}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:coordinate-circle-knot, lem:hopf-disjoint}
+    Let $L_2$ be the two-component link whose components are the knots $c_{0,0,1}$
+    (unit circle in the $xy$-plane) and $c_{e_0,0,2}$ (unit circle in the
+    $xz$-plane centred at $(1,0,0)$), both built via
+    \cref{lem:coordinate-circle-knot}, with disjointness from
+    \cref{lem:hopf-disjoint}.
+\end{definition}
+
+\subsection{Computing the two linking numbers}
+
+\begin{lemma}[The unlink linking integrand]
+    \label{lem:unlink-integrand}
+    \lean{LeanEval.KnotTheory.unlink_integrand}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:unlink, def:linking-number, lem:cc-deriv}
+    For the unlink $L_1$ (components $c_{0,0,1}$ in the plane $z=0$ and
+    $c_{2e_2,0,1}$ in the plane $z=2$) the linking integrand at $(s,t)$ equals
+    \[
+        I_{L_1}(s,t) = \frac{-2\,\sin(s-t)}{\bigl(6 - 2\cos(s-t)\bigr)^{3/2}} .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:cc-deriv}
+    Here $u = (\cos s-\cos t,\ \sin s-\sin t,\ -2)$, while $\gamma_K'(s) =
+    (-\sin s,\cos s,0)$ and $\gamma_L'(t) = (-\sin t,\cos t,0)$ by
+    \cref{lem:cc-deriv}. Their cross product is $(0,0,\ \sin s\cos t-\cos s\sin t) =
+    (0,0,\sin(s-t))$ (\texttt{cross\_apply}, \texttt{Real.sin\_sub}), so the
+    numerator is $\langle u,(0,0,\sin(s-t))\rangle = -2\sin(s-t)$. The denominator is
+    $\lVert u\rVert^3$ with $\lVert u\rVert^2 = (2-2\cos(s-t)) + 4 = 6-2\cos(s-t)$
+    (\texttt{Real.cos\_sub} and $\sin^2+\cos^2=1$).
+\end{proof}
+
+\begin{lemma}[Inner integral of the unlink integrand vanishes]
+    \label{lem:unlink-inner-integral-zero}
+    \lean{LeanEval.KnotTheory.unlink_inner_integral_zero}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:unlink-integrand}
+    For every $t$, $\displaystyle\int_0^{2\pi} I_{L_1}(s,t)\,ds = 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:unlink-integrand}
+    The function $h(s) = \bigl(6-2\cos(s-t)\bigr)^{-1/2}$ is differentiable (the base
+    $6-2\cos(\cdot) \ge 4 > 0$) with
+    $h'(s) = \dfrac{-2\sin(s-t)}{\bigl(6-2\cos(s-t)\bigr)^{3/2}} = I_{L_1}(s,t)$
+    by the chain rule (\texttt{Real.deriv\_cos}). By the fundamental theorem of
+    calculus (\texttt{intervalIntegral.integral\_deriv\_eq\_sub}),
+    $\int_0^{2\pi} I_{L_1}(s,t)\,ds = h(2\pi)-h(0) = 0$, since $\cos(\cdot-t)$ is
+    $2\pi$-periodic.
+\end{proof}
+
+\begin{lemma}[The unlink has linking number zero]
+    \label{lem:linking-unlink-zero}
+    \lean{LeanEval.KnotTheory.linking_unlink_zero}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:unlink, def:linking-number, lem:unlink-inner-integral-zero}
+    $\mathrm{lk}(L_1) = 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:unlink-inner-integral-zero}
+    By \cref{def:linking-number},
+    $4\pi\,\mathrm{lk}(L_1) = \int_0^{2\pi}\bigl(\int_0^{2\pi} I_{L_1}(s,t)\,ds\bigr)dt$.
+    The inner integral is $0$ for every $t$ by
+    \cref{lem:unlink-inner-integral-zero}, so the outer integral is the integral of
+    the zero function, namely $0$. Hence $\mathrm{lk}(L_1) = 0$.
+\end{proof}
+
+\begin{lemma}[Accepted assumption: the Hopf Gauss integral]
+    \label{lem:hopf-linking-value}
+    \lean{LeanEval.KnotTheory.hopf_linking_value}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:hopf-link, def:linking-number, lem:integrand-continuous}
+    For the Hopf link $L_2$ (components $c_{0,0,1}$ and $c_{e_0,0,2}$),
+    $\mathrm{lk}(L_2) = 1$.
+\end{lemma}
+\begin{proof}
+    \emph{Accepted as a benchmark assumption} (see the prelude). The integrand is
+    continuous (\cref{lem:integrand-continuous}), so the double integral is
+    well-defined; but its closed-form evaluation to $4\pi$ -- whence
+    $\mathrm{lk} = 1$ -- is a hard definite double integral with no supporting
+    development in Mathlib, so we take its value as an axiom.
+\end{proof}
+
+\begin{lemma}[The Hopf link has nonzero linking number]
+    \label{lem:linking-hopf-nonzero}
+    \lean{LeanEval.KnotTheory.linking_hopf_nonzero}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:hopf-link, def:linking-number, lem:hopf-linking-value}
+    $\mathrm{lk}(L_2) \neq 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:hopf-linking-value}
+    By \cref{lem:hopf-linking-value}, $\mathrm{lk}(L_2) = 1 \neq 0$.
+\end{proof}
+
+\subsection{Conclusion}
+
+\begin{theorem}[Existence of a non-isotopic pair of links]
+    \label{thm:exists-nonisotopic-link}
+    \lean{LeanEval.KnotTheory.exists_nonisotopic_link}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:unlink, def:hopf-link, thm:linking-isotopy-invariant, lem:linking-unlink-zero, lem:linking-hopf-nonzero}
+    There exist two oriented smooth two-component links $L_1, L_2$ in
+    $\mathbb{R}^3$ that are not ambient-isotopic:
+    $\exists\, L_1\, L_2 : \texttt{TwoLink},\ \neg\, L_1 \cong L_2$.
+\end{theorem}
+\begin{proof}
+    \uses{thm:linking-isotopy-invariant, lem:linking-unlink-zero, lem:linking-hopf-nonzero}
+    Take $L_1$ the unlink (\cref{def:unlink}) and $L_2$ the Hopf link
+    (\cref{def:hopf-link}). Suppose, for contradiction, that $L_1 \cong L_2$. By
+    \cref{thm:linking-isotopy-invariant} we would have
+    $\mathrm{lk}(L_1) = \mathrm{lk}(L_2)$. But $\mathrm{lk}(L_1) = 0$ by
+    \cref{lem:linking-unlink-zero} and $\mathrm{lk}(L_2)\neq 0$ by
+    \cref{lem:linking-hopf-nonzero}, a contradiction. Hence $L_1$ and $L_2$ are not
+    ambient-isotopic.
+\end{proof}
 
 \end{document}
