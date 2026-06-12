@@ -493,6 +493,37 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     complex numbers.
 \end{proof}
 
+\begin{lemma}[The reduced circle factor $\psi$]
+    \label{lem:circle-root-even-psi}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/CircleRoots.lean}
+    \uses{lem:exp-expansion}
+    Let $w \in \mathbb{C}$ with $\|w\| = 1$, let $n, m \in \mathbb{N}$, let
+    $g \in \mathbb{C}[X]$ with $g(w) \neq 0$, and let $u : \mathbb{R} \to
+    \mathbb{C}$ be the continuous function of \Cref{lem:exp-expansion} (so
+    $u(0) = 1$ and $e^{i t} - 1 = i t\,u(t)$). Define
+    \[
+        \psi(t) := (w e^{i t})^{-n}\,(i w)^{m}\, u(t)^{m}\, g(w e^{i t}).
+    \]
+    Then $\psi$ is continuous, $\psi(0) = w^{-n}(i w)^{m} g(w) \neq 0$, and for
+    the polynomial $H := (X - C\,w)^{m}\,g$ one has, for every $t \in \mathbb{R}$,
+    $(w e^{i t})^{-n}\,H(w e^{i t}) = t^{m}\,\psi(t)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:exp-expansion}
+    Continuity of $\psi$ is clear: $t \mapsto w e^{i t}$ is continuous
+    (\texttt{Complex.continuous\_exp} composed with $t \mapsto i t$), polynomial
+    evaluation $g(\cdot)$ and the power $w e^{i t} \neq 0$ are continuous, and $u$
+    is continuous (\Cref{lem:exp-expansion}); products and the nonvanishing power
+    $(w e^{i t})^{-n}$ are continuous. At $t = 0$, $u(0) = 1$ and $w e^{i 0} = w$,
+    so $\psi(0) = w^{-n}(i w)^{m} g(w)$, which is nonzero because $w \neq 0$
+    (from $\|w\| = 1$), $i w \neq 0$, and $g(w) \neq 0$. For the identity, put
+    $z := w e^{i t}$; evaluating $H = (X - C\,w)^{m} g$ gives
+    $H(z) = (z - w)^{m}\,g(z)$. By \Cref{lem:exp-expansion},
+    $z - w = w(e^{i t} - 1) = w\,(i t\,u(t)) = i w t\,u(t)$, hence
+    $(z - w)^{m} = (i w)^{m} t^{m} u(t)^{m}$ and
+    $z^{-n} H(z) = z^{-n}(i w)^{m} t^{m} u(t)^{m} g(z) = t^{m}\,\psi(t)$.
+\end{proof}
+
 \begin{lemma}[Even multiplicity at circle roots]
     \label{lem:circle-root-even}
     \lean{LeanEval.ComplexAnalysis.circle_root_even}
@@ -503,23 +534,19 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     If $w$ has $\|w\| = 1$, then the root multiplicity $m$ of $w$ in $H$ is even.
 \end{lemma}
 \begin{proof}
-    \uses{lem:local-factorization, lem:nonneg-even-order, lem:exp-expansion,
-    lem:psi-real}
+    \uses{lem:local-factorization, lem:circle-root-even-psi, lem:nonneg-even-order,
+    lem:exp-expansion, lem:psi-real}
     By \Cref{lem:local-factorization}, $H = (X - w)^{m} g$ with $g(w) \neq 0$.
-    Parametrise the circle by $z = z(t) := w e^{i t}$; since $\|w\| = 1$, every
-    $z(t)$ lies on the unit circle, for all $t \in \mathbb{R}$. By
-    \Cref{lem:exp-expansion}, $z - w = w(e^{i t} - 1) = i w t\,u(t)$, so
-    $(z - w)^{m} = (i w)^{m} t^{m} u(t)^{m}$. Define
-    \[
-        \psi(t) := (w e^{i t})^{-n}\,(i w)^{m}\, u(t)^{m}\, g(w e^{i t}),
-    \]
-    a continuous function with $\psi(0) = w^{-n}(i w)^{m} g(w) \neq 0$, and
-    $z^{-n} H(z) = t^{m}\,\psi(t)$ for all $t$. By hypothesis $z^{-n}H(z)$ is a
-    (nonnegative) real for every $t$, so $t^{m}\psi(t)$ is real for all $t$; by
-    \Cref{lem:psi-real}, $\phi := \operatorname{Re}\psi$ is a continuous real
-    function with $\phi = \psi$, $\phi(0) \neq 0$, and
-    $t^{m}\phi(t) = z^{-n}H(z) \ge 0$ for all $t$. \Cref{lem:nonneg-even-order}
-    now gives that $m$ is even.
+    Let $u$ be as in \Cref{lem:exp-expansion} and let $\psi$ be the function of
+    \Cref{lem:circle-root-even-psi}; that lemma gives $\psi$ continuous,
+    $\psi(0) \neq 0$, and $(w e^{i t})^{-n} H(w e^{i t}) = t^{m}\,\psi(t)$ for all
+    $t$. Each $z(t) := w e^{i t}$ lies on the unit circle (since $\|w\| = 1$), so
+    by hypothesis $(w e^{i t})^{-n} H(w e^{i t})$ is a nonnegative real for every
+    $t$; hence $t^{m}\psi(t)$ is real for all $t$. By \Cref{lem:psi-real},
+    $\phi := \operatorname{Re}\psi$ is a continuous real function with
+    $\phi = \psi$, so $\phi(0) \neq 0$ and $t^{m}\phi(t) = t^{m}\psi(t)
+    = (w e^{i t})^{-n} H(w e^{i t}) \ge 0$ for all $t$.
+    \Cref{lem:nonneg-even-order} now gives that $m$ is even.
 \end{proof}
 
 \begin{lemma}[Equality from leading coefficient and root multiset]
@@ -555,6 +582,81 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     $\sigma(w) = w \iff 1 = w\overline{w} = \|w\|^2 \iff \|w\| = 1$.
 \end{proof}
 
+\begin{lemma}[Count form of the root pairing]
+    \label{lem:fr-build-S-root-pairing}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:conjrecip-root-pairing, lem:circle-involution}
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$ and
+    $H^{\dagger 2n} = H$, and write $\sigma(w) := 1/\overline{w}$. Then $0$ is
+    not in $\operatorname{roots}(H)$ once $H(0) \neq 0$, every $r \in
+    \operatorname{roots}(H)$ is nonzero, and for every $w \neq 0$ the count of $w$
+    in $\operatorname{roots}(H)$ equals the count of $\sigma(w)$, i.e.
+    $\operatorname{count}_w\operatorname{roots}(H)
+    = \operatorname{count}_{\sigma(w)}\operatorname{roots}(H)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:conjrecip-root-pairing, lem:circle-involution}
+    By \texttt{Polynomial.count\_roots} the count of any $v$ in
+    $\operatorname{roots}(H)$ is the root multiplicity of $v$ in $H$. For
+    $w \neq 0$, \Cref{lem:conjrecip-root-pairing} gives that the multiplicity of
+    $w$ in $H$ equals the multiplicity of $1/\overline{w} = \sigma(w)$ in $H$,
+    which is the claimed count equality. A member $r \in \operatorname{roots}(H)$
+    is a root, so $H(r) = 0$; if $H(0) \neq 0$ then $r \neq 0$.
+\end{proof}
+
+\begin{lemma}[Partition of the root multiset by modulus]
+    \label{lem:fr-build-S-partition}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:fr-build-S-root-pairing, lem:circle-involution}
+    Let $R := \operatorname{roots}(H)$ be the root multiset, with every $r \in R$
+    nonzero and $\operatorname{count}_w R = \operatorname{count}_{\sigma(w)} R$
+    for all $w \neq 0$. Write $R = R_{<} + R_{=} + R_{>}$, where $R_{<}$,
+    $R_{=}$, $R_{>}$ are the submultisets obtained by filtering $R$ on
+    $\|r\| < 1$, $\|r\| = 1$, $\|r\| > 1$ respectively
+    (\texttt{Multiset.filter}, and the three predicates are exhaustive and
+    pairwise exclusive). Then $\sigma$ maps $R_{<}$ onto $R_{>}$
+    preserving counts: $\operatorname{count}_{w} R_{>}
+    = \operatorname{count}_{\sigma(w)} R_{<}$ for all $w$, and for $w$ with
+    $\|w\| = 1$ one has $\sigma(w) = w$, so $R_{=}$ is $\sigma$-invariant.
+\end{lemma}
+\begin{proof}
+    \uses{lem:circle-involution}
+    Since $\|r\| < 1$, $\|r\| = 1$, $\|r\| > 1$ are mutually exclusive and cover
+    all $r$, repeated application of \texttt{Multiset.filter\_add\_not} writes
+    $R = R_{<} + R_{=} + R_{>}$. By \Cref{lem:circle-involution} $\sigma$ is an
+    involution with $\|\sigma(w)\| = 1/\|w\|$, so it sends $\{\|w\| < 1\}$ to
+    $\{\|w\| > 1\}$ and fixes $\{\|w\| = 1\}$ pointwise. Using the count
+    equality $\operatorname{count}_w R = \operatorname{count}_{\sigma(w)} R$
+    together with these modulus facts, filtering commutes with the count
+    transport, giving $\operatorname{count}_w R_{>}
+    = \operatorname{count}_{\sigma(w)} R_{<}$; and on the circle $\sigma(w) = w$
+    makes $R_{=}$ invariant.
+\end{proof}
+
+\begin{lemma}[The circle part has a half]
+    \label{lem:fr-build-S-circle-half}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{lem:circle-root-even}
+    With $H$, $n$ as in \Cref{lem:fr-build-S} and $R_{=}$ the circle part of
+    $\operatorname{roots}(H)$ (those $r$ with $\|r\| = 1$), every $w$ with
+    $\|w\| = 1$ has even count in $R_{=}$. Hence there is a multiset $T$ with
+    $T + T = R_{=}$ and $\operatorname{count}_w T
+    = \tfrac{1}{2}\operatorname{count}_w R_{=}$ for all $w$, and $\sigma(T) = T$
+    (as $\sigma$ fixes every element of $R_{=}$).
+\end{lemma}
+\begin{proof}
+    \uses{lem:circle-root-even}
+    For $\|w\| = 1$, \texttt{Polynomial.count\_roots} and \Cref{lem:circle-root-even}
+    give that $\operatorname{count}_w R_{=} = \operatorname{count}_w
+    \operatorname{roots}(H) = \operatorname{rootMultiplicity}_w(H)$ is even (for
+    $w$ off the circle the count in $R_{=}$ is $0$, also even). A multiset all of
+    whose multiplicities are even is twice a multiset $T$ defined by halving each
+    multiplicity (build $T$ by \texttt{Multiset.ext} fixing
+    $\operatorname{count}_w T := \operatorname{count}_w R_{=}/2$); then
+    $T + T = R_{=}$ by \texttt{Multiset.count\_add}. Since every element of
+    $R_{=}$ lies on the circle, $\sigma$ fixes it, so $\sigma(T) = T$.
+\end{proof}
+
 \begin{lemma}[Halving the root multiset]
     \label{lem:fr-build-S}
     \lean{LeanEval.ComplexAnalysis.fr_build_S}
@@ -568,17 +670,23 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     $\sigma(w) = 1/\overline{w}$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:conjrecip-root-pairing, lem:circle-root-even, lem:circle-involution}
-    By \Cref{lem:conjrecip-root-pairing} the multiplicity of any $w \neq 0$ in
-    $H$ equals that of $\sigma(w) = 1/\overline{w}$. By \Cref{lem:circle-involution},
-    $\sigma$ is an involution that exchanges the regions $\|w\| < 1$ and
-    $\|w\| > 1$ and fixes exactly the unit circle, where \Cref{lem:circle-root-even}
-    gives even multiplicity. Build $S$ by including each root $w$ with
-    $\|w\| < 1$ with its full multiplicity, none of the roots with $\|w\| > 1$,
-    and each circle root with half its (even) multiplicity. Applying $\sigma$
-    moves the $\|w\| < 1$ part onto the $\|w\| > 1$ part with matching
-    multiplicities and doubles each circle root's half back to its full
-    multiplicity, so $\operatorname{roots}(H) = S \uplus \sigma(S)$.
+    \uses{lem:fr-build-S-root-pairing, lem:fr-build-S-partition,
+    lem:fr-build-S-circle-half}
+    By \Cref{lem:fr-build-S-root-pairing} every root of $H$ is nonzero and the
+    root multiset $R := \operatorname{roots}(H)$ satisfies
+    $\operatorname{count}_w R = \operatorname{count}_{\sigma(w)} R$ for $w \neq 0$.
+    Partition $R = R_{<} + R_{=} + R_{>}$ as in \Cref{lem:fr-build-S-partition},
+    with $\sigma$ carrying $R_{<}$ onto $R_{>}$ count-for-count and fixing
+    $R_{=}$. Let $T$ be the half of the circle part from
+    \Cref{lem:fr-build-S-circle-half} ($T + T = R_{=}$, $\sigma(T) = T$). Set
+    $S := R_{<} + T$. Then every element of $S$ is nonzero, and
+    \[
+        S \uplus \sigma(S) = R_{<} + T + \sigma(R_{<}) + \sigma(T)
+        = R_{<} + R_{>} + (T + T) = R_{<} + R_{>} + R_{=} = R,
+    \]
+    using $\sigma(R_{<}) = R_{>}$ (same counts), $\sigma(T) = T$, and
+    $T + T = R_{=}$. Hence $\operatorname{roots}(H) = S \uplus \sigma(S)$, proved
+    by \texttt{Multiset.ext} comparing counts on each side.
 \end{proof}
 
 \begin{lemma}[Size bound for the root half]
@@ -599,6 +707,28 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     Hence $2|S| \le 2n$, i.e. $|S| \le n$.
 \end{proof}
 
+\begin{lemma}[Constant term of a self-inversive polynomial]
+    \label{lem:fr-multiset-H0}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip}
+    Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$ and
+    $H^{\dagger 2n} = H$, and suppose $\deg H = 2n$. Then the constant term of
+    $H$ is the conjugate of its leading coefficient, $H(0)
+    = \overline{\operatorname{leadingCoeff}(H)}$, and in particular $H(0) \neq 0$.
+\end{lemma}
+\begin{proof}
+    Since $H = H^{\dagger 2n} = \operatorname{reflect}_{2n}(\operatorname{map}\,
+    \overline{(\cdot)}\,H)$, \texttt{Polynomial.coeff\_reflect} gives
+    $\operatorname{coeff}_0 H = \operatorname{coeff}_{\operatorname{revAt}_{2n}0}
+    (\operatorname{map}\,\overline{(\cdot)}\,H)
+    = \operatorname{coeff}_{2n}(\operatorname{map}\,\overline{(\cdot)}\,H)
+    = \overline{\operatorname{coeff}_{2n} H}$ (\texttt{Polynomial.coeff\_map}).
+    With $\deg H = 2n$, $\operatorname{coeff}_{2n} H
+    = \operatorname{leadingCoeff}(H)$, and $H(0) = \operatorname{coeff}_0 H$
+    (\texttt{Polynomial.coeff\_zero\_eq\_eval\_zero}). As $H \neq 0$ its leading
+    coefficient is nonzero, hence so is its conjugate $H(0)$.
+\end{proof}
+
 \begin{lemma}[The Fejér--Riesz root multiset]
     \label{lem:fr-multiset}
     \lean{LeanEval.ComplexAnalysis.fr_multiset}
@@ -610,13 +740,56 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     with $\{1/\overline{r} : r \in S\}$ is the root multiset of $H$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:fr-build-S, lem:fr-size-bound}
-    Since $H^{\dagger 2n} = H$ and $H \neq 0$, the constant term of $H$ equals
-    the conjugate of its leading coefficient, which is nonzero; thus $H(0) \neq 0$
-    and $0$ is not a root. By \Cref{lem:fr-build-S} there is a multiset $S$ of
-    nonzero numbers with $\operatorname{roots}(H) = S \uplus \sigma(S)
-    = S \uplus \{1/\overline{r} : r \in S\}$, and \Cref{lem:fr-size-bound} gives
-    $|S| \le n$.
+    \uses{lem:fr-multiset-H0, lem:fr-build-S, lem:fr-size-bound}
+    By \Cref{lem:fr-multiset-H0} (using $\deg H = 2n$), the constant term of $H$
+    is the conjugate of its leading coefficient, which is nonzero; thus
+    $H(0) \neq 0$ and $0$ is not a root. By \Cref{lem:fr-build-S} there is a
+    multiset $S$ of nonzero numbers with $\operatorname{roots}(H) = S \uplus
+    \sigma(S) = S \uplus \{1/\overline{r} : r \in S\}$, and
+    \Cref{lem:fr-size-bound} gives $|S| \le n$.
+\end{proof}
+
+\begin{lemma}[Multiplicity transport for the conjugate-reciprocal]
+    \label{lem:fr-complementary-mult}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip, lem:rootmult-reflect, lem:rootmult-map-conj}
+    Let $Q \in \mathbb{C}[X]$ be nonzero with $\deg Q \le n$. Then for every
+    $w \neq 0$ the root multiplicity of $w$ in $Q^{\dagger n}$ equals the root
+    multiplicity of $1/\overline{w}$ in $Q$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:rootmult-reflect, lem:rootmult-map-conj}
+    Write $Q^{\dagger n} = \operatorname{reflect}_n(\operatorname{map}\,
+    \overline{(\cdot)}\,Q)$; since $Q \neq 0$ and coefficient conjugation is
+    injective, $\operatorname{map}\,\overline{(\cdot)}\,Q \neq 0$ with degree
+    $\le n$. \Cref{lem:rootmult-reflect} gives that the multiplicity of $w$ in
+    $Q^{\dagger n}$ equals the multiplicity of $1/w$ in
+    $\operatorname{map}\,\overline{(\cdot)}\,Q$, and \Cref{lem:rootmult-map-conj}
+    rewrites this as the multiplicity of $\overline{1/w} = 1/\overline{w}$ in $Q$.
+\end{proof}
+
+\begin{lemma}[Root multiset of a scaled factor product]
+    \label{lem:fr-complementary-roots}
+    \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \uses{def:conj-recip, lem:fr-complementary-mult}
+    Let $c \neq 0$ and let $S$ be a multiset of nonzero complex numbers, and put
+    $Q := c\prod_{r \in S}(X - r)$. Then $\operatorname{roots}(Q) = S$ and the
+    root multiset of $Q^{\dagger n}$ is $\sigma(S) := \{1/\overline{r} : r \in S\}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fr-complementary-mult}
+    By \texttt{Polynomial.roots\_C\_mul} (with $c \neq 0$) and
+    \texttt{Polynomial.roots\_multiset\_prod\_X\_sub\_C},
+    $\operatorname{roots}(Q) = \operatorname{roots}\bigl(\prod_{r\in S}(X-r)\bigr)
+    = S$. For each $w \neq 0$, by \Cref{lem:fr-complementary-mult} and
+    \texttt{Polynomial.count\_roots}, $\operatorname{count}_w
+    \operatorname{roots}(Q^{\dagger n}) = \operatorname{rootMultiplicity}_w
+    (Q^{\dagger n}) = \operatorname{rootMultiplicity}_{1/\overline{w}}(Q)
+    = \operatorname{count}_{1/\overline{w}} S$, which equals
+    $\operatorname{count}_w \sigma(S)$ because $\sigma(w) = 1/\overline{w}$ is an
+    injective map on the nonzero $r \in S$ (\texttt{Multiset.count\_map\_eq\_count});
+    for $w = 0$ both counts are $0$ (no root is zero). By \texttt{Multiset.ext},
+    $\operatorname{roots}(Q^{\dagger n}) = \sigma(S)$.
 \end{proof}
 
 \begin{lemma}[Roots of the conjugate-reciprocal of a factor]
@@ -632,19 +805,13 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     $Q\cdot Q^{\dagger n}$ is $S \uplus \{1/\overline{r} : r \in S\}$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:rootmult-reflect, lem:rootmult-map-conj}
-    Writing $Q^{\dagger n} = \operatorname{reflect}_n(\operatorname{map}\,
-    \overline{(\cdot)}\,Q)$ (note $Q \neq 0$, so
-    $\operatorname{map}\,\overline{(\cdot)}\,Q \neq 0$),
-    \Cref{lem:rootmult-reflect} gives that the multiplicity of $w$ equals that of
-    $1/w$ in $\operatorname{map}\,\overline{(\cdot)}\,Q$, and
-    \Cref{lem:rootmult-map-conj} rewrites the latter as the multiplicity of
-    $\overline{1/w} = 1/\overline{w}$ in $Q$. For the special form, the roots of
-    $Q = c\prod_{r \in S}(X - r)$ are the multiset $S$
-    (\texttt{Polynomial.roots\_C\_mul} and \texttt{Polynomial.roots\_prod\_X\_sub\_C}),
-    so the root multiset of $Q^{\dagger n}$ is $\{1/\overline{r} : r \in S\}$.
-    Since $c \neq 0$ and all $r \neq 0$, both $Q$ and $Q^{\dagger n}$ are nonzero
-    (the latter has leading coefficient $\overline{Q(0)} \neq 0$), hence
+    \uses{lem:fr-complementary-mult, lem:fr-complementary-roots}
+    The multiplicity transport is \Cref{lem:fr-complementary-mult}. For the
+    special form $Q = c\prod_{r\in S}(X-r)$, \Cref{lem:fr-complementary-roots}
+    gives $\operatorname{roots}(Q) = S$ and
+    $\operatorname{roots}(Q^{\dagger n}) = \{1/\overline{r} : r \in S\}$. Since
+    $c \neq 0$ and all $r \neq 0$, both $Q$ and $Q^{\dagger n}$ are nonzero (the
+    latter has leading coefficient $\overline{Q(0)} \neq 0$), so
     $Q\cdot Q^{\dagger n} \neq 0$ and \texttt{Polynomial.roots\_mul} gives
     $\operatorname{roots}(Q\cdot Q^{\dagger n})
     = \operatorname{roots}(Q) + \operatorname{roots}(Q^{\dagger n})
