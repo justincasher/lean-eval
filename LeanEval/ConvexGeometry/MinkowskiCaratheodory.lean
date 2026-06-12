@@ -220,6 +220,25 @@ theorem translatedSet_convex {s : Set E} (hsconv : Convex ℝ s) (W : Submodule 
   have h := hsconv.affine_preimage f
   simpa [Set.preimage, Set.mem_setOf_eq] using h
 
+/-- **The translation recovers `s`.** For `p ∈ s` and `W = vectorSpan ℝ s`, the image of the
+translated set `{w : W | (w : E) + p ∈ s}` under `w ↦ (w : E) + p` is `s` itself. -/
+theorem image_translatedSet_eq {s : Set E} {p : E} (hp : p ∈ s) :
+    (fun w : (vectorSpan ℝ s) => (w : E) + p) '' {w : (vectorSpan ℝ s) | (w : E) + p ∈ s} = s := by
+  sorry
+
+/-- **The translated set spans its subspace.** For `p ∈ s`, the translated set
+`{w : W | (w : E) + p ∈ s}` has full affine span in `W = vectorSpan ℝ s`. -/
+theorem affineSpan_translatedSet_eq_top {s : Set E} {p : E} (hp : p ∈ s) :
+    affineSpan ℝ {w : (vectorSpan ℝ s) | (w : E) + p ∈ s} = ⊤ := by
+  sorry
+
+/-- **Intrinsic interior equals interior under full affine span.** If a set `u` of a real normed
+space has `affineSpan ℝ u = ⊤`, then its intrinsic interior is its topological interior. -/
+theorem intrinsicInterior_eq_interior_of_affineSpan_eq_top {F : Type*} [NormedAddCommGroup F]
+    [NormedSpace ℝ F] {u : Set F} (hu : affineSpan ℝ u = ⊤) :
+    intrinsicInterior ℝ u = interior u := by
+  sorry
+
 /-- **Intrinsic interior via the direction subspace.** With `W = vectorSpan ℝ s` and base point
 `p ∈ s`, the intrinsic interior of `s` is the image of the topological interior of the
 translated set under `w ↦ w + p`. -/

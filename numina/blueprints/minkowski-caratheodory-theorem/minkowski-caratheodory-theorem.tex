@@ -202,8 +202,73 @@ $0 \in s'$ (as $p \in s$).
     $w \mapsto w + p$, hence convex (\texttt{Convex.affine\_preimage}).
 \end{proof}
 
+We decompose the identity $\operatorname{intrinsicInterior}_{\mathbb R} s =
+\iota_p\,''\,\operatorname{interior} s'$ into three independent pieces: the
+translation recovers $s$, the translated set spans all of $W$, and (a general
+fact) the intrinsic interior of a set whose affine span is the whole space is its
+ordinary interior.
+
+\begin{lemma}[The translation recovers $s$]
+    \label{lem:iie-image}
+    \lean{LeanEval.ConvexGeometry.image_translatedSet_eq}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    For $p \in s$ and $s' = \{\, w \in W : w + p \in s \,\}$ one has
+    $\iota_p\,''\,s' = s$, i.e.
+    \[
+        \{\, w + p : w \in W,\ w + p \in s \,\} \;=\; s .
+    \]
+\end{lemma}
+\begin{proof}
+    The inclusion $\iota_p\,''\,s' \subseteq s$ is immediate from the definition of
+    $s'$. Conversely, for $z \in s$ the difference $z - p$ lies in
+    $W = \operatorname{vectorSpan}_{\mathbb R} s$
+    (\texttt{vsub\_mem\_vectorSpan}), and $\iota_p(z - p) = (z - p) + p = z \in s$,
+    so $z \in \iota_p\,''\,s'$.
+\end{proof}
+
+\begin{lemma}[The translated set spans its subspace]
+    \label{lem:iie-affinespan-top}
+    \lean{LeanEval.ConvexGeometry.affineSpan_translatedSet_eq_top}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:iie-image}
+    For $p \in s$ the translated set $s' = \{\, w \in W : w + p \in s \,\}$ has full
+    affine span in $W$:
+    \[
+        \operatorname{affineSpan}_{\mathbb R} s' \;=\; \top .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:iie-image}
+    The set $s'$ is nonempty, as $0 \in s'$ (since $0 + p = p \in s$). The
+    injective inclusion $\iota_p$ carries $\operatorname{vectorSpan}_{\mathbb R} s'$
+    onto $\operatorname{vectorSpan}_{\mathbb R}(\iota_p\,''\,s')
+    = \operatorname{vectorSpan}_{\mathbb R} s = W$ (using
+    Lemma~\ref{lem:iie-image}), so $\operatorname{vectorSpan}_{\mathbb R} s'$ is all
+    of $W$. A nonempty set whose vector span is the whole space has full affine
+    span (\texttt{affineSpan\_eq\_top\_iff\_vectorSpan\_eq\_top\_of\_nonempty}).
+\end{proof}
+
+\begin{lemma}[Intrinsic interior equals interior under full affine span]
+    \label{lem:intrinsicinterior-eq-interior}
+    \lean{LeanEval.ConvexGeometry.intrinsicInterior_eq_interior_of_affineSpan_eq_top}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    Let $F$ be a real normed space and $u \subseteq F$ with
+    $\operatorname{affineSpan}_{\mathbb R} u = \top$. Then
+    $\operatorname{intrinsicInterior}_{\mathbb R} u = \operatorname{interior} u$.
+\end{lemma}
+\begin{proof}
+    By definition $\operatorname{intrinsicInterior}_{\mathbb R} u$ is the image,
+    under the coercion $\operatorname{affineSpan}_{\mathbb R} u \hookrightarrow F$,
+    of the topological interior of the preimage of $u$. When
+    $\operatorname{affineSpan}_{\mathbb R} u = \top$ this coercion is the
+    homeomorphism $\top \simeq F$ (\texttt{AffineSubspace.topHomeomorph} via
+    \texttt{AffineSubspace.topEquiv}), under which preimage and interior commute,
+    so the image is exactly $\operatorname{interior} u$.
+\end{proof}
+
 \begin{lemma}[Intrinsic interior via the direction subspace]
     \label{lem:intrinsic-interior-eq-image}
+    \uses{lem:iie-image, lem:iie-affinespan-top, lem:intrinsicinterior-eq-interior}
     \lean{LeanEval.ConvexGeometry.intrinsicInterior_eq_image}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     The affine span of $s'$ is all of $W$, so the intrinsic interior of $s'$ in
@@ -214,16 +279,22 @@ $0 \in s'$ (as $p \in s$).
     \]
 \end{lemma}
 \begin{proof}
-    Since $s'$ contains $0$ and its vector span is $W$, one has
-    $\operatorname{affineSpan}_{\mathbb R} s' = \top$ in $W$, whence
-    $\operatorname{intrinsicInterior}_{\mathbb R} s' = \operatorname{interior} s'$.
-    The affine isometry $\iota_p$ satisfies $\iota_p\,''\,s' = s$, so by
-    \texttt{AffineIsometry.image\_intrinsicInterior},
+    \uses{lem:iie-image, lem:iie-affinespan-top, lem:intrinsicinterior-eq-interior}
+    The map $\iota_p : W \to E$, $w \mapsto w + p$, is an affine isometry (the
+    isometric subspace inclusion followed by translation by $p$). By
+    Lemma~\ref{lem:iie-image}, $\iota_p\,''\,s' = s$, so
+    \texttt{AffineIsometry.image\_intrinsicInterior} gives
     \[
         \operatorname{intrinsicInterior}_{\mathbb R} s
-        = \iota_p\,''\,\operatorname{intrinsicInterior}_{\mathbb R} s'
-        = \iota_p\,''\,\operatorname{interior} s' . \qedhere
+        = \operatorname{intrinsicInterior}_{\mathbb R}(\iota_p\,''\,s')
+        = \iota_p\,''\,\operatorname{intrinsicInterior}_{\mathbb R} s' .
     \]
+    By Lemma~\ref{lem:iie-affinespan-top}, $\operatorname{affineSpan}_{\mathbb R} s'
+    = \top$, so Lemma~\ref{lem:intrinsicinterior-eq-interior} gives
+    $\operatorname{intrinsicInterior}_{\mathbb R} s' = \operatorname{interior} s'$.
+    Substituting yields
+    $\operatorname{intrinsicInterior}_{\mathbb R} s
+    = \iota_p\,''\,\operatorname{interior} s'$.
 \end{proof}
 
 \begin{lemma}[The interior in the direction subspace is nonempty]
