@@ -1,0 +1,198 @@
+% Blueprint: Comparison principle for the Dirichlet BVP
+% Created by Numina
+
+\begin{document}
+
+\section{Comparison principle for the Dirichlet BVP}
+
+We prove the one-dimensional maximum (comparison) principle for the second-order
+Dirichlet boundary value problem. Let $J \subseteq \mathbb{R}$ be open with
+$[0,1] \subseteq J$ and let $u, v : \mathbb{R} \to \mathbb{R}$ be $C^2$ on $J$
+(i.e. $u, v$ and their derivatives $u', v'$ are everywhere differentiable on $J$).
+Suppose
+\[
+    -u''(x) \le -v''(x) \qquad (x \in (0,1)),
+    \qquad u(0) \le v(0), \qquad u(1) \le v(1).
+\]
+Then $u(x) \le v(x)$ for all $x \in [0,1]$.
+
+The argument is purely convex. Set $w := u - v$. From $-u'' \le -v''$ we get
+$w'' = u'' - v'' \ge 0$ on $(0,1)$, so $w$ is convex on $[0,1]$ (using
+continuity at the endpoints). A convex function on a segment is bounded above by
+the maximum of its endpoint values; here both endpoint values $w(0), w(1)$ are
+$\le 0$, hence $w \le 0$ on $[0,1]$, i.e. $u \le v$.
+
+We work with the explicit ``second-derivative function'' $\partial^2 :=
+\mathrm{deriv}\,(\mathrm{deriv}\,u) - \mathrm{deriv}\,(\mathrm{deriv}\,v)$ and the
+first-derivative function $\partial := \mathrm{deriv}\,u - \mathrm{deriv}\,v$, so
+that no identification of $\mathrm{deriv}\,(u-v)$ with $\mathrm{deriv}\,u -
+\mathrm{deriv}\,v$ is ever needed: the convexity criterion takes the derivative
+functions as data.
+
+\subsection{The difference function and its derivatives}
+
+\begin{definition}[Difference function]
+    \label{def:w}
+    \lean{LeanEval.Analysis.ODE.w}
+    \leanfile{LeanEval/Analysis/ODE/BVPComparison.lean}
+    Given $u, v : \mathbb{R} \to \mathbb{R}$, define $w := u - v$, i.e.
+    $w(x) = u(x) - v(x)$ for all $x$.
+\end{definition}
+
+\begin{lemma}[Continuity of the difference]
+    \label{lem:w-continuous}
+    \lean{LeanEval.Analysis.ODE.w_continuousOn}
+    \leanfile{LeanEval/Analysis/ODE/BVPComparison.lean}
+    \uses{def:w}
+    \leanok
+    Under the hypotheses above, $w = u - v$ is continuous on $[0,1]$.
+\end{lemma}
+\begin{proof}
+    \uses{def:w}
+    For each $x \in [0,1] \subseteq J$, both $u$ and $v$ have a derivative at
+    $x$ (hypotheses \texttt{hu}, \texttt{hv}), hence are continuous at $x$
+    (\texttt{HasDerivAt.continuousAt}); therefore $w = u - v$ is continuous at
+    $x$. Continuity at every point of $[0,1]$ gives continuity on $[0,1]$
+    (\texttt{ContinuousAt.continuousWithinAt} / \texttt{continuousOn\_of\_forall\_continuousAt}).
+\end{proof}
+
+\begin{lemma}[First derivative of the difference on the interior]
+    \label{lem:w-first-deriv}
+    \lean{LeanEval.Analysis.ODE.w_hasDerivWithinAt_first}
+    \leanfile{LeanEval/Analysis/ODE/BVPComparison.lean}
+    \uses{def:w}
+    \leanok
+    Write $\partial := \mathrm{deriv}\,u - \mathrm{deriv}\,v$. For every
+    $x \in (0,1)$, the function $w = u - v$ has derivative $\partial(x) =
+    \mathrm{deriv}\,u(x) - \mathrm{deriv}\,v(x)$ within $(0,1)$ at $x$.
+\end{lemma}
+\begin{proof}
+    \uses{def:w}
+    For $x \in (0,1) \subseteq J$, $u$ has derivative $\mathrm{deriv}\,u(x)$ and
+    $v$ has derivative $\mathrm{deriv}\,v(x)$ at $x$ (hypotheses \texttt{hu},
+    \texttt{hv}). Subtracting (\texttt{HasDerivAt.sub}) gives that $w = u - v$
+    has derivative $\mathrm{deriv}\,u(x) - \mathrm{deriv}\,v(x)$ at $x$, which
+    restricts to a derivative within $(0,1)$ (\texttt{HasDerivAt.hasDerivWithinAt}).
+\end{proof}
+
+\begin{lemma}[Second derivative of the difference on the interior]
+    \label{lem:w-second-deriv}
+    \lean{LeanEval.Analysis.ODE.w_hasDerivWithinAt_second}
+    \leanfile{LeanEval/Analysis/ODE/BVPComparison.lean}
+    \uses{def:w}
+    \leanok
+    Write $\partial := \mathrm{deriv}\,u - \mathrm{deriv}\,v$ and
+    $\partial^2 := \mathrm{deriv}\,(\mathrm{deriv}\,u) -
+    \mathrm{deriv}\,(\mathrm{deriv}\,v)$. For every $x \in (0,1)$, the function
+    $\partial$ has derivative $\partial^2(x) =
+    \mathrm{deriv}\,(\mathrm{deriv}\,u)(x) -
+    \mathrm{deriv}\,(\mathrm{deriv}\,v)(x)$ within $(0,1)$ at $x$.
+\end{lemma}
+\begin{proof}
+    \uses{def:w}
+    For $x \in (0,1) \subseteq J$, $\mathrm{deriv}\,u$ has derivative
+    $\mathrm{deriv}\,(\mathrm{deriv}\,u)(x)$ and $\mathrm{deriv}\,v$ has
+    derivative $\mathrm{deriv}\,(\mathrm{deriv}\,v)(x)$ at $x$ (hypotheses
+    \texttt{hu'}, \texttt{hv'}). Subtracting (\texttt{HasDerivAt.sub}) gives that
+    $\partial = \mathrm{deriv}\,u - \mathrm{deriv}\,v$ has derivative
+    $\mathrm{deriv}\,(\mathrm{deriv}\,u)(x) - \mathrm{deriv}\,(\mathrm{deriv}\,v)(x)$
+    at $x$, which restricts to a derivative within $(0,1)$
+    (\texttt{HasDerivAt.hasDerivWithinAt}).
+\end{proof}
+
+\begin{lemma}[Nonnegativity of the second derivative]
+    \label{lem:w-second-nonneg}
+    \lean{LeanEval.Analysis.ODE.w_second_deriv_nonneg}
+    \leanfile{LeanEval/Analysis/ODE/BVPComparison.lean}
+    \uses{def:w}
+    \leanok
+    Write $\partial^2 := \mathrm{deriv}\,(\mathrm{deriv}\,u) -
+    \mathrm{deriv}\,(\mathrm{deriv}\,v)$. For every $x \in (0,1)$ we have
+    $0 \le \partial^2(x) = \mathrm{deriv}\,(\mathrm{deriv}\,u)(x) -
+    \mathrm{deriv}\,(\mathrm{deriv}\,v)(x)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:w}
+    The hypothesis \texttt{hineq} states $-\mathrm{deriv}\,(\mathrm{deriv}\,u)(x)
+    \le -\mathrm{deriv}\,(\mathrm{deriv}\,v)(x)$ for $x \in (0,1)$. Negating both
+    sides gives $\mathrm{deriv}\,(\mathrm{deriv}\,v)(x) \le
+    \mathrm{deriv}\,(\mathrm{deriv}\,u)(x)$, i.e.
+    $0 \le \mathrm{deriv}\,(\mathrm{deriv}\,u)(x) -
+    \mathrm{deriv}\,(\mathrm{deriv}\,v)(x)$ by \texttt{sub\_nonneg}.
+\end{proof}
+
+\subsection{Convexity and the maximum principle}
+
+\begin{lemma}[The difference is convex on $[0,1]$]
+    \label{lem:w-convex}
+    \lean{LeanEval.Analysis.ODE.w_convexOn}
+    \leanfile{LeanEval/Analysis/ODE/BVPComparison.lean}
+    \uses{def:w, lem:w-continuous, lem:w-first-deriv, lem:w-second-deriv, lem:w-second-nonneg}
+    \leanok
+    Under the hypotheses above, $w = u - v$ is convex on $[0,1]$:
+    $\mathrm{ConvexOn}\,\mathbb{R}\,([0,1])\,w$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:w-continuous, lem:w-first-deriv, lem:w-second-deriv, lem:w-second-nonneg}
+    Apply the criterion that a function continuous on a convex set
+    $D \subseteq \mathbb{R}$, twice differentiable on $\mathrm{interior}\,D$ with
+    nonnegative second derivative there, is convex on $D$
+    (\texttt{convexOn\_of\_hasDerivWithinAt2\_nonneg}), with $D = [0,1]$,
+    $f = w$, first-derivative data $f' = \mathrm{deriv}\,u - \mathrm{deriv}\,v$
+    and second-derivative data $f'' = \mathrm{deriv}\,(\mathrm{deriv}\,u) -
+    \mathrm{deriv}\,(\mathrm{deriv}\,v)$. Its hypotheses are: $[0,1]$ is convex
+    (\texttt{convex\_Icc}); $\mathrm{interior}\,[0,1] = (0,1)$
+    (\texttt{interior\_Icc}); continuity on $[0,1]$
+    (Lemma~\ref{lem:w-continuous}); the first-derivative-within-$(0,1)$ clause
+    (Lemma~\ref{lem:w-first-deriv}); the second-derivative-within-$(0,1)$ clause
+    (Lemma~\ref{lem:w-second-deriv}); and nonnegativity of $f''$ on $(0,1)$
+    (Lemma~\ref{lem:w-second-nonneg}).
+\end{proof}
+
+\begin{lemma}[A convex function nonpositive at the endpoints is nonpositive]
+    \label{lem:convex-le-zero}
+    \lean{LeanEval.Analysis.ODE.convexOn_Icc_nonpos_of_endpoints}
+    \leanfile{LeanEval/Analysis/ODE/BVPComparison.lean}
+    \leanok
+    A function $f : \mathbb{R} \to \mathbb{R}$ that is convex on $[0,1]$ and
+    satisfies $f(0) \le 0$ and $f(1) \le 0$ satisfies $f(x) \le 0$ for all
+    $x \in [0,1]$.
+\end{lemma}
+\begin{proof}
+    Fix $x \in [0,1]$. Since $0 \le 1$, the segment $[0 -[\mathbb{R}] 1]$ equals
+    $[0,1]$ (\texttt{segment\_eq\_Icc}), so $x$ lies in this segment. Both
+    endpoints $0$ and $1$ lie in $[0,1]$. By the maximum principle for convex
+    functions on a segment (\texttt{ConvexOn.le\_max\_of\_mem\_segment}),
+    $f(x) \le \max(f(0), f(1))$. Since $f(0) \le 0$ and $f(1) \le 0$, the maximum
+    is $\le 0$ (\texttt{max\_le}), hence $f(x) \le 0$.
+\end{proof}
+
+\subsection{Main result}
+
+\begin{theorem}[Comparison principle for the Dirichlet BVP]
+    \label{thm:bvp-comparison}
+    \lean{LeanEval.Analysis.ODE.bvp_comparison}
+    \leanfile{LeanEval/Analysis/ODE/BVPComparison.lean}
+    \uses{def:w, lem:w-convex, lem:convex-le-zero}
+    \leanok
+    Let $J \subseteq \mathbb{R}$ be open with $[0,1] \subseteq J$, and let
+    $u, v : \mathbb{R} \to \mathbb{R}$ be such that $u, v, \mathrm{deriv}\,u,
+    \mathrm{deriv}\,v$ are everywhere differentiable on $J$ (so $u, v$ are $C^2$
+    on $J$). Suppose
+    \[
+        -\mathrm{deriv}\,(\mathrm{deriv}\,u)(x) \le
+        -\mathrm{deriv}\,(\mathrm{deriv}\,v)(x) \qquad (x \in (0,1)),
+    \]
+    and $u(0) \le v(0)$, $u(1) \le v(1)$. Then $u(x) \le v(x)$ for all
+    $x \in [0,1]$.
+\end{theorem}
+\begin{proof}
+    \uses{def:w, lem:w-convex, lem:convex-le-zero}
+    Let $w = u - v$. By Lemma~\ref{lem:w-convex}, $w$ is convex on $[0,1]$. At
+    the endpoints, $w(0) = u(0) - v(0) \le 0$ and $w(1) = u(1) - v(1) \le 0$ by
+    the boundary hypotheses (\texttt{sub\_nonpos}). By
+    Lemma~\ref{lem:convex-le-zero}, $w(x) \le 0$ for all $x \in [0,1]$, i.e.
+    $u(x) - v(x) \le 0$, which is $u(x) \le v(x)$ (\texttt{sub\_nonpos}).
+\end{proof}
+
+\end{document}
