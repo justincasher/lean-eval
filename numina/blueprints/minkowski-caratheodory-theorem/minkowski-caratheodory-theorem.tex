@@ -23,6 +23,7 @@ merely its closure --- of its extreme points.
     \label{lem:caratheodory-image-mem}
     \lean{LeanEval.ConvexGeometry.caratheodory_image_mem}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
     Let $A \subseteq E$ and let $x \in \operatorname{convexHull}_{\mathbb R} A$.
     Then there are a fintype $\iota$, an affinely independent family
     $z : \iota \to E$ with $\operatorname{range} z \subseteq A$, and strictly
@@ -47,6 +48,7 @@ merely its closure --- of its extreme points.
     \lean{LeanEval.ConvexGeometry.caratheodory_card_bound}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:caratheodory-image-mem}
+    \leanok
     With $\iota$, $z$, and $t = z\,''\,\iota$ as in
     Lemma~\ref{lem:caratheodory-image-mem}, one has
     \[
@@ -71,6 +73,7 @@ merely its closure --- of its extreme points.
     \lean{LeanEval.ConvexGeometry.caratheodory_card}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:caratheodory-image-mem, lem:caratheodory-card-bound}
+    \leanok
     Let $A \subseteq E$ and let $x \in \operatorname{convexHull}_{\mathbb R} A$.
     Then there is a finite set $t \subseteq A$ with
     $\#t \le \operatorname{finrank}_{\mathbb R} E + 1$ and
@@ -107,6 +110,7 @@ face of $s$ on which $\ell$ attains its maximum.
     \lean{LeanEval.ConvexGeometry.exposedFace_isExtreme}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{def:exposed-face}
+    \leanok
     For every continuous linear functional $\ell$, the set $F_\ell(s)$ is compact
     and convex, and its extreme points are extreme points of $s$:
     $\operatorname{ext}(F_\ell(s)) \subseteq \operatorname{ext}(s)$.
@@ -125,6 +129,7 @@ face of $s$ on which $\ell$ attains its maximum.
     \lean{LeanEval.ConvexGeometry.exposedFace_vectorSpan_le_ker}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{def:exposed-face}
+    \leanok
     Every difference of two points of $F_\ell(s)$ is annihilated by $\ell$, hence
     \[
         \operatorname{vectorSpan}_{\mathbb R} F_\ell(s) \;\le\; \ker \ell .
@@ -144,6 +149,7 @@ face of $s$ on which $\ell$ attains its maximum.
     \lean{LeanEval.ConvexGeometry.exposedFace_finrank_lt}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{def:exposed-face, lem:face-vectorspan-le-ker}
+    \leanok
     Suppose $\ell$ is non-constant on $s$, i.e.\ there exist $a, b \in s$ with
     $\ell a \ne \ell b$. Then
     \[
@@ -188,6 +194,7 @@ $0 \in s'$ (as $p \in s$).
     \label{lem:translated-set-convex}
     \lean{LeanEval.ConvexGeometry.translatedSet_convex}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
     The set $s' = \{\, w \in W : w + p \in s \,\}$ is convex.
 \end{lemma}
 \begin{proof}
@@ -224,6 +231,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.interior_translatedSet_nonempty}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:translated-set-convex, lem:intrinsic-interior-eq-image}
+    \leanok
     If $s$ is nonempty, then $\operatorname{interior} s'$ is nonempty.
 \end{lemma}
 \begin{proof}
@@ -240,6 +248,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.separation_in_direction}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:translated-set-convex, lem:intrinsic-interior-eq-image}
+    \leanok
     Let $y \in s$ with $y \notin \operatorname{intrinsicInterior}_{\mathbb R} s$,
     and put $y' = y - p \in W$. Then $y' \notin \operatorname{interior} s'$, and
     there is a continuous linear functional $g : W \to_{L} \mathbb R$ with
@@ -267,6 +276,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.extension_to_E}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:separation-in-direction}
+    \leanok
     Let $g : W \to_L \mathbb R$ be the functional of
     Lemma~\ref{lem:separation-in-direction}. Then there is a continuous linear
     functional $\ell : E \to_L \mathbb R$ whose restriction to $W$ equals $g$, and
@@ -290,6 +300,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.bound_passes_to_closure}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:translated-set-convex, lem:intrinsic-interior-nonempty, lem:extension-to-E}
+    \leanok
     With $\ell$ as in Lemma~\ref{lem:extension-to-E}, $\ell z \le \ell y$ for all
     $z \in s$.
 \end{lemma}
@@ -317,6 +328,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.functional_non_constant}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:intrinsic-interior-nonempty, lem:separation-in-direction, lem:extension-to-E}
+    \leanok
     The functional $\ell$ produced in Lemma~\ref{lem:extension-to-E} is
     non-constant on $s$: there exist $a, b \in s$ with $\ell a \ne \ell b$.
 \end{lemma}
@@ -335,6 +347,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.supporting_functional}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{def:exposed-face, lem:separation-in-direction, lem:extension-to-E, lem:bound-passes-to-closure, lem:functional-non-constant}
+    \leanok
     Assume $s$ is nonempty. Let $y \in s$ with $y$ \emph{not} in the intrinsic
     interior of $s$. Then there is a continuous linear functional $\ell$,
     non-constant on $s$, such that $y \in F_\ell(s)$, i.e.\
@@ -357,6 +370,7 @@ $0 \in s'$ (as $p \in s$).
     \label{lem:exists-direction-vector}
     \lean{LeanEval.ConvexGeometry.exists_direction_vector}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
     If $\operatorname{finrank}_{\mathbb R}(\operatorname{vectorSpan}_{\mathbb R} s) \ge 1$,
     then there is a nonzero vector $v \in \operatorname{vectorSpan}_{\mathbb R} s$.
 \end{lemma}
@@ -370,6 +384,7 @@ $0 \in s'$ (as $p \in s$).
     \label{lem:line-section-compact-convex}
     \lean{LeanEval.ConvexGeometry.lineSection_isCompact_convex}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
     Let $x \in s$ and let $v \in \operatorname{vectorSpan}_{\mathbb R} s$ be nonzero.
     Then the section
     \[
@@ -392,6 +407,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.lineSection_eq_Icc}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:line-section-compact-convex}
+    \leanok
     With $x$, $v$, and $T$ as in Lemma~\ref{lem:line-section-compact-convex},
     \[
         T = \operatorname{Icc}\!\big(\inf T,\ \sup T\big).
@@ -411,6 +427,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.lineSection_zero_interior}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:line-section-icc}
+    \leanok
     With $x$, $v$, and $T$ as above, if $0 \in \operatorname{interior} T$ then
     $\inf T < 0 < \sup T$.
 \end{lemma}
@@ -447,6 +464,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.interior_in_segment}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:exists-direction-vector, lem:line-section-icc, lem:segment-endpoints-not-interior}
+    \leanok
     Suppose $\operatorname{finrank}_{\mathbb R}(\operatorname{vectorSpan}_{\mathbb R} s) \ge 1$
     and let $x$ be in the intrinsic interior of $s$. Then there exist $y, z \in s$,
     both \emph{not} in the intrinsic interior of $s$, with $x$ on the segment
@@ -492,6 +510,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.minkowski_boundary}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{def:exposed-face, lem:exposed-face, lem:exposed-face-lower-dim, lem:supporting-functional}
+    \leanok
     Assume $s$ is nonempty, and let $y \in s$ not lie in the intrinsic interior of
     $s$. Then there is a set $F \subseteq s$ that is compact and convex, satisfies
     $\operatorname{ext}(F) \subseteq \operatorname{ext}(s)$, contains $y$, and has
@@ -516,6 +535,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.minkowski_boundary_mem}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:minkowski-boundary}
+    \leanok
     Let $s$ be compact convex and assume the induction hypothesis: for every
     compact convex set $s_0$ with
     $\operatorname{finrank}_{\mathbb R}(\operatorname{vectorSpan}_{\mathbb R} s_0)
@@ -543,6 +563,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.minkowski}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:base-case, lem:minkowski-boundary-mem, lem:interior-in-segment}
+    \leanok
     For every compact convex $s$ and every $x \in s$ one has
     $x \in \operatorname{convexHull}_{\mathbb R}(\operatorname{ext}(s))$.
 \end{lemma}
@@ -578,6 +599,7 @@ $0 \in s'$ (as $p \in s$).
     \lean{LeanEval.ConvexGeometry.mem_convexHull_finset_extremePoints_of_mem_compact_convex}
     \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
     \uses{lem:caratheodory-card, lem:minkowski}
+    \leanok
     Let $E$ be a finite-dimensional real normed space, $s \subseteq E$ compact and
     convex, and $x \in s$. Then there is a finite set $t \subseteq \operatorname{ext}(s)$
     with $\#t \le \operatorname{finrank}_{\mathbb R} E + 1$ and
