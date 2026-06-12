@@ -240,7 +240,65 @@ theorem image_translatedSet_eq {s : Set E} {p : E} (hp : p ∈ s) :
 `{w : W | (w : E) + p ∈ s}` has full affine span in `W = vectorSpan ℝ s`. -/
 theorem affineSpan_translatedSet_eq_top {s : Set E} {p : E} (hp : p ∈ s) :
     affineSpan ℝ {w : (vectorSpan ℝ s) | (w : E) + p ∈ s} = ⊤ := by
-  sorry
+  set W := vectorSpan ℝ s with hW
+  set s' : Set W := {w : W | (w : E) + p ∈ s} with hs'
+  have h_nonempty : s'.Nonempty := by
+    refine ⟨0, ?_⟩
+    dsimp [s']
+    simp [hp]
+  have h_vec_eq_top : vectorSpan ℝ s' = ⊤ := by
+    have h_inj : Function.Injective (Submodule.map (W.subtype : W →ₗ[ℝ] E)) :=
+      Submodule.map_injective_of_injective (Submodule.subtype_injective W)
+    apply h_inj
+    calc
+      Submodule.map W.subtype (vectorSpan ℝ s') = Submodule.map W.subtype (Submodule.span ℝ (s' -ᵥ s')) := by
+        rw [vectorSpan]
+      _ = Submodule.span ℝ (W.subtype '' (s' -ᵥ s' : Set W)) := by rw [Submodule.map_span]
+      _ = Submodule.span ℝ (s -ᵥ s : Set E) := by
+        apply congrArg (Submodule.span ℝ)
+        ext x
+        constructor
+        · intro hx
+          rw [Set.mem_image] at hx
+          rcases hx with ⟨y, hy, rfl⟩
+          rw [Set.mem_vsub] at hy
+          rcases hy with ⟨w₁, hw₁, w₂, hw₂, hy_eq⟩
+          have hw₁_s' : (w₁ : E) + p ∈ s := by simpa [s'] using hw₁
+          have hw₂_s' : (w₂ : E) + p ∈ s := by simpa [s'] using hw₂
+          have hy_val_eq : W.subtype y = ((w₁ : E) + p) - ((w₂ : E) + p) := by
+            calc
+              W.subtype y = W.subtype (w₁ -ᵥ w₂) := by rw [hy_eq]
+              _ = (W.subtype (w₁ - w₂) : E) := by simp
+              _ = (w₁ : E) - (w₂ : E) := rfl
+              _ = ((w₁ : E) + p) - ((w₂ : E) + p) := by simp
+          rw [hy_val_eq]
+          exact vsub_mem_vsub hw₁_s' hw₂_s'
+        · intro hx
+          rw [Set.mem_vsub] at hx
+          rcases hx with ⟨a, ha, b, hb, hx_eq⟩
+          have h_image : (fun w : W => (w : E) + p) '' s' = s := image_translatedSet_eq hp
+          have ha' : a ∈ (fun w : W => (w : E) + p) '' s' := by
+            rw [h_image]
+            exact ha
+          have hb' : b ∈ (fun w : W => (w : E) + p) '' s' := by
+            rw [h_image]
+            exact hb
+          rcases ha' with ⟨w₁, hw₁, ha_eq⟩
+          rcases hb' with ⟨w₂, hw₂, hb_eq⟩
+          have hz_mem : w₁ - w₂ ∈ (s' -ᵥ s' : Set W) := by
+            rw [Set.mem_vsub]
+            refine ⟨w₁, hw₁, w₂, hw₂, ?_⟩
+            simp
+          refine ⟨w₁ - w₂, hz_mem, ?_⟩
+          calc
+            W.subtype (w₁ - w₂) = (w₁ : E) - (w₂ : E) := rfl
+            _ = ((w₁ : E) + p) - ((w₂ : E) + p) := by simp
+            _ = a - b := by simp [ha_eq, hb_eq]
+            _ = x := hx_eq
+      _ = vectorSpan ℝ s := by rw [vectorSpan]
+      _ = W := rfl
+      _ = Submodule.map W.subtype (⊤ : Submodule ℝ W) := by rw [Submodule.map_subtype_top]
+  exact (AffineSubspace.affineSpan_eq_top_iff_vectorSpan_eq_top_of_nonempty (k := ℝ) (V := W) (P := W) h_nonempty).mpr h_vec_eq_top
 
 /-- **Intrinsic interior equals interior under full affine span.** If a set `u` of a real normed
 space has `affineSpan ℝ u = ⊤`, then its intrinsic interior is its topological interior. -/
