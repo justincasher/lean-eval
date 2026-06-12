@@ -1230,6 +1230,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \label{lem:fr-zero-factor-nonneg}
     \lean{LeanEval.ComplexAnalysis.fr_zero_factor_nonneg}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
+    \leanok
     Suppose $H = X^{k}\cdot H_1$ and $z^{-n}H(z)$ is a nonnegative real for all
     $\|z\| = 1$. Then $z^{-(n-k)}H_1(z)$ is a nonnegative real for all
     $\|z\| = 1$.
@@ -1245,6 +1246,7 @@ nonnegative trigonometric polynomial $1 - \|P(z)\|^2$ is realised as $\|Q(z)\|^2
     \lean{LeanEval.ComplexAnalysis.fr_zero_factor}
     \leanfile{LeanEval/ComplexAnalysis/ComplementaryPolynomials/Factorization.lean}
     \uses{lem:fr-zero-mult-le, lem:fr-zero-factor-selfinv, lem:fr-zero-factor-nonneg}
+    \leanok
     Let $H \in \mathbb{C}[X]$ be nonzero with $\deg H \le 2n$, $H^{\dagger 2n} = H$,
     and $z^{-n}H(z)$ a nonnegative real for all $\|z\| = 1$; let
     $k := \operatorname{rootMultiplicity}_0(H)$. Then $k \le n$ and there is a

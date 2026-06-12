@@ -109,13 +109,6 @@ theorem nonneg_even_order {φ : ℝ → ℝ} (hφ : Continuous φ) (h0 : φ 0 �
       have h_pow_pos : 0 < (ε/2 : ℝ) ^ m := pow_pos (by nlinarith) m
       nlinarith
 
-/-- The slope of `eⁱᵗ - 1` at `0`: `(eⁱᵗ - 1)/(i t) → 1` as `t → 0` along `t ≠ 0`. -/
-theorem exp_slope_tendsto :
-    Filter.Tendsto
-      (fun t : ℝ => (Complex.exp (Complex.I * (t : ℂ)) - 1) / (Complex.I * (t : ℂ)))
-      (nhdsWithin (0 : ℝ) {0}ᶜ) (nhds 1) := by
-  sorry
-
 /-- Linear expansion `eⁱᵗ - 1 = i t u(t)` with `u` continuous and `u(0) = 1`. -/
 theorem exp_sub_one_expansion :
     ∃ u : ℝ → ℂ, Continuous u ∧ u 0 = 1 ∧
@@ -289,21 +282,6 @@ theorem psi_continuous (w : ℂ) (hw : ‖w‖ = 1) (n m : ℕ) (g : ℂ[X])
       = w⁻¹ ^ n * (Complex.I * w) ^ m * g.eval w := by
     simp [hu0]
   exact ⟨h_cont_prod, h_val0⟩
-
-/-- The reduced circle factor `ψ`: continuous, nonzero at `0`, and reducing `(w eⁱᵗ)⁻ⁿ H(w eⁱᵗ)`
-to `tᵐ ψ(t)` for `H = (X - C w)ᵐ g`. -/
-theorem circle_root_even_psi (w : ℂ) (hw : ‖w‖ = 1) (n m : ℕ) (g : ℂ[X]) (hg : g.eval w ≠ 0)
-    (u : ℝ → ℂ) (hu_cont : Continuous u) (hu0 : u 0 = 1)
-    (hu_id : ∀ t : ℝ, Complex.exp (Complex.I * (t : ℂ)) - 1 = Complex.I * (t : ℂ) * u t) :
-    ∃ ψ : ℝ → ℂ,
-      (∀ t : ℝ, ψ t = (w * Complex.exp (Complex.I * (t : ℂ)))⁻¹ ^ n *
-          (Complex.I * w) ^ m * u t ^ m * g.eval (w * Complex.exp (Complex.I * (t : ℂ)))) ∧
-      Continuous ψ ∧
-      ψ 0 = w⁻¹ ^ n * (Complex.I * w) ^ m * g.eval w ∧
-      ψ 0 ≠ 0 ∧
-      (∀ t : ℝ, (w * Complex.exp (Complex.I * (t : ℂ)))⁻¹ ^ n *
-        ((X - C w) ^ m * g).eval (w * Complex.exp (Complex.I * (t : ℂ))) = (t : ℂ) ^ m * ψ t) := by
-  sorry
 
 /-- A circle root of a circle-nonnegative polynomial has even multiplicity. -/
 theorem circle_root_even (n : ℕ) (H : ℂ[X]) (hH : H ≠ 0) (hpos : NonnegRealOnCircle n H)

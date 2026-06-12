@@ -468,6 +468,9 @@ theorem fr_build_S_count_transport (R : Multiset ℂ) (hR : ∀ r ∈ R, r ≠ 0
 theorem exists_half_of_even_count {α : Type*} [DecidableEq α] (M : Multiset α)
     (h : ∀ w, Even (M.count w)) :
     ∃ T : Multiset α, T + T = M ∧ ∀ w, T.count w = M.count w / 2 := by
+  sorry
+
+/- Former broken induction proof of `exists_half_of_even_count`, kept for reference only:
   -- Strong induction on the cardinality of M
   let P : ℕ → Prop := λ n => ∀ (M' : Multiset α), M'.card = n → (∀ w, Even (M'.count w)) →
     ∃ T' : Multiset α, T' + T' = M' ∧ ∀ w, T'.count w = M'.count w / 2
@@ -580,6 +583,7 @@ theorem exists_half_of_even_count {α : Type*} [DecidableEq α] (M : Multiset α
       exact ⟨T, h_T_plus_T_eq_M', h_T_count⟩
   have h_total : P (M.card) := Nat.strong_induction_on (M.card) hP
   exact h_total M rfl h
+-/
 
 /-- The circle part of the root multiset has all-even counts and a `σ`-invariant half. -/
 theorem fr_build_S_circle_half (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
@@ -984,9 +988,26 @@ theorem fr_zero_factor_selfInv (n k : ℕ) (H H1 : ℂ[X]) (hself : conjRecip (2
   exact (mul_left_cancel₀ hXk_ne_zero h_eq).symm
 
 /-- Nonnegativity transports to the zero-free quotient. -/
-theorem fr_zero_factor_nonneg (n k : ℕ) (H H1 : ℂ[X]) (hfact : H = X ^ k * H1)
+theorem fr_zero_factor_nonneg (n k : ℕ) (H H1 : ℂ[X]) (hk : k ≤ n) (hfact : H = X ^ k * H1)
     (hpos : NonnegRealOnCircle n H) : NonnegRealOnCircle (n - k) H1 := by
-  sorry
+  intro z hz
+  have hz_ne_zero : z ≠ 0 := by
+    intro hzero
+    rw [hzero, norm_zero] at hz
+    norm_num at hz
+  rcases hpos z hz with ⟨r, hr_nonneg, hr_eq⟩
+  have h_H_eval : H.eval z = z ^ k * H1.eval z := by
+    rw [hfact, eval_mul, eval_pow, eval_X]
+  have hzn : z ^ n = z ^ (n - k) * z ^ k := by
+    rw [← pow_add, Nat.sub_add_cancel hk]
+  have h_eq : (z ^ (n - k))⁻¹ * H1.eval z = (r : ℂ) := by
+    calc
+      (z ^ (n - k))⁻¹ * H1.eval z = (z ^ n)⁻¹ * (z ^ k * H1.eval z) := by
+        rw [hzn]
+        field_simp [pow_ne_zero (n - k) hz_ne_zero, pow_ne_zero k hz_ne_zero]
+      _ = (z ^ n)⁻¹ * H.eval z := by rw [h_H_eval]
+      _ = (r : ℂ) := hr_eq
+  exact ⟨r, hr_nonneg, h_eq⟩
 
 /-- Factoring out the zero of a self-inversive polynomial. -/
 theorem fr_zero_factor (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
@@ -996,7 +1017,49 @@ theorem fr_zero_factor (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegre
         H1.natDegree = 2 * (n - H.rootMultiplicity 0) ∧
         conjRecip (2 * (n - H.rootMultiplicity 0)) H1 = H1 ∧
         NonnegRealOnCircle (n - H.rootMultiplicity 0) H1 := by
-  sorry
+  set k := H.rootMultiplicity 0 with hk_def
+  rcases fr_zero_mult_le n H hH0 hdeg hself with ⟨hk_le_n, h_nd_eq⟩
+  rcases Polynomial.exists_eq_pow_rootMultiplicity_mul_and_not_dvd H hH0 (0 : ℂ) with ⟨H1, h_eq, h_not⟩
+  have h_H1_eval0_ne : H1.eval 0 ≠ 0 := by
+    intro hzero
+    have hX_dvd : (X - C (0 : ℂ)) ∣ H1 := by
+      have hd : X ∣ H1 := by
+        rw [Polynomial.X_dvd_iff, Polynomial.coeff_zero_eq_eval_zero]
+        exact hzero
+      simpa using hd
+    exact h_not hX_dvd
+  have h_H_eq : H = X ^ k * H1 := by
+    simpa using h_eq
+  have h_H1_ne_zero : H1 ≠ 0 := by
+    intro hzero
+    rw [hzero, mul_zero] at h_H_eq
+    exact hH0 h_H_eq
+  have h_H1_natDegree : H1.natDegree = 2 * (n - k) := by
+    have h_Xk_ne_zero : (X : ℂ[X]) ^ k ≠ 0 := by simp
+    have h_nd_mul : H.natDegree = k + H1.natDegree := by
+      calc
+        H.natDegree = (X ^ k * H1).natDegree := by rw [h_H_eq]
+        _ = (X ^ k).natDegree + H1.natDegree :=
+          Polynomial.natDegree_mul h_Xk_ne_zero h_H1_ne_zero
+        _ = k + H1.natDegree := by simp
+    have hk_le_2n : k ≤ 2 * n := by omega
+    have h_eq_from_nd : k + H1.natDegree = 2 * n - k := by
+      calc
+        k + H1.natDegree = H.natDegree := by rw [h_nd_mul]
+        _ = 2 * n - k := h_nd_eq
+    have h_calc : H1.natDegree = 2 * n - 2 * k := by
+      omega
+    have : 2 * n - 2 * k = 2 * (n - k) := by
+      omega
+    rw [this] at h_calc
+    exact h_calc
+  have h_H1_natDegree_le : H1.natDegree ≤ 2 * (n - k) := by
+    rw [h_H1_natDegree]
+  have h_H1_selfInv : conjRecip (2 * (n - k)) H1 = H1 :=
+    fr_zero_factor_selfInv n k H H1 hself hk_le_n h_H1_ne_zero h_H1_natDegree_le h_H_eq
+  have h_H1_nonneg : NonnegRealOnCircle (n - k) H1 :=
+    fr_zero_factor_nonneg n k H H1 hk_le_n h_H_eq hpos
+  refine ⟨hk_le_n, H1, h_H_eq, h_H1_eval0_ne, h_H1_natDegree, h_H1_selfInv, h_H1_nonneg⟩
 
 /-- Recombining the factorization: `Q := Xᵏ · Q₁` factors `H = Xᵏ · H₁`. -/
 theorem fr_recombine (n k : ℕ) (H H1 Q1 : ℂ[X]) (hk : k ≤ n) (hfact : H = X ^ k * H1)
