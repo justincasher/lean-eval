@@ -30,6 +30,7 @@ the defining property of the compositional inverse together with uniqueness.
     \label{lem:subst-X-sub-X-sq}
     \lean{LeanEval.Combinatorics.subst_X_sub_X_sq}
     \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    \leanok
     For every $D \in \mathbb{Q}\llbracket X\rrbracket$ with zero constant term, the substitution
     of $D$ into $X - X^2$ equals $D - D^2$.
 \end{lemma}
@@ -44,6 +45,7 @@ the defining property of the compositional inverse together with uniqueness.
     \lean{LeanEval.Combinatorics.catalanSeriesRat_sq_mul_X_add_one}
     \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
     \uses{def:catalan-series-rat}
+    \leanok
     The series $\hat C$ satisfies $\hat C^2 \cdot X + 1 = \hat C$.
 \end{lemma}
 \begin{proof}
@@ -60,6 +62,7 @@ the defining property of the compositional inverse together with uniqueness.
     \lean{LeanEval.Combinatorics.X_mul_catalanSeriesRat_sub_sq}
     \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
     \uses{def:catalan-series-rat, lem:catalan-series-rat-eq}
+    \leanok
     Let $D = X \cdot \hat C$. Then $D - D^2 = X$.
 \end{lemma}
 \begin{proof}
@@ -76,6 +79,7 @@ the defining property of the compositional inverse together with uniqueness.
     \label{lem:hasSubst-X-sub-X-sq}
     \lean{LeanEval.Combinatorics.hasSubst_X_sub_X_sq}
     \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    \leanok
     The constant coefficient of $X - X^2 \in \mathbb{Q}\llbracket X\rrbracket$ is zero;
     consequently $X - X^2$ is substitutable.
 \end{lemma}
@@ -90,6 +94,7 @@ the defining property of the compositional inverse together with uniqueness.
     \lean{LeanEval.Combinatorics.substInv_eq_of_subst_eq_X}
     \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
     \uses{lem:hasSubst-X-sub-X-sq}
+    \leanok
     Let $P = X - X^2 \in \mathbb{Q}\llbracket X\rrbracket$. If $D$ has zero constant term and the
     substitution of $D$ into $P$ equals $X$, then $D = \operatorname{substInv} P$.
 \end{lemma}
@@ -115,6 +120,7 @@ the defining property of the compositional inverse together with uniqueness.
     \lean{LeanEval.Combinatorics.substInv_X_sub_X_sq_eq}
     \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
     \uses{def:catalan-series-rat, lem:subst-X-sub-X-sq, lem:catalan-times-X-relation, lem:inverse-unique}
+    \leanok
     Over $\mathbb{Q}\llbracket X\rrbracket$ we have $\operatorname{substInv}(X - X^2) = X \cdot \hat C$.
 \end{lemma}
 \begin{proof}
@@ -129,6 +135,7 @@ the defining property of the compositional inverse together with uniqueness.
     \label{lem:catalan-rat-formula}
     \lean{LeanEval.Combinatorics.catalan_rat_eq}
     \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    \leanok
     For every $n$, $(\mathrm{catalan}\,n : \mathbb{Q}) = \binom{2n}{n}/(n+1)$.
 \end{lemma}
 \begin{proof}
@@ -143,6 +150,7 @@ the defining property of the compositional inverse together with uniqueness.
     \lean{LeanEval.Combinatorics.substInv_X_sub_X_sq_eq_catalan}
     \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
     \uses{def:catalan-series-rat, lem:substInv-eq-X-mul-catalan, lem:catalan-rat-formula}
+    \leanok
     For every $n$,
     \[
       [X^{n+1}]\,\operatorname{substInv}(X - X^2) = \frac{\binom{2n}{n}}{n+1}.
