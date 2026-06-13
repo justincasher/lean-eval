@@ -1,0 +1,167 @@
+% Blueprint: Catalan generating function via compositional inversion
+% Created by Numina
+
+\begin{document}
+
+\section{Catalan generating function via compositional inversion}
+
+We work in the ring of formal power series $\mathbb{Q}\llbracket X\rrbracket$. The goal is to
+show that the compositional inverse of the polynomial $P(X) = X - X^2$ is the
+generating function of the Catalan numbers, i.e.
+\[
+  [X^{n+1}]\,\operatorname{substInv}(X - X^2) = \frac{\binom{2n}{n}}{n+1}.
+\]
+The strategy is to identify $\operatorname{substInv}(X - X^2)$ with $X \cdot \hat C$, where
+$\hat C$ is the rational-coefficient Catalan generating function provided by Mathlib, using
+the defining property of the compositional inverse together with uniqueness.
+
+\begin{definition}[Rational Catalan generating function]
+    \label{def:catalan-series-rat}
+    \lean{LeanEval.Combinatorics.catalanSeriesRat}
+    \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    Let $\hat C \in \mathbb{Q}\llbracket X\rrbracket$ be the image of Mathlib's Catalan
+    generating function $\mathrm{catalanSeries} \in \mathbb{N}\llbracket X\rrbracket$ (whose
+    $n$-th coefficient is the Catalan number $\mathrm{catalan}\,n$) under the coefficient map
+    induced by the ring homomorphism $\mathbb{N} \to \mathbb{Q}$. Thus the $n$-th coefficient
+    of $\hat C$ is $(\mathrm{catalan}\,n : \mathbb{Q})$.
+\end{definition}
+
+\begin{lemma}[Substituting into $X - X^2$]
+    \label{lem:subst-X-sub-X-sq}
+    \lean{LeanEval.Combinatorics.subst_X_sub_X_sq}
+    \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    \leanok
+    For every $D \in \mathbb{Q}\llbracket X\rrbracket$ with zero constant term, the substitution
+    of $D$ into $X - X^2$ equals $D - D^2$.
+\end{lemma}
+\begin{proof}
+    Since $D$ has zero constant term, $D$ is substitutable, so substitution by $D$ is a ring
+    homomorphism. It therefore distributes over the subtraction, sends $X$ to $D$, and sends
+    $X^2 = X \cdot X$ to $D^2$. Hence the substitution equals $D - D^2$.
+\end{proof}
+
+\begin{lemma}[Catalan series identity over $\mathbb{Q}$]
+    \label{lem:catalan-series-rat-eq}
+    \lean{LeanEval.Combinatorics.catalanSeriesRat_sq_mul_X_add_one}
+    \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    \uses{def:catalan-series-rat}
+    \leanok
+    The series $\hat C$ satisfies $\hat C^2 \cdot X + 1 = \hat C$.
+\end{lemma}
+\begin{proof}
+    \uses{def:catalan-series-rat}
+    Mathlib provides the corresponding identity over $\mathbb{N}$:
+    $\mathrm{catalanSeries}^2 \cdot X + 1 = \mathrm{catalanSeries}$. Applying the coefficient
+    map $\mathbb{N} \to \mathbb{Q}$, which is a ring homomorphism sending $X \mapsto X$ and
+    $1 \mapsto 1$ and commuting with products and powers, yields the claimed identity for
+    $\hat C$.
+\end{proof}
+
+\begin{lemma}[The shifted series inverts $X - X^2$]
+    \label{lem:catalan-times-X-relation}
+    \lean{LeanEval.Combinatorics.X_mul_catalanSeriesRat_sub_sq}
+    \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    \uses{def:catalan-series-rat, lem:catalan-series-rat-eq}
+    \leanok
+    Let $D = X \cdot \hat C$. Then $D - D^2 = X$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:catalan-series-rat-eq}
+    By Lemma~\ref{lem:catalan-series-rat-eq}, $X \cdot \hat C^2 = \hat C^2 \cdot X = \hat C - 1$.
+    Therefore
+    \[
+      D - D^2 = X\hat C - X^2 \hat C^2 = X\bigl(\hat C - X \hat C^2\bigr)
+              = X\bigl(\hat C - (\hat C - 1)\bigr) = X \cdot 1 = X. \qedhere
+    \]
+\end{proof}
+
+\begin{lemma}[$X - X^2$ is substitutable]
+    \label{lem:hasSubst-X-sub-X-sq}
+    \lean{LeanEval.Combinatorics.hasSubst_X_sub_X_sq}
+    \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    \leanok
+    The constant coefficient of $X - X^2 \in \mathbb{Q}\llbracket X\rrbracket$ is zero;
+    consequently $X - X^2$ is substitutable.
+\end{lemma}
+\begin{proof}
+    The constant-coefficient map is a ring homomorphism, so it sends $X - X^2$ to
+    $\operatorname{constantCoeff} X - (\operatorname{constantCoeff} X)^2 = 0 - 0 = 0$. A power
+    series with vanishing constant coefficient is substitutable.
+\end{proof}
+
+\begin{lemma}[Uniqueness of the compositional inverse]
+    \label{lem:inverse-unique}
+    \lean{LeanEval.Combinatorics.substInv_eq_of_subst_eq_X}
+    \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    \uses{lem:hasSubst-X-sub-X-sq}
+    \leanok
+    Let $P = X - X^2 \in \mathbb{Q}\llbracket X\rrbracket$. If $D$ has zero constant term and the
+    substitution of $D$ into $P$ equals $X$, then $D = \operatorname{substInv} P$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:hasSubst-X-sub-X-sq}
+    Write $C = \operatorname{substInv} P$. Since $C$ and $D$ have zero constant term they are
+    substitutable, and $P = X - X^2$ is substitutable by
+    Lemma~\ref{lem:hasSubst-X-sub-X-sq}. The defining property of the compositional inverse
+    gives $\operatorname{subst}_P C = X$. Applying associativity of substitution then yields a
+    single chain
+    \[
+      D = \operatorname{subst}_D X
+        = \operatorname{subst}_D\bigl(\operatorname{subst}_P C\bigr)
+        = \operatorname{subst}_{\,\operatorname{subst}_D P}\, C
+        = \operatorname{subst}_X C = C,
+    \]
+    using $\operatorname{subst}_P C = X$ at the second step and the hypothesis
+    $\operatorname{subst}_D P = X$ at the fourth. Hence $D = \operatorname{substInv} P$.
+\end{proof}
+
+\begin{lemma}[Identification of the inverse]
+    \label{lem:substInv-eq-X-mul-catalan}
+    \lean{LeanEval.Combinatorics.substInv_X_sub_X_sq_eq}
+    \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    \uses{def:catalan-series-rat, lem:subst-X-sub-X-sq, lem:catalan-times-X-relation, lem:inverse-unique}
+    \leanok
+    Over $\mathbb{Q}\llbracket X\rrbracket$ we have $\operatorname{substInv}(X - X^2) = X \cdot \hat C$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:inverse-unique, lem:subst-X-sub-X-sq, lem:catalan-times-X-relation}
+    Set $D = X \cdot \hat C$. Its constant term is $0$. By
+    Lemma~\ref{lem:subst-X-sub-X-sq}, substituting $D$ into $X - X^2$ equals $D - D^2$, which is
+    $X$ by Lemma~\ref{lem:catalan-times-X-relation}. Thus $D$ satisfies the hypotheses of
+    Lemma~\ref{lem:inverse-unique}, whence $\operatorname{substInv}(X - X^2) = D = X \cdot \hat C$.
+\end{proof}
+
+\begin{lemma}[Closed form of the Catalan number over $\mathbb{Q}$]
+    \label{lem:catalan-rat-formula}
+    \lean{LeanEval.Combinatorics.catalan_rat_eq}
+    \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    \leanok
+    For every $n$, $(\mathrm{catalan}\,n : \mathbb{Q}) = \binom{2n}{n}/(n+1)$.
+\end{lemma}
+\begin{proof}
+    Mathlib's identity $(n+1)\cdot \mathrm{catalan}\,n = \mathrm{centralBinom}\,n = \binom{2n}{n}$
+    holds over $\mathbb{N}$. Casting to $\mathbb{Q}$ gives
+    $(n+1)\cdot(\mathrm{catalan}\,n : \mathbb{Q}) = \binom{2n}{n}$, and dividing by the nonzero
+    factor $n + 1$ yields the claim.
+\end{proof}
+
+\begin{theorem}[Catalan generating function via compositional inversion]
+    \label{thm:substInv-catalan}
+    \lean{LeanEval.Combinatorics.substInv_X_sub_X_sq_eq_catalan}
+    \leanfile{LeanEval/Combinatorics/CatalanSubstInv.lean}
+    \uses{def:catalan-series-rat, lem:substInv-eq-X-mul-catalan, lem:catalan-rat-formula}
+    \leanok
+    For every $n$,
+    \[
+      [X^{n+1}]\,\operatorname{substInv}(X - X^2) = \frac{\binom{2n}{n}}{n+1}.
+    \]
+\end{theorem}
+\begin{proof}
+    \uses{lem:substInv-eq-X-mul-catalan, lem:catalan-rat-formula}
+    By Lemma~\ref{lem:substInv-eq-X-mul-catalan}, $\operatorname{substInv}(X - X^2) = X \cdot \hat C$,
+    so its $(n+1)$-st coefficient equals the $n$-th coefficient of $\hat C$, namely
+    $(\mathrm{catalan}\,n : \mathbb{Q})$ by the definition of $\hat C$. Finally
+    Lemma~\ref{lem:catalan-rat-formula} rewrites this as $\binom{2n}{n}/(n+1)$.
+\end{proof}
+
+\end{document}
