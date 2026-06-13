@@ -1,7 +1,10 @@
-import Mathlib.Analysis.VonNeumannAlgebra.Basic
-import Mathlib.Analysis.InnerProductSpace.WeakOperatorTopology
-import Mathlib.Topology.Algebra.Module.Spaces.PointwiseConvergenceCLM
+import Mathlib
 import EvalTools.Markers
+import LeanEval.Analysis.VonNeumannDoubleCommutant.Topology
+import LeanEval.Analysis.VonNeumannDoubleCommutant.Orbit
+import LeanEval.Analysis.VonNeumannDoubleCommutant.Amplification
+import LeanEval.Analysis.VonNeumannDoubleCommutant.Blocks
+import LeanEval.Analysis.VonNeumannDoubleCommutant.Approximation
 
 namespace LeanEval
 namespace Analysis
@@ -33,6 +36,18 @@ theorem vonNeumann_doubleCommutant_tfae
       , IsClosed
           (ContinuousLinearMap.toPointwiseConvergenceCLM ℂ (RingHom.id ℂ) H H ''
             (S : Set (H →L[ℂ] H))) ] := by
+  sorry
+
+/-- `(3) ⇒ (1)`: if the SOT image of `S` (the image under
+`ContinuousLinearMap.toPointwiseConvergenceCLM`) is closed, then `S` equals its
+double commutant, `S'' = S`. Blueprint label `thm:sot-imp-dct`. -/
+theorem sot_imp_dct
+    {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
+    (S : StarSubalgebra ℂ (H →L[ℂ] H))
+    (hS : IsClosed
+      (ContinuousLinearMap.toPointwiseConvergenceCLM ℂ (RingHom.id ℂ) H H ''
+        (S : Set (H →L[ℂ] H)))) :
+    Set.centralizer (Set.centralizer (S : Set (H →L[ℂ] H))) = (S : Set (H →L[ℂ] H)) := by
   sorry
 
 end Analysis

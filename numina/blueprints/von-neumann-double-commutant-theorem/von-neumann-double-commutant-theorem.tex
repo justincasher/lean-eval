@@ -3,6 +3,893 @@
 
 \begin{document}
 
-% Your blueprint will go here.
+\section{von Neumann's Double Commutant Theorem}
+
+Throughout, $H$ is a complex Hilbert space and $B(H) = H \to_L[\mathbb C] H$ is the
+algebra of bounded operators on $H$. For a subset $X \subseteq B(H)$ we write
+$X' = \operatorname{centralizer}(X)$ for its \emph{commutant} (Mathlib:
+\texttt{Set.centralizer}), the set of operators commuting with every element of
+$X$, and $X'' = (X')'$ for its \emph{double commutant}. Let
+$S \subseteq B(H)$ be a unital $*$-subalgebra (Mathlib:
+\texttt{StarSubalgebra}~$\mathbb C\ (H \to_L[\mathbb C] H)$).
+
+We use two ``type copies'' of $B(H)$ carrying weaker topologies, as in Mathlib.
+The \emph{weak operator topology} (WOT) lives on
+\texttt{ContinuousLinearMapWOT}, the coarsest topology making
+$T \mapsto \langle T x, y\rangle$ continuous for all $x, y$; the canonical
+inclusion is $\iota_W = \texttt{ContinuousLinearMap.toWOT}$. The \emph{strong
+operator topology} (SOT), i.e.\ the topology of pointwise convergence, lives on
+\texttt{PointwiseConvergenceCLM}, the coarsest topology making
+$T \mapsto T x$ continuous for all $x$; the canonical inclusion is
+$\iota_S = \texttt{ContinuousLinearMap.toPointwiseConvergenceCLM}$. Both
+inclusions are bijections onto the respective type copies, identical on
+underlying operators.
+
+The goal is the \emph{double commutant theorem}: for a unital $*$-subalgebra
+$S$, the following are equivalent:
+\begin{enumerate}
+  \item $S'' = S$;
+  \item the image $\iota_W(S)$ is closed in the WOT;
+  \item the image $\iota_S(S)$ is closed in the SOT.
+\end{enumerate}
+
+\begin{theorem}[Double commutant theorem]
+    \label{thm:dct}
+    \lean{LeanEval.Analysis.vonNeumann_doubleCommutant_tfae}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant.lean}
+    \uses{lem:dct-wot-closed, lem:wot-closed-imp-sot-closed, thm:sot-imp-dct}
+    Let $S$ be a unital $*$-subalgebra of $B(H)$. The three statements
+    $S'' = S$, ``$\iota_W(S)$ is WOT-closed'', and ``$\iota_S(S)$ is SOT-closed''
+    are equivalent.
+\end{theorem}
+\begin{proof}
+    \uses{lem:dct-wot-closed, lem:wot-closed-imp-sot-closed, thm:sot-imp-dct}
+    We prove the cycle of implications
+    $(1) \Rightarrow (2) \Rightarrow (3) \Rightarrow (1)$.
+    Implication $(1) \Rightarrow (2)$ is
+    Lemma~\ref{lem:dct-wot-closed}; implication $(2) \Rightarrow (3)$ is
+    Lemma~\ref{lem:wot-closed-imp-sot-closed}; implication
+    $(3) \Rightarrow (1)$ is Theorem~\ref{thm:sot-imp-dct}. Closing the cycle
+    (\texttt{List.TFAE} via \texttt{tfae\_finish}) yields the equivalence.
+\end{proof}
+
+\subsection{The easy implications}
+
+\begin{lemma}[The WOT type copy is Hausdorff]
+    \label{lem:wot-t2space}
+    \lean{LeanEval.Analysis.wot_t2space}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    The WOT type copy \texttt{ContinuousLinearMapWOT} is a \texttt{T2Space}.
+\end{lemma}
+\begin{proof}
+    The weak operator topology is in fact regular Hausdorff: Mathlib provides the
+    instance \texttt{ContinuousLinearMapWOT.instT3Space}, and every $T_3$ space is
+    a $T_2$ space. Hence the \texttt{T2Space} instance resolves.
+\end{proof}
+
+\begin{lemma}[Multiplication on the WOT type copy is separately continuous]
+    \label{lem:wot-separately-continuous-mul}
+    \lean{LeanEval.Analysis.wot_separatelyContinuousMul}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    The WOT type copy \texttt{ContinuousLinearMapWOT} carries a
+    \texttt{SeparatelyContinuousMul} instance: for each fixed operator $B$, both
+    $T \mapsto B \cdot T$ and $T \mapsto T \cdot B$ are WOT-continuous.
+\end{lemma}
+\begin{proof}
+    The WOT is the topology induced by the family of pairings
+    $T \mapsto \langle T x, y\rangle$ (Mathlib's inducing description
+    \texttt{ContinuousLinearMapWOT.isInducing\_inducingFn}). To prove WOT-continuity
+    of a map into the WOT it suffices that each composite with a pairing be
+    continuous (\texttt{ContinuousLinearMapWOT.continuous\_inducingFn}). For
+    left multiplication by $B$ the composite is
+    $T \mapsto \langle B(T x), y\rangle = \langle T x, B^* y\rangle$, which is the
+    pairing of $T$ at $(x, B^* y)$ and hence WOT-continuous; for right
+    multiplication the composite is $T \mapsto \langle T(B x), y\rangle$, the
+    pairing of $T$ at $(B x, y)$, again WOT-continuous. This gives both
+    \texttt{continuous\_const\_mul} and \texttt{continuous\_mul\_const}.
+\end{proof}
+
+\begin{lemma}[Commutants are WOT-closed]
+    \label{lem:wot-centralizer-closed}
+    \lean{LeanEval.Analysis.wot_centralizer_isClosed}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    \uses{lem:wot-t2space, lem:wot-separately-continuous-mul}
+    For any subset $Y$ of the WOT type copy \texttt{ContinuousLinearMapWOT}, the
+    centralizer $Y'$ is closed.
+\end{lemma}
+\begin{proof}
+    \uses{lem:wot-t2space, lem:wot-separately-continuous-mul}
+    By Lemma~\ref{lem:wot-t2space} the WOT type copy is a \texttt{T2Space} and by
+    Lemma~\ref{lem:wot-separately-continuous-mul} it has a
+    \texttt{SeparatelyContinuousMul} instance. With these two instances in scope,
+    the centralizer of any set is closed (\texttt{Set.isClosed\_centralizer}).
+\end{proof}
+
+\begin{lemma}[The WOT inclusion preserves commuting]
+    \label{lem:wot-commute-iff}
+    \lean{LeanEval.Analysis.wot_commute_iff}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    For operators $S, T \in B(H)$, one has $\operatorname{Commute} S\, T$ in
+    $B(H)$ if and only if $\operatorname{Commute} \iota_W(S)\, \iota_W(T)$ in the
+    WOT type copy.
+\end{lemma}
+\begin{proof}
+    The inclusion $\iota_W$ is a ring isomorphism onto the WOT type copy
+    (\texttt{ContinuousLinearMapWOT.ringEquiv}); in particular it is an injective
+    multiplicative map. Since $\operatorname{Commute} S\, T$ means $S T = T S$,
+    applying the ring homomorphism gives
+    $\iota_W(S)\iota_W(T) = \iota_W(T)\iota_W(S)$, and conversely the injective
+    homomorphism reflects this equality (\texttt{map\_mul} together with
+    injectivity of \texttt{ringEquiv}).
+\end{proof}
+
+\begin{lemma}[The WOT inclusion preserves commutants]
+    \label{lem:toWOT-centralizer}
+    \lean{LeanEval.Analysis.toWOT_centralizer}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    \uses{lem:wot-commute-iff}
+    For every subset $X \subseteq B(H)$,
+    \[
+        \iota_W(X') \;=\; \bigl(\iota_W(X)\bigr)',
+    \]
+    where the left commutant is taken in $B(H)$ and the right one in the WOT type
+    copy.
+\end{lemma}
+\begin{proof}
+    \uses{lem:wot-commute-iff}
+    Unfolding \texttt{Set.mem\_centralizer\_iff} on both sides, an element of
+    $\iota_W(X')$ is $\iota_W(T)$ with $T$ commuting with every $x \in X$, and an
+    element of $\bigl(\iota_W(X)\bigr)'$ is a WOT operator commuting with every
+    $\iota_W(x)$. Since $\iota_W$ is a bijection, both sides range over
+    $\iota_W(T)$; by Lemma~\ref{lem:wot-commute-iff} $T$ commutes with $x$ iff
+    $\iota_W(T)$ commutes with $\iota_W(x)$, so the two membership conditions
+    coincide and the sets are equal.
+\end{proof}
+
+\begin{lemma}[$(1) \Rightarrow (2)$: a self-double-commutant is WOT-closed]
+    \label{lem:dct-wot-closed}
+    \lean{LeanEval.Analysis.dct_wot_closed}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    \uses{lem:toWOT-centralizer, lem:wot-centralizer-closed}
+    If $S'' = S$, then $\iota_W(S)$ is WOT-closed.
+\end{lemma}
+\begin{proof}
+    \uses{lem:toWOT-centralizer, lem:wot-centralizer-closed}
+    Using $S = S'' = (S')'$ and applying
+    Lemma~\ref{lem:toWOT-centralizer} twice,
+    \[
+        \iota_W(S) = \iota_W\bigl((S')'\bigr)
+        = \bigl(\iota_W(S')\bigr)'
+        = \Bigl(\bigl(\iota_W(S)\bigr)'\Bigr)'.
+    \]
+    The right-hand side is a centralizer in the WOT type copy, hence closed by
+    Lemma~\ref{lem:wot-centralizer-closed}.
+\end{proof}
+
+\begin{lemma}[Each WOT pairing is SOT-continuous]
+    \label{lem:sot-pairing-continuous}
+    \lean{LeanEval.Analysis.sot_pairing_continuous}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    For fixed $x, y \in H$, the map $T \mapsto \langle T x, y\rangle$ is
+    continuous on the SOT type copy \texttt{PointwiseConvergenceCLM}.
+\end{lemma}
+\begin{proof}
+    On \texttt{PointwiseConvergenceCLM} the evaluation $T \mapsto T x$ is
+    continuous by construction of the pointwise-convergence topology. Composing
+    with the continuous map $z \mapsto \langle z, y\rangle$ (continuity of the
+    inner product in its first argument) gives that
+    $T \mapsto \langle T x, y\rangle$ is continuous.
+\end{proof}
+
+\begin{lemma}[The SOT is finer than the WOT]
+    \label{lem:continuous-sot-wot}
+    \lean{LeanEval.Analysis.continuous_sotToWot}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    \uses{lem:sot-pairing-continuous}
+    The identity map on underlying operators, viewed as a map from the SOT type
+    copy \texttt{PointwiseConvergenceCLM} to the WOT type copy
+    \texttt{ContinuousLinearMapWOT}, is continuous. Equivalently,
+    $\iota_W = \varphi \circ \iota_S$ for a continuous map
+    $\varphi$ between the two type copies.
+\end{lemma}
+\begin{proof}
+    \uses{lem:sot-pairing-continuous}
+    The WOT is the initial topology induced by the evaluation pairings
+    $T \mapsto \langle T x, y\rangle$ (Mathlib's inducing description of
+    \texttt{ContinuousLinearMapWOT}, e.g.\
+    \texttt{ContinuousLinearMapWOT.continuous\_inducingFn}). To prove continuity
+    into an initial topology it suffices that each composite
+    $T \mapsto \langle T x, y\rangle$ be continuous on the SOT type copy, which is
+    exactly Lemma~\ref{lem:sot-pairing-continuous}. Hence $\varphi$ is continuous,
+    and it agrees with $\iota_W$ after precomposition with $\iota_S$ since all
+    three maps are the identity on underlying operators.
+\end{proof}
+
+\begin{lemma}[The SOT image is a preimage of the WOT image]
+    \label{lem:sot-image-eq-preimage}
+    \lean{LeanEval.Analysis.sot_image_eq_preimage}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    \uses{lem:continuous-sot-wot}
+    Let $\varphi$ be the continuous map of Lemma~\ref{lem:continuous-sot-wot},
+    so $\varphi \circ \iota_S = \iota_W$ on underlying operators. Then for every
+    subset $X \subseteq B(H)$,
+    \[
+        \iota_S(X) \;=\; \varphi^{-1}\bigl(\iota_W(X)\bigr).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:continuous-sot-wot}
+    The forward inclusion is immediate: if $z \in X$ then
+    $\varphi(\iota_S(z)) = \iota_W(z) \in \iota_W(X)$. Conversely, every point of
+    the SOT copy is $\iota_S(z)$ for a unique operator $z$ (since $\iota_S$ is a
+    bijection); if $\varphi(\iota_S(z)) = \iota_W(z) \in \iota_W(X)$ then, as
+    $\iota_W$ is injective, $z \in X$, whence $\iota_S(z) \in \iota_S(X)$.
+\end{proof}
+
+\begin{lemma}[$(2) \Rightarrow (3)$: WOT-closed implies SOT-closed]
+    \label{lem:wot-closed-imp-sot-closed}
+    \lean{LeanEval.Analysis.wot_closed_imp_sot_closed}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    \uses{lem:continuous-sot-wot, lem:sot-image-eq-preimage}
+    If $\iota_W(S)$ is WOT-closed, then $\iota_S(S)$ is SOT-closed.
+\end{lemma}
+\begin{proof}
+    \uses{lem:continuous-sot-wot, lem:sot-image-eq-preimage}
+    Let $\varphi$ be the continuous map of Lemma~\ref{lem:continuous-sot-wot}. By
+    Lemma~\ref{lem:sot-image-eq-preimage},
+    $\iota_S(S) = \varphi^{-1}\bigl(\iota_W(S)\bigr)$. As the preimage of the
+    WOT-closed set $\iota_W(S)$ under the continuous map $\varphi$, the set
+    $\iota_S(S)$ is closed (\texttt{IsClosed.preimage}).
+\end{proof}
+
+\subsection{The hard implication \texorpdfstring{$(3) \Rightarrow (1)$}{(3) => (1)}}
+
+The substance of the theorem is producing, for $T \in S''$ and a finite family of
+vectors, an element of $S$ that approximates $T$ on those vectors. We first prove
+a single-vector statement in an arbitrary Hilbert space, then amplify to handle
+finitely many vectors at once.
+
+\begin{lemma}[The orbit is a submodule containing $x$]
+    \label{lem:orbit-submodule}
+    \lean{LeanEval.Analysis.mem_orbitSubmodule}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    Let $R$ be a unital subalgebra of $B(K)$ for a Hilbert space $K$, and let
+    $x \in K$. Then $M_0 = \{A x : A \in R\}$ is a linear subspace of $K$, namely
+    the image of $R$ under the linear evaluation $A \mapsto A x$, and $x \in M_0$.
+\end{lemma}
+\begin{proof}
+    Since $R$ is a linear subspace of $B(K)$ and $A \mapsto A x$ is linear
+    (\texttt{ContinuousLinearMap.apply} is linear in the operator), its image
+    $M_0$ is a submodule (\texttt{Submodule.map}). As $R$ is unital, $1 \in R$
+    and $x = 1 \cdot x \in M_0$.
+\end{proof}
+
+\begin{lemma}[The orbit is invariant]
+    \label{lem:orbit-invariant}
+    \lean{LeanEval.Analysis.orbitSubmodule_mem_invtSubmodule}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    \uses{lem:orbit-submodule}
+    With $R$, $x$ and $M_0 = \{A x : A \in R\}$ as in
+    Lemma~\ref{lem:orbit-submodule}, for every $A \in R$ the subspace $M_0$ is
+    invariant under $A$, i.e.\ $A(M_0) \subseteq M_0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:orbit-submodule}
+    Fix $A \in R$. A general element of $M_0$ is $B x$ with $B \in R$, and
+    $A(B x) = (A B) x \in M_0$ because $A B \in R$ ($R$ being a subalgebra).
+    Hence $M_0 \in \texttt{Module.End.invtSubmodule}\ A$.
+\end{proof}
+
+\begin{lemma}[Closure of an orbit is an invariant subspace]
+    \label{lem:invariant-closure}
+    \lean{LeanEval.Analysis.orbitClosure_invariant}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    \uses{lem:orbit-submodule, lem:orbit-invariant}
+    Let $R$ be a unital subalgebra of $B(K)$ for a Hilbert space $K$, $x \in K$,
+    $M_0 = \{A x : A \in R\}$ and let $M$ be its topological closure. Then $M$ is
+    a closed subspace, $x \in M$, and for every $A \in R$ one has
+    $A(M) \subseteq M$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:orbit-submodule, lem:orbit-invariant}
+    By Lemma~\ref{lem:orbit-submodule}, $M_0$ is a submodule and $x \in M_0$; its
+    topological closure $M$ is a closed subspace
+    (\texttt{Submodule.topologicalClosure}) and $x \in M_0 \subseteq M$. By
+    Lemma~\ref{lem:orbit-invariant}, $M_0$ is invariant under each $A \in R$, and
+    therefore so is its closure $M$
+    (\texttt{Submodule.topologicalClosure\_mem\_invtSubmodule}).
+\end{proof}
+
+\begin{lemma}[Adjoint-invariance passes to the orthogonal complement]
+    \label{lem:orthogonal-invariant}
+    \lean{LeanEval.Analysis.orthogonal_invariant}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    Let $K$ be a Hilbert space, $A \in B(K)$, and $V$ a closed subspace. If $V$
+    is invariant under the adjoint $A^*$, then the orthogonal complement
+    $V^\perp$ is invariant under $A$, i.e.\ $A(V^\perp) \subseteq V^\perp$.
+\end{lemma}
+\begin{proof}
+    This is exactly
+    \texttt{ContinuousLinearMap.mem\_invtSubmodule\_adjoint\_iff} (equivalently
+    \texttt{ContinuousLinearMap.orthogonal\_mem\_invtSubmodule}): a submodule $V$
+    is $A^*$-invariant iff $V^\perp$ is $A$-invariant.
+\end{proof}
+
+\begin{lemma}[Projection composed on an invariant subspace]
+    \label{lem:proj-on-invariant}
+    \lean{LeanEval.Analysis.starProjection_apply_of_invariant}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    Let $K$ be a Hilbert space, $A \in B(K)$, and $V$ a closed subspace with
+    orthogonal projection $P = P_V$. If $A(V) \subseteq V$, then for every
+    $v \in K$ one has $P\bigl(A(P v)\bigr) = A(P v)$.
+\end{lemma}
+\begin{proof}
+    Since $P v \in V$ and $A(V) \subseteq V$, we have $A(P v) \in V$. The
+    orthogonal projection fixes the points of its subspace, so
+    $P\bigl(A(P v)\bigr) = A(P v)$
+    (\texttt{Submodule.starProjection\_eq\_self\_iff}).
+\end{proof}
+
+\begin{lemma}[Projection annihilates the orthogonal part]
+    \label{lem:proj-on-orthogonal}
+    \lean{LeanEval.Analysis.starProjection_apply_of_orthogonal_invariant}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    Let $K$ be a Hilbert space, $A \in B(K)$, and $V$ a closed subspace with
+    orthogonal projection $P = P_V$. If $A(V^\perp) \subseteq V^\perp$, then for
+    every $v \in K$ one has $P\bigl(A((1 - P) v)\bigr) = 0$.
+\end{lemma}
+\begin{proof}
+    The complementary projection $(1 - P)v$ lies in $V^\perp$
+    (\texttt{Submodule.starProjection\_orthogonal} / the decomposition
+    \texttt{Submodule.starProjection\_add\_starProjection\_orthogonal}), so by
+    hypothesis $A((1 - P)v) \in V^\perp$. The orthogonal projection vanishes on
+    $V^\perp$, hence $P\bigl(A((1 - P)v)\bigr) = 0$
+    (\texttt{Submodule.starProjection\_eq\_zero\_iff} /
+    \texttt{Submodule.starProjection\_orthogonal\_eq\_zero}).
+\end{proof}
+
+\begin{lemma}[Projection onto a doubly invariant subspace commutes]
+    \label{lem:projection-commutes}
+    \lean{LeanEval.Analysis.starProjection_commute}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    \uses{lem:orthogonal-invariant, lem:proj-on-invariant, lem:proj-on-orthogonal}
+    Let $K$ be a Hilbert space, $A \in B(K)$, and $V$ a closed subspace
+    admitting an orthogonal projection $P = P_V$. If $V$ is invariant under both
+    $A$ and its adjoint $A^*$, then $A P = P A$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:orthogonal-invariant, lem:proj-on-invariant, lem:proj-on-orthogonal}
+    By Lemma~\ref{lem:orthogonal-invariant}, $V^\perp$ is invariant under $A$.
+    Fix $v \in K$ and decompose $v = P v + (1 - P)v$
+    (\texttt{Submodule.starProjection\_add\_starProjection\_orthogonal}). Applying
+    $P A$ and using linearity,
+    $P A v = P\bigl(A(P v)\bigr) + P\bigl(A((1 - P)v)\bigr)$. By
+    Lemma~\ref{lem:proj-on-invariant} the first term is $A(P v)$, and by
+    Lemma~\ref{lem:proj-on-orthogonal} the second is $0$. Hence
+    $P A v = A(P v) = A P v$. As $v$ was arbitrary, $P A = A P$.
+\end{proof}
+
+\begin{lemma}[Projection onto an orbit closure lies in the commutant]
+    \label{lem:projection-in-commutant}
+    \lean{LeanEval.Analysis.starProjection_orbitClosure_mem_centralizer}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    \uses{lem:invariant-closure, lem:projection-commutes}
+    Let $R$ be a unital $*$-subalgebra of $B(K)$ and $x \in K$. Let $M$ be the
+    closure of the orbit $\{A x : A \in R\}$ and $P = P_M$ its orthogonal
+    projection. Then $P$ commutes with every element of $R$; that is,
+    $P \in R'$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:invariant-closure, lem:projection-commutes}
+    Fix $A \in R$. Since $R$ is $*$-closed, $A^* \in R$ as well. By
+    Lemma~\ref{lem:invariant-closure} applied to $A$ and to $A^*$, the subspace
+    $M$ is invariant under both $A$ and $A^*$. Hence
+    Lemma~\ref{lem:projection-commutes} gives $A P = P A$. As $A \in R$ was
+    arbitrary, $P \in R'$ (\texttt{Set.mem\_centralizer\_iff}).
+\end{proof}
+
+\begin{lemma}[Single-vector approximation]
+    \label{lem:single-vector-approx}
+    \lean{LeanEval.Analysis.single_vector_approx}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    \uses{lem:invariant-closure, lem:projection-in-commutant}
+    Let $R$ be a unital $*$-subalgebra of $B(K)$ and $T \in R''$. Then for every
+    $x \in K$ one has $T x \in \overline{\{A x : A \in R\}}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:invariant-closure, lem:projection-in-commutant}
+    Let $M = \overline{\{A x : A \in R\}}$ and $P = P_M$. By
+    Lemma~\ref{lem:projection-in-commutant}, $P \in R'$. Since $T \in R'' = (R')'$
+    and $P \in R'$, $T$ commutes with $P$
+    (\texttt{Set.mem\_centralizer\_iff}). By
+    Lemma~\ref{lem:invariant-closure}, $x \in M$, so $P x = x$
+    (\texttt{Submodule.starProjection\_eq\_self\_iff}). Therefore
+    \[
+        T x = T (P x) = P (T x) \in \operatorname{range} P = M,
+    \]
+    using that the range of an orthogonal projection is its subspace
+    (\texttt{Submodule.range\_starProjection}). Thus
+    $T x \in M = \overline{\{A x : A \in R\}}$.
+\end{proof}
+
+\subsection{Amplification}
+
+We amplify $S$ to act diagonally on $H^n = $ \texttt{PiLp 2 (fun \_ : Fin n => H)},
+which is again a Hilbert space.
+
+\begin{definition}[Diagonal amplification map]
+    \label{def:amplification-map}
+    \lean{LeanEval.Analysis.amplificationMap}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
+    \leanok
+    For $n : \mathbb N$, the \emph{diagonal amplification map} is the function
+    $\Delta : B(H) \to B(H^n)$ sending $A$ to the operator
+    $v \mapsto (i \mapsto A(v_i))$, defined as
+    $\Delta(A) = \texttt{ContinuousLinearMap.pi}\,(\lambda i,\ A \circ p_i)$,
+    where $p_i = \texttt{ContinuousLinearMap.proj}\ i$ is the $i$-th coordinate
+    projection on $H^n$.
+\end{definition}
+
+\begin{lemma}[$\Delta$ commutes with projections]
+    \label{lem:amp-proj}
+    \lean{LeanEval.Analysis.ampProj_comp_amplificationMap}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
+    \uses{def:amplification-map}
+    For every $A \in B(H)$ and index $i$, the $i$-th coordinate projection
+    satisfies $p_i \circ \Delta(A) = A \circ p_i$.
+\end{lemma}
+\begin{proof}
+    \uses{def:amplification-map}
+    By definition $\Delta(A) = \texttt{ContinuousLinearMap.pi}\,(\lambda i, A \circ p_i)$,
+    and the $i$-th projection of such a \texttt{pi} is its $i$-th component
+    (\texttt{ContinuousLinearMap.proj\_pi}), i.e.\ $A \circ p_i$.
+\end{proof}
+
+\begin{lemma}[Coordinates of an amplified vector]
+    \label{lem:amp-apply}
+    \lean{LeanEval.Analysis.amplificationMap_apply}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
+    \uses{lem:amp-proj}
+    For every $A \in B(H)$, vector $v \in H^n$ and index $i$, one has
+    $(\Delta(A) v)_i = A(v_i)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:amp-proj}
+    The $i$-th coordinate of $\Delta(A) v$ is
+    $p_i(\Delta(A) v) = (p_i \circ \Delta(A)) v$, which by
+    Lemma~\ref{lem:amp-proj} equals $(A \circ p_i) v = A(p_i v) = A(v_i)$.
+\end{proof}
+
+\begin{lemma}[$\Delta$ commutes with inclusions]
+    \label{lem:amp-single}
+    \lean{LeanEval.Analysis.amplificationMap_single}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
+    \uses{def:amplification-map, lem:amp-proj}
+    For every $A \in B(H)$ and index $j$, the $j$-th coordinate inclusion
+    $s_j = \texttt{ContinuousLinearMap.single}\ j$ satisfies
+    $\Delta(A) \circ s_j = s_j \circ A$.
+\end{lemma}
+\begin{proof}
+    \uses{def:amplification-map, lem:amp-proj}
+    Both sides are operators into $H^n$, so by
+    \texttt{ContinuousLinearMap.pi\_proj\_comp} it suffices to check equality
+    after composing with each $p_i$. Using Lemma~\ref{lem:amp-proj},
+    $p_i \circ \Delta(A) \circ s_j = A \circ p_i \circ s_j$, while
+    $p_i \circ s_j \circ A = (p_i \circ s_j) \circ A$; since $p_i \circ s_j$ is
+    the identity when $i = j$ and $0$ otherwise
+    (\texttt{LinearMap.proj\_comp\_single}), both sides agree for every
+    $i$.
+\end{proof}
+
+\begin{lemma}[$\Delta$ is multiplicative]
+    \label{lem:amp-map-mul}
+    \lean{LeanEval.Analysis.amplificationMap_mul}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
+    \uses{def:amplification-map, lem:amp-proj}
+    For all $A, B \in B(H)$, $\Delta(A B) = \Delta(A)\,\Delta(B)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:amplification-map, lem:amp-proj}
+    Both sides are operators into $H^n$; by
+    \texttt{ContinuousLinearMap.pi\_proj\_comp} it suffices to compare after each
+    $p_i$. By Lemma~\ref{lem:amp-proj}, $p_i \circ \Delta(A B) = (A B) \circ p_i$,
+    while $p_i \circ \Delta(A)\Delta(B) = A \circ p_i \circ \Delta(B)
+    = A \circ B \circ p_i$, and these coincide by associativity.
+\end{proof}
+
+\begin{lemma}[$\Delta$ preserves the identity]
+    \label{lem:amp-map-one}
+    \lean{LeanEval.Analysis.amplificationMap_one}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
+    \uses{def:amplification-map, lem:amp-proj}
+    $\Delta(1) = 1$ in $B(H^n)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:amplification-map, lem:amp-proj}
+    By \texttt{ContinuousLinearMap.pi\_proj\_comp} it suffices that
+    $p_i \circ \Delta(1) = p_i$ for all $i$. By Lemma~\ref{lem:amp-proj},
+    $p_i \circ \Delta(1) = 1 \circ p_i = p_i = p_i \circ 1$.
+\end{proof}
+
+\begin{lemma}[$\Delta$ is additive]
+    \label{lem:amp-map-add}
+    \lean{LeanEval.Analysis.amplificationMap_add}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
+    \uses{def:amplification-map, lem:amp-proj}
+    For all $A, B \in B(H)$, $\Delta(A + B) = \Delta(A) + \Delta(B)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:amplification-map, lem:amp-proj}
+    By \texttt{ContinuousLinearMap.pi\_proj\_comp} compare after each $p_i$. By
+    Lemma~\ref{lem:amp-proj} and bilinearity of composition,
+    $p_i \circ \Delta(A + B) = (A + B) \circ p_i = A \circ p_i + B \circ p_i
+    = p_i \circ (\Delta(A) + \Delta(B))$.
+\end{proof}
+
+\begin{lemma}[$\Delta$ is $\mathbb C$-linear in scalars]
+    \label{lem:amp-map-smul}
+    \lean{LeanEval.Analysis.amplificationMap_smul}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
+    \uses{def:amplification-map, lem:amp-proj}
+    For every scalar $c \in \mathbb C$ and $A \in B(H)$,
+    $\Delta(c \cdot A) = c \cdot \Delta(A)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:amplification-map, lem:amp-proj}
+    By \texttt{ContinuousLinearMap.pi\_proj\_comp} compare after each $p_i$. By
+    Lemma~\ref{lem:amp-proj}, $p_i \circ \Delta(c A) = (c A) \circ p_i
+    = c \cdot (A \circ p_i) = p_i \circ (c \cdot \Delta(A))$.
+\end{proof}
+
+\begin{lemma}[$\Delta$ intertwines adjoints]
+    \label{lem:amp-adjoint}
+    \lean{LeanEval.Analysis.amplificationMap_adjoint}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
+    \uses{def:amplification-map, lem:amp-apply}
+    For every $A \in B(H)$, $\bigl(\Delta(A)\bigr)^* = \Delta(A^*)$ in $B(H^n)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:amplification-map, lem:amp-apply}
+    It suffices to check $\langle \Delta(A)^* u, v\rangle = \langle \Delta(A^*) u, v\rangle$
+    for all $u, v \in H^n$, equivalently
+    $\langle u, \Delta(A) v\rangle = \langle \Delta(A^*) u, v\rangle$. With the
+    $\ell^2$ inner product on $H^n$,
+    $\langle u, \Delta(A) v\rangle = \sum_i \langle u_i, A v_i\rangle
+    = \sum_i \langle A^* u_i, v_i\rangle = \langle \Delta(A^*) u, v\rangle$,
+    using the coordinate formula $(\Delta(A) v)_i = A(v_i)$
+    (Lemma~\ref{lem:amp-apply}) and the defining property of the adjoint $A^*$
+    in each coordinate (\texttt{ContinuousLinearMap.adjoint\_inner\_left}).
+\end{proof}
+
+\begin{definition}[Diagonal amplification homomorphism]
+    \label{def:amplification}
+    \lean{LeanEval.Analysis.amplification}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
+    \uses{def:amplification-map, lem:amp-map-mul, lem:amp-map-one, lem:amp-map-add, lem:amp-map-smul, lem:amp-adjoint}
+    \leanok
+    The \emph{diagonal amplification} is the unital $*$-algebra homomorphism
+    $\Delta : B(H) \to B(H^n)$ obtained by bundling the underlying map
+    (Definition~\ref{def:amplification-map}) with the structure lemmas: it is
+    additive (Lemma~\ref{lem:amp-map-add}), $\mathbb C$-linear
+    (Lemma~\ref{lem:amp-map-smul}), multiplicative (Lemma~\ref{lem:amp-map-mul}),
+    unital (Lemma~\ref{lem:amp-map-one}) and star-preserving
+    (Lemma~\ref{lem:amp-adjoint}), hence a \texttt{StarAlgHom}~$\mathbb C\
+    (H \to_L[\mathbb C] H)\ (H^n \to_L[\mathbb C] H^n)$.
+\end{definition}
+
+\begin{lemma}[Amplification of a $*$-subalgebra]
+    \label{lem:amplification-subalgebra}
+    \lean{LeanEval.Analysis.amplificationSubalgebra}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
+    \uses{def:amplification}
+    \leanok
+    The image $\Delta(S)$ is a unital $*$-subalgebra of $B(H^n)$ (namely
+    \texttt{StarSubalgebra.map}~$\Delta\ S$, the image of $S$ under the
+    $*$-algebra homomorphism $\Delta$).
+\end{lemma}
+\begin{proof}
+    \uses{def:amplification}
+    Since $\Delta$ is a unital $*$-algebra homomorphism
+    (Definition~\ref{def:amplification}), the image of the $*$-subalgebra $S$ is
+    a $*$-subalgebra (\texttt{StarSubalgebra.map}), and it is unital because
+    $\Delta$ preserves the identity.
+\end{proof}
+
+\begin{lemma}[Reduction to coordinate projections]
+    \label{lem:proj-reduction}
+    \lean{LeanEval.Analysis.proj_reduction}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
+    For operators $B, C \in B(H^n)$, one has $B = C$ if and only if
+    $p_i \circ B = p_i \circ C$ for every index $i$, where
+    $p_i = \texttt{ContinuousLinearMap.proj}\ i$.
+\end{lemma}
+\begin{proof}
+    Two operators into the product $H^n$ are equal iff their compositions with
+    every coordinate projection agree
+    (\texttt{ContinuousLinearMap.pi\_proj\_comp}: every operator $B$ equals
+    $\texttt{pi}\,(\lambda i, p_i \circ B)$, and \texttt{pi} is injective in its
+    components).
+\end{proof}
+
+\begin{lemma}[Reduction to coordinate inclusions]
+    \label{lem:single-reduction}
+    \lean{LeanEval.Analysis.single_reduction}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
+    For operators $B, C \in B(H^n)$, one has $B = C$ if and only if
+    $B \circ s_j = C \circ s_j$ for every index $j$, where
+    $s_j = \texttt{ContinuousLinearMap.single}\ j$.
+\end{lemma}
+\begin{proof}
+    The decomposition $\sum_j s_j \circ p_j = \mathrm{id}$ on $H^n$ holds because
+    for every $v$, $\sum_j s_j(p_j v) = v$
+    (\texttt{ContinuousLinearMap.sum\_comp\_single}). Hence if
+    $B \circ s_j = C \circ s_j$ for all $j$, then for any $v$,
+    $B v = \sum_j B(s_j(p_j v)) = \sum_j C(s_j(p_j v)) = C v$, so $B = C$; the
+    converse is immediate.
+\end{proof}
+
+\begin{lemma}[Operators on $H^n$ are determined by their blocks]
+    \label{lem:blocks-eq}
+    \lean{LeanEval.Analysis.blocks_eq}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
+    \uses{lem:proj-reduction, lem:single-reduction}
+    For operators $B, C \in B(H^n)$, one has $B = C$ if and only if for all
+    indices $i, j$ the block entries agree, i.e.\
+    $p_i \circ B \circ s_j = p_i \circ C \circ s_j$, where
+    $p_i = \texttt{ContinuousLinearMap.proj}\ i$ and
+    $s_j = \texttt{ContinuousLinearMap.single}\ j$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:proj-reduction, lem:single-reduction}
+    The forward direction is immediate. Conversely, by
+    Lemma~\ref{lem:single-reduction} it suffices to show $B \circ s_j = C \circ s_j$
+    for every $j$, and by Lemma~\ref{lem:proj-reduction} (applied to the operators
+    $B \circ s_j$ and $C \circ s_j$) this in turn reduces to
+    $p_i \circ B \circ s_j = p_i \circ C \circ s_j$ for all $i$, which is the
+    hypothesis.
+\end{proof}
+
+\begin{lemma}[Block of a left amplification product]
+    \label{lem:block-amp-left}
+    \lean{LeanEval.Analysis.block_amp_left}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
+    \uses{lem:amp-proj}
+    For $A \in B(H)$, $B \in B(H^n)$ and indices $i, j$, the $(i,j)$ block of
+    $\Delta(A) B$ is $A \circ B_{ij}$, where $B_{ij} = p_i \circ B \circ s_j$;
+    that is, $p_i \circ \Delta(A) B \circ s_j = A \circ B_{ij}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:amp-proj}
+    Using $p_i \circ \Delta(A) = A \circ p_i$ (Lemma~\ref{lem:amp-proj}),
+    $p_i \circ \Delta(A) B \circ s_j = A \circ p_i \circ B \circ s_j
+    = A \circ B_{ij}$.
+\end{proof}
+
+\begin{lemma}[Block of a right amplification product]
+    \label{lem:block-amp-right}
+    \lean{LeanEval.Analysis.block_amp_right}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
+    \uses{lem:amp-single}
+    For $A \in B(H)$, $B \in B(H^n)$ and indices $i, j$, the $(i,j)$ block of
+    $B \Delta(A)$ is $B_{ij} \circ A$; that is,
+    $p_i \circ B \Delta(A) \circ s_j = B_{ij} \circ A$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:amp-single}
+    Using $\Delta(A) \circ s_j = s_j \circ A$ (Lemma~\ref{lem:amp-single}),
+    $p_i \circ B \Delta(A) \circ s_j = p_i \circ B \circ s_j \circ A
+    = B_{ij} \circ A$.
+\end{proof}
+
+\begin{lemma}[Commuting with one amplification, blockwise]
+    \label{lem:amp-commute-iff-blocks}
+    \lean{LeanEval.Analysis.amp_commute_iff_blocks}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
+    \uses{lem:blocks-eq, lem:block-amp-left, lem:block-amp-right}
+    For $A \in B(H)$ and $B \in B(H^n)$, one has $\Delta(A) B = B \Delta(A)$ if
+    and only if $A \circ B_{ij} = B_{ij} \circ A$ for all indices $i, j$, where
+    $B_{ij} = p_i \circ B \circ s_j$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:blocks-eq, lem:block-amp-left, lem:block-amp-right}
+    By Lemmas~\ref{lem:block-amp-left} and~\ref{lem:block-amp-right}, the $(i,j)$
+    block of $\Delta(A) B$ is $A \circ B_{ij}$ and the $(i,j)$ block of
+    $B \Delta(A)$ is $B_{ij} \circ A$. By Lemma~\ref{lem:blocks-eq}, the two
+    operators are equal iff all their blocks agree, i.e.\
+    $A \circ B_{ij} = B_{ij} \circ A$ for all $i, j$.
+\end{proof}
+
+\begin{lemma}[Commutant of the amplification, entrywise]
+    \label{lem:commutant-amplification-entrywise}
+    \lean{LeanEval.Analysis.commutant_amplification_entrywise}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
+    \uses{def:amplification, lem:amp-commute-iff-blocks}
+    An operator $B \in B(H^n)$ commutes with $\Delta(A)$ for every $A \in S$ if
+    and only if every block entry $B_{ij} = p_i \circ B \circ s_j$ lies in the
+    commutant $S'$.
+\end{lemma}
+\begin{proof}
+    \uses{def:amplification, lem:amp-commute-iff-blocks}
+    By Lemma~\ref{lem:amp-commute-iff-blocks}, for a fixed $A$ the equality
+    $\Delta(A) B = B \Delta(A)$ holds iff $A B_{ij} = B_{ij} A$ for all $i, j$.
+    Quantifying over $A \in S$, $B$ commutes with all of $\Delta(S)$ iff for every
+    $i, j$ the entry $B_{ij}$ commutes with every $A \in S$, i.e.\ $B_{ij} \in S'$
+    (\texttt{Set.mem\_centralizer\_iff}).
+\end{proof}
+
+\begin{lemma}[Amplification preserves the double commutant]
+    \label{lem:amplification-double-commutant}
+    \lean{LeanEval.Analysis.amplification_double_commutant}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
+    \uses{def:amplification, lem:commutant-amplification-entrywise, lem:amp-commute-iff-blocks}
+    If $T \in S''$, then $\Delta(T) \in \bigl(\Delta(S)\bigr)''$.
+\end{lemma}
+\begin{proof}
+    \uses{def:amplification, lem:commutant-amplification-entrywise, lem:amp-commute-iff-blocks}
+    Let $B \in \bigl(\Delta(S)\bigr)'$, so $B$ commutes with $\Delta(A)$ for all
+    $A \in S$. By Lemma~\ref{lem:commutant-amplification-entrywise}, every block
+    $B_{ij} \in S'$. Since $T \in S'' = (S')'$, $T$ commutes with each $B_{ij}$,
+    i.e.\ $T B_{ij} = B_{ij} T$ for all $i, j$. Hence by
+    Lemma~\ref{lem:amp-commute-iff-blocks} (applied to $T$), $\Delta(T)$ commutes
+    with $B$. As $B \in \bigl(\Delta(S)\bigr)'$ was arbitrary,
+    $\Delta(T) \in \bigl(\Delta(S)\bigr)''$.
+\end{proof}
+
+\begin{lemma}[Coordinate norm bound in $H^n$]
+    \label{lem:coord-norm-le}
+    \lean{LeanEval.Analysis.coord_norm_le}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
+    For $v \in H^n = \texttt{PiLp 2 (fun \_ : Fin n => H)}$ and any index $i$,
+    one has $\|v_i\| \le \|v\|$.
+\end{lemma}
+\begin{proof}
+    The $\ell^2$ norm on \texttt{PiLp 2} dominates each coordinate norm; this is
+    \texttt{PiLp.norm\_apply\_le}.
+\end{proof}
+
+\begin{lemma}[Coordinatewise approximation from closure membership]
+    \label{lem:closure-coord-approx}
+    \lean{LeanEval.Analysis.closure_coord_approx}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
+    \uses{lem:coord-norm-le}
+    Let $T \in B(H)$ and $x : \mathrm{Fin}\, n \to H$, and suppose the vector
+    $(T x_i)_i \in H^n$ lies in the closure $\overline{\{(A x_i)_i : A \in S\}}$.
+    Then for every $\varepsilon > 0$ there exists $A \in S$ with
+    $\|T x_i - A x_i\| < \varepsilon$ for all $i$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:coord-norm-le}
+    By \texttt{Metric.mem\_closure\_iff}, membership in the closure provides, for
+    the given $\varepsilon > 0$, an element $(A x_i)_i$ of the set (i.e.\ some
+    $A \in S$) with $\|(T x_i)_i - (A x_i)_i\|_{H^n} < \varepsilon$. By
+    Lemma~\ref{lem:coord-norm-le} each coordinate then satisfies
+    $\|T x_i - A x_i\| \le \|(T x_i)_i - (A x_i)_i\|_{H^n} < \varepsilon$.
+\end{proof}
+
+\begin{lemma}[Finite-family approximation]
+    \label{lem:double-commutant-approx}
+    \lean{LeanEval.Analysis.double_commutant_approx}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
+    \uses{lem:single-vector-approx, lem:amplification-subalgebra, lem:amplification-double-commutant, def:amplification, lem:amp-apply, lem:closure-coord-approx}
+    Let $T \in S''$, let $x : \mathrm{Fin}\, n \to H$ be a finite family of
+    vectors, and let $\varepsilon > 0$. Then there exists $A \in S$ with
+    $\|T x_i - A x_i\| < \varepsilon$ for all $i$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:single-vector-approx, lem:amplification-subalgebra, lem:amplification-double-commutant, def:amplification, lem:amp-apply, lem:closure-coord-approx}
+    Regard $\xi = (x_i)_i$ as a vector of $H^n$. Let $R = \Delta(S)$, a unital
+    $*$-subalgebra of $B(H^n)$ by Lemma~\ref{lem:amplification-subalgebra}, and
+    note $\Delta(T) \in R''$ by
+    Lemma~\ref{lem:amplification-double-commutant}. Applying
+    Lemma~\ref{lem:single-vector-approx} to $R$, $\Delta(T)$ and the vector
+    $\xi$ gives $\Delta(T)\,\xi \in \overline{\{\Delta(A)\,\xi : A \in S\}}$.
+    By Lemma~\ref{lem:amp-apply}, $\Delta(A)\,\xi = (A x_i)_i$ and
+    $\Delta(T)\,\xi = (T x_i)_i$, so $(T x_i)_i$ lies in the closure of
+    $\{(A x_i)_i : A \in S\}$ in $H^n$. Lemma~\ref{lem:closure-coord-approx} then
+    yields $A \in S$ with $\|T x_i - A x_i\| < \varepsilon$ for all $i$.
+\end{proof}
+
+\begin{lemma}[Neighbourhood basis of the SOT at zero]
+    \label{lem:sot-nhds-zero-basis}
+    \lean{LeanEval.Analysis.sot_hasBasis_nhds_zero}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
+    In the SOT type copy \texttt{PointwiseConvergenceCLM}, the neighbourhood
+    filter $\mathcal N(0)$ has a basis given by the sets
+    \[
+        W_{x, \varepsilon}
+        = \{\, U : \|U x_i\| < \varepsilon \ \text{for all } i \,\}
+    \]
+    indexed by finite families $x : \mathrm{Fin}\, n \to H$ and reals
+    $\varepsilon > 0$.
+\end{lemma}
+\begin{proof}
+    Mathlib's \texttt{PointwiseConvergenceCLM.hasBasis\_nhds\_zero} gives a basis
+    of $\mathcal N(0)$ by the sets $\{f : \forall x \in F,\ f x \in V\}$ for finite
+    $F \subseteq H$ and $V \in \mathcal N(0)$ in $H$; specialising $V$ to the
+    $\varepsilon$-ball and $F$ to the range of a finite family $x$ yields exactly
+    the sets $W_{x, \varepsilon}$.
+\end{proof}
+
+\begin{lemma}[Neighbourhood basis of the SOT at an arbitrary point]
+    \label{lem:sot-nhds-basis}
+    \lean{LeanEval.Analysis.sot_hasBasis_nhds}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
+    \uses{lem:sot-nhds-zero-basis}
+    For $T_0$ in the SOT type copy \texttt{PointwiseConvergenceCLM}, the
+    neighbourhood filter $\mathcal N(T_0)$ has a basis given by the sets
+    \[
+        V_{x, \varepsilon}
+        = \{\, U : \|U x_i - T_0 x_i\| < \varepsilon \ \text{for all } i \,\}
+    \]
+    indexed by finite families $x : \mathrm{Fin}\, n \to H$ and reals
+    $\varepsilon > 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:sot-nhds-zero-basis}
+    By Lemma~\ref{lem:sot-nhds-zero-basis}, $\mathcal N(0)$ has the basis of sets
+    $W_{x, \varepsilon}$. Since \texttt{PointwiseConvergenceCLM} is a topological
+    additive group, translation by $T_0$ is a homeomorphism and
+    $\mathcal N(T_0) = \mathcal N(0) + T_0$, so transporting the basis at $0$ along
+    $U \mapsto U + T_0$ yields a basis of $\mathcal N(T_0)$
+    (\texttt{Filter.HasBasis.map} with the nhds-translation lemma); the
+    transported sets are exactly the $V_{x, \varepsilon}$.
+\end{proof}
+
+\begin{lemma}[Membership in the SOT closure]
+    \label{lem:sot-closure-membership}
+    \lean{LeanEval.Analysis.sot_closure_membership}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
+    \uses{lem:sot-nhds-basis}
+    An operator $T$ satisfies $\iota_S(T) \in \overline{\iota_S(S)}$ (closure in
+    the SOT type copy) if and only if for every finite family
+    $x : \mathrm{Fin}\, n \to H$ and every $\varepsilon > 0$ there exists
+    $A \in S$ with $\|T x_i - A x_i\| < \varepsilon$ for all $i$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:sot-nhds-basis}
+    By Lemma~\ref{lem:sot-nhds-basis} the neighbourhood filter at $\iota_S(T)$
+    has the basis $\{V_{x, \varepsilon}\}$. A point lies in the closure of a set
+    iff every basic neighbourhood meets the set
+    (\texttt{mem\_closure\_iff\_nhds\_basis'}); here this says every
+    $V_{x, \varepsilon}$ meets $\iota_S(S)$, i.e.\ there is $A \in S$ with
+    $\iota_S(A) \in V_{x, \varepsilon}$, which is exactly the stated
+    approximation property.
+\end{proof}
+
+\begin{lemma}[Approximable operators lie in an SOT-closed subalgebra]
+    \label{lem:sot-closed-mem}
+    \lean{LeanEval.Analysis.sot_closed_mem}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
+    \uses{lem:sot-closure-membership}
+    Suppose $\iota_S(S)$ is SOT-closed and $T \in B(H)$ satisfies: for every finite
+    family $x : \mathrm{Fin}\, n \to H$ and every $\varepsilon > 0$ there exists
+    $A \in S$ with $\|T x_i - A x_i\| < \varepsilon$ for all $i$. Then $T \in S$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:sot-closure-membership}
+    By Lemma~\ref{lem:sot-closure-membership} the approximation property gives
+    $\iota_S(T) \in \overline{\iota_S(S)}$. Since $\iota_S(S)$ is closed it contains
+    its closure, so $\iota_S(T) \in \iota_S(S)$, and injectivity of $\iota_S$ gives
+    $T \in S$.
+\end{proof}
+
+\begin{theorem}[$(3) \Rightarrow (1)$: SOT-closed implies self-double-commutant]
+    \label{thm:sot-imp-dct}
+    \lean{LeanEval.Analysis.sot_imp_dct}
+    \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant.lean}
+    \uses{lem:sot-closed-mem, lem:double-commutant-approx}
+    If $\iota_S(S)$ is SOT-closed, then $S'' = S$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:sot-closed-mem, lem:double-commutant-approx}
+    The inclusion $S \subseteq S''$ always holds
+    (\texttt{Set.subset\_centralizer\_centralizer}), so it suffices to prove
+    $S'' \subseteq S$. Let $T \in S''$. For any finite family
+    $x : \mathrm{Fin}\, n \to H$ and any $\varepsilon > 0$,
+    Lemma~\ref{lem:double-commutant-approx} provides $A \in S$ with
+    $\|T x_i - A x_i\| < \varepsilon$ for all $i$. Since $\iota_S(S)$ is closed,
+    Lemma~\ref{lem:sot-closed-mem} gives $T \in S$. Hence
+    $S'' \subseteq S$, and together with the reverse inclusion, $S'' = S$.
+\end{proof}
 
 \end{document}
