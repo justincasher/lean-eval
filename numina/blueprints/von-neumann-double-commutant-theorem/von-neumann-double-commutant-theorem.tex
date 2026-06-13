@@ -38,6 +38,7 @@ $S$, the following are equivalent:
     \lean{LeanEval.Analysis.vonNeumann_doubleCommutant_tfae}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant.lean}
     \uses{lem:dct-wot-closed, lem:wot-closed-imp-sot-closed, thm:sot-imp-dct}
+    \leanok
     Let $S$ be a unital $*$-subalgebra of $B(H)$. The three statements
     $S'' = S$, ``$\iota_W(S)$ is WOT-closed'', and ``$\iota_S(S)$ is SOT-closed''
     are equivalent.
@@ -539,6 +540,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.amplificationMap_add}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
     \uses{def:amplification-map, lem:amp-proj}
+    \leanok
     For all $A, B \in B(H)$, $\Delta(A + B) = \Delta(A) + \Delta(B)$.
 \end{lemma}
 \begin{proof}
@@ -570,6 +572,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.amplificationMap_adjoint}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
     \uses{def:amplification-map, lem:amp-apply}
+    \leanok
     For every $A \in B(H)$, $\bigl(\Delta(A)\bigr)^* = \Delta(A^*)$ in $B(H^n)$.
 \end{lemma}
 \begin{proof}
@@ -640,6 +643,7 @@ which is again a Hilbert space.
     \label{lem:single-reduction}
     \lean{LeanEval.Analysis.single_reduction}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
+    \leanok
     For operators $B, C \in B(H^n)$, one has $B = C$ if and only if
     $B \circ s_j = C \circ s_j$ for every index $j$, where
     $s_j = \texttt{ContinuousLinearMap.single}\ j$.
@@ -697,6 +701,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.block_amp_right}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
     \uses{lem:amp-single}
+    \leanok
     For $A \in B(H)$, $B \in B(H^n)$ and indices $i, j$, the $(i,j)$ block of
     $B \Delta(A)$ is $B_{ij} \circ A$; that is,
     $p_i \circ B \Delta(A) \circ s_j = B_{ij} \circ A$.
@@ -713,6 +718,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.amp_commute_iff_blocks}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
     \uses{lem:blocks-eq, lem:block-amp-left, lem:block-amp-right}
+    \leanok
     For $A \in B(H)$ and $B \in B(H^n)$, one has $\Delta(A) B = B \Delta(A)$ if
     and only if $A \circ B_{ij} = B_{ij} \circ A$ for all indices $i, j$, where
     $B_{ij} = p_i \circ B \circ s_j$.
@@ -731,6 +737,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.commutant_amplification_entrywise}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
     \uses{def:amplification, lem:amp-commute-iff-blocks}
+    \leanok
     An operator $B \in B(H^n)$ commutes with $\Delta(A)$ for every $A \in S$ if
     and only if every block entry $B_{ij} = p_i \circ B \circ s_j$ lies in the
     commutant $S'$.
@@ -749,6 +756,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.amplification_double_commutant}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
     \uses{def:amplification, lem:commutant-amplification-entrywise, lem:amp-commute-iff-blocks}
+    \leanok
     If $T \in S''$, then $\Delta(T) \in \bigl(\Delta(S)\bigr)''$.
 \end{lemma}
 \begin{proof}
@@ -780,6 +788,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.closure_coord_approx}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
     \uses{lem:coord-norm-le}
+    \leanok
     Let $T \in B(H)$ and $x : \mathrm{Fin}\, n \to H$, and suppose the vector
     $(T x_i)_i \in H^n$ lies in the closure $\overline{\{(A x_i)_i : A \in S\}}$.
     Then for every $\varepsilon > 0$ there exists $A \in S$ with
@@ -799,6 +808,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.double_commutant_approx}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
     \uses{lem:single-vector-approx, lem:amplification-subalgebra, lem:amplification-double-commutant, def:amplification, lem:amp-apply, lem:closure-coord-approx}
+    \leanok
     Let $T \in S''$, let $x : \mathrm{Fin}\, n \to H$ be a finite family of
     vectors, and let $\varepsilon > 0$. Then there exists $A \in S$ with
     $\|T x_i - A x_i\| < \varepsilon$ for all $i$.
@@ -821,6 +831,7 @@ which is again a Hilbert space.
     \label{lem:sot-nhds-zero-basis}
     \lean{LeanEval.Analysis.sot_hasBasis_nhds_zero}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
+    \leanok
     In the SOT type copy \texttt{PointwiseConvergenceCLM}, the neighbourhood
     filter $\mathcal N(0)$ has a basis given by the sets
     \[
@@ -843,6 +854,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.sot_hasBasis_nhds}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
     \uses{lem:sot-nhds-zero-basis}
+    \leanok
     For $T_0$ in the SOT type copy \texttt{PointwiseConvergenceCLM}, the
     neighbourhood filter $\mathcal N(T_0)$ has a basis given by the sets
     \[
@@ -868,6 +880,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.sot_closure_membership}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
     \uses{lem:sot-nhds-basis}
+    \leanok
     An operator $T$ satisfies $\iota_S(T) \in \overline{\iota_S(S)}$ (closure in
     the SOT type copy) if and only if for every finite family
     $x : \mathrm{Fin}\, n \to H$ and every $\varepsilon > 0$ there exists
@@ -889,6 +902,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.sot_closed_mem}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
     \uses{lem:sot-closure-membership}
+    \leanok
     Suppose $\iota_S(S)$ is SOT-closed and $T \in B(H)$ satisfies: for every finite
     family $x : \mathrm{Fin}\, n \to H$ and every $\varepsilon > 0$ there exists
     $A \in S$ with $\|T x_i - A x_i\| < \varepsilon$ for all $i$. Then $T \in S$.
@@ -906,6 +920,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.sot_imp_dct}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant.lean}
     \uses{lem:sot-closed-mem, lem:double-commutant-approx}
+    \leanok
     If $\iota_S(S)$ is SOT-closed, then $S'' = S$.
 \end{theorem}
 \begin{proof}

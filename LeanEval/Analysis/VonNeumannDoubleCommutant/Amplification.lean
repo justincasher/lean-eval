@@ -133,7 +133,21 @@ theorem amplificationMap_smul (c : ℂ) (A : H →L[ℂ] H) :
 theorem amplificationMap_adjoint (A : H →L[ℂ] H) :
     ContinuousLinearMap.adjoint (amplificationMap (n := n) A)
       = amplificationMap (ContinuousLinearMap.adjoint A) := by
-  sorry
+  refine ContinuousLinearMap.ext fun u => ?_
+  apply ext_inner_left (𝕜 := ℂ)
+  intro v
+  calc
+    inner ℂ v (ContinuousLinearMap.adjoint (amplificationMap A) u)
+        = inner ℂ (amplificationMap A v) u := by
+          rw [ContinuousLinearMap.adjoint_inner_right]
+    _ = ∑ i : Fin n, inner ℂ ((amplificationMap A v).ofLp i) (u.ofLp i) := by
+      rw [PiLp.inner_apply]
+    _ = ∑ i : Fin n, inner ℂ (A (v.ofLp i)) (u.ofLp i) := by
+      simp [amplificationMap_apply]
+    _ = ∑ i : Fin n, inner ℂ (v.ofLp i) ((ContinuousLinearMap.adjoint A) (u.ofLp i)) := by
+      simp [ContinuousLinearMap.adjoint_inner_right]
+    _ = inner ℂ v (amplificationMap (ContinuousLinearMap.adjoint A) u) := by
+      simp [PiLp.inner_apply, amplificationMap_apply]
 
 /-- `def:amplification`: the diagonal amplification as a unital `*`-algebra
 homomorphism `Δ : B(H) →⋆ₐ[ℂ] B(H^n)`, bundling `amplificationMap` with the
