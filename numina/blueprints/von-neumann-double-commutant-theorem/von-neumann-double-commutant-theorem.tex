@@ -59,6 +59,7 @@ $S$, the following are equivalent:
     \label{lem:wot-t2space}
     \lean{LeanEval.Analysis.wot_t2space}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    \leanok
     The WOT type copy \texttt{ContinuousLinearMapWOT} is a \texttt{T2Space}.
 \end{lemma}
 \begin{proof}
@@ -94,6 +95,7 @@ $S$, the following are equivalent:
     \lean{LeanEval.Analysis.wot_centralizer_isClosed}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
     \uses{lem:wot-t2space, lem:wot-separately-continuous-mul}
+    \leanok
     For any subset $Y$ of the WOT type copy \texttt{ContinuousLinearMapWOT}, the
     centralizer $Y'$ is closed.
 \end{lemma}
@@ -109,6 +111,7 @@ $S$, the following are equivalent:
     \label{lem:wot-commute-iff}
     \lean{LeanEval.Analysis.wot_commute_iff}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    \leanok
     For operators $S, T \in B(H)$, one has $\operatorname{Commute} S\, T$ in
     $B(H)$ if and only if $\operatorname{Commute} \iota_W(S)\, \iota_W(T)$ in the
     WOT type copy.
@@ -128,6 +131,7 @@ $S$, the following are equivalent:
     \lean{LeanEval.Analysis.toWOT_centralizer}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
     \uses{lem:wot-commute-iff}
+    \leanok
     For every subset $X \subseteq B(H)$,
     \[
         \iota_W(X') \;=\; \bigl(\iota_W(X)\bigr)',
@@ -151,6 +155,7 @@ $S$, the following are equivalent:
     \lean{LeanEval.Analysis.dct_wot_closed}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
     \uses{lem:toWOT-centralizer, lem:wot-centralizer-closed}
+    \leanok
     If $S'' = S$, then $\iota_W(S)$ is WOT-closed.
 \end{lemma}
 \begin{proof}
@@ -170,6 +175,7 @@ $S$, the following are equivalent:
     \label{lem:sot-pairing-continuous}
     \lean{LeanEval.Analysis.sot_pairing_continuous}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
+    \leanok
     For fixed $x, y \in H$, the map $T \mapsto \langle T x, y\rangle$ is
     continuous on the SOT type copy \texttt{PointwiseConvergenceCLM}.
 \end{lemma}
@@ -186,6 +192,7 @@ $S$, the following are equivalent:
     \lean{LeanEval.Analysis.continuous_sotToWot}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
     \uses{lem:sot-pairing-continuous}
+    \leanok
     The identity map on underlying operators, viewed as a map from the SOT type
     copy \texttt{PointwiseConvergenceCLM} to the WOT type copy
     \texttt{ContinuousLinearMapWOT}, is continuous. Equivalently,
@@ -210,6 +217,7 @@ $S$, the following are equivalent:
     \lean{LeanEval.Analysis.sot_image_eq_preimage}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
     \uses{lem:continuous-sot-wot}
+    \leanok
     Let $\varphi$ be the continuous map of Lemma~\ref{lem:continuous-sot-wot},
     so $\varphi \circ \iota_S = \iota_W$ on underlying operators. Then for every
     subset $X \subseteq B(H)$,
@@ -231,6 +239,7 @@ $S$, the following are equivalent:
     \lean{LeanEval.Analysis.wot_closed_imp_sot_closed}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Topology.lean}
     \uses{lem:continuous-sot-wot, lem:sot-image-eq-preimage}
+    \leanok
     If $\iota_W(S)$ is WOT-closed, then $\iota_S(S)$ is SOT-closed.
 \end{lemma}
 \begin{proof}
@@ -253,6 +262,7 @@ finitely many vectors at once.
     \label{lem:orbit-submodule}
     \lean{LeanEval.Analysis.mem_orbitSubmodule}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    \leanok
     Let $R$ be a unital subalgebra of $B(K)$ for a Hilbert space $K$, and let
     $x \in K$. Then $M_0 = \{A x : A \in R\}$ is a linear subspace of $K$, namely
     the image of $R$ under the linear evaluation $A \mapsto A x$, and $x \in M_0$.
@@ -269,6 +279,7 @@ finitely many vectors at once.
     \lean{LeanEval.Analysis.orbitSubmodule_mem_invtSubmodule}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
     \uses{lem:orbit-submodule}
+    \leanok
     With $R$, $x$ and $M_0 = \{A x : A \in R\}$ as in
     Lemma~\ref{lem:orbit-submodule}, for every $A \in R$ the subspace $M_0$ is
     invariant under $A$, i.e.\ $A(M_0) \subseteq M_0$.
@@ -285,6 +296,7 @@ finitely many vectors at once.
     \lean{LeanEval.Analysis.orbitClosure_invariant}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
     \uses{lem:orbit-submodule, lem:orbit-invariant}
+    \leanok
     Let $R$ be a unital subalgebra of $B(K)$ for a Hilbert space $K$, $x \in K$,
     $M_0 = \{A x : A \in R\}$ and let $M$ be its topological closure. Then $M$ is
     a closed subspace, $x \in M$, and for every $A \in R$ one has
@@ -304,6 +316,7 @@ finitely many vectors at once.
     \label{lem:orthogonal-invariant}
     \lean{LeanEval.Analysis.orthogonal_invariant}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    \leanok
     Let $K$ be a Hilbert space, $A \in B(K)$, and $V$ a closed subspace. If $V$
     is invariant under the adjoint $A^*$, then the orthogonal complement
     $V^\perp$ is invariant under $A$, i.e.\ $A(V^\perp) \subseteq V^\perp$.
@@ -319,6 +332,7 @@ finitely many vectors at once.
     \label{lem:proj-on-invariant}
     \lean{LeanEval.Analysis.starProjection_apply_of_invariant}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    \leanok
     Let $K$ be a Hilbert space, $A \in B(K)$, and $V$ a closed subspace with
     orthogonal projection $P = P_V$. If $A(V) \subseteq V$, then for every
     $v \in K$ one has $P\bigl(A(P v)\bigr) = A(P v)$.
@@ -334,6 +348,7 @@ finitely many vectors at once.
     \label{lem:proj-on-orthogonal}
     \lean{LeanEval.Analysis.starProjection_apply_of_orthogonal_invariant}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
+    \leanok
     Let $K$ be a Hilbert space, $A \in B(K)$, and $V$ a closed subspace with
     orthogonal projection $P = P_V$. If $A(V^\perp) \subseteq V^\perp$, then for
     every $v \in K$ one has $P\bigl(A((1 - P) v)\bigr) = 0$.
@@ -353,6 +368,7 @@ finitely many vectors at once.
     \lean{LeanEval.Analysis.starProjection_commute}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
     \uses{lem:orthogonal-invariant, lem:proj-on-invariant, lem:proj-on-orthogonal}
+    \leanok
     Let $K$ be a Hilbert space, $A \in B(K)$, and $V$ a closed subspace
     admitting an orthogonal projection $P = P_V$. If $V$ is invariant under both
     $A$ and its adjoint $A^*$, then $A P = P A$.
@@ -374,6 +390,7 @@ finitely many vectors at once.
     \lean{LeanEval.Analysis.starProjection_orbitClosure_mem_centralizer}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
     \uses{lem:invariant-closure, lem:projection-commutes}
+    \leanok
     Let $R$ be a unital $*$-subalgebra of $B(K)$ and $x \in K$. Let $M$ be the
     closure of the orbit $\{A x : A \in R\}$ and $P = P_M$ its orthogonal
     projection. Then $P$ commutes with every element of $R$; that is,
@@ -393,6 +410,7 @@ finitely many vectors at once.
     \lean{LeanEval.Analysis.single_vector_approx}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Orbit.lean}
     \uses{lem:invariant-closure, lem:projection-in-commutant}
+    \leanok
     Let $R$ be a unital $*$-subalgebra of $B(K)$ and $T \in R''$. Then for every
     $x \in K$ one has $T x \in \overline{\{A x : A \in R\}}$.
 \end{lemma}
@@ -435,6 +453,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.ampProj_comp_amplificationMap}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
     \uses{def:amplification-map}
+    \leanok
     For every $A \in B(H)$ and index $i$, the $i$-th coordinate projection
     satisfies $p_i \circ \Delta(A) = A \circ p_i$.
 \end{lemma}
@@ -450,6 +469,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.amplificationMap_apply}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
     \uses{lem:amp-proj}
+    \leanok
     For every $A \in B(H)$, vector $v \in H^n$ and index $i$, one has
     $(\Delta(A) v)_i = A(v_i)$.
 \end{lemma}
@@ -465,6 +485,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.amplificationMap_single}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
     \uses{def:amplification-map, lem:amp-proj}
+    \leanok
     For every $A \in B(H)$ and index $j$, the $j$-th coordinate inclusion
     $s_j = \texttt{ContinuousLinearMap.single}\ j$ satisfies
     $\Delta(A) \circ s_j = s_j \circ A$.
@@ -486,6 +507,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.amplificationMap_mul}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
     \uses{def:amplification-map, lem:amp-proj}
+    \leanok
     For all $A, B \in B(H)$, $\Delta(A B) = \Delta(A)\,\Delta(B)$.
 \end{lemma}
 \begin{proof}
@@ -502,6 +524,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.amplificationMap_one}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
     \uses{def:amplification-map, lem:amp-proj}
+    \leanok
     $\Delta(1) = 1$ in $B(H^n)$.
 \end{lemma}
 \begin{proof}
@@ -531,6 +554,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.amplificationMap_smul}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Amplification.lean}
     \uses{def:amplification-map, lem:amp-proj}
+    \leanok
     For every scalar $c \in \mathbb C$ and $A \in B(H)$,
     $\Delta(c \cdot A) = c \cdot \Delta(A)$.
 \end{lemma}
@@ -599,6 +623,7 @@ which is again a Hilbert space.
     \label{lem:proj-reduction}
     \lean{LeanEval.Analysis.proj_reduction}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
+    \leanok
     For operators $B, C \in B(H^n)$, one has $B = C$ if and only if
     $p_i \circ B = p_i \circ C$ for every index $i$, where
     $p_i = \texttt{ContinuousLinearMap.proj}\ i$.
@@ -633,6 +658,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.blocks_eq}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
     \uses{lem:proj-reduction, lem:single-reduction}
+    \leanok
     For operators $B, C \in B(H^n)$, one has $B = C$ if and only if for all
     indices $i, j$ the block entries agree, i.e.\
     $p_i \circ B \circ s_j = p_i \circ C \circ s_j$, where
@@ -654,6 +680,7 @@ which is again a Hilbert space.
     \lean{LeanEval.Analysis.block_amp_left}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Blocks.lean}
     \uses{lem:amp-proj}
+    \leanok
     For $A \in B(H)$, $B \in B(H^n)$ and indices $i, j$, the $(i,j)$ block of
     $\Delta(A) B$ is $A \circ B_{ij}$, where $B_{ij} = p_i \circ B \circ s_j$;
     that is, $p_i \circ \Delta(A) B \circ s_j = A \circ B_{ij}$.
@@ -739,6 +766,7 @@ which is again a Hilbert space.
     \label{lem:coord-norm-le}
     \lean{LeanEval.Analysis.coord_norm_le}
     \leanfile{LeanEval/Analysis/VonNeumannDoubleCommutant/Approximation.lean}
+    \leanok
     For $v \in H^n = \texttt{PiLp 2 (fun \_ : Fin n => H)}$ and any index $i$,
     one has $\|v_i\| \le \|v\|$.
 \end{lemma}
