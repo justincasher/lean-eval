@@ -28,6 +28,7 @@ the result.
     \label{lem:f-ne-zero-sphere}
     \lean{LeanEval.ComplexAnalysis.f_ne_zero_sphere}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     For every $z \in S$ we have $f(z) \neq 0$.
 \end{lemma}
 \begin{proof}
@@ -39,6 +40,7 @@ the result.
     \label{lem:fg-ne-zero-sphere}
     \lean{LeanEval.ComplexAnalysis.fg_ne_zero_sphere}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     For every $z \in S$ we have $(f+g)(z) \neq 0$.
 \end{lemma}
 \begin{proof}
@@ -52,6 +54,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.f_analytic_sphere}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:f-ne-zero-sphere}
+    \leanok
     For every $z \in S$, the meromorphic order of $f$ at $z$ is $0$; in
     particular $f$ is analytic at $z$ with $f(z) \neq 0$.
 \end{lemma}
@@ -68,6 +71,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.fg_analytic_sphere}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:f-analytic-sphere, lem:fg-ne-zero-sphere}
+    \leanok
     For every $z \in S$, $f+g$ is analytic at $z$ and $(f+g)(z) \neq 0$;
     consequently its meromorphic order at $z$ is $0$.
 \end{lemma}
@@ -82,6 +86,7 @@ the result.
     \label{lem:divisor-eq-zero-of-orderZero}
     \lean{LeanEval.ComplexAnalysis.divisor_eq_zero_of_orderZero}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     Let $h$ be meromorphic on $\mathbb{C}$ and $z \in D$ with meromorphic order
     of $h$ at $z$ equal to $0$. Then $\operatorname{divisor}(h,D)(z) = 0$.
 \end{lemma}
@@ -96,6 +101,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.divisor_f_zero_sphere}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:f-analytic-sphere, lem:divisor-eq-zero-of-orderZero}
+    \leanok
     For every $z \in S$ we have $\operatorname{divisor}(f,D)(z) = 0$.
 \end{lemma}
 \begin{proof}
@@ -110,6 +116,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.divisor_fg_zero_sphere}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:fg-analytic-sphere, lem:divisor-eq-zero-of-orderZero}
+    \leanok
     For every $z \in S$ we have $\operatorname{divisor}(f+g,D)(z) = 0$.
 \end{lemma}
 \begin{proof}
@@ -124,6 +131,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.divisor_support_open}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:divisor-f-zero-sphere, lem:divisor-fg-zero-sphere}
+    \leanok
     The supports of $\operatorname{divisor}(f,D)$ and
     $\operatorname{divisor}(f+g,D)$ are contained in the open disk $B$.
 \end{lemma}
@@ -140,6 +148,7 @@ the result.
     \label{lem:logDeriv-zpow-shift}
     \lean{LeanEval.ComplexAnalysis.logDeriv_zpow_shift}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     For $u \in \mathbb{C}$, an integer $n$, and $z \neq u$,
     \[
         \operatorname{logDeriv}\big((\cdot - u)^{n}\big)(z) = n\,(z-u)^{-1}.
@@ -180,6 +189,7 @@ the result.
     \label{lem:circleIntegrable-sub-inv}
     \lean{LeanEval.ComplexAnalysis.circleIntegrable_sub_inv}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     For $u \in B$, the function $z \mapsto (z-u)^{-1}$ is circle-integrable on
     $C(0,R)$.
 \end{lemma}
@@ -193,6 +203,7 @@ the result.
     \label{lem:circleIntegral-sub-inv}
     \lean{LeanEval.ComplexAnalysis.circleIntegral_sub_inv}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     For $u \in B$,
     $\oint_{C(0,R)} (z-u)^{-1}\,dz = 2\pi i$.
 \end{lemma}
@@ -207,6 +218,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.circleIntegral_sum_inv}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:circleIntegrable-sub-inv, lem:circleIntegral-sub-inv}
+    \leanok
     Let $d$ be an integer-valued divisor with finite support $T \subseteq B$.
     Then
     \[
@@ -294,6 +306,7 @@ the result.
     \label{lem:exists-lt-of-finite}
     \lean{LeanEval.ComplexAnalysis.exists_lt_of_finite}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     Let $A$ be a finite set of real numbers with $a > R$ for every $a \in A$.
     Then there is $R' > R$ with $R' \le a$ for all $a \in A$.
 \end{lemma}
@@ -330,6 +343,7 @@ the result.
     \label{lem:order-ne-top}
     \lean{LeanEval.ComplexAnalysis.order_ne_top}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     Let $h$ be meromorphic on $\mathbb{C}$, not identically zero. Then for every
     $z \in \mathbb{C}$ the meromorphic order of $h$ at $z$ is finite
     ($\neq \infty$). In particular, on any subset its order is finite at every
@@ -346,6 +360,7 @@ the result.
     \label{lem:factorizedRational-restrict}
     \lean{LeanEval.ComplexAnalysis.factorizedRational_restrict}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     Let $h$ be meromorphic on $\mathbb{C}$ and let $D \subseteq B'$ with
     $\operatorname{divisor}(h, B')$ supported in $B \subseteq D$. Then
     \[
@@ -455,6 +470,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.argument_principle_integral}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:factorization-existence, lem:argument-principle-integral-split, lem:circleIntegral-logDeriv-factorizedRational, lem:circleIntegral-logDeriv-unit}
+    \leanok
     Let $h$ be meromorphic on $\mathbb{C}$, not identically zero, with
     $\operatorname{order}(h) = 0$ on $S$. Then
     \[
@@ -511,6 +527,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.F_slitPlane}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:f-ne-zero-sphere}
+    \leanok
     For every $z \in S$, the value $F(z) := (f+g)(z)/f(z)$ satisfies
     $\|F(z) - 1\| < 1$; in particular $F(z)$ lies in the slit plane
     $\mathbb{C}\setminus(-\infty,0]$.
@@ -527,6 +544,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.F_hasDerivAt}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:f-analytic-sphere, lem:fg-analytic-sphere}
+    \leanok
     With $F = (f+g)/f$, for every $z \in S$ the function $F$ is differentiable at
     $z$ — so $\operatorname{HasDerivAt} F\,(F'(z))\,z$ for its derivative
     $F'(z)$ — and $F(z) \neq 0$.
@@ -543,6 +561,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.winding_hasDerivWithinAt}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:F-slitPlane, lem:F-hasDerivAt}
+    \leanok
     With $F = (f+g)/f$, for every $z \in S$ the function
     $\operatorname{Log}\circ F$ has derivative $\operatorname{logDeriv} F(z)$
     within $S$ at $z$.
@@ -563,6 +582,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.winding_cancel}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:winding-hasDerivWithinAt}
+    \leanok
     With $F = (f+g)/f$, $\oint_{C(0,R)} \operatorname{logDeriv} F = 0$.
 \end{lemma}
 \begin{proof}
@@ -577,6 +597,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.logDeriv_div_pointwise}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:f-analytic-sphere, lem:fg-analytic-sphere}
+    \leanok
     For every $z \in S$,
     $\operatorname{logDeriv}\big((f+g)/f\big)(z)
        = \operatorname{logDeriv}(f+g)(z) - \operatorname{logDeriv} f(z)$.
@@ -594,6 +615,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.logDeriv_circleIntegrable}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:f-analytic-sphere, lem:fg-analytic-sphere}
+    \leanok
     The functions $\operatorname{logDeriv} f$ and $\operatorname{logDeriv}(f+g)$
     are circle-integrable on $C(0,R)$.
 \end{lemma}
@@ -609,6 +631,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.logDeriv_diff}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:winding-cancel, lem:logDeriv-div-pointwise, lem:logDeriv-circleIntegrable}
+    \leanok
     $\displaystyle \oint_{C(0,R)} \operatorname{logDeriv}(f+g)
        = \oint_{C(0,R)} \operatorname{logDeriv} f$.
 \end{lemma}
@@ -636,6 +659,7 @@ the result.
     \label{lem:order-nonneg-of-pole}
     \lean{LeanEval.ComplexAnalysis.order_nonneg_of_pole}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     For every $z \in \mathbb{C}$, if $\operatorname{order}(f) \ge 0$ at $z$ then
     $\operatorname{order}(f+g) \ge 0$ at $z$.
 \end{lemma}
@@ -649,6 +673,7 @@ the result.
     \label{lem:order-eq-at-pole}
     \lean{LeanEval.ComplexAnalysis.order_eq_at_pole}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     For every $z \in \mathbb{C}$, if $\operatorname{order}(f) < 0$ at $z$ then
     $\operatorname{order}(f+g) = \operatorname{order}(f)$ at $z$.
 \end{lemma}
@@ -665,6 +690,7 @@ the result.
     \lean{LeanEval.ComplexAnalysis.negPart_eq}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:order-nonneg-of-pole, lem:order-eq-at-pole}
+    \leanok
     For every $z \in D$,
     $\big(\operatorname{divisor}(f+g,D)\big)^{-}(z)
        = \big(\operatorname{divisor}(f,D)\big)^{-}(z)$.
@@ -702,6 +728,7 @@ the result.
     \label{lem:posPart-mass-decomp}
     \lean{LeanEval.ComplexAnalysis.posPart_mass_decomp}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \leanok
     For a meromorphic $h$,
     \[
         \sum_z \big(\operatorname{divisor}(h,D)\big)^{+}(z)
