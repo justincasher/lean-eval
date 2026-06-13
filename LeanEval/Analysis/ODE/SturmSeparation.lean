@@ -1,5 +1,33 @@
-import Mathlib.Analysis.Calculus.Deriv.Basic
+import Mathlib
 import EvalTools.Markers
+import LeanEval.Analysis.ODE.SturmSeparation.Defs
+import LeanEval.Analysis.ODE.SturmSeparation.UIccSubset
+import LeanEval.Analysis.ODE.SturmSeparation.DerivRightNonneg
+import LeanEval.Analysis.ODE.SturmSeparation.DerivLeftNonpos
+import LeanEval.Analysis.ODE.SturmSeparation.PosOfNoInteriorZero
+import LeanEval.Analysis.ODE.SturmSeparation.ConstSignOfNonzero
+import LeanEval.Analysis.ODE.SturmSeparation.DerivEndpointsPos
+import LeanEval.Analysis.ODE.SturmSeparation.DerivEndpointsSigned
+import LeanEval.Analysis.ODE.SturmSeparation.WronskianHasDerivAt
+import LeanEval.Analysis.ODE.SturmSeparation.PIntegMeas
+import LeanEval.Analysis.ODE.SturmSeparation.ExistsPrimitive
+import LeanEval.Analysis.ODE.SturmSeparation.WronskianMulExpZero
+import LeanEval.Analysis.ODE.SturmSeparation.WronskianMulExpConst
+import LeanEval.Analysis.ODE.SturmSeparation.WronskianEqConstMulExp
+import LeanEval.Analysis.ODE.SturmSeparation.WronskianMulPos
+import LeanEval.Analysis.ODE.SturmSeparation.WronskianAtZero
+import LeanEval.Analysis.ODE.SturmSeparation.FactorsNonzeroAtZero
+import LeanEval.Analysis.ODE.SturmSeparation.EndpointsNonzero
+import LeanEval.Analysis.ODE.SturmSeparation.RatioHasDerivAt
+import LeanEval.Analysis.ODE.SturmSeparation.RatioContinuousOn
+import LeanEval.Analysis.ODE.SturmSeparation.WronskianSignOfRef
+import LeanEval.Analysis.ODE.SturmSeparation.RatioStrictMonoOn
+import LeanEval.Analysis.ODE.SturmSeparation.RatioStrictAntiOn
+import LeanEval.Analysis.ODE.SturmSeparation.RatioInjOn
+import LeanEval.Analysis.ODE.SturmSeparation.Y1SignConstant
+import LeanEval.Analysis.ODE.SturmSeparation.Y1DerivOpposite
+import LeanEval.Analysis.ODE.SturmSeparation.Y2EndpointsOpposite
+import LeanEval.Analysis.ODE.SturmSeparation.Y2ZeroExists
 
 namespace LeanEval
 namespace Analysis
@@ -42,7 +70,18 @@ theorem sturm_separation
     (hza : y₁ a = 0) (hzb : y₁ b = 0)
     (hne : ∀ x ∈ Set.Ioo a b, y₁ x ≠ 0) :
     ∃! c, c ∈ Set.Ioo a b ∧ y₂ c = 0 := by
-  sorry
+  have h_ex : ∃ c, c ∈ Set.Ioo a b ∧ y₂ c = 0 :=
+    y2_zero_exists hab hJ_open hJ_conn hJ_sub hp hy₁ hy₁' hy₂ hy₂' hW hza hzb hne
+  rcases h_ex with ⟨c, hc_ioo, hc_y2⟩
+  have hinj : Set.InjOn (ratio y₁ y₂) (Set.Ioo a b) :=
+    ratio_injOn hab hJ_open hJ_conn hJ_sub hp hy₁ hy₁' hy₂ hy₂' hW hne
+  refine ⟨c, ⟨hc_ioo, hc_y2⟩, ?_⟩
+  intro y hy
+  rcases hy with ⟨hy_ioo, hy_y2⟩
+  have hratio_eq : ratio y₁ y₂ y = ratio y₁ y₂ c := by
+    dsimp [ratio]
+    simp [hy_y2, hc_y2]
+  exact hinj hy_ioo hc_ioo hratio_eq
 
 end ODE
 end Analysis

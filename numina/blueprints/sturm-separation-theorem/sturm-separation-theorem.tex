@@ -1,0 +1,591 @@
+% Blueprint: Sturm separation theorem
+% Created by Numina
+
+\begin{document}
+
+\section{Sturm separation theorem}
+
+We prove the Sturm separation theorem: between two consecutive zeros of one
+solution of a second-order linear homogeneous ODE
+\[
+    y'' + p(x)\,y' + q(x)\,y = 0,
+\]
+any linearly independent solution has exactly one zero.
+
+\subsection{Standing hypotheses}
+
+Throughout, $J \subseteq \mathbb{R}$ is open and preconnected with
+$[a,b] \subseteq J$ and $a < b$; $p, q : \mathbb{R} \to \mathbb{R}$ are
+continuous on $J$; and $y_1, y_2 : \mathbb{R} \to \mathbb{R}$ are $C^2$
+solutions on $J$, meaning that for every $x \in J$ and $i = 1, 2$:
+\[
+    \mathrm{HasDerivAt}\;y_i\;(\mathrm{deriv}\,y_i(x))\;x, \qquad
+    \mathrm{HasDerivAt}\;(\mathrm{deriv}\,y_i)\;
+        \bigl(-(p(x)\,\mathrm{deriv}\,y_i(x) + q(x)\,y_i(x))\bigr)\;x.
+\]
+We assume the two solutions are linearly independent in the Wronskian sense:
+there is $x_0 \in J$ with $y_1(x_0)\,\mathrm{deriv}\,y_2(x_0) -
+y_2(x_0)\,\mathrm{deriv}\,y_1(x_0) \ne 0$. Finally $a, b$ are consecutive zeros
+of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
+
+\begin{definition}[Wronskian]
+    \label{def:wronskian}
+    \lean{LeanEval.Analysis.ODE.wronskian}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/Defs.lean}
+    \leanok
+    The \emph{Wronskian} of $y_1, y_2$ is the function
+    \[
+        W(x) := y_1(x)\,\mathrm{deriv}\,y_2(x) - y_2(x)\,\mathrm{deriv}\,y_1(x).
+    \]
+\end{definition}
+
+\begin{definition}[Ratio of solutions]
+    \label{def:ratio}
+    \lean{LeanEval.Analysis.ODE.ratio}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/Defs.lean}
+    \leanok
+    On the open interval $(a,b)$, where $y_1$ does not vanish, define the ratio
+    $g(x) := y_2(x) / y_1(x)$.
+\end{definition}
+
+\subsection{The Wronskian and its constant sign}
+
+\begin{lemma}[Closed interval between two points of $J$ stays in $J$]
+    \label{lem:uIcc-subset-J}
+    \lean{LeanEval.Analysis.ODE.uIcc_subset_of_isOpen_isPreconnected}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/UIccSubset.lean}
+    \leanok
+    For all $x_0, x \in J$, the unordered closed interval
+    $\mathrm{uIcc}(x_0, x) = [\min(x_0,x), \max(x_0,x)]$ is contained in $J$.
+\end{lemma}
+\begin{proof}
+    Since $J$ is open and preconnected in $\mathbb{R}$, it is convex
+    (\texttt{IsPreconnected.convex}), hence order-connected
+    (\texttt{Convex.ordConnected}). For order-connected sets the unordered
+    interval between two members is a subset
+    (\texttt{Set.OrdConnected.uIcc\_subset}), so
+    $\mathrm{uIcc}(x_0, x) \subseteq J$.
+\end{proof}
+
+\begin{lemma}[Abel/Liouville identity]
+    \label{lem:wronskian-deriv}
+    \lean{LeanEval.Analysis.ODE.wronskian_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianHasDerivAt.lean}
+    \uses{def:wronskian}
+    \leanok
+    For every $x \in J$, the Wronskian has derivative
+    $W'(x) = -p(x)\,W(x)$; that is, $\mathrm{HasDerivAt}\;W\;(-(p(x)\,W(x)))\;x$.
+\end{lemma}
+\begin{proof}
+    \uses{def:wronskian}
+    By the product rule (\texttt{HasDerivAt.mul}) and the hypotheses,
+    $x \mapsto y_1(x)\,\mathrm{deriv}\,y_2(x)$ has derivative
+    $\mathrm{deriv}\,y_1(x)\,\mathrm{deriv}\,y_2(x) + y_1(x)\,\mathrm{deriv}^2 y_2(x)$
+    and $x \mapsto y_2(x)\,\mathrm{deriv}\,y_1(x)$ has derivative
+    $\mathrm{deriv}\,y_2(x)\,\mathrm{deriv}\,y_1(x) + y_2(x)\,\mathrm{deriv}^2 y_1(x)$.
+    Subtracting (\texttt{HasDerivAt.sub}), the cross terms cancel and
+    $W'(x) = y_1(x)\,\mathrm{deriv}^2 y_2(x) - y_2(x)\,\mathrm{deriv}^2 y_1(x)$.
+    Substituting the ODE relations
+    $\mathrm{deriv}^2 y_i(x) = -(p(x)\,\mathrm{deriv}\,y_i(x) + q(x)\,y_i(x))$ and
+    simplifying with \texttt{ring} gives $-p(x)\,W(x)$.
+\end{proof}
+
+\begin{lemma}[Integrability and measurability of $p$ along $J$]
+    \label{lem:p-int-meas}
+    \lean{LeanEval.Analysis.ODE.p_intervalIntegrable_stronglyMeasurable}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/PIntegMeas.lean}
+    \uses{lem:uIcc-subset-J}
+    \leanok
+    Fix $x_0 \in J$. Then for every $x \in J$: $p$ is interval integrable on the
+    closed interval from $x_0$ to $x$, and $p$ is strongly measurable at the
+    neighborhood filter of $x$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:uIcc-subset-J}
+    Fix $x \in J$. By Lemma~\ref{lem:uIcc-subset-J} the closed interval between
+    $x_0$ and $x$ lies in $J$; as $p$ is continuous on $J$, it is interval
+    integrable there (\texttt{ContinuousOn.intervalIntegrable}). Moreover $J$ is
+    a neighborhood of $x$ (\texttt{IsOpen.mem\_nhds}), so $p$ is continuous at
+    $x$ (\texttt{ContinuousOn.continuousAt}) and therefore strongly measurable at
+    the neighborhood filter of $x$
+    (\texttt{ContinuousOn.stronglyMeasurableAtFilter}).
+\end{proof}
+
+\begin{lemma}[Existence of a primitive of $p$]
+    \label{lem:exists-primitive}
+    \lean{LeanEval.Analysis.ODE.exists_primitive}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/ExistsPrimitive.lean}
+    \uses{lem:p-int-meas}
+    \leanok
+    There is a function $P : \mathbb{R} \to \mathbb{R}$ with
+    $\mathrm{HasDerivAt}\;P\;(p(x))\;x$ for every $x \in J$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:p-int-meas}
+    Fix $x_0 \in J$ (e.g.\ the point from the Wronskian hypothesis) and set
+    $P(x) := \int_{x_0}^{x} p$. For each $x \in J$ the two side conditions of
+    the fundamental theorem of calculus hold by Lemma~\ref{lem:p-int-meas}: $p$
+    is interval integrable from $x_0$ to $x$ and strongly measurable at the
+    neighborhood filter of $x$. That theorem
+    (\texttt{intervalIntegral.integral\_hasDerivAt\_right}) then gives
+    $\mathrm{HasDerivAt}\;P\;(p(x))\;x$.
+\end{proof}
+
+\begin{lemma}[The product $W\,e^{P}$ has zero derivative]
+    \label{lem:h-deriv-zero}
+    \lean{LeanEval.Analysis.ODE.wronskian_mul_exp_hasDerivAt_zero}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianMulExpZero.lean}
+    \uses{def:wronskian, lem:wronskian-deriv, lem:exists-primitive}
+    \leanok
+    Let $P$ be the primitive of Lemma~\ref{lem:exists-primitive} and set
+    $h(x) := W(x)\,e^{P(x)}$. Then for every $x \in J$,
+    $\mathrm{HasDerivAt}\;h\;0\;x$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:wronskian-deriv, lem:exists-primitive}
+    By the product rule (\texttt{HasDerivAt.mul}), using
+    Lemma~\ref{lem:wronskian-deriv} for $W'(x) = -p(x)\,W(x)$ and
+    $(\mathrm{deriv}\,e^{P})(x) = p(x)\,e^{P(x)}$
+    (\texttt{HasDerivAt.exp} applied to $P$), the function $h$ has derivative
+    \[
+        \bigl(-p(x)\,W(x)\bigr)e^{P(x)} + W(x)\,\bigl(p(x)\,e^{P(x)}\bigr)
+        = 0
+        \qquad (x \in J),
+    \]
+    the last equality by \texttt{ring}.
+\end{proof}
+
+\begin{lemma}[$W\,e^{P}$ is constant on $J$]
+    \label{lem:W-exp-const}
+    \lean{LeanEval.Analysis.ODE.wronskian_mul_exp_const}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianMulExpConst.lean}
+    \uses{lem:h-deriv-zero, lem:uIcc-subset-J}
+    \leanok
+    With $h(x) = W(x)\,e^{P(x)}$ as above, fix any $x_0 \in J$. Then for every
+    $x \in J$ one has $h(x) = h(x_0)$, i.e.
+    $W(x)\,e^{P(x)} = W(x_0)\,e^{P(x_0)}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:h-deriv-zero, lem:uIcc-subset-J}
+    Fix $x \in J$. By Lemma~\ref{lem:uIcc-subset-J} the closed interval
+    $I := \mathrm{uIcc}(x_0, x)$ lies in $J$, and it is convex. On $I$ the
+    function $h$ is differentiable with $\mathrm{HasDerivAt}\;h\;0$ at every
+    point (Lemma~\ref{lem:h-deriv-zero}), so its derivative within $I$ vanishes;
+    hence $h$ is constant on $I$ (\texttt{constant\_of\_derivWithin\_zero}).
+    Since both $x_0$ and $x$ belong to $I$, $h(x) = h(x_0)$.
+\end{proof}
+
+\begin{lemma}[Closed form of the Wronskian]
+    \label{lem:W-formula}
+    \lean{LeanEval.Analysis.ODE.wronskian_eq_const_mul_exp}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianEqConstMulExp.lean}
+    \uses{def:wronskian, lem:W-exp-const, lem:exists-primitive}
+    \leanok
+    Let $P$ be the primitive of Lemma~\ref{lem:exists-primitive}. There is a
+    constant $C \ne 0$ such that $W(x) = C\,e^{-P(x)}$ for every $x \in J$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:W-exp-const, lem:exists-primitive}
+    Fix $x_0 \in J$ with $W(x_0) \ne 0$ and set $C := W(x_0)\,e^{P(x_0)}$. By
+    Lemma~\ref{lem:W-exp-const}, $W(x)\,e^{P(x)} = C$ for every $x \in J$, so
+    $W(x) = C\,e^{-P(x)}$ since the exponential is positive
+    (\texttt{Real.exp\_pos}). The constant $C \ne 0$ because $W(x_0) \ne 0$ and
+    $e^{P(x_0)} > 0$.
+\end{proof}
+
+\begin{lemma}[The Wronskian has constant sign]
+    \label{lem:wronskian-sign}
+    \lean{LeanEval.Analysis.ODE.wronskian_mul_pos}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianMulPos.lean}
+    \uses{def:wronskian, lem:W-formula}
+    \leanok
+    For all $x, y \in J$ one has $0 < W(x)\,W(y)$. In particular
+    $W(x) \ne 0$ for every $x \in J$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:W-formula}
+    By Lemma~\ref{lem:W-formula} there is $C \ne 0$ with $W(x) = C\,e^{-P(x)}$
+    for every $x \in J$. Hence for all $x, y \in J$,
+    $W(x)\,W(y) = C^2\,e^{-P(x)}\,e^{-P(y)} > 0$, since $C^2 > 0$
+    (\texttt{sq\_pos\_of\_ne\_zero}) and the exponentials are positive
+    (\texttt{Real.exp\_pos}). Taking $y = x$ gives $W(x)^2 > 0$, so
+    $W(x) \ne 0$.
+\end{proof}
+
+\begin{lemma}[Wronskian at a zero of $y_1$]
+    \label{lem:wronskian-at-zero}
+    \lean{LeanEval.Analysis.ODE.wronskian_at_zero}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianAtZero.lean}
+    \uses{def:wronskian}
+    \leanok
+    If $t \in \mathbb{R}$ satisfies $y_1(t) = 0$, then
+    $W(t) = -\,y_2(t)\,\mathrm{deriv}\,y_1(t)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:wronskian}
+    Substitute $y_1(t) = 0$ into the definition
+    $W(t) = y_1(t)\,\mathrm{deriv}\,y_2(t) - y_2(t)\,\mathrm{deriv}\,y_1(t)$;
+    the first term vanishes, leaving $-\,y_2(t)\,\mathrm{deriv}\,y_1(t)$
+    (\texttt{ring}).
+\end{proof}
+
+\begin{lemma}[Both factors are nonzero at a zero of $y_1$]
+    \label{lem:factors-nonzero-at-zero}
+    \lean{LeanEval.Analysis.ODE.factors_nonzero_at_zero}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/FactorsNonzeroAtZero.lean}
+    \uses{lem:wronskian-at-zero, lem:wronskian-sign}
+    \leanok
+    If $t \in J$ satisfies $y_1(t) = 0$, then $y_2(t) \ne 0$ and
+    $\mathrm{deriv}\,y_1(t) \ne 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:wronskian-at-zero, lem:wronskian-sign}
+    By Lemma~\ref{lem:wronskian-at-zero},
+    $W(t) = -\,y_2(t)\,\mathrm{deriv}\,y_1(t)$, and by
+    Lemma~\ref{lem:wronskian-sign} $W(t) \ne 0$. A product is nonzero only if
+    both factors are, so $y_2(t) \ne 0$ and $\mathrm{deriv}\,y_1(t) \ne 0$.
+\end{proof}
+
+\begin{lemma}[Endpoint values are nonzero]
+    \label{lem:endpoints-nonzero}
+    \lean{LeanEval.Analysis.ODE.endpoints_nonzero}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/EndpointsNonzero.lean}
+    \uses{lem:factors-nonzero-at-zero}
+    \leanok
+    We have $y_2(a) \ne 0$, $y_2(b) \ne 0$, $\mathrm{deriv}\,y_1(a) \ne 0$ and
+    $\mathrm{deriv}\,y_1(b) \ne 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:factors-nonzero-at-zero}
+    Apply Lemma~\ref{lem:factors-nonzero-at-zero} at $t = a$, using $a \in J$
+    and $y_1(a) = 0$, to get $y_2(a) \ne 0$ and $\mathrm{deriv}\,y_1(a) \ne 0$;
+    apply it at $t = b$, using $y_1(b) = 0$, to get $y_2(b) \ne 0$ and
+    $\mathrm{deriv}\,y_1(b) \ne 0$.
+\end{proof}
+
+\subsection{Strict monotonicity of the ratio}
+
+\begin{lemma}[Derivative of the ratio]
+    \label{lem:ratio-deriv}
+    \lean{LeanEval.Analysis.ODE.ratio_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/RatioHasDerivAt.lean}
+    \uses{def:ratio, def:wronskian}
+    \leanok
+    For every $x \in (a,b)$, the ratio $g = y_2 / y_1$ has derivative
+    $\mathrm{HasDerivAt}\;g\;\bigl(W(x) / y_1(x)^2\bigr)\;x$.
+\end{lemma}
+\begin{proof}
+    \uses{def:ratio, def:wronskian}
+    For $x \in (a,b) \subseteq J$ both $y_1, y_2$ have derivatives
+    $\mathrm{deriv}\,y_1(x), \mathrm{deriv}\,y_2(x)$ at $x$, and $y_1(x) \ne 0$.
+    The quotient rule (\texttt{HasDerivAt.div}) gives
+    $\mathrm{HasDerivAt}\;g\;\bigl((\mathrm{deriv}\,y_2(x)\,y_1(x) -
+    y_2(x)\,\mathrm{deriv}\,y_1(x)) / y_1(x)^2\bigr)\;x$, and the numerator is
+    exactly $W(x)$.
+\end{proof}
+
+\begin{lemma}[The ratio is continuous on $(a,b)$]
+    \label{lem:ratio-continuous}
+    \lean{LeanEval.Analysis.ODE.ratio_continuousOn}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/RatioContinuousOn.lean}
+    \uses{def:ratio, lem:ratio-deriv}
+    \leanok
+    The ratio $g = y_2 / y_1$ is continuous on $(a,b)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:ratio-deriv}
+    By Lemma~\ref{lem:ratio-deriv}, at every $x \in (a,b)$ the function $g$ has
+    a derivative, hence is differentiable within $(a,b)$
+    (\texttt{HasDerivAt.differentiableWithinAt}); a function differentiable on a
+    set is continuous on it (\texttt{DifferentiableOn.continuousOn}).
+\end{proof}
+
+\begin{lemma}[The Wronskian keeps the sign of a reference point]
+    \label{lem:wronskian-sign-of-mid}
+    \lean{LeanEval.Analysis.ODE.wronskian_sign_of_ref}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianSignOfRef.lean}
+    \uses{lem:wronskian-sign}
+    \leanok
+    Fix $m \in J$. For every $x \in J$: if $W(m) > 0$ then $W(x) > 0$, and if
+    $W(m) < 0$ then $W(x) < 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:wronskian-sign}
+    By Lemma~\ref{lem:wronskian-sign}, $0 < W(x)\,W(m)$. If $W(m) > 0$, a
+    product that is positive with a positive second factor forces $W(x) > 0$;
+    if $W(m) < 0$, it forces $W(x) < 0$ (\texttt{pos\_of\_mul\_pos} sign
+    reasoning, e.g.\ \texttt{nlinarith}).
+\end{proof}
+
+\begin{lemma}[The ratio is strictly increasing when $W > 0$]
+    \label{lem:ratio-strict-mono}
+    \lean{LeanEval.Analysis.ODE.ratio_strictMonoOn}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/RatioStrictMonoOn.lean}
+    \uses{def:ratio, lem:ratio-deriv, lem:ratio-continuous, lem:wronskian-sign-of-mid}
+    \leanok
+    Fix $m \in (a,b)$ with $W(m) > 0$. Then $g = y_2/y_1$ is strictly increasing
+    on $(a,b)$: $\mathrm{StrictMonoOn}\;g\;(a,b)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:ratio-deriv, lem:ratio-continuous, lem:wronskian-sign-of-mid}
+    The interval $(a,b)$ is convex and equals its own interior
+    (\texttt{interior\_Ioo}), and $g$ is continuous on it by
+    Lemma~\ref{lem:ratio-continuous}. For every $x \in (a,b)$,
+    Lemma~\ref{lem:wronskian-sign-of-mid} gives $W(x) > 0$, so by
+    Lemma~\ref{lem:ratio-deriv} the derivative $W(x)/y_1(x)^2 > 0$. Hence $g$ is
+    strictly increasing on $(a,b)$
+    (\texttt{strictMonoOn\_of\_hasDerivWithinAt\_pos}).
+\end{proof}
+
+\begin{lemma}[The ratio is strictly decreasing when $W < 0$]
+    \label{lem:ratio-strict-anti}
+    \lean{LeanEval.Analysis.ODE.ratio_strictAntiOn}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/RatioStrictAntiOn.lean}
+    \uses{def:ratio, lem:ratio-deriv, lem:ratio-continuous, lem:wronskian-sign-of-mid}
+    \leanok
+    Fix $m \in (a,b)$ with $W(m) < 0$. Then $g = y_2/y_1$ is strictly decreasing
+    on $(a,b)$: $\mathrm{StrictAntiOn}\;g\;(a,b)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:ratio-deriv, lem:ratio-continuous, lem:wronskian-sign-of-mid}
+    As in Lemma~\ref{lem:ratio-strict-mono}, $(a,b)$ is convex and equals its
+    own interior (\texttt{interior\_Ioo}), and $g$ is continuous on it
+    (Lemma~\ref{lem:ratio-continuous}). For every $x \in (a,b)$,
+    Lemma~\ref{lem:wronskian-sign-of-mid} gives $W(x) < 0$, so by
+    Lemma~\ref{lem:ratio-deriv} the derivative $W(x)/y_1(x)^2 < 0$. Hence $g$ is
+    strictly decreasing on $(a,b)$
+    (\texttt{strictAntiOn\_of\_hasDerivWithinAt\_neg}).
+\end{proof}
+
+\begin{lemma}[The ratio is injective]
+    \label{lem:ratio-injective}
+    \lean{LeanEval.Analysis.ODE.ratio_injOn}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/RatioInjOn.lean}
+    \uses{def:ratio, lem:ratio-strict-mono, lem:ratio-strict-anti, lem:wronskian-sign}
+    \leanok
+    The ratio $g = y_2 / y_1$ is injective on $(a,b)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:ratio-strict-mono, lem:ratio-strict-anti, lem:wronskian-sign}
+    Pick the midpoint $m \in (a,b) \subseteq J$; by
+    Lemma~\ref{lem:wronskian-sign} $W(m) \ne 0$. If $W(m) > 0$, then $g$ is
+    strictly increasing on $(a,b)$ (Lemma~\ref{lem:ratio-strict-mono}), hence
+    injective there (\texttt{StrictMonoOn.injOn}). If $W(m) < 0$, then $g$ is
+    strictly decreasing on $(a,b)$ (Lemma~\ref{lem:ratio-strict-anti}), hence
+    injective there (\texttt{StrictAntiOn.injOn}).
+\end{proof}
+
+\subsection{The endpoint sign argument}
+
+\begin{lemma}[One-sided derivative sign at the left endpoint]
+    \label{lem:deriv-right-nonneg}
+    \lean{LeanEval.Analysis.ODE.deriv_right_nonneg}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/DerivRightNonneg.lean}
+    \leanok
+    Let $f : \mathbb{R} \to \mathbb{R}$, $L \in \mathbb{R}$, and $a < b$.
+    If $\mathrm{HasDerivAt}\;f\;L\;a$, $f(a) = 0$, and $f(x) \ge 0$ for all
+    $x \in (a,b)$, then $0 \le L$.
+\end{lemma}
+\begin{proof}
+    Restrict the derivative to $(a,b)$
+    (\texttt{HasDerivAt.hasDerivWithinAt}); by
+    \texttt{hasDerivWithinAt\_iff\_tendsto\_slope}, the slope
+    $x \mapsto (f(x) - f(a))/(x - a)$ tends to $L$ along
+    $\mathcal{N}_{(a,b)}\,a$ (the point $a \notin (a,b)$ is already removed).
+    This filter is nontrivial (\texttt{left\_nhdsWithin\_Ioo\_neBot}). For
+    $x \in (a,b)$ the slope equals $f(x)/(x - a) \ge 0$, since the numerator is
+    $\ge 0$ and the denominator $> 0$. Passing to the limit
+    (\texttt{ge\_of\_tendsto'}) gives $0 \le L$.
+\end{proof}
+
+\begin{lemma}[One-sided derivative sign at the right endpoint]
+    \label{lem:deriv-left-nonpos}
+    \lean{LeanEval.Analysis.ODE.deriv_left_nonpos}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/DerivLeftNonpos.lean}
+    \leanok
+    Let $f : \mathbb{R} \to \mathbb{R}$, $L \in \mathbb{R}$, and $a < b$.
+    If $\mathrm{HasDerivAt}\;f\;L\;b$, $f(b) = 0$, and $f(x) \ge 0$ for all
+    $x \in (a,b)$, then $L \le 0$.
+\end{lemma}
+\begin{proof}
+    As in Lemma~\ref{lem:deriv-right-nonneg}, the slope
+    $x \mapsto (f(x) - f(b))/(x - b)$ tends to $L$ along the nontrivial filter
+    $\mathcal{N}_{(a,b)}\,b$ (\texttt{right\_nhdsWithin\_Ioo\_neBot},
+    \texttt{hasDerivWithinAt\_iff\_tendsto\_slope}). For $x \in (a,b)$ the slope
+    equals $f(x)/(x - b) \le 0$, since now the numerator is $\ge 0$ and the
+    denominator $x - b < 0$. Passing to the limit (\texttt{le\_of\_tendsto'})
+    gives $L \le 0$.
+\end{proof}
+
+\begin{lemma}[A nowhere-vanishing continuous function cannot change sign]
+    \label{lem:no-interior-zero-forces-sign}
+    \lean{LeanEval.Analysis.ODE.pos_of_pos_of_no_interior_zero}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/PosOfNoInteriorZero.lean}
+    \leanok
+    Let $f : \mathbb{R} \to \mathbb{R}$ be continuous on $[a,b]$ with
+    $f(x) \ne 0$ for all $x \in (a,b)$. If $u, v \in (a,b)$ and $f(u) > 0$, then
+    $f(v) > 0$.
+\end{lemma}
+\begin{proof}
+    Suppose instead $f(v) \le 0$; since $f(v) \ne 0$, in fact $f(v) < 0$. Then
+    $0$ lies strictly between $f(u)$ and $f(v)$, and the closed interval
+    $\mathrm{uIcc}(u,v) \subseteq (a,b) \subseteq [a,b]$, on which $f$ is
+    continuous; the intermediate value theorem
+    (\texttt{intermediate\_value\_uIcc}) produces $w \in \mathrm{uIcc}(u,v)$
+    with $f(w) = 0$. As $u, v \in (a,b)$ and $(a,b)$ is order-connected,
+    $w \in (a,b)$, contradicting $f \ne 0$ there. Hence $f(v) > 0$.
+\end{proof}
+
+\begin{lemma}[A nowhere-vanishing continuous function has constant sign]
+    \label{lem:const-sign-of-nonzero}
+    \lean{LeanEval.Analysis.ODE.const_sign_of_nonzero}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/ConstSignOfNonzero.lean}
+    \uses{lem:no-interior-zero-forces-sign}
+    \leanok
+    Let $f : \mathbb{R} \to \mathbb{R}$ be continuous on $[a,b]$ with $a < b$ and
+    $f(x) \ne 0$ for all $x \in (a,b)$. Then either $f(x) > 0$ for all
+    $x \in (a,b)$, or $f(x) < 0$ for all $x \in (a,b)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:no-interior-zero-forces-sign}
+    Fix the midpoint $m \in (a,b)$, so $f(m) \ne 0$. If $f(m) > 0$, then for
+    every $v \in (a,b)$ Lemma~\ref{lem:no-interior-zero-forces-sign} (with
+    $u = m$) gives $f(v) > 0$. If $f(m) < 0$, apply the same lemma to $-f$ (also
+    continuous on $[a,b]$ and nonzero on $(a,b)$), where $(-f)(m) > 0$, to get
+    $(-f)(v) > 0$, i.e.\ $f(v) < 0$, for every $v \in (a,b)$.
+\end{proof}
+
+\begin{lemma}[$y_1$ has constant sign on $(a,b)$]
+    \label{lem:y1-sign-constant}
+    \lean{LeanEval.Analysis.ODE.y1_sign_constant}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/Y1SignConstant.lean}
+    \uses{lem:const-sign-of-nonzero}
+    \leanok
+    Either $y_1(x) > 0$ for all $x \in (a,b)$, or $y_1(x) < 0$ for all
+    $x \in (a,b)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:const-sign-of-nonzero}
+    The function $y_1$ is continuous on $[a,b]$ (being differentiable on $J$,
+    via \texttt{HasDerivAt.continuousAt}) and nonzero on $(a,b)$. Apply
+    Lemma~\ref{lem:const-sign-of-nonzero} to $f = y_1$.
+\end{proof}
+
+\begin{lemma}[Endpoint derivatives of a positive interior bump]
+    \label{lem:positive-deriv-endpoints}
+    \lean{LeanEval.Analysis.ODE.deriv_endpoints_of_pos_interior}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/DerivEndpointsPos.lean}
+    \uses{lem:deriv-right-nonneg, lem:deriv-left-nonpos}
+    \leanok
+    Let $f : \mathbb{R} \to \mathbb{R}$, $L_a, L_b \in \mathbb{R}$ and $a < b$.
+    Suppose $\mathrm{HasDerivAt}\;f\;L_a\;a$, $\mathrm{HasDerivAt}\;f\;L_b\;b$,
+    $f(a) = f(b) = 0$, $f(x) > 0$ for all $x \in (a,b)$, and $L_a \ne 0$,
+    $L_b \ne 0$. Then $0 < L_a$ and $L_b < 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deriv-right-nonneg, lem:deriv-left-nonpos}
+    Since $f(x) > 0$ implies $f(x) \ge 0$ on $(a,b)$,
+    Lemma~\ref{lem:deriv-right-nonneg} (at $a$) gives $L_a \ge 0$, and with
+    $L_a \ne 0$ this is $0 < L_a$. Likewise Lemma~\ref{lem:deriv-left-nonpos}
+    (at $b$) gives $L_b \le 0$, and with $L_b \ne 0$ this is $L_b < 0$.
+\end{proof}
+
+\begin{lemma}[Endpoint derivatives of a constant-sign interior bump]
+    \label{lem:signed-deriv-endpoints}
+    \lean{LeanEval.Analysis.ODE.deriv_endpoints_of_signed_interior}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/DerivEndpointsSigned.lean}
+    \uses{lem:positive-deriv-endpoints}
+    \leanok
+    Let $f : \mathbb{R} \to \mathbb{R}$, $L_a, L_b \in \mathbb{R}$ and $a < b$.
+    Suppose $\mathrm{HasDerivAt}\;f\;L_a\;a$, $\mathrm{HasDerivAt}\;f\;L_b\;b$,
+    $f(a) = f(b) = 0$, $L_a \ne 0$, $L_b \ne 0$, and either $f(x) > 0$ for all
+    $x \in (a,b)$ or $f(x) < 0$ for all $x \in (a,b)$. Then $L_a\,L_b < 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:positive-deriv-endpoints}
+    If $f > 0$ on $(a,b)$, Lemma~\ref{lem:positive-deriv-endpoints} gives
+    $0 < L_a$ and $L_b < 0$, so $L_a\,L_b < 0$. If $f < 0$ on $(a,b)$, apply the
+    same lemma to $-f$ (which is $> 0$ on $(a,b)$, vanishes at $a, b$, and has
+    derivatives $-L_a, -L_b$ via \texttt{HasDerivAt.neg}), giving $0 < -L_a$ and
+    $-L_b < 0$; again $L_a\,L_b < 0$.
+\end{proof}
+
+\begin{lemma}[Endpoint derivatives of $y_1$ have opposite signs]
+    \label{lem:y1-deriv-opposite}
+    \lean{LeanEval.Analysis.ODE.y1_deriv_opposite}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/Y1DerivOpposite.lean}
+    \uses{lem:endpoints-nonzero, lem:signed-deriv-endpoints, lem:y1-sign-constant}
+    \leanok
+    We have $\mathrm{deriv}\,y_1(a)\,\mathrm{deriv}\,y_1(b) < 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:endpoints-nonzero, lem:signed-deriv-endpoints, lem:y1-sign-constant}
+    By Lemma~\ref{lem:endpoints-nonzero}, $\mathrm{deriv}\,y_1(a)$ and
+    $\mathrm{deriv}\,y_1(b)$ are nonzero; $y_1(a) = y_1(b) = 0$; and by
+    Lemma~\ref{lem:y1-sign-constant} $y_1$ has constant sign on $(a,b)$. Apply
+    Lemma~\ref{lem:signed-deriv-endpoints} to $f = y_1$ with
+    $L_a = \mathrm{deriv}\,y_1(a)$ and $L_b = \mathrm{deriv}\,y_1(b)$ to obtain
+    $\mathrm{deriv}\,y_1(a)\,\mathrm{deriv}\,y_1(b) < 0$.
+\end{proof}
+
+\begin{lemma}[$y_2$ takes opposite signs at the endpoints]
+    \label{lem:y2-endpoints-opposite}
+    \lean{LeanEval.Analysis.ODE.y2_endpoints_opposite}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/Y2EndpointsOpposite.lean}
+    \uses{def:wronskian, lem:wronskian-sign, lem:y1-deriv-opposite}
+    \leanok
+    We have $y_2(a)\,y_2(b) < 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:wronskian-sign, lem:y1-deriv-opposite}
+    Since $y_1(a) = y_1(b) = 0$, we have $W(a) = -\,y_2(a)\,\mathrm{deriv}\,y_1(a)$
+    and $W(b) = -\,y_2(b)\,\mathrm{deriv}\,y_1(b)$. By
+    Lemma~\ref{lem:wronskian-sign}, $0 < W(a)\,W(b)$, i.e.
+    \[
+        0 < \bigl(y_2(a)\,y_2(b)\bigr)\,\bigl(\mathrm{deriv}\,y_1(a)\,\mathrm{deriv}\,y_1(b)\bigr).
+    \]
+    By Lemma~\ref{lem:y1-deriv-opposite} the second factor is negative, so the
+    first factor $y_2(a)\,y_2(b)$ must be negative (\texttt{nlinarith}).
+\end{proof}
+
+\begin{lemma}[Existence of a zero of $y_2$]
+    \label{lem:y2-zero-exists}
+    \lean{LeanEval.Analysis.ODE.y2_zero_exists}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation/Y2ZeroExists.lean}
+    \uses{lem:y2-endpoints-opposite}
+    \leanok
+    There exists $c \in (a,b)$ with $y_2(c) = 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:y2-endpoints-opposite}
+    The function $y_2$ is continuous on $[a,b]$ (differentiable on $J$). By
+    Lemma~\ref{lem:y2-endpoints-opposite}, $y_2(a)$ and $y_2(b)$ have opposite
+    signs. If $y_2(a) < 0 < y_2(b)$ then $0 \in (y_2(a), y_2(b))$, and the
+    intermediate value theorem (\texttt{intermediate\_value\_Ioo}) gives
+    $c \in (a,b)$ with $y_2(c) = 0$. If instead $y_2(b) < 0 < y_2(a)$, the
+    decreasing version (\texttt{intermediate\_value\_Ioo'}) applies. In either
+    case a zero exists in $(a,b)$.
+\end{proof}
+
+\subsection{Main result}
+
+\begin{theorem}[Sturm separation theorem]
+    \label{thm:sturm-separation}
+    \lean{LeanEval.Analysis.ODE.sturm_separation}
+    \leanfile{LeanEval/Analysis/ODE/SturmSeparation.lean}
+    \uses{def:ratio, lem:y2-zero-exists, lem:ratio-injective}
+    \leanok
+    Under the standing hypotheses, $y_2$ has exactly one zero in $(a,b)$:
+    there is a unique $c$ with $c \in (a,b)$ and $y_2(c) = 0$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:y2-zero-exists, lem:ratio-injective}
+    Existence is Lemma~\ref{lem:y2-zero-exists}: there is $c_0 \in (a,b)$ with
+    $y_2(c_0) = 0$. For uniqueness, suppose $c \in (a,b)$ also satisfies
+    $y_2(c) = 0$. Since $y_1$ is nonzero on $(a,b)$, the ratio values are
+    $g(c) = y_2(c)/y_1(c) = 0 = y_2(c_0)/y_1(c_0) = g(c_0)$. By
+    Lemma~\ref{lem:ratio-injective}, $g$ is injective on $(a,b)$, so $c = c_0$.
+    This establishes $\exists!\,c,\; c \in (a,b) \wedge y_2(c) = 0$.
+\end{proof}
+
+\end{document}
