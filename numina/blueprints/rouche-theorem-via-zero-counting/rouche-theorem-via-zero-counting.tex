@@ -3,6 +3,750 @@
 
 \begin{document}
 
-% Your blueprint will go here.
+\section{Rouché's Theorem via Zero Counting}
+
+We work over $\mathbb{C}$. Fix $R > 0$ and write
+$D = \overline{B}(0,R)$ for the closed disk, $B = B(0,R)$ for the open disk and
+$S = \{z : \|z\| = R\}$ for the boundary circle. Let $f$ be meromorphic in
+normal form on all of $\mathbb{C}$, let $g$ be analytic on $\mathbb{C}$, and
+assume $\|g(z)\| < \|f(z)\|$ for every $z \in S$. The goal is to show that $f$
+and $f+g$ have the same number of zeros in $D$, each counted with multiplicity,
+where the multiplicity-counted zero count of a meromorphic $h$ is
+$\sum_z \big(\operatorname{divisor}(h, D)\big)^{+}(z)$, the total mass of the
+positive part of its divisor.
+
+The strategy is the argument principle: the signed mass of the divisor of $h$ in
+$D$ equals the normalized contour integral $\frac{1}{2\pi i}\oint_{C(0,R)}
+\operatorname{logDeriv} h$. Applying this to $f$ and to $f+g$ and showing the two
+contour integrals agree (because $(f+g)/f$ winds zero times around the origin),
+together with the fact that $f$ and $f+g$ have identical pole divisors, yields
+the result.
+
+\subsection{Behaviour on the boundary circle}
+
+\begin{lemma}[$f$ does not vanish on the circle]
+    \label{lem:f-ne-zero-sphere}
+    \lean{LeanEval.ComplexAnalysis.f_ne_zero_sphere}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    For every $z \in S$ we have $f(z) \neq 0$.
+\end{lemma}
+\begin{proof}
+    The hypothesis gives $\|f(z)\| > \|g(z)\| \ge 0$, so $\|f(z)\| > 0$, hence
+    $f(z) \neq 0$.
+\end{proof}
+
+\begin{lemma}[$f+g$ does not vanish on the circle]
+    \label{lem:fg-ne-zero-sphere}
+    \lean{LeanEval.ComplexAnalysis.fg_ne_zero_sphere}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    For every $z \in S$ we have $(f+g)(z) \neq 0$.
+\end{lemma}
+\begin{proof}
+    By the reverse triangle inequality
+    $\|(f+g)(z)\| \ge \|f(z)\| - \|g(z)\| > 0$ using the hypothesis
+    $\|g(z)\| < \|f(z)\|$. Hence $(f+g)(z) \neq 0$.
+\end{proof}
+
+\begin{lemma}[$f$ is analytic and nonzero near the circle]
+    \label{lem:f-analytic-sphere}
+    \lean{LeanEval.ComplexAnalysis.f_analytic_sphere}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:f-ne-zero-sphere}
+    For every $z \in S$, the meromorphic order of $f$ at $z$ is $0$; in
+    particular $f$ is analytic at $z$ with $f(z) \neq 0$.
+\end{lemma}
+\begin{proof}
+    Since $f$ is in meromorphic normal form, the order of $f$ at $z$ is zero if
+    and only if $f(z) \neq 0$ (a function in normal form with a zero or pole
+    takes the value $0$ there). By Lemma~\ref{lem:f-ne-zero-sphere} the value is
+    nonzero, so the order is $0$, which is equivalent to $f$ being analytic at
+    $z$ with nonzero value.
+\end{proof}
+
+\begin{lemma}[$f+g$ is analytic and nonzero near the circle]
+    \label{lem:fg-analytic-sphere}
+    \lean{LeanEval.ComplexAnalysis.fg_analytic_sphere}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:f-analytic-sphere, lem:fg-ne-zero-sphere}
+    For every $z \in S$, $f+g$ is analytic at $z$ and $(f+g)(z) \neq 0$;
+    consequently its meromorphic order at $z$ is $0$.
+\end{lemma}
+\begin{proof}
+    By Lemma~\ref{lem:f-analytic-sphere} $f$ is analytic at $z$, and $g$ is
+    analytic everywhere, so $f+g$ is analytic at $z$. By
+    Lemma~\ref{lem:fg-ne-zero-sphere} its value is nonzero, so an analytic
+    function with nonzero value has order $0$ there.
+\end{proof}
+
+\begin{lemma}[A point of order zero is off the divisor]
+    \label{lem:divisor-eq-zero-of-orderZero}
+    \lean{LeanEval.ComplexAnalysis.divisor_eq_zero_of_orderZero}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    Let $h$ be meromorphic on $\mathbb{C}$ and $z \in D$ with meromorphic order
+    of $h$ at $z$ equal to $0$. Then $\operatorname{divisor}(h,D)(z) = 0$.
+\end{lemma}
+\begin{proof}
+    The divisor at a point of $D$ is the untopped meromorphic order of $h$ at
+    that point. Since the order at $z$ is the integer $0$, its untopping is $0$,
+    so $\operatorname{divisor}(h,D)(z) = 0$.
+\end{proof}
+
+\begin{lemma}[$f$'s divisor vanishes on the circle]
+    \label{lem:divisor-f-zero-sphere}
+    \lean{LeanEval.ComplexAnalysis.divisor_f_zero_sphere}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:f-analytic-sphere, lem:divisor-eq-zero-of-orderZero}
+    For every $z \in S$ we have $\operatorname{divisor}(f,D)(z) = 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:f-analytic-sphere, lem:divisor-eq-zero-of-orderZero}
+    Fix $z \in S \subseteq D$. By Lemma~\ref{lem:f-analytic-sphere} the order of
+    $f$ at $z$ is $0$, so Lemma~\ref{lem:divisor-eq-zero-of-orderZero} gives
+    $\operatorname{divisor}(f,D)(z) = 0$.
+\end{proof}
+
+\begin{lemma}[$f+g$'s divisor vanishes on the circle]
+    \label{lem:divisor-fg-zero-sphere}
+    \lean{LeanEval.ComplexAnalysis.divisor_fg_zero_sphere}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:fg-analytic-sphere, lem:divisor-eq-zero-of-orderZero}
+    For every $z \in S$ we have $\operatorname{divisor}(f+g,D)(z) = 0$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:fg-analytic-sphere, lem:divisor-eq-zero-of-orderZero}
+    Fix $z \in S \subseteq D$. By Lemma~\ref{lem:fg-analytic-sphere} the order of
+    $f+g$ at $z$ is $0$, so Lemma~\ref{lem:divisor-eq-zero-of-orderZero} gives
+    $\operatorname{divisor}(f+g,D)(z) = 0$.
+\end{proof}
+
+\begin{lemma}[The divisors are supported in the open disk]
+    \label{lem:divisor-support-open}
+    \lean{LeanEval.ComplexAnalysis.divisor_support_open}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:divisor-f-zero-sphere, lem:divisor-fg-zero-sphere}
+    The supports of $\operatorname{divisor}(f,D)$ and
+    $\operatorname{divisor}(f+g,D)$ are contained in the open disk $B$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:divisor-f-zero-sphere, lem:divisor-fg-zero-sphere}
+    Both divisors are supported in $D = B \cup S$ and vanish on all of $S$ by
+    Lemmas~\ref{lem:divisor-f-zero-sphere} and~\ref{lem:divisor-fg-zero-sphere};
+    hence their supports lie in $B$.
+\end{proof}
+
+\subsection{The argument principle}
+
+\begin{lemma}[Logarithmic derivative of a single power factor]
+    \label{lem:logDeriv-zpow-shift}
+    \lean{LeanEval.ComplexAnalysis.logDeriv_zpow_shift}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    For $u \in \mathbb{C}$, an integer $n$, and $z \neq u$,
+    \[
+        \operatorname{logDeriv}\big((\cdot - u)^{n}\big)(z) = n\,(z-u)^{-1}.
+    \]
+\end{lemma}
+\begin{proof}
+    The map $z \mapsto z - u$ has derivative $1$ and is nonzero at $z$. The
+    logarithmic derivative of an integer power is the exponent times the
+    logarithmic derivative of the base, so
+    $\operatorname{logDeriv}\big((\cdot-u)^{n}\big)(z) = n\,(z-u)^{-1}$.
+\end{proof}
+
+\begin{lemma}[Logarithmic derivative of a factorized rational function]
+    \label{lem:logDeriv-factorizedRational}
+    \lean{LeanEval.ComplexAnalysis.logDeriv_factorizedRational}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:logDeriv-zpow-shift}
+    Let $d$ be an integer-valued divisor with finite support $T$, and put
+    $\varphi = \operatorname*{{\textstyle\prod}^{\mathrm f}}_{u}(\cdot - u)^{d(u)}$,
+    the finite product (\texttt{finprod}, i.e.\ the
+    \texttt{Function.FactorizedRational} of $d$) over all $u$. For every
+    $z \notin T$,
+    \[
+        \operatorname{logDeriv}\varphi(z)
+          = \operatorname*{{\textstyle\sum}^{\mathrm f}}_{u} d(u)\,(z-u)^{-1},
+    \]
+    the finite sum (\texttt{finsum}) over the support $T$.
+\end{lemma}
+\begin{proof}
+    Only the factors with $u \in T$ differ from $1$, so $\varphi$ is the finite
+    product over $T$. Since $z \notin T$, every factor $(\cdot-u)^{d(u)}$ is
+    nonzero and differentiable at $z$, so the logarithmic derivative of the finite
+    product is the sum of the logarithmic derivatives of the factors. Each summand
+    equals $d(u)(z-u)^{-1}$ by Lemma~\ref{lem:logDeriv-zpow-shift}.
+\end{proof}
+
+\begin{lemma}[Each simple pole is circle-integrable]
+    \label{lem:circleIntegrable-sub-inv}
+    \lean{LeanEval.ComplexAnalysis.circleIntegrable_sub_inv}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    For $u \in B$, the function $z \mapsto (z-u)^{-1}$ is circle-integrable on
+    $C(0,R)$.
+\end{lemma}
+\begin{proof}
+    The function $z \mapsto (z-u)^{-1}$ is circle-integrable on $C(0,R)$ if and
+    only if $u \notin S$. Since $u \in B$ and $B \cap S = \emptyset$, indeed
+    $u \notin S$.
+\end{proof}
+
+\begin{lemma}[Cauchy integral of a single simple pole]
+    \label{lem:circleIntegral-sub-inv}
+    \lean{LeanEval.ComplexAnalysis.circleIntegral_sub_inv}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    For $u \in B$,
+    $\oint_{C(0,R)} (z-u)^{-1}\,dz = 2\pi i$.
+\end{lemma}
+\begin{proof}
+    Since $u \in B = B(0,R)$ we have $\|u\| < R$, so Cauchy's integral formula for
+    the reciprocal on the circle $C(0,R)$ gives
+    $\oint_{C(0,R)} (z-u)^{-1}\,dz = 2\pi i$.
+\end{proof}
+
+\begin{lemma}[Contour integral of a sum of simple poles]
+    \label{lem:circleIntegral-sum-inv}
+    \lean{LeanEval.ComplexAnalysis.circleIntegral_sum_inv}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:circleIntegrable-sub-inv, lem:circleIntegral-sub-inv}
+    Let $d$ be an integer-valued divisor with finite support $T \subseteq B$.
+    Then
+    \[
+        \oint_{C(0,R)}
+          \operatorname*{{\textstyle\sum}^{\mathrm f}}_{u} d(u)\,(z-u)^{-1}\,dz
+            = \Big(\operatorname*{{\textstyle\sum}^{\mathrm f}}_{u} d(u)\Big)\,
+              2\pi i,
+    \]
+    both finite sums (\texttt{finsum}) being over the support $T$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:circleIntegrable-sub-inv, lem:circleIntegral-sub-inv}
+    Each summand $z \mapsto (z-u)^{-1}$ ($u \in T \subseteq B$) is
+    circle-integrable by Lemma~\ref{lem:circleIntegrable-sub-inv}, so by linearity
+    the circle integral of the finite sum is the sum of the integrals and the
+    constants $d(u)$ pull out. For each $u$, Lemma~\ref{lem:circleIntegral-sub-inv}
+    gives $\oint_{C(0,R)} (z-u)^{-1}\,dz = 2\pi i$. Summing over $T$ yields the
+    claim.
+\end{proof}
+
+\begin{lemma}[Contour integral of the logarithmic derivative of a unit]
+    \label{lem:circleIntegral-logDeriv-unit}
+    \lean{LeanEval.ComplexAnalysis.circleIntegral_logDeriv_unit}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    Let $U$ be analytic and nowhere zero on the closed disk $D$. Then
+    $\oint_{C(0,R)} \operatorname{logDeriv} U = 0$.
+\end{lemma}
+\begin{proof}
+    Since $U$ is analytic and nonvanishing on $D$, $\operatorname{logDeriv} U =
+    U'/U$ is analytic on $D$, in particular continuous on $D$ and differentiable
+    on the open disk. By the Cauchy--Goursat theorem for a disk its contour
+    integral over $C(0,R)$ vanishes.
+\end{proof}
+
+\begin{lemma}[The factorization holds on a full neighbourhood of the circle]
+    \label{lem:factorization-eventuallyEq}
+    \lean{LeanEval.ComplexAnalysis.factorization_eventuallyEq}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:divisor-eq-zero-of-orderZero}
+    Let $h$ be meromorphic with $\operatorname{order}(h) = 0$ on $S$, let
+    $\varphi = \operatorname*{{\textstyle\prod}^{\mathrm f}}_{u}
+      (\cdot-u)^{\operatorname{divisor}(h,D)(u)}$ be the factorized rational
+    (\texttt{finprod}) of $\operatorname{divisor}(h,D)$, and let $U$ be analytic
+    and nowhere zero on $D$ with $h = \varphi \cdot U$ off a codiscrete set of
+    $D$. Then for every $z \in S$ the functions $h$ and $\varphi\cdot U$ agree on
+    a punctured neighbourhood of $z$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:divisor-eq-zero-of-orderZero}
+    Near $S$ all of $h$, $\varphi$, $U$ are meromorphic: $h$ has order $0$ there,
+    $\varphi$ has its zeros and poles only at the support points, which lie in
+    $B$ (the order of $h$ is $0$ on $S$, so by
+    Lemma~\ref{lem:divisor-eq-zero-of-orderZero} $\operatorname{divisor}(h,D)$
+    vanishes on $S$), and $U$ is analytic. The set on
+    which $h = \varphi U$ is codiscrete in $D$, and the circle $S$ is
+    preperfect (no point of $S$ is isolated in $D$). Hence the upgrade from
+    codiscrete equality to punctured-neighbourhood equality for meromorphic
+    functions applies, giving $h = \varphi U$ on a punctured neighbourhood of
+    each $z \in S$.
+\end{proof}
+
+\begin{lemma}[Factorization of the logarithmic derivative on the circle]
+    \label{lem:factorization-logDeriv}
+    \lean{LeanEval.ComplexAnalysis.factorization_logDeriv}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:factorization-eventuallyEq}
+    With $h$, $\varphi$, $U$ as in
+    Lemma~\ref{lem:factorization-eventuallyEq}, for every $z \in S$,
+    \[
+        \operatorname{logDeriv} h(z)
+          = \operatorname{logDeriv}\varphi(z) + \operatorname{logDeriv} U(z).
+    \]
+\end{lemma}
+\begin{proof}
+    By Lemma~\ref{lem:factorization-eventuallyEq}, $h = \varphi U$ on a punctured
+    neighbourhood of $z$; since the logarithmic derivative depends only on the
+    germ at $z$, $\operatorname{logDeriv} h(z) = \operatorname{logDeriv}(\varphi
+    U)(z)$. At $z$ both $\varphi$ and $U$ are nonzero and differentiable, so the
+    product rule for logarithmic derivatives gives
+    $\operatorname{logDeriv}(\varphi U)(z) = \operatorname{logDeriv}\varphi(z) +
+    \operatorname{logDeriv} U(z)$.
+\end{proof}
+
+\begin{lemma}[A bound strictly above a finite set of larger reals]
+    \label{lem:exists-lt-of-finite}
+    \lean{LeanEval.ComplexAnalysis.exists_lt_of_finite}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    Let $A$ be a finite set of real numbers with $a > R$ for every $a \in A$.
+    Then there is $R' > R$ with $R' \le a$ for all $a \in A$.
+\end{lemma}
+\begin{proof}
+    If $A$ is empty, take $R' = R + 1$. Otherwise the minimum $R' = \min A$ is
+    attained, so $R' \in A$ gives $R' > R$, and $R' \le a$ for every $a \in A$ by
+    minimality.
+\end{proof}
+
+\begin{lemma}[A zero/pole-free annulus outside the circle]
+    \label{lem:annulus-zero-free}
+    \lean{LeanEval.ComplexAnalysis.annulus_zero_free}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:divisor-eq-zero-of-orderZero, lem:exists-lt-of-finite}
+    Let $h$ be meromorphic on $\mathbb{C}$ with $\operatorname{order}(h) = 0$ on
+    $S$. Then there is $R' > R$ such that $\operatorname{divisor}(h, B(0,R'))$ is
+    supported in the open disk $B = B(0,R)$; equivalently, $h$ has order $0$ at
+    every $z$ with $R \le \|z\| < R'$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:divisor-eq-zero-of-orderZero, lem:exists-lt-of-finite}
+    On the compact closed disk $\overline{B}(0, R+1)$ the support of the divisor
+    of $h$ is finite. None of its points lie on $S$: the order is $0$ there by
+    hypothesis, so $\operatorname{divisor}(h,\cdot)$ vanishes on $S$ by
+    Lemma~\ref{lem:divisor-eq-zero-of-orderZero}. Hence the finitely many support
+    points of modulus $\ge R$ have modulus $> R$, and
+    Lemma~\ref{lem:exists-lt-of-finite} applied to their moduli yields $R' > R$
+    with $R'$ no larger than any of them. Then the annulus $R \le \|z\| < R'$
+    contains no zero or pole of $h$, so $\operatorname{divisor}(h, B(0,R'))$ is
+    supported in $B$.
+\end{proof}
+
+\begin{lemma}[A nonzero meromorphic function has finite order everywhere]
+    \label{lem:order-ne-top}
+    \lean{LeanEval.ComplexAnalysis.order_ne_top}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    Let $h$ be meromorphic on $\mathbb{C}$, not identically zero. Then for every
+    $z \in \mathbb{C}$ the meromorphic order of $h$ at $z$ is finite
+    ($\neq \infty$). In particular, on any subset its order is finite at every
+    point.
+\end{lemma}
+\begin{proof}
+    The domain $\mathbb{C}$ is preconnected, and on a preconnected set a
+    meromorphic function has order $\infty$ at some point iff it is locally
+    eventually zero (equivalently, identically zero on the connected domain).
+    Since $h$ is not identically zero, its order is finite at every point.
+\end{proof}
+
+\begin{lemma}[The factorized rational of $h$ on $B'$ restricts to $\varphi$]
+    \label{lem:factorizedRational-restrict}
+    \lean{LeanEval.ComplexAnalysis.factorizedRational_restrict}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    Let $h$ be meromorphic on $\mathbb{C}$ and let $D \subseteq B'$ with
+    $\operatorname{divisor}(h, B')$ supported in $B \subseteq D$. Then
+    \[
+        \operatorname*{{\textstyle\prod}^{\mathrm f}}_{u}
+          (\cdot-u)^{\operatorname{divisor}(h,B')(u)}
+        = \operatorname*{{\textstyle\prod}^{\mathrm f}}_{u}
+          (\cdot-u)^{\operatorname{divisor}(h,D)(u)} =: \varphi .
+    \]
+\end{lemma}
+\begin{proof}
+    By \texttt{MeromorphicOn.divisor\_restrict}, restricting
+    $\operatorname{divisor}(h, B')$ to $D \subseteq B'$ yields
+    $\operatorname{divisor}(h, D)$. Since the support of
+    $\operatorname{divisor}(h, B')$ already lies in $B \subseteq D$, restriction
+    leaves it unchanged, so $\operatorname{divisor}(h, B')$ and
+    $\operatorname{divisor}(h, D)$ agree as integer-valued functions. Hence their
+    factorized rationals (the \texttt{finprod} over all $u$ of
+    $(\cdot-u)^{\bullet(u)}$) coincide.
+\end{proof}
+
+\begin{lemma}[Existence of the factorization $h = \varphi\cdot U$]
+    \label{lem:factorization-existence}
+    \lean{LeanEval.ComplexAnalysis.factorization_existence}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:annulus-zero-free, lem:order-ne-top, lem:factorizedRational-restrict}
+    Let $h$ be meromorphic on $\mathbb{C}$, not identically zero, with
+    $\operatorname{order}(h) = 0$ on $S$. Write
+    $\varphi = \operatorname*{{\textstyle\prod}^{\mathrm f}}_{u}
+      (\cdot-u)^{\operatorname{divisor}(h,D)(u)}$, the factorized rational
+    (\texttt{finprod}) of $\operatorname{divisor}(h,D)$. Then there is a function
+    $U$, analytic and nowhere zero on the closed disk $D$, with
+    $h = \varphi\cdot U$ off a codiscrete set of $D$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:annulus-zero-free, lem:order-ne-top, lem:factorizedRational-restrict}
+    Choose $R' > R$ as in Lemma~\ref{lem:annulus-zero-free}, so the open disk
+    $B' = B(0,R')$ contains $D$ and $\operatorname{divisor}(h, B')$ is supported
+    in $B$. By Lemma~\ref{lem:order-ne-top} the order of $h$ is finite at every
+    point of $B'$, and the support of $\operatorname{divisor}(h, B')$ is finite,
+    so the extraction of zeros and poles on $B'$
+    (\texttt{MeromorphicOn.extract\_zeros\_poles}) produces an analytic
+    nowhere-zero function $g$ on $B'$ with
+    $h = \big(\operatorname*{{\textstyle\prod}^{\mathrm f}}_{u}
+    (\cdot-u)^{\operatorname{divisor}(h,B')(u)}\big)\cdot g$ off a codiscrete set
+    of $B'$. By Lemma~\ref{lem:factorizedRational-restrict} that factorized
+    rational equals $\varphi$. Take $U = g$ restricted to $D$: it is analytic and
+    nowhere zero on $D \subseteq B'$, and the codiscrete equality on $B'$
+    restricts to one on $D$.
+\end{proof}
+
+\begin{lemma}[Splitting the contour integral of $\operatorname{logDeriv} h$]
+    \label{lem:argument-principle-integral-split}
+    \lean{LeanEval.ComplexAnalysis.argument_principle_integral_split}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:factorization-existence, lem:factorization-logDeriv, lem:circleIntegral-logDeriv-unit}
+    Let $h$ be meromorphic on $\mathbb{C}$, not identically zero, with
+    $\operatorname{order}(h) = 0$ on $S$, and let $h = \varphi\cdot U$ be the
+    factorization of Lemma~\ref{lem:factorization-existence}, with $\varphi$ the
+    factorized rational of $\operatorname{divisor}(h,D)$ and $U$ analytic and
+    nowhere zero on $D$. Then
+    \[
+        \oint_{C(0,R)}\operatorname{logDeriv} h
+          = \oint_{C(0,R)}\operatorname{logDeriv}\varphi
+          + \oint_{C(0,R)}\operatorname{logDeriv} U .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:factorization-logDeriv, lem:circleIntegral-logDeriv-unit}
+    On $S$, Lemma~\ref{lem:factorization-logDeriv} gives the pointwise identity
+    $\operatorname{logDeriv} h = \operatorname{logDeriv}\varphi +
+    \operatorname{logDeriv} U$. Each of $\operatorname{logDeriv}\varphi$ and
+    $\operatorname{logDeriv} U$ is continuous on the circle (the support of
+    $\operatorname{divisor}(h,D)$ lies in $B$, off $S$, and $U$ is analytic
+    nowhere-zero on $D$, this last giving circle-integrability of
+    $\operatorname{logDeriv} U$ as in
+    Lemma~\ref{lem:circleIntegral-logDeriv-unit}), hence circle-integrable. By
+    linearity of the circle integral (\texttt{integral\_add}) the integral of the
+    sum splits as claimed.
+\end{proof}
+
+\begin{lemma}[Contour integral of $\operatorname{logDeriv}\varphi$]
+    \label{lem:circleIntegral-logDeriv-factorizedRational}
+    \lean{LeanEval.ComplexAnalysis.circleIntegral_logDeriv_factorizedRational}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:logDeriv-factorizedRational, lem:circleIntegral-sum-inv}
+    Let $\varphi = \operatorname*{{\textstyle\prod}^{\mathrm f}}_{u}
+      (\cdot-u)^{\operatorname{divisor}(h,D)(u)}$ be the factorized rational of
+    $\operatorname{divisor}(h,D)$, whose finite support $T$ lies in $B$. Then
+    \[
+        \oint_{C(0,R)}\operatorname{logDeriv}\varphi
+          = \Big(\operatorname*{{\textstyle\sum}^{\mathrm f}}_{u}
+            \operatorname{divisor}(h,D)(u)\Big)\, 2\pi i .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:logDeriv-factorizedRational, lem:circleIntegral-sum-inv}
+    For $z \in S$ we have $z \notin T$ (as $T \subseteq B$), so
+    Lemma~\ref{lem:logDeriv-factorizedRational} gives
+    $\operatorname{logDeriv}\varphi(z) =
+    \operatorname*{{\textstyle\sum}^{\mathrm f}}_{u}
+    \operatorname{divisor}(h,D)(u)(z-u)^{-1}$. Integrating over $C(0,R)$ and
+    applying Lemma~\ref{lem:circleIntegral-sum-inv} yields the claim.
+\end{proof}
+
+\begin{lemma}[Integral evaluation of the logarithmic derivative]
+    \label{lem:argument-principle-integral}
+    \lean{LeanEval.ComplexAnalysis.argument_principle_integral}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:factorization-existence, lem:argument-principle-integral-split, lem:circleIntegral-logDeriv-factorizedRational, lem:circleIntegral-logDeriv-unit}
+    Let $h$ be meromorphic on $\mathbb{C}$, not identically zero, with
+    $\operatorname{order}(h) = 0$ on $S$. Then
+    \[
+        \oint_{C(0,R)}\operatorname{logDeriv} h
+          = \Big(\operatorname*{{\textstyle\sum}^{\mathrm f}}_{u}
+            \operatorname{divisor}(h,D)(u)\Big)\, 2\pi i .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:factorization-existence, lem:argument-principle-integral-split,
+      lem:circleIntegral-logDeriv-factorizedRational,
+      lem:circleIntegral-logDeriv-unit}
+    By Lemma~\ref{lem:factorization-existence} write $h = \varphi\cdot U$ with
+    $\varphi$ the factorized rational of $\operatorname{divisor}(h,D)$ and $U$
+    analytic and nowhere zero on $D$. By
+    Lemma~\ref{lem:argument-principle-integral-split},
+    $\oint_{C(0,R)}\operatorname{logDeriv} h =
+    \oint_{C(0,R)}\operatorname{logDeriv}\varphi +
+    \oint_{C(0,R)}\operatorname{logDeriv} U$. The second integral vanishes by
+    Lemma~\ref{lem:circleIntegral-logDeriv-unit}, and the first equals
+    $\big(\operatorname*{{\textstyle\sum}^{\mathrm f}}_{u}
+    \operatorname{divisor}(h,D)(u)\big)2\pi i$ by
+    Lemma~\ref{lem:circleIntegral-logDeriv-factorizedRational}.
+\end{proof}
+
+\begin{theorem}[Argument principle, zero-counting form]
+    \label{thm:argument-principle}
+    \lean{LeanEval.ComplexAnalysis.argument_principle}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:argument-principle-integral}
+    Let $h$ be meromorphic on $\mathbb{C}$, not identically zero, and assume that
+    on $S$ the order of $h$ is $0$ (so $h$ is analytic and nonzero on the
+    circle). Then
+    \[
+        \sum_{z}\operatorname{divisor}(h,D)(z)
+          = \frac{1}{2\pi i}\oint_{C(0,R)} \operatorname{logDeriv} h .
+    \]
+\end{theorem}
+\begin{proof}
+    The total mass $\sum_z \operatorname{divisor}(h,D)(z)$ is by definition the
+    finite sum (\texttt{finsum})
+    $\operatorname*{{\textstyle\sum}^{\mathrm f}}_{u}\operatorname{divisor}(h,D)(u)$
+    over the support. By Lemma~\ref{lem:argument-principle-integral},
+    $\oint_{C(0,R)}\operatorname{logDeriv} h =
+    \big(\operatorname*{{\textstyle\sum}^{\mathrm f}}_{u}
+    \operatorname{divisor}(h,D)(u)\big)2\pi i$. Dividing both sides by $2\pi i$
+    gives the claim.
+\end{proof}
+
+\subsection{Vanishing winding of \texorpdfstring{$(f+g)/f$}{(f+g)/f}}
+
+\begin{lemma}[The quotient maps the circle into a slit-free disk]
+    \label{lem:F-slitPlane}
+    \lean{LeanEval.ComplexAnalysis.F_slitPlane}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:f-ne-zero-sphere}
+    For every $z \in S$, the value $F(z) := (f+g)(z)/f(z)$ satisfies
+    $\|F(z) - 1\| < 1$; in particular $F(z)$ lies in the slit plane
+    $\mathbb{C}\setminus(-\infty,0]$.
+\end{lemma}
+\begin{proof}
+    By Lemma~\ref{lem:f-ne-zero-sphere} we have $f(z) \neq 0$, so $F(z) - 1 =
+    g(z)/f(z)$ and $\|F(z)-1\| = \|g(z)\|/\|f(z)\| < 1$ by the hypothesis. Thus
+    $F(z) \in B(1,1)$, and the open ball $B(1,1)$ is contained in the slit plane
+    $\mathbb{C}\setminus(-\infty,0]$.
+\end{proof}
+
+\begin{lemma}[$F = (f+g)/f$ is differentiable and nonzero on the circle]
+    \label{lem:F-hasDerivAt}
+    \lean{LeanEval.ComplexAnalysis.F_hasDerivAt}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:f-analytic-sphere, lem:fg-analytic-sphere}
+    With $F = (f+g)/f$, for every $z \in S$ the function $F$ is differentiable at
+    $z$ — so $\operatorname{HasDerivAt} F\,(F'(z))\,z$ for its derivative
+    $F'(z)$ — and $F(z) \neq 0$.
+\end{lemma}
+\begin{proof}
+    By Lemmas~\ref{lem:f-analytic-sphere} and~\ref{lem:fg-analytic-sphere}, near
+    $z$ both $f$ and $f+g$ are analytic with nonzero values. Hence the quotient
+    $F = (f+g)/f$ is differentiable at $z$, with derivative $F'(z)$ given by the
+    quotient rule, and $F(z) = (f+g)(z)/f(z) \neq 0$.
+\end{proof}
+
+\begin{lemma}[The logarithm of $F$ is a primitive of $\operatorname{logDeriv} F$ on the circle]
+    \label{lem:winding-hasDerivWithinAt}
+    \lean{LeanEval.ComplexAnalysis.winding_hasDerivWithinAt}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:F-slitPlane, lem:F-hasDerivAt}
+    With $F = (f+g)/f$, for every $z \in S$ the function
+    $\operatorname{Log}\circ F$ has derivative $\operatorname{logDeriv} F(z)$
+    within $S$ at $z$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:F-slitPlane, lem:F-hasDerivAt}
+    By Lemma~\ref{lem:F-hasDerivAt}, $\operatorname{HasDerivAt} F\,(F'(z))\,z$ and
+    $F(z) \neq 0$. By Lemma~\ref{lem:F-slitPlane}, $F(z)$ lies in the slit plane,
+    where $\operatorname{Log}$ is differentiable with derivative $F(z)^{-1}$. The
+    chain rule for $\operatorname{Log}$ (\texttt{HasDerivAt.clog}) then gives
+    $\operatorname{HasDerivAt}(\operatorname{Log}\circ F)(F'(z)/F(z))\,z$; since
+    $F'(z)/F(z) = \operatorname{logDeriv} F(z)$, restricting to $S$ yields the
+    within-$S$ derivative.
+\end{proof}
+
+\begin{lemma}[The winding contour integral vanishes]
+    \label{lem:winding-cancel}
+    \lean{LeanEval.ComplexAnalysis.winding_cancel}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:winding-hasDerivWithinAt}
+    With $F = (f+g)/f$, $\oint_{C(0,R)} \operatorname{logDeriv} F = 0$.
+\end{lemma}
+\begin{proof}
+    By Lemma~\ref{lem:winding-hasDerivWithinAt}, at every $z \in S$ the value
+    $\operatorname{logDeriv} F(z)$ is the derivative within $S$ of
+    $\operatorname{Log}\circ F$. As $R \ge 0$, the circle integral of a function
+    that is, everywhere on the circle, such a within-circle derivative vanishes.
+\end{proof}
+
+\begin{lemma}[Pointwise split of $\operatorname{logDeriv}((f+g)/f)$ on the circle]
+    \label{lem:logDeriv-div-pointwise}
+    \lean{LeanEval.ComplexAnalysis.logDeriv_div_pointwise}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:f-analytic-sphere, lem:fg-analytic-sphere}
+    For every $z \in S$,
+    $\operatorname{logDeriv}\big((f+g)/f\big)(z)
+       = \operatorname{logDeriv}(f+g)(z) - \operatorname{logDeriv} f(z)$.
+\end{lemma}
+\begin{proof}
+    On $S$ both $f$ and $f+g$ are analytic and nonzero
+    (Lemmas~\ref{lem:f-analytic-sphere} and~\ref{lem:fg-analytic-sphere}); in
+    particular both are differentiable at $z$ with nonzero values. Hence
+    \texttt{logDeriv\_div} applies and the logarithmic derivative of the quotient
+    is the difference of the logarithmic derivatives.
+\end{proof}
+
+\begin{lemma}[The logarithmic derivatives are circle-integrable]
+    \label{lem:logDeriv-circleIntegrable}
+    \lean{LeanEval.ComplexAnalysis.logDeriv_circleIntegrable}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:f-analytic-sphere, lem:fg-analytic-sphere}
+    The functions $\operatorname{logDeriv} f$ and $\operatorname{logDeriv}(f+g)$
+    are circle-integrable on $C(0,R)$.
+\end{lemma}
+\begin{proof}
+    On a neighbourhood of every $z \in S$ each of $f$ and $f+g$ is analytic and
+    nonzero (Lemmas~\ref{lem:f-analytic-sphere} and~\ref{lem:fg-analytic-sphere}),
+    so $\operatorname{logDeriv} f = f'/f$ and $\operatorname{logDeriv}(f+g)$ are
+    continuous on the circle, hence circle-integrable.
+\end{proof}
+
+\begin{lemma}[Equality of the two winding integrals]
+    \label{lem:logDeriv-diff}
+    \lean{LeanEval.ComplexAnalysis.logDeriv_diff}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:winding-cancel, lem:logDeriv-div-pointwise, lem:logDeriv-circleIntegrable}
+    $\displaystyle \oint_{C(0,R)} \operatorname{logDeriv}(f+g)
+       = \oint_{C(0,R)} \operatorname{logDeriv} f$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:winding-cancel, lem:logDeriv-div-pointwise,
+      lem:logDeriv-circleIntegrable}
+    By Lemma~\ref{lem:logDeriv-circleIntegrable} both
+    $\operatorname{logDeriv}(f+g)$ and $\operatorname{logDeriv} f$ are
+    circle-integrable, so by \texttt{integral\_sub}
+    \[
+        \oint_{C(0,R)}\operatorname{logDeriv}(f+g)
+          - \oint_{C(0,R)}\operatorname{logDeriv} f
+          = \oint_{C(0,R)}\big(\operatorname{logDeriv}(f+g)
+            - \operatorname{logDeriv} f\big).
+    \]
+    By Lemma~\ref{lem:logDeriv-div-pointwise} the integrand agrees on $S$ with
+    $\operatorname{logDeriv}\big((f+g)/f\big)$, whose circle integral is $0$ by
+    Lemma~\ref{lem:winding-cancel}. Hence the difference of the two integrals is
+    $0$.
+\end{proof}
+
+\subsection{Matching pole divisors and conclusion}
+
+\begin{lemma}[Nonnegative order is preserved by adding $g$]
+    \label{lem:order-nonneg-of-pole}
+    \lean{LeanEval.ComplexAnalysis.order_nonneg_of_pole}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    For every $z \in \mathbb{C}$, if $\operatorname{order}(f) \ge 0$ at $z$ then
+    $\operatorname{order}(f+g) \ge 0$ at $z$.
+\end{lemma}
+\begin{proof}
+    Since $g$ is analytic, $\operatorname{order}(g) \ge 0$ at $z$. If
+    $\operatorname{order}(f) \ge 0$, then $\operatorname{order}(f+g) \ge
+    \min(\operatorname{order} f, \operatorname{order} g) \ge 0$.
+\end{proof}
+
+\begin{lemma}[Order of $f+g$ equals that of $f$ at a pole of $f$]
+    \label{lem:order-eq-at-pole}
+    \lean{LeanEval.ComplexAnalysis.order_eq_at_pole}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    For every $z \in \mathbb{C}$, if $\operatorname{order}(f) < 0$ at $z$ then
+    $\operatorname{order}(f+g) = \operatorname{order}(f)$ at $z$.
+\end{lemma}
+\begin{proof}
+    Since $g$ is analytic, $\operatorname{order}(g) \ge 0$ at $z$. If
+    $\operatorname{order}(f) < 0 \le \operatorname{order}(g)$, then
+    $\operatorname{order}(f) < \operatorname{order}(g)$, so the order of the sum
+    equals the strictly smaller one:
+    $\operatorname{order}(f+g) = \operatorname{order}(f)$.
+\end{proof}
+
+\begin{lemma}[$f$ and $f+g$ have the same pole divisor]
+    \label{lem:negPart-eq}
+    \lean{LeanEval.ComplexAnalysis.negPart_eq}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:order-nonneg-of-pole, lem:order-eq-at-pole}
+    For every $z \in D$,
+    $\big(\operatorname{divisor}(f+g,D)\big)^{-}(z)
+       = \big(\operatorname{divisor}(f,D)\big)^{-}(z)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:order-nonneg-of-pole, lem:order-eq-at-pole}
+    Fix $z \in D$. The divisor at $z$ is the untopped meromorphic order, and the
+    negative part of an integer is determined by that integer. If
+    $\operatorname{order}(f) \ge 0$ at $z$, then by
+    Lemma~\ref{lem:order-nonneg-of-pole} also $\operatorname{order}(f+g) \ge 0$,
+    so both divisors are $\ge 0$ and both negative parts vanish. If
+    $\operatorname{order}(f) < 0$, then by Lemma~\ref{lem:order-eq-at-pole} the
+    two orders are equal, hence so are the two divisors and their negative parts.
+\end{proof}
+
+\begin{lemma}[The argument principle applies to $f$ and to $f+g$]
+    \label{lem:orderZero-bundle}
+    \lean{LeanEval.ComplexAnalysis.orderZero_bundle}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:f-ne-zero-sphere, lem:fg-ne-zero-sphere, lem:f-analytic-sphere, lem:fg-analytic-sphere}
+    Each of $f$ and $f+g$ is meromorphic on $\mathbb{C}$, not identically zero,
+    and has order $0$ at every $z \in S$. Hence
+    Theorem~\ref{thm:argument-principle} applies to each.
+\end{lemma}
+\begin{proof}
+    $f$ is meromorphic by hypothesis and $f+g$ is meromorphic, being the sum of a
+    meromorphic and an analytic function. Neither is identically zero: $f$ is
+    nonzero on $S$ (Lemma~\ref{lem:f-ne-zero-sphere}) and $f+g$ is nonzero on $S$
+    (Lemma~\ref{lem:fg-ne-zero-sphere}). The order is $0$ on $S$ by
+    Lemmas~\ref{lem:f-analytic-sphere} and~\ref{lem:fg-analytic-sphere}. These are
+    exactly the hypotheses of Theorem~\ref{thm:argument-principle}.
+\end{proof}
+
+\begin{lemma}[The positive part decomposes the total mass]
+    \label{lem:posPart-mass-decomp}
+    \lean{LeanEval.ComplexAnalysis.posPart_mass_decomp}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    For a meromorphic $h$,
+    \[
+        \sum_z \big(\operatorname{divisor}(h,D)\big)^{+}(z)
+          = \sum_z \operatorname{divisor}(h,D)(z)
+          + \sum_z \big(\operatorname{divisor}(h,D)\big)^{-}(z).
+    \]
+\end{lemma}
+\begin{proof}
+    For an integer $v$ one has $v^{+} = v + v^{-}$ (i.e.\
+    $v^{+} - v^{-} = v$). Applying this pointwise to
+    $v = \operatorname{divisor}(h,D)(z)$ and summing over the finite support gives
+    the identity.
+\end{proof}
+
+\begin{theorem}[Rouché's theorem, zero-counting form]
+    \label{thm:rouche}
+    \lean{LeanEval.ComplexAnalysis.rouche_zero_count_eq}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche.lean}
+    \uses{thm:argument-principle, lem:logDeriv-diff, lem:negPart-eq, lem:orderZero-bundle, lem:posPart-mass-decomp}
+    Under the standing hypotheses ($R>0$, $f$ meromorphic in normal form on
+    $\mathbb{C}$, $g$ analytic on $\mathbb{C}$, and $\|g(z)\| < \|f(z)\|$ on
+    $S$),
+    \[
+        \sum_{z}\big(\operatorname{divisor}(f+g,D)\big)^{+}(z)
+          = \sum_{z}\big(\operatorname{divisor}(f,D)\big)^{+}(z).
+    \]
+\end{theorem}
+\begin{proof}
+    \uses{thm:argument-principle, lem:logDeriv-diff, lem:negPart-eq,
+      lem:orderZero-bundle, lem:posPart-mass-decomp}
+    By Lemma~\ref{lem:posPart-mass-decomp}, applied to each of $f$ and $f+g$, the
+    positive-part mass decomposes as the signed mass plus the negative-part mass.
+    By Lemma~\ref{lem:orderZero-bundle}, Theorem~\ref{thm:argument-principle}
+    applies to both $f$ and $f+g$:
+    \[
+        \sum_z \operatorname{divisor}(f+g,D)(z)
+          = \frac{1}{2\pi i}\oint_{C(0,R)}\operatorname{logDeriv}(f+g),
+        \qquad
+        \sum_z \operatorname{divisor}(f,D)(z)
+          = \frac{1}{2\pi i}\oint_{C(0,R)}\operatorname{logDeriv} f.
+    \]
+    By Lemma~\ref{lem:logDeriv-diff} the two integrals are equal, hence the two
+    signed masses are equal. By Lemma~\ref{lem:negPart-eq} the negative-part
+    masses are equal as well. Adding the equal signed and negative-part masses
+    gives equality of the positive-part masses, which is the claim.
+\end{proof}
 
 \end{document}

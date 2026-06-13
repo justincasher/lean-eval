@@ -1,4 +1,5 @@
 import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Basic
+import LeanEval.ComplexAnalysis.Rouche.Support
 import EvalTools.Markers
 
 namespace LeanEval
