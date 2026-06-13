@@ -348,7 +348,118 @@ theorem annulus_zero_free {h : ℂ → ℂ} {R : ℝ}
     (hh : MeromorphicOn h Set.univ)
     (horder : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt h z = 0) :
     ∃ R' : ℝ, R < R' ∧ (divisor h (Metric.ball 0 R')).support ⊆ Metric.ball 0 R := by
-  sorry
+  -- The closed disk of radius R+1 is compact, so the divisor's support there is finite.
+  set K := Metric.closedBall (0 : ℂ) (R + 1) with hK
+  have hK_compact : IsCompact K := isCompact_closedBall (0 : ℂ) (R + 1)
+  have hhK : MeromorphicOn h K := hh.mono_set (Set.subset_univ _)
+  have hfin_support : Set.Finite (divisor h K).support :=
+    (divisor h K).finiteSupport hK_compact
+
+  -- Points on the circle ‖z‖ = R have divisor zero on the closed disk of radius R+1.
+  have h_circle_zero : ∀ z : ℂ, ‖z‖ = R → (divisor h K) z = 0 := by
+    intro z hz
+    have hz_closedBall_R : z ∈ Metric.closedBall (0 : ℂ) R := by
+      rw [Metric.mem_closedBall, dist_eq_norm, sub_zero]
+      exact le_of_eq hz
+    have hz_divisor_R_zero : (divisor h (Metric.closedBall (0 : ℂ) R)) z = 0 :=
+      divisor_eq_zero_of_orderZero hh hz_closedBall_R (horder z hz)
+    have hsub : Metric.closedBall (0 : ℂ) R ⊆ K := by
+      intro x hx
+      rw [Metric.mem_closedBall, dist_eq_norm, sub_zero] at hx
+      rw [hK, Metric.mem_closedBall, dist_eq_norm, sub_zero]
+      nlinarith
+    have hrestrict_eq := MeromorphicOn.divisor_restrict hhK hsub
+    calc
+      (divisor h K) z = ((divisor h K).restrict hsub) z := by
+        simp [Function.locallyFinsuppWithin.restrict_apply, hz_closedBall_R]
+      _ = divisor h (Metric.closedBall (0 : ℂ) R) z := by rw [hrestrict_eq]
+      _ = 0 := hz_divisor_R_zero
+
+  -- Consider the support points outside the open disk of radius R.
+  let S : Set ℂ := (divisor h K).support \ Metric.ball (0 : ℂ) R
+  have hS_fin : Set.Finite S := hfin_support.subset (by
+    intro x hx; exact hx.1)
+
+  -- Every point in S has norm > R (since those with norm = R have divisor zero).
+  have hS_norm_gt_R : ∀ z ∈ S, R < ‖z‖ := by
+    intro z hz
+    rcases hz with ⟨hz_supp, hz_not_ball⟩
+    have hz_norm_ge_R : R ≤ ‖z‖ := by
+      by_contra! hlt
+      apply hz_not_ball
+      rw [Metric.mem_ball, dist_eq_norm, sub_zero]
+      exact hlt
+    have hz_norm_ne_R : ‖z‖ ≠ R := by
+      intro heq
+      have hzero : (divisor h K) z = 0 := h_circle_zero z heq
+      exact hz_supp hzero
+    exact lt_of_le_of_ne hz_norm_ge_R hz_norm_ne_R.symm
+
+  -- Build a Finset ℝ of the norms of points in S.
+  let A : Finset ℝ := (hS_fin.toFinset).image (fun z : ℂ => ‖z‖)
+  have hA_gt_R : ∀ a ∈ A, R < a := by
+    intro a ha
+    rw [Finset.mem_image] at ha
+    rcases ha with ⟨z, hz, rfl⟩
+    have hz_S : z ∈ S := by
+      simpa using hz
+    exact hS_norm_gt_R z hz_S
+
+  rcases exists_lt_of_finite hA_gt_R with ⟨R1, hR1_gt_R, hR1_le⟩
+
+  -- Choose R' = min R1 (R+1), ensuring R' > R and Metric.ball 0 R' ⊆ K.
+  set R' := min R1 (R + 1) with hR'
+  have hR'_gt_R : R < R' := by
+    have hR1_gt_R : R < R1 := hR1_gt_R
+    have hRp1_gt_R : R < R + 1 := by nlinarith
+    exact lt_min_iff.mpr ⟨hR1_gt_R, hRp1_gt_R⟩
+
+  have hR'_le_Rp1 : R' ≤ R + 1 := min_le_right _ _
+  have hball_sub_K : Metric.ball (0 : ℂ) R' ⊆ K := by
+    intro x hx
+    rw [Metric.mem_ball, dist_eq_norm, sub_zero] at hx
+    rw [hK, Metric.mem_closedBall, dist_eq_norm, sub_zero]
+    nlinarith
+
+  -- The divisor on the ball of radius R' and on K agree for points in the ball.
+  have h_restrict_eq₂ := MeromorphicOn.divisor_restrict hhK hball_sub_K
+
+  -- Now we prove the support inclusion.
+  refine ⟨R', hR'_gt_R, ?_⟩
+  intro z hz
+  rw [Function.mem_support] at hz
+  by_cases hz_ball_R : z ∈ Metric.ball (0 : ℂ) R
+  · exact hz_ball_R
+  · exfalso
+    have hz_ball_R'_from_divisor : z ∈ Metric.ball (0 : ℂ) R' := by
+      rw [divisor_def] at hz
+      split_ifs at hz with h
+      · exact h.2
+      · exact (hz rfl).elim
+    have hz_K : z ∈ K := hball_sub_K hz_ball_R'_from_divisor
+    -- Since the divisors agree, (divisor h K) z ≠ 0.
+    have hz_divisor_K_ne_zero : (divisor h K) z ≠ 0 := by
+      intro hzero
+      apply hz
+      calc
+        (divisor h (Metric.ball (0 : ℂ) R')) z = ((divisor h K).restrict hball_sub_K) z := by rw [h_restrict_eq₂]
+        _ = (divisor h K) z := by
+          simp [Function.locallyFinsuppWithin.restrict_apply, hz_ball_R'_from_divisor]
+        _ = 0 := hzero
+    have hz_S : z ∈ S := ⟨hz_divisor_K_ne_zero, hz_ball_R⟩
+    -- Then ‖z‖ is one of the moduli in A, so R1 ≤ ‖z‖.
+    have h_norm_in_A : ‖z‖ ∈ A := by
+      apply Finset.mem_image.mpr
+      refine ⟨z, ?_, rfl⟩
+      simpa using hz_S
+    have hR1_le_norm : R1 ≤ ‖z‖ := hR1_le ‖z‖ h_norm_in_A
+    -- But z is in the ball of radius R' = min R1 (R+1), so ‖z‖ < R' ≤ R1, contradiction.
+    have hz_norm_lt_R' : ‖z‖ < R' := by
+      rw [Metric.mem_ball, dist_eq_norm, sub_zero] at hz_ball_R'_from_divisor
+      exact hz_ball_R'_from_divisor
+    have hR'_le_R1 : R' ≤ R1 := min_le_left _ _
+    have : ‖z‖ < R1 := lt_of_lt_of_le hz_norm_lt_R' hR'_le_R1
+    linarith
 
 /-- A meromorphic function that is not identically zero has finite order at every
 point. -/
@@ -548,7 +659,26 @@ theorem argument_principle {h : ℂ → ℂ} {R : ℝ}
     (horder : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt h z = 0) :
     ((∑ᶠ z, (divisor h (Metric.closedBall 0 R)) z : ℤ) : ℂ)
       = (2 * (Real.pi : ℂ) * Complex.I)⁻¹ * (∮ z in C(0, R), logDeriv h z) := by
-  sorry
+  have hintegral := argument_principle_integral hh hne horder
+  have hfinite : Function.HasFiniteSupport (divisor h (Metric.closedBall 0 R)) :=
+    Function.locallyFinsuppWithin.finiteSupport (divisor h (Metric.closedBall 0 R))
+      (isCompact_closedBall 0 R)
+  have hC : (2 * (Real.pi : ℂ) * Complex.I) ≠ 0 := by
+    have hπ0 : (Real.pi : ℂ) ≠ 0 := by exact_mod_cast Real.pi_pos.ne'
+    have hI0 : Complex.I ≠ 0 := Complex.I_ne_zero
+    have h20 : (2 : ℂ) ≠ 0 := by norm_num
+    exact mul_ne_zero (mul_ne_zero h20 hπ0) hI0
+  calc
+    ((∑ᶠ z, (divisor h (Metric.closedBall 0 R)) z : ℤ) : ℂ)
+        = ∑ᶠ u, ((divisor h (Metric.closedBall 0 R)) u : ℂ) := by
+      let d : ℂ → ℤ := divisor h (Metric.closedBall 0 R)
+      have hfinite_d : Function.HasFiniteSupport d := hfinite
+      simpa using (Int.castAddHom ℂ).map_finsum (f := d) hfinite_d
+    _ = (2 * (Real.pi : ℂ) * Complex.I)⁻¹
+        * ((∑ᶠ u, ((divisor h (Metric.closedBall 0 R)) u : ℂ))
+          * (2 * (Real.pi : ℂ) * Complex.I)) := by
+      field_simp [hC]
+    _ = (2 * (Real.pi : ℂ) * Complex.I)⁻¹ * (∮ z in C(0, R), logDeriv h z) := by rw [hintegral]
 
 /-! ## Vanishing winding of `(f + g) / f` -/
 

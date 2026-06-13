@@ -40,7 +40,77 @@ theorem rouche_zero_count_eq
     (hbound : ∀ z : ℂ, ‖z‖ = R → ‖g z‖ < ‖f z‖) :
     (∑ᶠ z, ((divisor (f + g) (Metric.closedBall 0 R))⁺) z) =
       (∑ᶠ z, ((divisor f (Metric.closedBall 0 R))⁺) z) := by
-  sorry
+  set D := Metric.closedBall (0 : ℂ) R with hD
+  have hpos_decomp_f : (∑ᶠ z, ((divisor f D)⁺) z) =
+      (∑ᶠ z, (divisor f D) z) + (∑ᶠ z, ((divisor f D)⁻) z) :=
+    posPart_mass_decomp (h := f) (R := R)
+  have hpos_decomp_fg : (∑ᶠ z, ((divisor (f + g) D)⁺) z) =
+      (∑ᶠ z, (divisor (f + g) D) z) + (∑ᶠ z, ((divisor (f + g) D)⁻) z) :=
+    posPart_mass_decomp (h := f + g) (R := R)
+  -- The negative parts are equal
+  have h_neg_eq_pointwise : ∀ z, ((divisor (f + g) D)⁻) z = ((divisor f D)⁻) z := by
+    intro z
+    by_cases hz : z ∈ D
+    · exact negPart_eq hf hg hz
+    · have hdiv_f : divisor f D z = 0 := by
+        rw [MeromorphicOn.divisor_def]
+        simp [hz]
+      have hdiv_fg : divisor (f + g) D z = 0 := by
+        rw [MeromorphicOn.divisor_def]
+        simp [hz]
+      simp [hdiv_f, hdiv_fg]
+  have h_neg_sum_eq : (∑ᶠ z, ((divisor (f + g) D)⁻) z) = (∑ᶠ z, ((divisor f D)⁻) z) := by
+    refine finsum_congr ?_
+    intro z
+    exact h_neg_eq_pointwise z
+  -- The signed masses are equal via the argument principle
+  have hfg_merm : MeromorphicOn (f + g) Set.univ :=
+    hf.meromorphicOn.add (fun z hz => (hg.analyticAt (isOpen_univ.mem_nhds hz)).meromorphicAt)
+  have hf_ne_top : ∃ z, meromorphicOrderAt f z ≠ ⊤ := by
+    have hz_sphere : ∃ z : ℂ, ‖z‖ = R := by
+      refine ⟨(R : ℂ), ?_⟩
+      calc
+        ‖(R : ℂ)‖ = |R| := by simp
+        _ = R := abs_of_pos hR
+    rcases hz_sphere with ⟨z, hz⟩
+    have horder : meromorphicOrderAt f z = 0 := (f_analytic_sphere hf hbound hz).1
+    exact ⟨z, by simp [horder]⟩
+  have hfg_ne_top : ∃ z, meromorphicOrderAt (f + g) z ≠ ⊤ := by
+    have hz_sphere : ∃ z : ℂ, ‖z‖ = R := by
+      refine ⟨(R : ℂ), ?_⟩
+      calc
+        ‖(R : ℂ)‖ = |R| := by simp
+        _ = R := abs_of_pos hR
+    rcases hz_sphere with ⟨z, hz⟩
+    have horder : meromorphicOrderAt (f + g) z = 0 :=
+      (fg_analytic_sphere hf hg hbound hz).2.2
+    exact ⟨z, by simp [horder]⟩
+  have hf_order_sphere : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt f z = 0 := by
+    intro z hz
+    exact (f_analytic_sphere hf hbound hz).1
+  have hfg_order_sphere : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt (f + g) z = 0 := by
+    intro z hz
+    exact (fg_analytic_sphere hf hg hbound hz).2.2
+  have h_ap_f := argument_principle hf.meromorphicOn hf_ne_top hf_order_sphere
+  have h_ap_fg := argument_principle hfg_merm hfg_ne_top hfg_order_sphere
+  have h_int_eq : (∮ z in C(0, R), logDeriv (f + g) z) = (∮ z in C(0, R), logDeriv f z) :=
+    logDeriv_diff hR hf hg hbound
+  have h_signed_eq_ℂ : ((∑ᶠ z, (divisor (f + g) D) z : ℤ) : ℂ) =
+      ((∑ᶠ z, (divisor f D) z : ℤ) : ℂ) := by
+    calc
+      ((∑ᶠ z, (divisor (f + g) D) z : ℤ) : ℂ) =
+          (2 * (Real.pi : ℂ) * Complex.I)⁻¹ * (∮ z in C(0, R), logDeriv (f + g) z) := h_ap_fg
+      _ = (2 * (Real.pi : ℂ) * Complex.I)⁻¹ * (∮ z in C(0, R), logDeriv f z) := by rw [h_int_eq]
+      _ = ((∑ᶠ z, (divisor f D) z : ℤ) : ℂ) := by rw [h_ap_f]
+  have h_signed_eq : (∑ᶠ z, (divisor (f + g) D) z) = (∑ᶠ z, (divisor f D) z) := by
+    exact_mod_cast h_signed_eq_ℂ
+  -- Combine using the decompositions
+  calc
+    (∑ᶠ z, ((divisor (f + g) D)⁺) z)
+        = (∑ᶠ z, (divisor (f + g) D) z) + (∑ᶠ z, ((divisor (f + g) D)⁻) z) := hpos_decomp_fg
+    _ = (∑ᶠ z, (divisor f D) z) + (∑ᶠ z, ((divisor (f + g) D)⁻) z) := by rw [h_signed_eq]
+    _ = (∑ᶠ z, (divisor f D) z) + (∑ᶠ z, ((divisor f D)⁻) z) := by rw [h_neg_sum_eq]
+    _ = (∑ᶠ z, ((divisor f D)⁺) z) := by rw [hpos_decomp_f]
 
 end ComplexAnalysis
 end LeanEval
