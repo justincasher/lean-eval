@@ -1,0 +1,696 @@
+% Blueprint: Minkowski-Caratheodory theorem
+% Created by Numina
+
+\begin{document}
+
+\section{Minkowski--Carathéodory Theorem}
+
+Throughout, $E$ is a finite-dimensional real normed space, $s \subseteq E$ is a
+compact convex set, and $x \in s$. We write $\operatorname{ext}(s)$ for the set
+of extreme points of $s$ (Mathlib: \texttt{Set.extremePoints}). The goal is the
+\emph{Minkowski--Carathéodory theorem}: every point of $s$ is a convex
+combination of at most $\operatorname{finrank}_{\mathbb R} E + 1$ extreme points
+of $s$.
+
+The proof combines two ingredients: a cardinality-bounded form of
+Carathéodory's theorem, and \emph{Minkowski's theorem} (the finite-dimensional
+Krein--Milman theorem), which states that $s$ equals the convex hull --- not
+merely its closure --- of its extreme points.
+
+\subsection{Carathéodory with a dimension bound}
+
+\begin{lemma}[Carathéodory representation lands in the convex hull of a finite image]
+    \label{lem:caratheodory-image-mem}
+    \lean{LeanEval.ConvexGeometry.caratheodory_image_mem}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
+    Let $A \subseteq E$ and let $x \in \operatorname{convexHull}_{\mathbb R} A$.
+    Then there are a fintype $\iota$, an affinely independent family
+    $z : \iota \to E$ with $\operatorname{range} z \subseteq A$, and strictly
+    positive weights $w : \iota \to \mathbb R$ with $\sum_i w_i = 1$ and
+    $\sum_i w_i\, z_i = x$, such that, writing $t = z\,''\,\iota$ for the image
+    finset, one has $t \subseteq A$ and
+    $x \in \operatorname{convexHull}_{\mathbb R} t$.
+\end{lemma}
+\begin{proof}
+    By the explicit Carathéodory representation
+    (\texttt{eq\_pos\_convex\_span\_of\_mem\_convexHull}) we obtain $\iota$, $z$,
+    and $w$ as stated, with $\operatorname{range} z \subseteq A$. Let $t$ be the
+    image of $z$; then $t \subseteq A$, and $x = \sum_i w_i\, z_i$ is the center of
+    mass of the points $z_i$ with strictly positive weights summing to $1$, hence
+    a convex combination of the points of $t$, so
+    $x \in \operatorname{convexHull}_{\mathbb R} t$
+    (\texttt{Finset.centerMass\_id\_mem\_convexHull}).
+\end{proof}
+
+\begin{lemma}[Carathéodory cardinality estimate]
+    \label{lem:caratheodory-card-bound}
+    \lean{LeanEval.ConvexGeometry.caratheodory_card_bound}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:caratheodory-image-mem}
+    \leanok
+    With $\iota$, $z$, and $t = z\,''\,\iota$ as in
+    Lemma~\ref{lem:caratheodory-image-mem}, one has
+    \[
+        \#t \;\le\; \#\iota \;\le\; \operatorname{finrank}_{\mathbb R} E + 1 .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:caratheodory-image-mem}
+    Since $t = z\,''\,\iota$ is the image of $\iota$ under $z$, we have
+    $\#t \le \#\iota$ (\texttt{Finset.card\_image\_le}). As $z$ is affinely
+    independent,
+    $\#\iota \le \operatorname{finrank}_{\mathbb R}\big(\operatorname{vectorSpan}_{\mathbb R}(\operatorname{range} z)\big) + 1$
+    (\texttt{AffineIndependent.card\_le\_finrank\_succ}). Finally
+    $\operatorname{vectorSpan}_{\mathbb R}(\operatorname{range} z)$ is a submodule of
+    $E$, so its \texttt{finrank} is at most $\operatorname{finrank}_{\mathbb R} E$
+    (\texttt{Submodule.finrank\_le}); combining the three inequalities gives
+    $\#t \le \#\iota \le \operatorname{finrank}_{\mathbb R} E + 1$.
+\end{proof}
+
+\begin{lemma}[Carathéodory cardinality bound]
+    \label{lem:caratheodory-card}
+    \lean{LeanEval.ConvexGeometry.caratheodory_card}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:caratheodory-image-mem, lem:caratheodory-card-bound}
+    \leanok
+    Let $A \subseteq E$ and let $x \in \operatorname{convexHull}_{\mathbb R} A$.
+    Then there is a finite set $t \subseteq A$ with
+    $\#t \le \operatorname{finrank}_{\mathbb R} E + 1$ and
+    $x \in \operatorname{convexHull}_{\mathbb R} t$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:caratheodory-image-mem, lem:caratheodory-card-bound}
+    Take $t = z\,''\,\iota$ from Lemma~\ref{lem:caratheodory-image-mem}; then
+    $t \subseteq A$ and $x \in \operatorname{convexHull}_{\mathbb R} t$. The
+    cardinality bound $\#t \le \operatorname{finrank}_{\mathbb R} E + 1$ is
+    Lemma~\ref{lem:caratheodory-card-bound}.
+\end{proof}
+
+\subsection{Building blocks for Minkowski's theorem}
+
+For a continuous linear functional $\ell : E \to \mathbb R$ we single out the
+face of $s$ on which $\ell$ attains its maximum.
+
+\begin{definition}[Maximal face of a linear functional]
+    \label{def:exposed-face}
+    \lean{LeanEval.ConvexGeometry.exposedFace}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
+    For a continuous linear functional $\ell : E \to \mathbb R$ set
+    \[
+        F_\ell(s) \;=\; \{\, y \in s : \forall z \in s,\ \ell z \le \ell y \,\}.
+    \]
+    Equivalently, $F_\ell(s)$ is the exposed subset of $s$ determined by $\ell$
+    (Mathlib: \texttt{IsExposed}).
+\end{definition}
+
+\begin{lemma}[The maximal face is an extreme subset]
+    \label{lem:exposed-face}
+    \lean{LeanEval.ConvexGeometry.exposedFace_isExtreme}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{def:exposed-face}
+    \leanok
+    For every continuous linear functional $\ell$, the set $F_\ell(s)$ is compact
+    and convex, and its extreme points are extreme points of $s$:
+    $\operatorname{ext}(F_\ell(s)) \subseteq \operatorname{ext}(s)$.
+\end{lemma}
+\begin{proof}
+    $F_\ell(s)$ is an exposed subset of $s$ (it is cut out by $\ell$), hence by
+    \texttt{IsExposed.isExtreme} it is an extreme subset of $s$; therefore
+    \texttt{IsExtreme.extremePoints\_subset\_extremePoints} gives
+    $\operatorname{ext}(F_\ell(s)) \subseteq \operatorname{ext}(s)$. Compactness
+    and convexity are \texttt{IsExposed.isCompact} (using compactness of $s$) and
+    \texttt{IsExposed.convex}.
+\end{proof}
+
+\begin{lemma}[The maximal face lies in the kernel of $\ell$]
+    \label{lem:face-vectorspan-le-ker}
+    \lean{LeanEval.ConvexGeometry.exposedFace_vectorSpan_le_ker}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{def:exposed-face}
+    \leanok
+    Every difference of two points of $F_\ell(s)$ is annihilated by $\ell$, hence
+    \[
+        \operatorname{vectorSpan}_{\mathbb R} F_\ell(s) \;\le\; \ker \ell .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{def:exposed-face}
+    Any $y, y' \in F_\ell(s)$ both attain the maximal value of $\ell$ on $s$, so
+    $\ell(y - y') = \ell y - \ell y' = 0$, i.e.\ $y - y' \in \ker \ell$. Thus every
+    generator $y - y'$ of $\operatorname{vectorSpan}_{\mathbb R} F_\ell(s)$ lies in
+    the submodule $\ker \ell$, so the whole span is contained in it
+    (\texttt{vectorSpan\_le}).
+\end{proof}
+
+\begin{lemma}[The maximal face has smaller affine dimension]
+    \label{lem:exposed-face-lower-dim}
+    \lean{LeanEval.ConvexGeometry.exposedFace_finrank_lt}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{def:exposed-face, lem:face-vectorspan-le-ker}
+    \leanok
+    Suppose $\ell$ is non-constant on $s$, i.e.\ there exist $a, b \in s$ with
+    $\ell a \ne \ell b$. Then
+    \[
+        \operatorname{finrank}_{\mathbb R}\big(\operatorname{vectorSpan}_{\mathbb R} F_\ell(s)\big)
+        \;<\;
+        \operatorname{finrank}_{\mathbb R}\big(\operatorname{vectorSpan}_{\mathbb R} s\big).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:face-vectorspan-le-ker}
+    Write $U = \operatorname{vectorSpan}_{\mathbb R} F_\ell(s)$ and
+    $V = \operatorname{vectorSpan}_{\mathbb R} s$. By
+    Lemma~\ref{lem:face-vectorspan-le-ker}, $U \le \ker \ell$, and $U \le V$ since
+    $F_\ell(s) \subseteq s$ (\texttt{vectorSpan\_mono}); hence
+    $U \le V \sqcap \ker \ell$. As $a, b \in s$, the vector $a - b$ lies in $V$
+    (\texttt{vsub\_mem\_vectorSpan}), whereas $\ell(a - b) = \ell a - \ell b \ne 0$
+    shows $a - b \notin \ker \ell$. Therefore $V \sqcap \ker \ell$ is a
+    \emph{proper} submodule of $V$, i.e.\ $V \sqcap \ker \ell < V$. Combining
+    \[
+        \operatorname{finrank}_{\mathbb R} U
+        \;\le\; \operatorname{finrank}_{\mathbb R}(V \sqcap \ker \ell)
+        \qquad (\texttt{Submodule.finrank\_mono})
+    \]
+    with
+    $\operatorname{finrank}_{\mathbb R}(V \sqcap \ker \ell) < \operatorname{finrank}_{\mathbb R} V$
+    (\texttt{Submodule.finrank\_lt\_finrank\_of\_lt}) yields the claim.
+\end{proof}
+
+To analyse relative boundary points we reduce to the \emph{direction subspace}.
+Fix a base point $p \in s$ and let $W = \operatorname{vectorSpan}_{\mathbb R} s$,
+which (as a submodule of the finite-dimensional space $E$) is itself a
+finite-dimensional real normed space. Every difference of points of $s$ lies in
+$W$, so $s \subseteq p + W$, and the map
+$\iota_p : W \hookrightarrow E,\ w \mapsto w + p$ is an affine isometry. Write
+\[
+    s' \;=\; \{\, w \in W : w + p \in s \,\} \;=\; \iota_p^{-1}(s) \;\subseteq\; W
+\]
+for the translated copy of $s$ inside $W$; then $\iota_p\,''\,s' = s$ and
+$0 \in s'$ (as $p \in s$).
+
+\begin{lemma}[The translated set is convex]
+    \label{lem:translated-set-convex}
+    \lean{LeanEval.ConvexGeometry.translatedSet_convex}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
+    The set $s' = \{\, w \in W : w + p \in s \,\}$ is convex.
+\end{lemma}
+\begin{proof}
+    $s'$ is the preimage of the convex set $s$ under the affine map
+    $w \mapsto w + p$, hence convex (\texttt{Convex.affine\_preimage}).
+\end{proof}
+
+We decompose the identity $\operatorname{intrinsicInterior}_{\mathbb R} s =
+\iota_p\,''\,\operatorname{interior} s'$ into three independent pieces: the
+translation recovers $s$, the translated set spans all of $W$, and (a general
+fact) the intrinsic interior of a set whose affine span is the whole space is its
+ordinary interior.
+
+\begin{lemma}[The translation recovers $s$]
+    \label{lem:iie-image}
+    \lean{LeanEval.ConvexGeometry.image_translatedSet_eq}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
+    For $p \in s$ and $s' = \{\, w \in W : w + p \in s \,\}$ one has
+    $\iota_p\,''\,s' = s$, i.e.
+    \[
+        \{\, w + p : w \in W,\ w + p \in s \,\} \;=\; s .
+    \]
+\end{lemma}
+\begin{proof}
+    The inclusion $\iota_p\,''\,s' \subseteq s$ is immediate from the definition of
+    $s'$. Conversely, for $z \in s$ the difference $z - p$ lies in
+    $W = \operatorname{vectorSpan}_{\mathbb R} s$
+    (\texttt{vsub\_mem\_vectorSpan}), and $\iota_p(z - p) = (z - p) + p = z \in s$,
+    so $z \in \iota_p\,''\,s'$.
+\end{proof}
+
+\begin{lemma}[The translated set spans its subspace]
+    \label{lem:iie-affinespan-top}
+    \lean{LeanEval.ConvexGeometry.affineSpan_translatedSet_eq_top}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:iie-image}
+    \leanok
+    For $p \in s$ the translated set $s' = \{\, w \in W : w + p \in s \,\}$ has full
+    affine span in $W$:
+    \[
+        \operatorname{affineSpan}_{\mathbb R} s' \;=\; \top .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:iie-image}
+    The set $s'$ is nonempty, as $0 \in s'$ (since $0 + p = p \in s$). The
+    injective inclusion $\iota_p$ carries $\operatorname{vectorSpan}_{\mathbb R} s'$
+    onto $\operatorname{vectorSpan}_{\mathbb R}(\iota_p\,''\,s')
+    = \operatorname{vectorSpan}_{\mathbb R} s = W$ (using
+    Lemma~\ref{lem:iie-image}), so $\operatorname{vectorSpan}_{\mathbb R} s'$ is all
+    of $W$. A nonempty set whose vector span is the whole space has full affine
+    span (\texttt{affineSpan\_eq\_top\_iff\_vectorSpan\_eq\_top\_of\_nonempty}).
+\end{proof}
+
+\begin{lemma}[Intrinsic interior equals interior under full affine span]
+    \label{lem:intrinsicinterior-eq-interior}
+    \lean{LeanEval.ConvexGeometry.intrinsicInterior_eq_interior_of_affineSpan_eq_top}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
+    Let $F$ be a real normed space and $u \subseteq F$ with
+    $\operatorname{affineSpan}_{\mathbb R} u = \top$. Then
+    $\operatorname{intrinsicInterior}_{\mathbb R} u = \operatorname{interior} u$.
+\end{lemma}
+\begin{proof}
+    By definition $\operatorname{intrinsicInterior}_{\mathbb R} u$ is the image,
+    under the coercion $\operatorname{affineSpan}_{\mathbb R} u \hookrightarrow F$,
+    of the topological interior of the preimage of $u$. When
+    $\operatorname{affineSpan}_{\mathbb R} u = \top$ this coercion is the
+    homeomorphism $\top \simeq F$ (\texttt{AffineSubspace.topHomeomorph} via
+    \texttt{AffineSubspace.topEquiv}), under which preimage and interior commute,
+    so the image is exactly $\operatorname{interior} u$.
+\end{proof}
+
+\begin{lemma}[Intrinsic interior via the direction subspace]
+    \label{lem:intrinsic-interior-eq-image}
+    \lean{LeanEval.ConvexGeometry.intrinsicInterior_eq_image}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:iie-image, lem:iie-affinespan-top, lem:intrinsicinterior-eq-interior}
+    \leanok
+    The affine span of $s'$ is all of $W$, so the intrinsic interior of $s'$ in
+    $W$ coincides with its topological interior, and
+    \[
+        \operatorname{intrinsicInterior}_{\mathbb R} s
+        \;=\; \iota_p\,''\,\operatorname{interior} s' .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:iie-image, lem:iie-affinespan-top, lem:intrinsicinterior-eq-interior}
+    The map $\iota_p : W \to E$, $w \mapsto w + p$, is an affine isometry (the
+    isometric subspace inclusion followed by translation by $p$). By
+    Lemma~\ref{lem:iie-image}, $\iota_p\,''\,s' = s$, so
+    \texttt{AffineIsometry.image\_intrinsicInterior} gives
+    \[
+        \operatorname{intrinsicInterior}_{\mathbb R} s
+        = \operatorname{intrinsicInterior}_{\mathbb R}(\iota_p\,''\,s')
+        = \iota_p\,''\,\operatorname{intrinsicInterior}_{\mathbb R} s' .
+    \]
+    By Lemma~\ref{lem:iie-affinespan-top}, $\operatorname{affineSpan}_{\mathbb R} s'
+    = \top$, so Lemma~\ref{lem:intrinsicinterior-eq-interior} gives
+    $\operatorname{intrinsicInterior}_{\mathbb R} s' = \operatorname{interior} s'$.
+    Substituting yields
+    $\operatorname{intrinsicInterior}_{\mathbb R} s
+    = \iota_p\,''\,\operatorname{interior} s'$.
+\end{proof}
+
+\begin{lemma}[The interior in the direction subspace is nonempty]
+    \label{lem:intrinsic-interior-nonempty}
+    \lean{LeanEval.ConvexGeometry.interior_translatedSet_nonempty}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:translated-set-convex, lem:intrinsic-interior-eq-image}
+    \leanok
+    If $s$ is nonempty, then $\operatorname{interior} s'$ is nonempty.
+\end{lemma}
+\begin{proof}
+    \uses{lem:translated-set-convex, lem:intrinsic-interior-eq-image}
+    As $s$ is convex and nonempty, $\operatorname{intrinsicInterior}_{\mathbb R} s$
+    is nonempty (\texttt{intrinsicInterior\_nonempty}). By
+    Lemma~\ref{lem:intrinsic-interior-eq-image} it equals
+    $\iota_p\,''\,\operatorname{interior} s'$, so $\operatorname{interior} s'$ is
+    nonempty as well.
+\end{proof}
+
+\begin{lemma}[Separation in the direction subspace]
+    \label{lem:separation-in-direction}
+    \lean{LeanEval.ConvexGeometry.separation_in_direction}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:translated-set-convex, lem:intrinsic-interior-eq-image}
+    \leanok
+    Let $y \in s$ with $y \notin \operatorname{intrinsicInterior}_{\mathbb R} s$,
+    and put $y' = y - p \in W$. Then $y' \notin \operatorname{interior} s'$, and
+    there is a continuous linear functional $g : W \to_{L} \mathbb R$ with
+    \[
+        g\,w \;<\; g\,y' \qquad \text{for all } w \in \operatorname{interior} s' .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:translated-set-convex, lem:intrinsic-interior-eq-image}
+    By Lemma~\ref{lem:intrinsic-interior-eq-image},
+    $\operatorname{intrinsicInterior}_{\mathbb R} s
+      = \iota_p\,''\,\operatorname{interior} s'$, so
+    $y \notin \operatorname{intrinsicInterior}_{\mathbb R} s$ forces
+    $y' = y - p \notin \operatorname{interior} s'$. The set
+    $\operatorname{interior} s'$ is open (\texttt{isOpen\_interior}) and convex
+    (\texttt{Convex.interior}, using Lemma~\ref{lem:translated-set-convex}). Since
+    $W$ is a normed space, the geometric Hahn--Banach theorem for an open convex
+    set and a point (\texttt{geometric\_hahn\_banach\_open\_point}) yields a
+    continuous linear functional $g : W \to_L \mathbb R$ with $g\,w < g\,y'$ for
+    every $w \in \operatorname{interior} s'$.
+\end{proof}
+
+\begin{lemma}[Extension of the separating functional to $E$]
+    \label{lem:extension-to-E}
+    \lean{LeanEval.ConvexGeometry.extension_to_E}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:separation-in-direction}
+    \leanok
+    Let $g : W \to_L \mathbb R$ be the functional of
+    Lemma~\ref{lem:separation-in-direction}. Then there is a continuous linear
+    functional $\ell : E \to_L \mathbb R$ whose restriction to $W$ equals $g$, and
+    consequently every $z \in s$ with $z - p \in \operatorname{interior} s'$
+    satisfies $\ell z < \ell y$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:separation-in-direction}
+    By the Hahn--Banach extension theorem
+    (\texttt{exists\_extension\_norm\_eq}) applied to $g$ along the isometric
+    inclusion $W \hookrightarrow E$, there is $\ell : E \to_L \mathbb R$ with
+    $\ell|_W = g$. For $z \in s$ we have $z - p \in W$ and
+    $\ell(z - p) = g(z - p)$, and likewise $\ell(y - p) = g\,y'$. Hence
+    $z - p \in \operatorname{interior} s'$ gives $g(z - p) < g\,y'$, i.e.\
+    $\ell(z - p) < \ell(y - p)$, and adding $\ell p$ to both sides yields
+    $\ell z < \ell y$.
+\end{proof}
+
+\begin{lemma}[The bound passes to all of $s$]
+    \label{lem:bound-passes-to-closure}
+    \lean{LeanEval.ConvexGeometry.bound_passes_to_closure}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:translated-set-convex, lem:intrinsic-interior-nonempty, lem:extension-to-E}
+    \leanok
+    With $\ell$ as in Lemma~\ref{lem:extension-to-E}, $\ell z \le \ell y$ for all
+    $z \in s$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:translated-set-convex, lem:intrinsic-interior-nonempty,
+          lem:extension-to-E}
+    By Lemma~\ref{lem:extension-to-E} the strict bound $\ell z < \ell y$ holds
+    whenever $z - p \in \operatorname{interior} s'$. Since $s'$ is convex
+    (Lemma~\ref{lem:translated-set-convex}) with nonempty interior
+    (Lemma~\ref{lem:intrinsic-interior-nonempty}),
+    \[
+        \operatorname{closure}(\operatorname{interior} s')
+        = \operatorname{closure} s' \;\supseteq\; s'
+    \]
+    by \texttt{Convex.closure\_interior\_eq\_closure\_of\_nonempty\_interior}. The
+    affine function $z \mapsto \ell z - \ell y$ is continuous and $\le 0$ on the
+    image of $\operatorname{interior} s'$ under $\iota_p$, so by
+    \texttt{Continuous.le\_on\_closure} it remains $\le 0$ on the closure, which
+    contains every $z \in s$ (as $z - p \in s'$). Hence $\ell z \le \ell y$ for all
+    $z \in s$.
+\end{proof}
+
+\begin{lemma}[The separating functional is non-constant on $s$]
+    \label{lem:functional-non-constant}
+    \lean{LeanEval.ConvexGeometry.functional_non_constant}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:intrinsic-interior-nonempty, lem:separation-in-direction, lem:extension-to-E}
+    \leanok
+    The functional $\ell$ produced in Lemma~\ref{lem:extension-to-E} is
+    non-constant on $s$: there exist $a, b \in s$ with $\ell a \ne \ell b$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:intrinsic-interior-nonempty, lem:separation-in-direction,
+          lem:extension-to-E}
+    By Lemma~\ref{lem:intrinsic-interior-nonempty} pick
+    $w \in \operatorname{interior} s'$ and set $a = w + p \in s$. By
+    Lemmas~\ref{lem:separation-in-direction} and~\ref{lem:extension-to-E} the
+    separation is strict, so $\ell a < \ell y$ with $a, y \in s$, exhibiting two
+    distinct values of $\ell$ on $s$.
+\end{proof}
+
+\begin{lemma}[Supporting functional at a relative boundary point]
+    \label{lem:supporting-functional}
+    \lean{LeanEval.ConvexGeometry.supporting_functional}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{def:exposed-face, lem:separation-in-direction, lem:extension-to-E, lem:bound-passes-to-closure, lem:functional-non-constant}
+    \leanok
+    Assume $s$ is nonempty. Let $y \in s$ with $y$ \emph{not} in the intrinsic
+    interior of $s$. Then there is a continuous linear functional $\ell$,
+    non-constant on $s$, such that $y \in F_\ell(s)$, i.e.\
+    $\ell z \le \ell y$ for all $z \in s$.
+\end{lemma}
+\begin{proof}
+    \uses{def:exposed-face, lem:separation-in-direction, lem:extension-to-E,
+          lem:bound-passes-to-closure, lem:functional-non-constant}
+    Work in the direction subspace $W$ with base point $p$ and translated set
+    $s'$. Lemma~\ref{lem:separation-in-direction} separates $y' = y - p$ from
+    $\operatorname{interior} s'$ by some $g : W \to_L \mathbb R$;
+    Lemma~\ref{lem:extension-to-E} extends $g$ to $\ell : E \to_L \mathbb R$, and
+    Lemma~\ref{lem:bound-passes-to-closure} shows $\ell z \le \ell y$ for all
+    $z \in s$, i.e.\ $y \in F_\ell(s)$ by Definition~\ref{def:exposed-face}.
+    Finally Lemma~\ref{lem:functional-non-constant} shows $\ell$ is non-constant on
+    $s$.
+\end{proof}
+
+\begin{lemma}[A nonzero direction exists]
+    \label{lem:exists-direction-vector}
+    \lean{LeanEval.ConvexGeometry.exists_direction_vector}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
+    If $\operatorname{finrank}_{\mathbb R}(\operatorname{vectorSpan}_{\mathbb R} s) \ge 1$,
+    then there is a nonzero vector $v \in \operatorname{vectorSpan}_{\mathbb R} s$.
+\end{lemma}
+\begin{proof}
+    A finite-dimensional space whose \texttt{finrank} is at least $1$ is nontrivial
+    (\texttt{finrank\_pos\_iff}), hence contains a nonzero element
+    (\texttt{exists\_ne}).
+\end{proof}
+
+\begin{lemma}[The line section is compact and convex]
+    \label{lem:line-section-compact-convex}
+    \lean{LeanEval.ConvexGeometry.lineSection_isCompact_convex}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
+    Let $x \in s$ and let $v \in \operatorname{vectorSpan}_{\mathbb R} s$ be nonzero.
+    Then the section
+    \[
+        T = \{\, t \in \mathbb R : x + t\, v \in s \,\}
+    \]
+    is compact and convex.
+\end{lemma}
+\begin{proof}
+    The map $\gamma : t \mapsto x + t\, v$ is continuous and affine, and (as
+    $v \ne 0$) is a homeomorphism onto its image. Thus $T = \gamma^{-1}(s)$ is
+    convex, being the preimage of the convex set $s$ under an affine map
+    (\texttt{Convex.affine\_preimage}), and closed, being the preimage of the
+    closed set $s$ (\texttt{IsCompact.isClosed}). It is also bounded, since $s$ is
+    bounded and $\gamma$ is a homeomorphism onto its image; hence $T$ is closed and
+    bounded in $\mathbb R$, i.e.\ compact.
+\end{proof}
+
+\begin{lemma}[The line section is a closed interval]
+    \label{lem:line-section-icc}
+    \lean{LeanEval.ConvexGeometry.lineSection_eq_Icc}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:line-section-compact-convex}
+    \leanok
+    With $x$, $v$, and $T$ as in Lemma~\ref{lem:line-section-compact-convex},
+    \[
+        T = \operatorname{Icc}\!\big(\inf T,\ \sup T\big).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:line-section-compact-convex}
+    $T$ is nonempty ($0 \in T$, since $x \in s$), convex and hence connected, and
+    closed and bounded (Lemma~\ref{lem:line-section-compact-convex}), so it is
+    bounded above and below. A connected, bounded, closed subset of $\mathbb R$
+    equals $\operatorname{Icc}(\inf T, \sup T)$
+    (\texttt{eq\_Icc\_csInf\_csSup\_of\_connected\_bdd\_closed}).
+\end{proof}
+
+\begin{lemma}[Zero is interior to the section]
+    \label{lem:line-section-zero-interior}
+    \lean{LeanEval.ConvexGeometry.lineSection_zero_interior}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:line-section-icc}
+    \leanok
+    With $x$, $v$, and $T$ as above, if $0 \in \operatorname{interior} T$ then
+    $\inf T < 0 < \sup T$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:line-section-icc}
+    By Lemma~\ref{lem:line-section-icc}, $T = \operatorname{Icc}(\inf T, \sup T)$,
+    whose interior is the open interval $\operatorname{Ioo}(\inf T, \sup T)$
+    (\texttt{interior\_Icc}). Hence $0 \in \operatorname{interior} T$ means
+    $\inf T < 0 < \sup T$.
+\end{proof}
+
+\begin{lemma}[Endpoints of the section are not interior]
+    \label{lem:segment-endpoints-not-interior}
+    \lean{LeanEval.ConvexGeometry.segment_endpoints_not_interior}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:line-section-icc}
+    \leanok
+    Let $x \in s$, let $v \in \operatorname{vectorSpan}_{\mathbb R} s$ be nonzero,
+    and let $T = \{\, t : x + t\, v \in s \,\}$ with $a = \inf T$ and $b = \sup T$.
+    Then neither $x + a\, v$ nor $x + b\, v$ lies in
+    $\operatorname{intrinsicInterior}_{\mathbb R} s$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:line-section-icc, lem:line-section-zero-interior}
+    If $x + a\, v$ were in the intrinsic interior of $s$, then $0$ would be an
+    interior point of the section of $s$ through $x + a\, v$ along $v$, so by
+    Lemma~\ref{lem:line-section-zero-interior} (applied at $x + a\, v$) the section
+    through $x$ would extend strictly below $a$: some $a' < a$ still has
+    $x + a'\, v \in s$, contradicting $a = \inf T$. The same argument at
+    $b = \sup T$ rules out $x + b\, v$.
+\end{proof}
+
+\begin{lemma}[An interior point lies between two boundary points]
+    \label{lem:interior-in-segment}
+    \lean{LeanEval.ConvexGeometry.interior_in_segment}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:exists-direction-vector, lem:line-section-icc, lem:segment-endpoints-not-interior}
+    \leanok
+    Suppose $\operatorname{finrank}_{\mathbb R}(\operatorname{vectorSpan}_{\mathbb R} s) \ge 1$
+    and let $x$ be in the intrinsic interior of $s$. Then there exist $y, z \in s$,
+    both \emph{not} in the intrinsic interior of $s$, with $x$ on the segment
+    $[y, z]$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:exists-direction-vector, lem:line-section-compact-convex,
+          lem:line-section-icc, lem:line-section-zero-interior,
+          lem:segment-endpoints-not-interior}
+    By Lemma~\ref{lem:exists-direction-vector} pick a nonzero
+    $v \in \operatorname{vectorSpan}_{\mathbb R} s$ and form the section
+    $T = \{\, t : x + t\, v \in s \,\}$, which equals
+    $\operatorname{Icc}(\inf T, \sup T)$
+    (Lemmas~\ref{lem:line-section-compact-convex} and~\ref{lem:line-section-icc}).
+    Since $x$ lies in the intrinsic interior of $s$ and
+    $v \in \operatorname{vectorSpan}_{\mathbb R} s$, a neighbourhood of $0$ stays in
+    $T$, so $0 \in \operatorname{interior} T$ and
+    Lemma~\ref{lem:line-section-zero-interior} gives $\inf T < 0 < \sup T$. Put
+    $a = \inf T$, $b = \sup T$, $y = x + a\, v$, and $z = x + b\, v$, all in $s$.
+    Then $x = \tfrac{b}{b-a} y + \tfrac{-a}{b-a} z \in [y, z]$, and by
+    Lemma~\ref{lem:segment-endpoints-not-interior} neither $y$ nor $z$ is in the
+    intrinsic interior of $s$.
+\end{proof}
+
+\subsection{Minkowski's theorem}
+
+\begin{lemma}[Zero-dimensional base case]
+    \label{lem:base-case}
+    \lean{LeanEval.ConvexGeometry.base_case}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \leanok
+    If $\operatorname{finrank}_{\mathbb R}(\operatorname{vectorSpan}_{\mathbb R} s) = 0$
+    and $x \in s$, then $x \in \operatorname{ext}(s)$.
+\end{lemma}
+\begin{proof}
+    A vector span of rank $0$ is trivial, so by
+    \texttt{vectorSpan\_eq\_bot\_iff\_subsingleton} the set $s$ is a subsingleton;
+    being nonempty (it contains $x$) it equals $\{x\}$. The unique point of a
+    singleton is an extreme point.
+\end{proof}
+
+\begin{lemma}[Reduction at a relative boundary point]
+    \label{lem:minkowski-boundary}
+    \lean{LeanEval.ConvexGeometry.minkowski_boundary}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{def:exposed-face, lem:exposed-face, lem:exposed-face-lower-dim, lem:supporting-functional}
+    \leanok
+    Assume $s$ is nonempty, and let $y \in s$ not lie in the intrinsic interior of
+    $s$. Then there is a set $F \subseteq s$ that is compact and convex, satisfies
+    $\operatorname{ext}(F) \subseteq \operatorname{ext}(s)$, contains $y$, and has
+    \[
+        \operatorname{finrank}_{\mathbb R}\big(\operatorname{vectorSpan}_{\mathbb R} F\big)
+        \;<\;
+        \operatorname{finrank}_{\mathbb R}\big(\operatorname{vectorSpan}_{\mathbb R} s\big).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:supporting-functional, lem:exposed-face, lem:exposed-face-lower-dim}
+    By Lemma~\ref{lem:supporting-functional} there is a functional $\ell$,
+    non-constant on $s$, with $y \in F_\ell(s)$. Take $F = F_\ell(s)$. By
+    Lemma~\ref{lem:exposed-face} it is compact, convex, contains $y$, and satisfies
+    $\operatorname{ext}(F) \subseteq \operatorname{ext}(s)$; by
+    Lemma~\ref{lem:exposed-face-lower-dim} its affine dimension is strictly smaller
+    than that of $s$.
+\end{proof}
+
+\begin{lemma}[Boundary points are convex combinations of extreme points]
+    \label{lem:minkowski-boundary-mem}
+    \lean{LeanEval.ConvexGeometry.minkowski_boundary_mem}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:minkowski-boundary}
+    \leanok
+    Let $s$ be compact convex and assume the induction hypothesis: for every
+    compact convex set $s_0$ with
+    $\operatorname{finrank}_{\mathbb R}(\operatorname{vectorSpan}_{\mathbb R} s_0)
+      < \operatorname{finrank}_{\mathbb R}(\operatorname{vectorSpan}_{\mathbb R} s)$
+    and every $x_0 \in s_0$ one has
+    $x_0 \in \operatorname{convexHull}_{\mathbb R}(\operatorname{ext}(s_0))$. Then
+    for every $y \in s$ not in the intrinsic interior of $s$,
+    $y \in \operatorname{convexHull}_{\mathbb R}(\operatorname{ext}(s))$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:minkowski-boundary}
+    By Lemma~\ref{lem:minkowski-boundary} there is a compact convex set
+    $F \subseteq s$ with $y \in F$,
+    $\operatorname{ext}(F) \subseteq \operatorname{ext}(s)$, and
+    $\operatorname{finrank}_{\mathbb R}(\operatorname{vectorSpan}_{\mathbb R} F)
+      < \operatorname{finrank}_{\mathbb R}(\operatorname{vectorSpan}_{\mathbb R} s)$.
+    The induction hypothesis applied to $F$ and $y$ gives
+    $y \in \operatorname{convexHull}_{\mathbb R}(\operatorname{ext}(F))
+      \subseteq \operatorname{convexHull}_{\mathbb R}(\operatorname{ext}(s))$, the
+    inclusion by monotonicity of the convex hull.
+\end{proof}
+
+\begin{lemma}[Minkowski's theorem]
+    \label{lem:minkowski}
+    \lean{LeanEval.ConvexGeometry.minkowski}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:base-case, lem:minkowski-boundary-mem, lem:interior-in-segment}
+    \leanok
+    For every compact convex $s$ and every $x \in s$ one has
+    $x \in \operatorname{convexHull}_{\mathbb R}(\operatorname{ext}(s))$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:base-case, lem:minkowski-boundary-mem, lem:interior-in-segment}
+    We argue by strong induction on
+    $d = \operatorname{finrank}_{\mathbb R}(\operatorname{vectorSpan}_{\mathbb R} s)$,
+    with the set $s$ (and the point $x$) universally quantified, so that the
+    induction hypothesis is exactly the statement for all compact convex sets of
+    affine dimension $< d$.
+
+    \emph{Base case $d = 0$.} By Lemma~\ref{lem:base-case},
+    $x \in \operatorname{ext}(s)$, and a point lies in the convex hull of any set
+    containing it.
+
+    \emph{Inductive step $d \ge 1$.} The induction hypothesis is precisely the
+    hypothesis required by Lemma~\ref{lem:minkowski-boundary-mem}, so that lemma
+    applies to $s$: every relative boundary point of $s$ lies in
+    $\operatorname{convexHull}_{\mathbb R}(\operatorname{ext}(s))$. If $x$ is itself
+    a relative boundary point, we are done. Otherwise $x$ lies in the intrinsic
+    interior of $s$, and by Lemma~\ref{lem:interior-in-segment} there are relative
+    boundary points $y, z \in s$ with $x \in [y, z]$. Applying
+    Lemma~\ref{lem:minkowski-boundary-mem} to each of $y$ and $z$ puts both in
+    $\operatorname{convexHull}_{\mathbb R}(\operatorname{ext}(s))$; since the convex
+    hull is convex, the segment $[y, z]$ is contained in it, and in particular
+    $x \in \operatorname{convexHull}_{\mathbb R}(\operatorname{ext}(s))$.
+\end{proof}
+
+\subsection{Main theorem}
+
+\begin{theorem}[Minkowski--Carathéodory]
+    \label{thm:minkowski-caratheodory}
+    \lean{LeanEval.ConvexGeometry.mem_convexHull_finset_extremePoints_of_mem_compact_convex}
+    \leanfile{LeanEval/ConvexGeometry/MinkowskiCaratheodory.lean}
+    \uses{lem:caratheodory-card, lem:minkowski}
+    \leanok
+    Let $E$ be a finite-dimensional real normed space, $s \subseteq E$ compact and
+    convex, and $x \in s$. Then there is a finite set $t \subseteq \operatorname{ext}(s)$
+    with $\#t \le \operatorname{finrank}_{\mathbb R} E + 1$ and
+    $x \in \operatorname{convexHull}_{\mathbb R} t$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:caratheodory-card, lem:minkowski}
+    By Minkowski's theorem (Lemma~\ref{lem:minkowski}),
+    $x \in \operatorname{convexHull}_{\mathbb R}(\operatorname{ext}(s))$. Apply the
+    Carathéodory cardinality bound (Lemma~\ref{lem:caratheodory-card}) with
+    $A = \operatorname{ext}(s)$: this produces a finite set
+    $t \subseteq \operatorname{ext}(s)$ with
+    $\#t \le \operatorname{finrank}_{\mathbb R} E + 1$ and
+    $x \in \operatorname{convexHull}_{\mathbb R} t$, as required.
+\end{proof}
+
+\end{document}
