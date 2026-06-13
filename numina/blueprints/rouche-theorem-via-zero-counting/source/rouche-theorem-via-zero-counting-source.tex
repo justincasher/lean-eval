@@ -1,0 +1,21 @@
+Rouche theorem via zero counting
+← All problems
+
+rouche_zero_count_eq
+
+Submitter: Kim Morrison.
+
+Notes: Phrases Rouché's theorem as equality of multiplicity-counted zero counts for f and f + g on the closed disk of radius R.
+
+Source: Classical theorem in complex analysis.
+
+Informal solution: Assuming f is meromorphic in normal form on ℂ and |g| < |f| on the boundary circle, f and f + g have the same number of zeros inside the disk, counted with multiplicity.
+
+theorem rouche_zero_count_eq {f g : ℂ → ℂ} {R : ℝ}
+    (hR : 0 < R)
+    (hf : MeromorphicNFOn f Set.univ)
+    (hg : AnalyticOn ℂ g Set.univ)
+    (hbound : ∀ z : ℂ, ‖z‖ = R → ‖g z‖ < ‖f z‖) :
+    (∑ᶠ z, ((divisor (f + g) (Metric.closedBall 0 R))⁺) z) =
+      (∑ᶠ z, ((divisor f (Metric.closedBall 0 R))⁺) z) := by
+  sorry
