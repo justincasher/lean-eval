@@ -812,7 +812,86 @@ theorem hasDerivAt_under_integral {F F' : ℝ → ℝ → ℝ} {r₀ : ℝ} {s :
     (hderiv : ∀ y : ℝ, ∀ r ∈ s, HasDerivAt (fun r' => F r' y) (F' r y) r) :
     Integrable (fun y => F' r₀ y) ∧
       HasDerivAt (fun r => ∫ y : ℝ, F r y) (∫ y : ℝ, F' r₀ y) r₀ := by
-  sorry
+  have hF_meas : ∀ᶠ r in nhds r₀, AEStronglyMeasurable (fun y => F r y) volume :=
+    Filter.eventually_of_mem hs hmeas
+  have h_bound' : ∀ᵐ a ∂(volume : Measure ℝ), ∀ r ∈ s, ‖F' r a‖ ≤ g a :=
+    ae_of_all volume (fun a r hr => by
+      rw [Real.norm_eq_abs]
+      exact hbound a r hr)
+  have h_diff' : ∀ᵐ a ∂(volume : Measure ℝ), ∀ r ∈ s, HasDerivAt (fun r' => F r' a) (F' r a) r :=
+    ae_of_all volume (fun a r hr => hderiv a r hr)
+  -- Obtain AEStronglyMeasurability of F' r₀ via a pointwise limit of AEStronglyMeasurable functions
+  have hF'_meas : AEStronglyMeasurable (fun y => F' r₀ y) volume := by
+    rcases Metric.mem_nhds_iff.1 hs with ⟨ε, εpos, hε⟩
+    have hr₀s : r₀ ∈ s := hε (Metric.mem_ball_self εpos)
+    -- Sequence u n → r₀ with u n ≠ r₀ and u n ∈ Metric.ball r₀ ε ⊆ s
+    set u : ℕ → ℝ := fun n => r₀ + ε / ((n : ℝ) + 2) with hu_def
+    have h_n_pos : ∀ n : ℕ, (0 : ℝ) < (n : ℝ) + 2 := by
+      intro n
+      have : (0 : ℝ) ≤ n := by exact mod_cast Nat.zero_le n
+      nlinarith
+    have hu_ne : ∀ n, u n ≠ r₀ := by
+      intro n
+      dsimp [u]
+      have : ε / ((n : ℝ) + 2) ≠ 0 :=
+        div_ne_zero (ne_of_gt εpos) (by exact (h_n_pos n).ne.symm)
+      intro h
+      apply this
+      nlinarith
+    have hu_mem_ball : ∀ n, u n ∈ Metric.ball r₀ ε := by
+      intro n
+      dsimp [u]
+      rw [Metric.mem_ball, Real.dist_eq, add_sub_cancel_left]
+      have hpos' : 0 < ε / ((n : ℝ) + 2) := div_pos εpos (h_n_pos n)
+      rw [abs_of_pos hpos']
+      calc
+        ε / ((n : ℝ) + 2) = ε * ((n : ℝ) + 2)⁻¹ := by rw [div_eq_mul_inv]
+        _ = ε * (1 / ((n : ℝ) + 2)) := by rw [one_div]
+        _ < ε * 1 := mul_lt_mul_of_pos_left (by
+          refine (div_lt_one (h_n_pos n)).mpr ?_
+          have : (1 : ℝ) < (n : ℝ) + 2 := by
+            have hn0 : (0 : ℝ) ≤ n := by exact mod_cast Nat.zero_le n
+            nlinarith
+          exact this) εpos
+        _ = ε := by simp
+    have hu_mem_s : ∀ n, u n ∈ s := fun n => hε (hu_mem_ball n)
+    have hu_tendsto : Filter.Tendsto u Filter.atTop (nhds r₀) := by
+      have h_tendsto_ε_n : Filter.Tendsto (fun n : ℕ => ε / ((n : ℝ) + 2)) Filter.atTop (nhds (0 : ℝ)) := by
+        have h_grow : Filter.Tendsto (fun n : ℕ => ((n : ℝ) + 2)) Filter.atTop Filter.atTop :=
+          Filter.tendsto_atTop_mono (fun n : ℕ => by
+            have hn0 : (0 : ℝ) ≤ (n : ℝ) := by exact mod_cast Nat.zero_le n
+            nlinarith) (tendsto_natCast_atTop_atTop (R := ℝ))
+        exact h_grow.const_div_atTop ε
+      simpa [u] using (tendsto_const_nhds (x := r₀)).add h_tendsto_ε_n
+    have hu_tendsto_punct : Filter.Tendsto u Filter.atTop (nhdsWithin r₀ {x | x ≠ r₀}) :=
+      tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within u hu_tendsto
+        (Filter.Eventually.of_forall hu_ne)
+    set q : ℕ → ℝ → ℝ := fun n y => (F (u n) y - F r₀ y) / (u n - r₀) with hq_def
+    have hq_meas : ∀ n, AEStronglyMeasurable (q n) volume := by
+      intro n
+      have hu_n_s : u n ∈ s := hu_mem_s n
+      have hF_un : AEStronglyMeasurable (fun y => F (u n) y) volume := hmeas (u n) hu_n_s
+      have hF_r₀ : AEStronglyMeasurable (fun y => F r₀ y) volume := hmeas r₀ hr₀s
+      have h_sub : AEStronglyMeasurable (fun y => F (u n) y - F r₀ y) volume := hF_un.sub hF_r₀
+      have h_mul : AEStronglyMeasurable (fun y => (F (u n) y - F r₀ y) * ((u n - r₀)⁻¹)) volume :=
+        h_sub.mul_const ((u n - r₀)⁻¹)
+      simpa [q, div_eq_mul_inv] using h_mul
+    have h_tendsto_q : ∀ᵐ y ∂(volume : Measure ℝ),
+        Filter.Tendsto (fun n : ℕ => q n y) Filter.atTop (nhds (F' r₀ y)) := by
+      apply ae_of_all volume
+      intro y
+      have hy_slope : Filter.Tendsto (fun (r' : ℝ) => slope (fun r'' : ℝ => F r'' y) r₀ r')
+          (nhdsWithin r₀ {x | x ≠ r₀}) (nhds (F' r₀ y)) :=
+        (hasDerivAt_iff_tendsto_slope).mp (hderiv y r₀ hr₀s)
+      have h_slope_q : ∀ n : ℕ, q n y = slope (fun r'' : ℝ => F r'' y) r₀ (u n) := by
+        intro n
+        dsimp [q]
+        rw [slope_def_field]
+      have h_comp := hy_slope.comp hu_tendsto_punct
+      simpa [h_slope_q] using h_comp
+    exact aestronglyMeasurable_of_tendsto_ae Filter.atTop hq_meas h_tendsto_q
+  -- Apply the target lemma
+  exact hasDerivAt_integral_of_dominated_loc_of_deriv_le hs hF_meas hF₀ hF'_meas h_bound' hg h_diff'
 
 /-- **First spatial derivative of the solution.** -/
 theorem hasDerivAt_space {f : ℝ → ℝ} (hf_cont : Continuous f) {M : ℝ}
