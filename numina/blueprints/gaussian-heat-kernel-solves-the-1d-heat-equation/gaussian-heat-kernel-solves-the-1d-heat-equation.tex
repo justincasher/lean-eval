@@ -1,0 +1,847 @@
+% Blueprint: Gaussian heat kernel solves the 1D heat equation
+% Created by Numina
+
+\begin{document}
+
+\section{The Gaussian heat kernel solves the 1D heat equation}
+
+For a continuous, bounded $f : \mathbb{R} \to \mathbb{R}$ define, for $t > 0$,
+\[
+  u(t,x) \;=\; \mathrm{heatSolution}\,f\,t\,x
+  \;=\; (4\pi t)^{-1/2} \int_{\mathbb{R}} \exp\!\Bigl(-\tfrac{(x-y)^2}{4t}\Bigr)\, f(y)\, dy,
+\]
+and $u(t,x) = f(x)$ for $t \le 0$. We prove that on $(0,\infty)\times\mathbb{R}$ the
+function $u$ solves the heat equation $\partial_t u = \partial_x^2 u$ (in the sense
+that the relevant spatial derivatives exist and the time derivative equals the
+second spatial derivative), and that $u(t,x) \to f(x)$ as $t \downarrow 0$ for
+every $x$.
+
+Throughout, write the \emph{normalized Gaussian heat kernel}
+\[
+  G_t(x) \;=\; (4\pi t)^{-1/2}\,\exp\!\Bigl(-\tfrac{x^2}{4t}\Bigr), \qquad t > 0,\ x \in \mathbb{R}.
+\]
+Pulling the constant $(4\pi t)^{-1/2}$ inside the integral gives the convolution form
+$u(t,x) = \int_{\mathbb{R}} G_t(x-y)\, f(y)\, dy$, which is the form used below.
+
+The proof has two independent halves. The PDE half differentiates under the
+integral sign (Leibniz rule, \texttt{hasDerivAt\_integral\_of\_dominated\_loc\_of\_deriv\_le})
+once in $t$ and twice in $x$; since the kernel $G_t$ itself solves the heat
+equation pointwise, so does the convolution. The initial-condition half performs
+the substitution $y = x - 2\sqrt{t}\,z$, turning $u$ into an average of
+$f(x - 2\sqrt{t}\,z)$ against the fixed integrable weight $\pi^{-1/2}\exp(-z^2)$,
+and concludes by dominated convergence as $t \downarrow 0$.
+
+\subsection{Definitions}
+
+\begin{definition}[Gaussian heat kernel]
+    \label{def:kernel}
+    For $t > 0$ and $x \in \mathbb{R}$, the normalized Gaussian heat kernel is
+    \[ G_t(x) \;=\; (4\pi t)^{-1/2}\,\exp\!\Bigl(-\tfrac{x^2}{4t}\Bigr). \]
+\end{definition}
+
+\begin{definition}[Heat solution]
+    \label{def:heatSolution}
+    \uses{def:kernel}
+    For continuous bounded $f : \mathbb{R} \to \mathbb{R}$, define
+    \[ \mathrm{heatSolution}\,f\,t\,x \;=\;
+       (4\pi t)^{-1/2}\int_{\mathbb{R}} \exp\!\bigl(-\tfrac{(x-y)^2}{4t}\bigr)\, f(y)\, dy
+       \quad (t > 0), \]
+    and $\mathrm{heatSolution}\,f\,t\,x = f(x)$ for $t \le 0$.
+\end{definition}
+
+\subsection{The kernel and its derivatives}
+
+\begin{lemma}[Convolution form of the solution]
+    \label{lem:heatSolution_eq_kernel_integral}
+    \lean{LeanEval.Analysis.ODE.heatSolution_eq_kernel_integral}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{def:kernel, def:heatSolution}
+    \leanok
+    For every $t > 0$ and $x \in \mathbb{R}$,
+    \[ \mathrm{heatSolution}\,f\,t\,x = \int_{\mathbb{R}} G_t(x-y)\, f(y)\, dy. \]
+\end{lemma}
+\begin{proof}
+    Since $t > 0$, $\mathrm{heatSolution}\,f\,t\,x$ unfolds to
+    $(4\pi t)^{-1/2}\int_{\mathbb{R}} \exp(-(x-y)^2/(4t)) f(y)\, dy$. The scalar
+    $(4\pi t)^{-1/2}$ moves inside the integral by
+    \texttt{MeasureTheory.integral\_const\_mul}, and
+    $(4\pi t)^{-1/2}\exp(-(x-y)^2/(4t)) = G_t(x-y)$ by definition of $G_t$.
+\end{proof}
+
+\begin{lemma}[Translated kernel is integrable]
+    \label{lem:kernel_translate_integrable}
+    \lean{LeanEval.Analysis.ODE.kernel_translate_integrable}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{def:kernel}
+    \leanok
+    For every $t > 0$ and $x \in \mathbb{R}$, the function $y \mapsto G_t(x-y)$ is
+    integrable on $\mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    The Gaussian $z \mapsto \exp(-z^2/(4t))$ is integrable by
+    \texttt{integrable\_exp\_neg\_mul\_sq} (with $b = 1/(4t) > 0$); scaling by the
+    constant $(4\pi t)^{-1/2}$ keeps it integrable
+    (\texttt{MeasureTheory.Integrable.const\_mul}), giving integrability of
+    $z \mapsto G_t(z)$. Applying \texttt{MeasureTheory.Integrable.comp\_sub\_left}
+    with shift $x$ yields integrability of $y \mapsto G_t(x-y)$ directly; this lemma
+    already produces $y \mapsto G_t(x - y)$, so no separate reflection step is needed.
+\end{proof}
+
+\begin{lemma}[Integrand is integrable]
+    \label{lem:kernel_integrand_integrable}
+    \lean{LeanEval.Analysis.ODE.kernel_integrand_integrable}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:kernel_translate_integrable}
+    \leanok
+    Suppose $\lvert f \rvert \le M$ pointwise and $f$ is continuous. Then for every
+    $t > 0$ and $x \in \mathbb{R}$ the function $y \mapsto G_t(x-y)\, f(y)$ is
+    integrable on $\mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:kernel_translate_integrable}
+    By \cref{lem:kernel_translate_integrable} the factor $y \mapsto G_t(x-y)$ is
+    integrable. Since $f$ is continuous it is \texttt{AEStronglyMeasurable}, and
+    $\lvert f \rvert \le M$ is bounded, so the product of an integrable function with a
+    bounded measurable function is integrable by
+    \texttt{MeasureTheory.Integrable.bdd\_mul}.
+\end{proof}
+
+\begin{lemma}[First spatial derivative of the kernel]
+    \label{lem:kernel_hasDerivAt_space}
+    \lean{LeanEval.Analysis.ODE.kernel_hasDerivAt_space}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{def:kernel}
+    \leanok
+    For every $t > 0$ and $x \in \mathbb{R}$, the function $z \mapsto G_t(z)$ has
+    derivative $-\tfrac{x}{2t}\,G_t(x)$ at $x$, i.e.\
+    $\mathrm{HasDerivAt}\,(z \mapsto G_t(z))\,\bigl(-\tfrac{x}{2t} G_t(x)\bigr)\, x$.
+\end{lemma}
+\begin{proof}
+    Write $G_t(z) = (4\pi t)^{-1/2}\exp(e(z))$ with $e(z) = -z^2/(4t)$. The inner
+    map $e$ has derivative $-z/(2t)$ at $x$, namely $-x/(2t)$
+    (\texttt{HasDerivAt.pow} / \texttt{hasDerivAt\_id} with
+    \texttt{HasDerivAt.div\_const} and \texttt{HasDerivAt.neg}). By the chain rule
+    for $\exp$ (\texttt{Real.HasDerivAt.exp}) and scaling by the constant
+    $(4\pi t)^{-1/2}$ (\texttt{HasDerivAt.const\_mul}), $z \mapsto G_t(z)$ has
+    derivative $(4\pi t)^{-1/2}\exp(-x^2/(4t))\cdot(-x/(2t)) = -\tfrac{x}{2t} G_t(x)$.
+\end{proof}
+
+\begin{lemma}[Second spatial derivative of the kernel]
+    \label{lem:kernel_hasDerivAt_space_second}
+    \lean{LeanEval.Analysis.ODE.kernel_hasDerivAt_space_second}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:kernel_hasDerivAt_space}
+    \leanok
+    For every $t > 0$ and $x \in \mathbb{R}$, the function
+    $z \mapsto -\tfrac{z}{2t}\,G_t(z)$ has derivative
+    $\bigl(\tfrac{x^2}{4t^2} - \tfrac{1}{2t}\bigr) G_t(x)$ at $x$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:kernel_hasDerivAt_space}
+    Apply the product rule \texttt{HasDerivAt.mul} to $z \mapsto (-z/(2t))\cdot G_t(z)$:
+    the factor $-z/(2t)$ has derivative $-1/(2t)$, and $G_t$ has derivative
+    $-\tfrac{x}{2t} G_t(x)$ at $x$ by \cref{lem:kernel_hasDerivAt_space}. The product
+    rule gives
+    $-\tfrac{1}{2t}G_t(x) + \bigl(-\tfrac{x}{2t}\bigr)\bigl(-\tfrac{x}{2t}G_t(x)\bigr)$,
+    which is normalized by \texttt{ring\_nf} to the canonical form
+    $\bigl(\tfrac{x^2}{4t^2} - \tfrac{1}{2t}\bigr) G_t(x)$ that is stated. The same
+    normalized expression is emitted by \cref{lem:kernel_hasDerivAt_time}, which is
+    what lets \cref{lem:kernel_heat_identity} close by \texttt{rfl}.
+\end{proof}
+
+\begin{lemma}[Time derivative of the prefactor]
+    \label{lem:prefactor_hasDerivAt}
+    \lean{LeanEval.Analysis.ODE.prefactor_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    For every $t > 0$, the function $s \mapsto (4\pi s)^{-1/2}$ has derivative
+    $-\tfrac{1}{2t}(4\pi t)^{-1/2}$ at $t$.
+\end{lemma}
+\begin{proof}
+    Write $(4\pi s)^{-1/2} = (4\pi)^{-1/2}\, s^{-1/2}$. The power $s \mapsto s^{-1/2}$
+    has derivative $-\tfrac12 t^{-3/2}$ at $t > 0$ by
+    \texttt{Real.hasDerivAt\_rpow\_const} (valid since $t \neq 0$). Scaling by the
+    constant $(4\pi)^{-1/2}$ via \texttt{HasDerivAt.const\_mul} gives derivative
+    $(4\pi)^{-1/2}\bigl(-\tfrac12 t^{-3/2}\bigr) = -\tfrac{1}{2t}(4\pi t)^{-1/2}$.
+\end{proof}
+
+\begin{lemma}[Time derivative of the kernel]
+    \label{lem:kernel_hasDerivAt_time}
+    \lean{LeanEval.Analysis.ODE.kernel_hasDerivAt_time}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:prefactor_hasDerivAt, def:kernel}
+    \leanok
+    For every $x \in \mathbb{R}$ and $t > 0$, the function $s \mapsto G_s(x)$ has
+    derivative $\bigl(\tfrac{x^2}{4t^2} - \tfrac{1}{2t}\bigr) G_t(x)$ at $t$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:prefactor_hasDerivAt}
+    Write $G_s(x) = (4\pi s)^{-1/2}\cdot \exp(-x^2/(4s))$, a product. By
+    \cref{lem:prefactor_hasDerivAt} the first factor has derivative
+    $-\tfrac{1}{2t}(4\pi t)^{-1/2}$ at $t$. For the second factor, $s \mapsto -x^2/(4s)$
+    has derivative $x^2/(4t^2)$ at $t > 0$ (\texttt{HasDerivAt.const\_mul} of
+    \texttt{hasDerivAt\_inv}, $t \neq 0$), so by \texttt{Real.HasDerivAt.exp} the map
+    $s \mapsto \exp(-x^2/(4s))$ has derivative $\exp(-x^2/(4t))\cdot x^2/(4t^2)$.
+    The product rule \texttt{HasDerivAt.mul}, normalized by \texttt{ring\_nf}, yields
+    the canonical form $\bigl(\tfrac{x^2}{4t^2} - \tfrac{1}{2t}\bigr)G_t(x)$ — the
+    \emph{identical} normalized expression emitted by
+    \cref{lem:kernel_hasDerivAt_space_second}, so \cref{lem:kernel_heat_identity}
+    closes by \texttt{rfl}.
+\end{proof}
+
+\begin{lemma}[Kernel solves the heat equation pointwise]
+    \label{lem:kernel_heat_identity}
+    \lean{LeanEval.Analysis.ODE.kernel_heat_identity}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:kernel_hasDerivAt_space_second, lem:kernel_hasDerivAt_time}
+    \leanok
+    For every $x \in \mathbb{R}$ and $t > 0$, the second spatial derivative and the
+    time derivative of the kernel agree: both
+    \cref{lem:kernel_hasDerivAt_space_second} and \cref{lem:kernel_hasDerivAt_time}
+    produce the value $\bigl(\tfrac{x^2}{4t^2} - \tfrac{1}{2t}\bigr) G_t(x)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:kernel_hasDerivAt_space_second, lem:kernel_hasDerivAt_time}
+    The two derivative formulas are literally the same expression
+    $\bigl(\tfrac{x^2}{4t^2} - \tfrac{1}{2t}\bigr) G_t(x)$, so the claim is
+    \texttt{rfl} after invoking the two lemmas.
+\end{proof}
+
+\subsection{Gaussian domination bounds}
+
+\begin{lemma}[Absolute-value-times-Gaussian is integrable]
+    \label{lem:integrable_abs_mul_gaussian}
+    \lean{LeanEval.Analysis.ODE.integrable_abs_mul_gaussian}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    Let $c > 0$. Then the function $y \mapsto \lvert y\rvert\,\exp(-c\,y^2)$ is
+    integrable on $\mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    Note $\lvert y\rvert\exp(-cy^2) = \lvert\, y\exp(-cy^2)\,\rvert$ (since
+    $\exp > 0$). By \texttt{integrable\_mul\_exp\_neg\_mul\_sq} ($c > 0$) the function
+    $y \mapsto y\exp(-cy^2)$ is integrable, hence so is its absolute value
+    (\texttt{MeasureTheory.Integrable.abs}).
+\end{proof}
+
+\begin{lemma}[Square-times-Gaussian is integrable]
+    \label{lem:integrable_sq_mul_gaussian}
+    \lean{LeanEval.Analysis.ODE.integrable_sq_mul_gaussian}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    Let $c > 0$. Then the function $y \mapsto y^2\,\exp(-c\,y^2)$ is integrable
+    on $\mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    Apply \texttt{integrable\_rpow\_mul\_exp\_neg\_mul\_sq} with $b = c > 0$ and real
+    exponent $s = 2$ (which satisfies $-1 < 2$); this gives integrability of
+    $y \mapsto y^{(2:\mathbb{R})}\exp(-c\,y^2)$. \emph{Note on the rpow-vs-npow
+    mismatch:} \texttt{integrable\_rpow\_mul\_exp\_neg\_mul\_sq} produces the real
+    power $y^{(2:\mathbb{R})}$ (\texttt{Real.rpow}), whereas the statement here uses the
+    monoid power $y^2$ (\texttt{HPow} with natural exponent). These are equal for all
+    real $y$ by \texttt{Real.rpow\_natCast} (equivalently \texttt{Real.rpow\_two}), so
+    rewriting along that bridge converts the integrand into the stated form.
+\end{proof}
+
+\begin{lemma}[Polynomial-times-Gaussian is integrable (centered case)]
+    \label{lem:gaussian_poly_integrable_zero}
+    \lean{LeanEval.Analysis.ODE.gaussian_poly_integrable_zero}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:integrable_abs_mul_gaussian, lem:integrable_sq_mul_gaussian}
+    \leanok
+    Let $c > 0$ and $a, b, d \ge 0$. Then the function
+    \[ y \mapsto \bigl(a + b\,\lvert y\rvert + d\,y^2\bigr)\,\exp(-c\,y^2) \]
+    is integrable on $\mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:integrable_abs_mul_gaussian, lem:integrable_sq_mul_gaussian}
+    The three summands $a\exp(-cy^2)$, $b\lvert y\rvert\exp(-cy^2)$ and
+    $d\,y^2\exp(-cy^2)$ are each integrable: the first by
+    \texttt{integrable\_exp\_neg\_mul\_sq} ($c>0$); the second by
+    \cref{lem:integrable_abs_mul_gaussian} scaled by the constant $b$
+    (\texttt{MeasureTheory.Integrable.const\_mul}); the third by
+    \cref{lem:integrable_sq_mul_gaussian} scaled by the constant $d$. A finite sum of
+    integrable functions is integrable (\texttt{MeasureTheory.Integrable.add}).
+\end{proof}
+
+\begin{lemma}[Shifted polynomial-times-Gaussian is integrable]
+    \label{lem:shifted_gaussian_integrable}
+    \lean{LeanEval.Analysis.ODE.shifted_gaussian_integrable}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:gaussian_poly_integrable_zero}
+    \leanok
+    Let $x_0 \in \mathbb{R}$, $c > 0$, and $a, b, d \ge 0$. Then the function
+    \[ y \mapsto \bigl(a + b\,\lvert y - x_0\rvert + d\,(y-x_0)^2\bigr)\,
+        \exp\!\bigl(-c\,(y-x_0)^2\bigr) \]
+    is integrable on $\mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:gaussian_poly_integrable_zero}
+    The displayed function is the precomposition of the centered function of
+    \cref{lem:gaussian_poly_integrable_zero} with the translation $y \mapsto y - x_0$.
+    By translation invariance of Lebesgue measure
+    (\texttt{MeasureTheory.integrable\_comp\_sub\_right}), integrability transfers from
+    the centered case, which is \cref{lem:gaussian_poly_integrable_zero}.
+\end{proof}
+
+\begin{lemma}[A uniform quadratic lower bound]
+    \label{lem:gaussian_quadratic_lower_bound}
+    \lean{LeanEval.Analysis.ODE.gaussian_quadratic_lower_bound}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    For all $x, y, x_0 \in \mathbb{R}$ with $\lvert x - x_0\rvert \le 1$,
+    \[ (x-y)^2 \;\ge\; \tfrac12 (y - x_0)^2 - 2. \]
+\end{lemma}
+\begin{proof}
+    Write $x - y = (x_0 - y) + (x - x_0)$, so
+    $(x-y)^2 = (x_0-y)^2 + 2(x_0-y)(x-x_0) + (x-x_0)^2$. From the nonnegative square
+    $\bigl(\tfrac{x_0-y}{\sqrt2} + \sqrt2\,(x-x_0)\bigr)^2 \ge 0$ we get
+    $2(x_0-y)(x-x_0) \ge -\tfrac12(x_0-y)^2 - 2(x-x_0)^2$, whence
+    $(x-y)^2 \ge \tfrac12(x_0-y)^2 - 2(x-x_0)^2 \ge \tfrac12(y-x_0)^2 - 2$ using
+    $\lvert x-x_0\rvert \le 1$. This is a single \texttt{nlinarith} call from
+    $\lvert x - x_0\rvert \le 1$ and nonnegativity of squares.
+\end{proof}
+
+\begin{lemma}[Gaussian exponential domination]
+    \label{lem:gaussian_exp_domination}
+    \lean{LeanEval.Analysis.ODE.gaussian_exp_domination}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:gaussian_quadratic_lower_bound}
+    \leanok
+    For all $x, y, x_0 \in \mathbb{R}$ and $t > 0$ with $\lvert x - x_0\rvert \le 1$,
+    \[ \exp\!\Bigl(-\tfrac{(x-y)^2}{4t}\Bigr) \;\le\;
+       \exp\!\Bigl(\tfrac{1}{2t}\Bigr)\,\exp\!\Bigl(-\tfrac{(y-x_0)^2}{8t}\Bigr). \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:gaussian_quadratic_lower_bound}
+    By \cref{lem:gaussian_quadratic_lower_bound}, $(x-y)^2 \ge \tfrac12(y-x_0)^2 - 2$.
+    Dividing by $4t > 0$ and negating gives
+    $-\tfrac{(x-y)^2}{4t} \le -\tfrac{(y-x_0)^2}{8t} + \tfrac{1}{2t}$. Apply
+    monotonicity of $\exp$ (\texttt{Real.exp\_le\_exp}) and \texttt{Real.exp\_add}.
+\end{proof}
+
+\begin{lemma}[Pointwise estimate for the first spatial derivative]
+    \label{lem:bound_space_pointwise}
+    \uses{lem:gaussian_exp_domination}
+    Fix $t > 0$, $x_0 \in \mathbb{R}$, and suppose $\lvert f\rvert \le M$. Set
+    \[ g_1(y) := \tfrac{M}{2t}(4\pi t)^{-1/2} e^{1/(2t)}\,\bigl(1 + \lvert y - x_0\rvert\bigr)
+       \exp\!\bigl(-(y-x_0)^2/(8t)\bigr). \]
+    Then for every $x$ with $\lvert x - x_0\rvert \le 1$ and every $y \in \mathbb{R}$,
+    \[ \Bigl\lvert -\tfrac{x-y}{2t}\,G_t(x-y)\, f(y)\Bigr\rvert \;\le\; g_1(y). \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:gaussian_exp_domination}
+    The left side equals
+    $\tfrac{\lvert x-y\rvert}{2t}(4\pi t)^{-1/2}\exp(-(x-y)^2/(4t))\,\lvert f(y)\rvert$.
+    Bound $\lvert f(y)\rvert \le M$, $\lvert x-y\rvert \le \lvert y - x_0\rvert + 1$
+    (triangle inequality, since $\lvert x - x_0\rvert \le 1$), and use the shared
+    exponential bound of \cref{lem:gaussian_exp_domination}. Multiplying these
+    nonnegative bounds gives the left side $\le g_1(y)$.
+\end{proof}
+
+\begin{lemma}[Uniform domination of the first spatial derivative]
+    \label{lem:bound_space}
+    \lean{LeanEval.Analysis.ODE.bound_space}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:shifted_gaussian_integrable, lem:bound_space_pointwise}
+    \leanok
+    Fix $t > 0$, $x_0 \in \mathbb{R}$, and suppose $\lvert f\rvert \le M$. There is an
+    integrable function $g : \mathbb{R} \to \mathbb{R}$ such that for every $x$ with
+    $\lvert x - x_0\rvert \le 1$ and every $y \in \mathbb{R}$,
+    \[ \Bigl\lvert -\tfrac{x-y}{2t}\,G_t(x-y)\, f(y)\Bigr\rvert \;\le\; g(y). \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:shifted_gaussian_integrable, lem:bound_space_pointwise}
+    Take $g = g_1$, the explicit dominating function of
+    \cref{lem:bound_space_pointwise}; that lemma supplies the pointwise bound. It
+    remains to check $g_1$ is integrable, which is \cref{lem:shifted_gaussian_integrable}
+    (with $a = b = M(4\pi t)^{-1/2} e^{1/(2t)}/(2t)$, $d = 0$, $c = 1/(8t) > 0$).
+\end{proof}
+
+\begin{lemma}[Pointwise estimate for the second spatial derivative]
+    \label{lem:bound_space_second_pointwise}
+    \lean{LeanEval.Analysis.ODE.bound_space_second_pointwise}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:gaussian_exp_domination}
+    \leanok
+    Fix $t > 0$, $x_0 \in \mathbb{R}$, and suppose $\lvert f\rvert \le M$. Set
+    \[ g_2(y) := M(4\pi t)^{-1/2} e^{1/(2t)}
+        \Bigl(\tfrac{(1+\lvert y-x_0\rvert)^2}{4t^2} + \tfrac{1}{2t}\Bigr)
+        \exp\!\bigl(-(y-x_0)^2/(8t)\bigr), \]
+    a function of the form $\bigl(a + b\lvert y-x_0\rvert + d(y-x_0)^2\bigr)
+    \exp(-(y-x_0)^2/(8t))$ with $a,b,d \ge 0$. Then for every $x$ with
+    $\lvert x - x_0\rvert \le 1$ and every $y \in \mathbb{R}$,
+    \[ \Bigl\lvert \bigl(\tfrac{(x-y)^2}{4t^2} - \tfrac{1}{2t}\bigr)
+        G_t(x-y)\, f(y)\Bigr\rvert \;\le\; g_2(y). \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:gaussian_exp_domination}
+    As in \cref{lem:bound_space_pointwise}: bound $\lvert f(y)\rvert \le M$, the
+    quadratic prefactor $\bigl\lvert\tfrac{(x-y)^2}{4t^2} - \tfrac{1}{2t}\bigr\rvert
+    \le \tfrac{(\lvert y-x_0\rvert+1)^2}{4t^2} + \tfrac{1}{2t}$ (triangle inequality
+    $\lvert x-y\rvert \le \lvert y-x_0\rvert+1$), and the shared exponential bound
+    $\exp(-(x-y)^2/(4t)) \le e^{1/(2t)}\exp(-(y-x_0)^2/(8t))$ of
+    \cref{lem:gaussian_exp_domination}. Multiplying the nonnegative bounds yields the
+    left side $\le g_2(y)$.
+\end{proof}
+
+\begin{lemma}[Uniform domination of the second spatial derivative]
+    \label{lem:bound_space_second}
+    \lean{LeanEval.Analysis.ODE.bound_space_second}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:shifted_gaussian_integrable, lem:bound_space_second_pointwise}
+    \leanok
+    Fix $t > 0$, $x_0 \in \mathbb{R}$, and suppose $\lvert f\rvert \le M$. There is an
+    integrable function $g : \mathbb{R} \to \mathbb{R}$ such that for every $x$ with
+    $\lvert x - x_0\rvert \le 1$ and every $y \in \mathbb{R}$,
+    \[ \Bigl\lvert \bigl(\tfrac{(x-y)^2}{4t^2} - \tfrac{1}{2t}\bigr)
+        G_t(x-y)\, f(y)\Bigr\rvert \;\le\; g(y). \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:shifted_gaussian_integrable, lem:bound_space_second_pointwise}
+    Take $g = g_2$, the explicit dominating function of
+    \cref{lem:bound_space_second_pointwise}, which supplies the pointwise bound. After
+    expanding $(1+\lvert y-x_0\rvert)^2 = 1 + 2\lvert y-x_0\rvert + (y-x_0)^2$, the
+    function $g_2$ has the form $\bigl(a + b\lvert y-x_0\rvert + d(y-x_0)^2\bigr)
+    \exp(-(y-x_0)^2/(8t))$ with $a,b,d \ge 0$, hence is integrable by
+    \cref{lem:shifted_gaussian_integrable} (with $c = 1/(8t) > 0$).
+\end{proof}
+
+\begin{lemma}[Pointwise estimate for the time derivative]
+    \label{lem:bound_time_pointwise}
+    \lean{LeanEval.Analysis.ODE.bound_time_pointwise}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    Fix $t_0 > 0$, $x_0 \in \mathbb{R}$, and suppose $\lvert f\rvert \le M$. Set
+    \[ g_3(y) := M(2\pi t_0)^{-1/2}\Bigl(\tfrac{(x_0-y)^2}{t_0^2} + \tfrac{1}{t_0}\Bigr)
+        \exp\!\bigl(-(x_0-y)^2/(8t_0)\bigr). \]
+    Then for every $s \in (t_0/2,\, 2t_0)$ and every $y \in \mathbb{R}$,
+    \[ \Bigl\lvert \bigl(\tfrac{(x_0-y)^2}{4s^2} - \tfrac{1}{2s}\bigr)
+        G_s(x_0-y)\, f(y)\Bigr\rvert \;\le\; g_3(y). \]
+\end{lemma}
+\begin{proof}
+    Here $x_0$ is fixed and the parameter is the time $s$, restricted to
+    $[t_0/2, 2t_0] \subseteq (0,\infty)$. For $s$ in this range
+    $(4\pi s)^{-1/2} \le (2\pi t_0)^{-1/2}$, and since $s \le 2t_0$ we have
+    $\exp(-(x_0-y)^2/(4s)) \le \exp(-(x_0-y)^2/(8t_0))$ (the exponent is more
+    negative for smaller $s$). The polynomial prefactor
+    $\bigl\lvert\tfrac{(x_0-y)^2}{4s^2} - \tfrac{1}{2s}\bigr\rvert$ is bounded, using
+    $s \ge t_0/2$, by $\tfrac{(x_0-y)^2}{t_0^2} + \tfrac{1}{t_0}$. With
+    $\lvert f(y)\rvert \le M$, multiplying these nonnegative bounds gives the left side
+    $\le g_3(y)$.
+\end{proof}
+
+\begin{lemma}[Uniform domination of the time derivative]
+    \label{lem:bound_time}
+    \lean{LeanEval.Analysis.ODE.bound_time}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:shifted_gaussian_integrable, lem:bound_time_pointwise}
+    \leanok
+    Fix $t_0 > 0$, $x_0 \in \mathbb{R}$, and suppose $\lvert f\rvert \le M$. There is an
+    integrable function $g : \mathbb{R} \to \mathbb{R}$ such that for every
+    $s \in (t_0/2,\, 2t_0)$ and every $y \in \mathbb{R}$,
+    \[ \Bigl\lvert \bigl(\tfrac{(x_0-y)^2}{4s^2} - \tfrac{1}{2s}\bigr)
+        G_s(x_0-y)\, f(y)\Bigr\rvert \;\le\; g(y). \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:shifted_gaussian_integrable, lem:bound_time_pointwise}
+    Take $g = g_3$, the explicit dominating function of
+    \cref{lem:bound_time_pointwise}, which supplies the pointwise bound. It is of the
+    form $\bigl(a + d(y-x_0)^2\bigr)\exp(-(y-x_0)^2/(8t_0))$ with $a,d \ge 0$ and
+    $b = 0$, hence integrable by \cref{lem:shifted_gaussian_integrable} (with
+    $c = 1/(8t_0) > 0$).
+\end{proof}
+
+\subsection{Differentiation under the integral sign}
+
+\begin{lemma}[Shifted, scaled kernel has a derivative]
+    \label{lem:shift_scale_hasDerivAt}
+    \lean{LeanEval.Analysis.ODE.shift_scale_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    Let $k : \mathbb{R} \to \mathbb{R}$ and $y, c, d, v \in \mathbb{R}$. If
+    $\mathrm{HasDerivAt}\,k\,d\,(c-y)$, then
+    \[ \mathrm{HasDerivAt}\,\bigl(z \mapsto k(z-y)\cdot v\bigr)\,(d\cdot v)\,c. \]
+\end{lemma}
+\begin{proof}
+    The shift $z \mapsto z - y$ has derivative $1$, so by
+    \texttt{HasDerivAt.comp\_sub\_const} the composite $z \mapsto k(z-y)$ has
+    derivative $d$ at $c$. Multiplying by the constant $v$ via
+    \texttt{HasDerivAt.mul\_const} gives derivative $d\cdot v$.
+\end{proof}
+
+\begin{lemma}[Integrand is a.e.\ strongly measurable]
+    \label{lem:shift_scale_aestronglyMeasurable}
+    \lean{LeanEval.Analysis.ODE.shift_scale_aestronglyMeasurable}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    Let $k : \mathbb{R} \to \mathbb{R}$ be continuous and $f : \mathbb{R} \to \mathbb{R}$
+    be continuous. Then for every $z \in \mathbb{R}$ the function
+    $y \mapsto k(z-y)\, f(y)$ is \texttt{AEStronglyMeasurable} with respect to Lebesgue
+    measure.
+\end{lemma}
+\begin{proof}
+    The map $y \mapsto z - y$ is continuous, so $y \mapsto k(z-y)$ is continuous
+    (\texttt{Continuous.comp}); multiplying by the continuous $f$
+    (\texttt{Continuous.mul}) gives a continuous function, which is
+    \texttt{AEStronglyMeasurable} by \texttt{Continuous.aestronglyMeasurable}.
+\end{proof}
+
+\begin{lemma}[Differentiation under the integral sign, packaged]
+    \label{lem:hasDerivAt_under_integral}
+    \lean{LeanEval.Analysis.ODE.hasDerivAt_under_integral}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    Let $F, F' : \mathbb{R} \to \mathbb{R} \to \mathbb{R}$, let $r_0 \in \mathbb{R}$, let
+    $s$ be a neighborhood of $r_0$, and let $g : \mathbb{R} \to \mathbb{R}$ be
+    integrable. Suppose
+    \begin{enumerate}
+        \item $y \mapsto F(r_0, y)$ is integrable;
+        \item for every $r \in s$ the function $y \mapsto F(r,y)$ is
+              \texttt{AEStronglyMeasurable};
+        \item for every $y$ and every $r \in s$, $\lvert F'(r,y)\rvert \le g(y)$;
+        \item for every $y$ and every $r \in s$,
+              $\mathrm{HasDerivAt}\,(r \mapsto F(r,y))\,(F'(r,y))\,r$.
+    \end{enumerate}
+    Then $y \mapsto F'(r_0,y)$ is integrable and
+    \[ \mathrm{HasDerivAt}\Bigl(r \mapsto \textstyle\int_{\mathbb{R}} F(r,y)\,dy\Bigr)
+       \Bigl(\textstyle\int_{\mathbb{R}} F'(r_0,y)\,dy\Bigr)\, r_0. \]
+\end{lemma}
+\begin{proof}
+    This is \texttt{hasDerivAt\_integral\_of\_dominated\_loc\_of\_deriv\_le} applied at
+    the base point $r_0$ with integrand $F$, derivative integrand $F'$, dominating
+    function $g$, and the neighborhood $s \in \mathcal{N}(r_0)$. Hypotheses (1)--(4) are
+    precisely its four hypotheses (integrability at the base point, eventual a.e.\
+    measurability, the eventual uniform bound, and the eventual pointwise derivative),
+    and its conclusion is the displayed \texttt{HasDerivAt} together with integrability
+    of $F'(r_0,\cdot)$.
+\end{proof}
+
+\begin{lemma}[First spatial derivative of the solution]
+    \label{lem:hasDerivAt_space}
+    \lean{LeanEval.Analysis.ODE.hasDerivAt_space}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:heatSolution_eq_kernel_integral, lem:kernel_integrand_integrable, lem:kernel_hasDerivAt_space, lem:shift_scale_hasDerivAt, lem:shift_scale_aestronglyMeasurable, lem:bound_space, lem:hasDerivAt_under_integral}
+    \leanok
+    Assume $f$ continuous with $\lvert f\rvert \le M$. For every $t > 0$ and every
+    $x \in \mathbb{R}$,
+    \[ \mathrm{HasDerivAt}\Bigl(z \mapsto \mathrm{heatSolution}\,f\,t\,z\Bigr)
+       \Bigl(\textstyle\int_{\mathbb{R}} -\tfrac{x-y}{2t}\,G_t(x-y)\,f(y)\,dy\Bigr)\, x. \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:heatSolution_eq_kernel_integral, lem:kernel_integrand_integrable, lem:kernel_hasDerivAt_space, lem:shift_scale_hasDerivAt, lem:shift_scale_aestronglyMeasurable, lem:bound_space, lem:hasDerivAt_under_integral}
+    By \cref{lem:heatSolution_eq_kernel_integral} the function equals
+    $z \mapsto \int G_t(z-y) f(y)\, dy$. Instantiate
+    \cref{lem:hasDerivAt_under_integral} at $r_0 = x$ with $F(z,y) = G_t(z-y) f(y)$,
+    $F'(z,y) = -\tfrac{z-y}{2t} G_t(z-y) f(y)$, and neighborhood
+    $s = \{\,z : \lvert z - x\rvert \le 1\,\}$. Its four hypotheses are supplied by
+    named lemmas: (1) integrability of $F(x,\cdot)$
+    (\cref{lem:kernel_integrand_integrable}); (2) a.e.\ measurability of $F(z,\cdot)$
+    (\cref{lem:shift_scale_aestronglyMeasurable}); (3) the uniform integrable bound
+    (\cref{lem:bound_space}); (4) pointwise differentiability, which is
+    \cref{lem:shift_scale_hasDerivAt} applied to \cref{lem:kernel_hasDerivAt_space}
+    (with $v = f(y)$). The conclusion is the stated \texttt{HasDerivAt}.
+\end{proof}
+
+\begin{lemma}[Second spatial derivative of the solution]
+    \label{lem:hasDerivAt_space_second}
+    \lean{LeanEval.Analysis.ODE.hasDerivAt_space_second}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:kernel_integrand_integrable, lem:shifted_gaussian_integrable, lem:kernel_hasDerivAt_space_second, lem:shift_scale_hasDerivAt, lem:shift_scale_aestronglyMeasurable, lem:bound_space_second, lem:hasDerivAt_under_integral}
+    \leanok
+    Assume $f$ continuous with $\lvert f\rvert \le M$. For every $t > 0$ and every
+    $x \in \mathbb{R}$, writing $u_x(z) = \int_{\mathbb{R}} -\tfrac{z-y}{2t}\,G_t(z-y)\,f(y)\,dy$,
+    \[ \mathrm{HasDerivAt}\,u_x
+       \Bigl(\textstyle\int_{\mathbb{R}} \bigl(\tfrac{(x-y)^2}{4t^2}-\tfrac{1}{2t}\bigr)\,
+       G_t(x-y)\,f(y)\,dy\Bigr)\, x. \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:kernel_integrand_integrable, lem:shifted_gaussian_integrable, lem:kernel_hasDerivAt_space_second, lem:shift_scale_hasDerivAt, lem:shift_scale_aestronglyMeasurable, lem:bound_space_second, lem:hasDerivAt_under_integral}
+    Instantiate \cref{lem:hasDerivAt_under_integral} again, now at $r_0 = x$ with
+    $F(z,y) = -\tfrac{z-y}{2t} G_t(z-y) f(y)$ and
+    $F'(z,y) = \bigl(\tfrac{(z-y)^2}{4t^2}-\tfrac{1}{2t}\bigr) G_t(z-y) f(y)$ on the
+    neighborhood $\lvert z - x\rvert \le 1$. (1) Integrability of $F(x,\cdot)$ follows as
+    in \cref{lem:kernel_integrand_integrable} (the extra linear factor is absorbed by
+    \cref{lem:shifted_gaussian_integrable}); (2) a.e.\ measurability of $F(z,\cdot)$ is
+    \cref{lem:shift_scale_aestronglyMeasurable}; (3) the uniform bound is
+    \cref{lem:bound_space_second}; (4) pointwise differentiability is
+    \cref{lem:shift_scale_hasDerivAt} applied to
+    \cref{lem:kernel_hasDerivAt_space_second} (with $v = f(y)$). The conclusion is the
+    stated \texttt{HasDerivAt} of $u_x$.
+\end{proof}
+
+\begin{lemma}[Solution agrees with the kernel integral near positive times]
+    \label{lem:heatSolution_eventuallyEq_kernel_integral}
+    \lean{LeanEval.Analysis.ODE.heatSolution_eventuallyEq_kernel_integral}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:heatSolution_eq_kernel_integral}
+    \leanok
+    For every $t > 0$ and $x \in \mathbb{R}$, the two functions
+    $s \mapsto \mathrm{heatSolution}\,f\,s\,x$ and $s \mapsto \int_{\mathbb{R}} G_s(x-y)\,f(y)\,dy$
+    are eventually equal as $s \to t$ (i.e.\ equal on a neighborhood of $t$).
+\end{lemma}
+\begin{proof}
+    \uses{lem:heatSolution_eq_kernel_integral}
+    The set $(0,\infty)$ is a neighborhood of $t$ (it is open and contains $t > 0$,
+    \texttt{isOpen\_Ioi.mem\_nhds}). On $(0,\infty)$ the two functions agree by
+    \cref{lem:heatSolution_eq_kernel_integral}, which gives the \texttt{EventuallyEq}
+    via \texttt{Filter.eventuallyEq\_of\_mem}.
+\end{proof}
+
+\begin{lemma}[Time derivative of the solution]
+    \label{lem:hasDerivAt_time}
+    \lean{LeanEval.Analysis.ODE.hasDerivAt_time}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:heatSolution_eventuallyEq_kernel_integral, lem:kernel_integrand_integrable, lem:kernel_hasDerivAt_time, lem:shift_scale_aestronglyMeasurable, lem:bound_time, lem:hasDerivAt_under_integral}
+    \leanok
+    Assume $f$ continuous with $\lvert f\rvert \le M$. For every $t > 0$ and every
+    $x \in \mathbb{R}$,
+    \[ \mathrm{HasDerivAt}\Bigl(s \mapsto \mathrm{heatSolution}\,f\,s\,x\Bigr)
+       \Bigl(\textstyle\int_{\mathbb{R}} \bigl(\tfrac{(x-y)^2}{4t^2}-\tfrac{1}{2t}\bigr)\,
+       G_t(x-y)\,f(y)\,dy\Bigr)\, t. \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:heatSolution_eventuallyEq_kernel_integral, lem:kernel_integrand_integrable, lem:kernel_hasDerivAt_time, lem:shift_scale_aestronglyMeasurable, lem:bound_time, lem:hasDerivAt_under_integral}
+    \emph{Transfer.} By \cref{lem:heatSolution_eventuallyEq_kernel_integral} the map
+    $s \mapsto \mathrm{heatSolution}\,f\,s\,x$ is eventually equal to
+    $s \mapsto \int G_s(x-y) f(y)\,dy$ near $t$, so by
+    \texttt{Filter.EventuallyEq.hasDerivAt\_iff} it suffices to differentiate the
+    latter at $t$.
+    \emph{Leibniz step.} Instantiate \cref{lem:hasDerivAt_under_integral} at $r_0 = t$
+    with $F(s,y) = G_s(x-y) f(y)$, derivative integrand
+    $F'(s,y) = \bigl(\tfrac{(x-y)^2}{4s^2}-\tfrac{1}{2s}\bigr) G_s(x-y) f(y)$, and the
+    neighborhood $s \in (t/2, 2t)$. (1) Integrability of $F(t,\cdot)$ is
+    \cref{lem:kernel_integrand_integrable}; (2) a.e.\ measurability of $F(s,\cdot)$ is
+    \cref{lem:shift_scale_aestronglyMeasurable} (each $G_s$ is continuous); (3) the
+    uniform bound is \cref{lem:bound_time}; (4) pointwise differentiability in $s$ is
+    \cref{lem:kernel_hasDerivAt_time} scaled by $f(y)$ via \texttt{HasDerivAt.mul\_const}.
+\end{proof}
+
+\begin{lemma}[Time derivative equals the second spatial derivative]
+    \label{lem:time_eq_space_second}
+    \lean{LeanEval.Analysis.ODE.time_eq_space_second}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:kernel_heat_identity}
+    \leanok
+    For every $t > 0$ and $x \in \mathbb{R}$, the time-derivative value of
+    \cref{lem:hasDerivAt_time} equals the second-spatial-derivative value of
+    \cref{lem:hasDerivAt_space_second}; both equal
+    $\int_{\mathbb{R}} \bigl(\tfrac{(x-y)^2}{4t^2}-\tfrac{1}{2t}\bigr)\,G_t(x-y)\,f(y)\,dy$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:kernel_heat_identity}
+    The two values are written by exactly the same integral expression, because by
+    \cref{lem:kernel_heat_identity} the time derivative and the second spatial
+    derivative of the kernel at the shifted argument $x-y$ are the same expression
+    $\bigl(\tfrac{(x-y)^2}{4t^2}-\tfrac{1}{2t}\bigr) G_t(x-y)$. Hence the integrals
+    agree (\texttt{rfl}).
+\end{proof}
+
+\subsection{The PDE on $(0,\infty)\times\mathbb{R}$}
+
+\begin{lemma}[Heat equation half]
+    \label{lem:pde_part}
+    \lean{LeanEval.Analysis.ODE.pde_part}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:hasDerivAt_space, lem:hasDerivAt_space_second, lem:hasDerivAt_time, lem:time_eq_space_second}
+    \leanok
+    Assume $f$ continuous with $\lvert f\rvert \le M$. For every $t > 0$ and every
+    $x \in \mathbb{R}$ there exist $u_x : \mathbb{R} \to \mathbb{R}$ and
+    $u_{xx} \in \mathbb{R}$ such that: $u_x$ is the spatial derivative of
+    $z \mapsto \mathrm{heatSolution}\,f\,t\,z$ at every point; $u_{xx}$ is the
+    derivative of $u_x$ at $x$; and $u_{xx}$ is the time derivative of
+    $s \mapsto \mathrm{heatSolution}\,f\,s\,x$ at $t$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:hasDerivAt_space, lem:hasDerivAt_space_second, lem:hasDerivAt_time, lem:time_eq_space_second}
+    Choose $u_x(z) = \int_{\mathbb{R}} -\tfrac{z-y}{2t} G_t(z-y) f(y)\, dy$ and
+    $u_{xx} = \int_{\mathbb{R}} \bigl(\tfrac{(x-y)^2}{4t^2}-\tfrac{1}{2t}\bigr)
+    G_t(x-y) f(y)\, dy$. \Cref{lem:hasDerivAt_space} (applied at each point) gives the
+    first clause; \cref{lem:hasDerivAt_space_second} gives
+    $\mathrm{HasDerivAt}\,u_x\,u_{xx}\,x$; and \cref{lem:hasDerivAt_time} together with
+    \cref{lem:time_eq_space_second} gives that the time derivative at $t$ equals
+    $u_{xx}$.
+\end{proof}
+
+\subsection{Recovery of the initial datum as $t \downarrow 0$}
+
+\begin{lemma}[Total Gaussian mass]
+    \label{lem:gaussian_total_mass}
+    \lean{LeanEval.Analysis.ODE.gaussian_total_mass}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    $\int_{\mathbb{R}} \exp(-z^2)\, dz = \sqrt{\pi}$.
+\end{lemma}
+\begin{proof}
+    Apply \texttt{integral\_gaussian} with $b = 1$: $\int \exp(-1\cdot z^2)\, dz
+    = \sqrt{\pi/1} = \sqrt{\pi}$.
+\end{proof}
+
+\begin{lemma}[Exponent simplifies under the scaling substitution]
+    \label{lem:gaussian_exponent_simplify}
+    \lean{LeanEval.Analysis.ODE.gaussian_exponent_simplify}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    For every $t > 0$ and $z \in \mathbb{R}$,
+    \[ \exp\!\Bigl(-\tfrac{(2\sqrt{t}\,z)^2}{4t}\Bigr) = \exp(-z^2). \]
+\end{lemma}
+\begin{proof}
+    Since $t > 0$, $(\sqrt{t})^2 = t$ (\texttt{Real.sq\_sqrt}), so
+    $(2\sqrt{t}\,z)^2 = 4t\,z^2$ and hence $(2\sqrt{t}\,z)^2/(4t) = z^2$ (dividing by
+    $4t \neq 0$). The two exponents are equal, so the exponentials agree.
+\end{proof}
+
+\begin{lemma}[Change of variables in the solution]
+    \label{lem:heatSolution_change_of_variables}
+    \lean{LeanEval.Analysis.ODE.heatSolution_change_of_variables}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:heatSolution_eq_kernel_integral, lem:gaussian_exponent_simplify}
+    \leanok
+    For every $t > 0$ and $x \in \mathbb{R}$,
+    \[ \mathrm{heatSolution}\,f\,t\,x
+       = (4\pi t)^{-1/2}\cdot 2\sqrt{t} \int_{\mathbb{R}}
+         \exp(-z^2)\, f\bigl(x - 2\sqrt{t}\,z\bigr)\, dz. \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:heatSolution_eq_kernel_integral, lem:gaussian_exponent_simplify}
+    Start from $\mathrm{heatSolution}\,f\,t\,x = (4\pi t)^{-1/2}\int \exp(-(x-y)^2/(4t)) f(y)\,dy$.
+    \emph{Scaling / Jacobian step.} Substitute $y = x - 2\sqrt{t}\,z$: translation
+    invariance (\texttt{MeasureTheory.integral\_comp\_add\_right} /
+    \texttt{integral\_comp\_sub\_left}) handles the shift by $x$, and the linear scaling
+    by $2\sqrt{t}$ is \texttt{MeasureTheory.Measure.integral\_comp\_mul\_left},
+    contributing the Jacobian $\lvert 2\sqrt{t}\rvert = 2\sqrt{t}$. This rewrites the
+    integral with integrand $\exp(-(2\sqrt{t}\,z)^2/(4t))\, f(x - 2\sqrt{t}\,z)$.
+    \emph{Exponent step.} By \cref{lem:gaussian_exponent_simplify} the exponential
+    factor equals $\exp(-z^2)$, giving the displayed identity with the leading constant
+    left in unsimplified form (its bookkeeping is done in
+    \cref{lem:heatSolution_eq_subst}).
+\end{proof}
+
+\begin{lemma}[Substitution form of the solution]
+    \label{lem:heatSolution_eq_subst}
+    \lean{LeanEval.Analysis.ODE.heatSolution_eq_subst}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:heatSolution_change_of_variables}
+    \leanok
+    For every $t > 0$ and $x \in \mathbb{R}$,
+    \[ \mathrm{heatSolution}\,f\,t\,x
+       = \pi^{-1/2} \int_{\mathbb{R}} \exp(-z^2)\, f\bigl(x - 2\sqrt{t}\,z\bigr)\, dz. \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:heatSolution_change_of_variables}
+    By \cref{lem:heatSolution_change_of_variables} it remains to simplify the leading
+    constant: $(4\pi t)^{-1/2}\cdot 2\sqrt{t} = \pi^{-1/2}$ for $t > 0$ (since
+    $\sqrt{t}^2 = t$), a purely algebraic identity on the constants.
+\end{proof}
+
+\begin{lemma}[Dominating bound for the substituted integrand]
+    \label{lem:subst_integrand_bound}
+    \lean{LeanEval.Analysis.ODE.subst_integrand_bound}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    Suppose $\lvert f\rvert \le M$. For every $t > 0$, $x \in \mathbb{R}$ and
+    $z \in \mathbb{R}$,
+    \[ \bigl\lvert \exp(-z^2)\, f(x - 2\sqrt{t}\,z)\bigr\rvert \le M\exp(-z^2), \]
+    and $z \mapsto M\exp(-z^2)$ is integrable.
+\end{lemma}
+\begin{proof}
+    Since $\exp(-z^2) > 0$ and $\lvert f(x-2\sqrt{t}\,z)\rvert \le M$, the bound is
+    immediate. Integrability of $z \mapsto M\exp(-z^2)$ follows from
+    \texttt{integrable\_exp\_neg\_mul\_sq} ($b=1$) and
+    \texttt{MeasureTheory.Integrable.const\_mul}.
+\end{proof}
+
+\begin{lemma}[Pointwise convergence of the substituted integrand]
+    \label{lem:subst_integrand_tendsto}
+    \lean{LeanEval.Analysis.ODE.subst_integrand_tendsto}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \leanok
+    Suppose $f$ is continuous. For every $x, z \in \mathbb{R}$,
+    \[ \exp(-z^2)\, f(x - 2\sqrt{t}\,z) \;\longrightarrow\; \exp(-z^2)\, f(x)
+       \quad\text{as } t \downarrow 0. \]
+\end{lemma}
+\begin{proof}
+    As $t \downarrow 0$, $\sqrt{t} \to 0$ (\texttt{Real.continuous\_sqrt} and
+    $\sqrt{0}=0$), so $x - 2\sqrt{t}\,z \to x$. By continuity of $f$
+    (\texttt{Continuous.tendsto}, composed via \texttt{Filter.Tendsto.comp}),
+    $f(x - 2\sqrt{t}\,z) \to f(x)$. Multiplying by the constant $\exp(-z^2)$
+    (\texttt{Filter.Tendsto.const\_mul}) gives the claim.
+\end{proof}
+
+\begin{lemma}[Gaussian integral of a constant]
+    \label{lem:gaussian_integral_const_mul}
+    \lean{LeanEval.Analysis.ODE.gaussian_integral_const_mul}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:gaussian_total_mass}
+    \leanok
+    For every $c \in \mathbb{R}$, $\int_{\mathbb{R}} \exp(-z^2)\, c\, dz = \sqrt{\pi}\, c$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:gaussian_total_mass}
+    Pull the constant $c$ out of the integral
+    (\texttt{MeasureTheory.integral\_mul\_const}), then use
+    $\int \exp(-z^2)\,dz = \sqrt{\pi}$ from \cref{lem:gaussian_total_mass}.
+\end{proof}
+
+\begin{lemma}[Convergence of the substituted integral]
+    \label{lem:subst_integral_tendsto}
+    \lean{LeanEval.Analysis.ODE.subst_integral_tendsto}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:subst_integrand_bound, lem:subst_integrand_tendsto, lem:gaussian_integral_const_mul}
+    \leanok
+    Suppose $f$ continuous with $\lvert f\rvert \le M$. For every $x \in \mathbb{R}$,
+    \[ \int_{\mathbb{R}} \exp(-z^2)\, f(x - 2\sqrt{t}\,z)\, dz
+       \;\longrightarrow\; \sqrt{\pi}\, f(x) \quad\text{as } t \downarrow 0. \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:subst_integrand_bound, lem:subst_integrand_tendsto, lem:gaussian_integral_const_mul}
+    Apply \texttt{MeasureTheory.tendsto\_integral\_filter\_of\_dominated\_convergence}
+    along the (countably generated) filter $\mathcal{N}_{>0}(0)$, with dominating
+    function $z \mapsto M\exp(-z^2)$. Its hypotheses are: a.e.\ measurability of each
+    integrand (continuity), the uniform bound and integrability of the dominator
+    (\cref{lem:subst_integrand_bound}), and a.e.\ pointwise convergence to
+    $\exp(-z^2) f(x)$ (\cref{lem:subst_integrand_tendsto}). The limit integral equals
+    $\sqrt{\pi}\,f(x)$ by \cref{lem:gaussian_integral_const_mul} (with $c = f(x)$).
+\end{proof}
+
+\begin{lemma}[Initial-condition half]
+    \label{lem:initial_condition}
+    \lean{LeanEval.Analysis.ODE.initial_condition}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:heatSolution_eq_subst, lem:subst_integral_tendsto}
+    \leanok
+    Suppose $f$ continuous with $\lvert f\rvert \le M$. For every $x \in \mathbb{R}$,
+    \[ \mathrm{heatSolution}\,f\,t\,x \;\longrightarrow\; f(x)
+       \quad\text{as } t \downarrow 0. \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:heatSolution_eq_subst, lem:subst_integral_tendsto}
+    For $t > 0$, \cref{lem:heatSolution_eq_subst} writes
+    $\mathrm{heatSolution}\,f\,t\,x = \pi^{-1/2}\int \exp(-z^2) f(x-2\sqrt{t}\,z)\,dz$;
+    since the limit is along $t > 0$ this equality holds eventually. By
+    \cref{lem:subst_integral_tendsto} the integral tends to $\sqrt{\pi}\, f(x)$, so
+    multiplying by the constant $\pi^{-1/2}$ (\texttt{Filter.Tendsto.const\_mul}) the
+    product tends to $\pi^{-1/2}\sqrt{\pi}\,f(x) = f(x)$.
+\end{proof}
+
+\subsection{Main theorem}
+
+\begin{theorem}[Gaussian heat kernel solves the 1D heat equation]
+    \label{thm:heat_kernel_solves_heat_equation}
+    \lean{LeanEval.Analysis.ODE.heat_kernel_solves_heat_equation}
+    \leanfile{LeanEval/Analysis/ODE/HeatKernel.lean}
+    \uses{lem:pde_part, lem:initial_condition}
+    \leanok
+    Let $f : \mathbb{R} \to \mathbb{R}$ be continuous and bounded ($\lvert f\rvert \le M$
+    for some $M$). Then $u = \mathrm{heatSolution}\,f$ satisfies the 1D heat equation
+    $\partial_t u = \partial_x^2 u$ on $(0,\infty)\times\mathbb{R}$ — the spatial first
+    and second derivatives exist and the time derivative equals the second spatial
+    derivative — and $u(t,x) \to f(x)$ as $t \downarrow 0$ for every $x$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:pde_part, lem:initial_condition}
+    The first conjunct is \cref{lem:pde_part}; the second conjunct is
+    \cref{lem:initial_condition}.
+\end{proof}
+
+\end{document}
