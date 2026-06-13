@@ -25,7 +25,21 @@ include hJ_open hJ_conn hy₁ hy₁' hy₂ hy₂' hW in
 theorem wronskian_eq_const_mul_exp {P : ℝ → ℝ}
     (hP : ∀ x ∈ J, HasDerivAt P (p x) x) :
     ∃ C : ℝ, C ≠ 0 ∧ ∀ x ∈ J, wronskian y₁ y₂ x = C * Real.exp (-(P x)) := by
-  sorry
+  rcases hW with ⟨x₀, hx₀, hWx₀⟩
+  have hWx₀' : wronskian y₁ y₂ x₀ ≠ 0 := hWx₀
+  have hpos : Real.exp (P x₀) > 0 := Real.exp_pos (P x₀)
+  have hC_ne_zero : wronskian y₁ y₂ x₀ * Real.exp (P x₀) ≠ 0 :=
+    mul_ne_zero hWx₀' hpos.ne'
+  refine ⟨wronskian y₁ y₂ x₀ * Real.exp (P x₀), hC_ne_zero, λ x hx => ?_⟩
+  have h_eq : wronskian y₁ y₂ x * Real.exp (P x) = wronskian y₁ y₂ x₀ * Real.exp (P x₀) :=
+    wronskian_mul_exp_const hJ_open hJ_conn hy₁ hy₁' hy₂ hy₂' hP hx₀ hx
+  have h_nonzero : Real.exp (P x) ≠ 0 := (Real.exp_pos (P x)).ne'
+  calc
+    wronskian y₁ y₂ x
+        = (wronskian y₁ y₂ x * Real.exp (P x)) * (Real.exp (P x))⁻¹ := by
+      field_simp [h_nonzero]
+    _ = (wronskian y₁ y₂ x₀ * Real.exp (P x₀)) * (Real.exp (P x))⁻¹ := by rw [h_eq]
+    _ = (wronskian y₁ y₂ x₀ * Real.exp (P x₀)) * Real.exp (-(P x)) := by rw [Real.exp_neg]
 
 end ODE
 end Analysis

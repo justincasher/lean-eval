@@ -26,7 +26,18 @@ function `x ↦ W(x) eᴾ⁽ˣ⁾` has derivative `0` at every point of `J`. -/
 theorem wronskian_mul_exp_hasDerivAt_zero {P : ℝ → ℝ}
     (hP : ∀ x ∈ J, HasDerivAt P (p x) x) {x : ℝ} (hx : x ∈ J) :
     HasDerivAt (fun t => wronskian y₁ y₂ t * Real.exp (P t)) 0 x := by
-  sorry
+  have hWx : HasDerivAt (wronskian y₁ y₂) (-(p x * wronskian y₁ y₂ x)) x :=
+    wronskian_hasDerivAt hy₁ hy₁' hy₂ hy₂' hx
+  have hPx : HasDerivAt P (p x) x := hP x hx
+  have hExpPx : HasDerivAt (fun t => Real.exp (P t)) (Real.exp (P x) * p x) x :=
+    hPx.exp
+  have hMul : HasDerivAt (fun t => wronskian y₁ y₂ t * Real.exp (P t))
+      ((-(p x * wronskian y₁ y₂ x)) * Real.exp (P x) + wronskian y₁ y₂ x * (Real.exp (P x) * p x)) x :=
+    HasDerivAt.mul hWx hExpPx
+  have hZero : (-(p x * wronskian y₁ y₂ x)) * Real.exp (P x) + wronskian y₁ y₂ x * (Real.exp (P x) * p x) = 0 := by
+    ring
+  rw [hZero] at hMul
+  exact hMul
 
 end ODE
 end Analysis

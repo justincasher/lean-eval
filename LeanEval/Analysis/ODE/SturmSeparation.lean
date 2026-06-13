@@ -70,7 +70,18 @@ theorem sturm_separation
     (hza : y₁ a = 0) (hzb : y₁ b = 0)
     (hne : ∀ x ∈ Set.Ioo a b, y₁ x ≠ 0) :
     ∃! c, c ∈ Set.Ioo a b ∧ y₂ c = 0 := by
-  sorry
+  have h_ex : ∃ c, c ∈ Set.Ioo a b ∧ y₂ c = 0 :=
+    y2_zero_exists hab hJ_open hJ_conn hJ_sub hp hy₁ hy₁' hy₂ hy₂' hW hza hzb hne
+  rcases h_ex with ⟨c, hc_ioo, hc_y2⟩
+  have hinj : Set.InjOn (ratio y₁ y₂) (Set.Ioo a b) :=
+    ratio_injOn hab hJ_open hJ_conn hJ_sub hp hy₁ hy₁' hy₂ hy₂' hW hne
+  refine ⟨c, ⟨hc_ioo, hc_y2⟩, ?_⟩
+  intro y hy
+  rcases hy with ⟨hy_ioo, hy_y2⟩
+  have hratio_eq : ratio y₁ y₂ y = ratio y₁ y₂ c := by
+    dsimp [ratio]
+    simp [hy_y2, hc_y2]
+  exact hinj hy_ioo hc_ioo hratio_eq
 
 end ODE
 end Analysis

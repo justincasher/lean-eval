@@ -23,7 +23,14 @@ include hJ_open hJ_conn hp hW in
 every `x ∈ J`. -/
 theorem exists_primitive :
     ∃ P : ℝ → ℝ, ∀ x ∈ J, HasDerivAt P (p x) x := by
-  sorry
+  rcases hW with ⟨x₀, hx₀, _⟩
+  set P := fun (x : ℝ) => ∫ t in (x₀ : ℝ)..x, p t with hP
+  refine ⟨P, λ x hx => ?_⟩
+  have hp_int_meas := p_intervalIntegrable_stronglyMeasurable hJ_open hJ_conn hp hx₀ hx
+  rcases hp_int_meas with ⟨h_int, h_meas⟩
+  have h_cont : ContinuousAt p x :=
+    hp.continuousAt (hJ_open.mem_nhds hx)
+  exact intervalIntegral.integral_hasDerivAt_right h_int h_meas h_cont
 
 end ODE
 end Analysis

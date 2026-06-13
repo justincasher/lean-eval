@@ -24,7 +24,17 @@ include hJ_open hJ_conn hp hy₁ hy₁' hy₂ hy₂' hW in
 theorem wronskian_sign_of_ref {m : ℝ} (hm : m ∈ J) {x : ℝ} (hx : x ∈ J) :
     (0 < wronskian y₁ y₂ m → 0 < wronskian y₁ y₂ x) ∧
       (wronskian y₁ y₂ m < 0 → wronskian y₁ y₂ x < 0) := by
-  sorry
+  have hprod_pos : 0 < wronskian y₁ y₂ m * wronskian y₁ y₂ x :=
+    wronskian_mul_pos (hJ_open := hJ_open) (hJ_conn := hJ_conn) (hp := hp) (hy₁ := hy₁) (hy₁' := hy₁') (hy₂ := hy₂) (hy₂' := hy₂') (hW := hW) hm hx
+  constructor
+  · intro hWm_pos
+    have hWx_pos : 0 < wronskian y₁ y₂ x := by
+      nlinarith
+    exact hWx_pos
+  · intro hWm_neg
+    have hWx_neg : wronskian y₁ y₂ x < 0 := by
+      nlinarith
+    exact hWx_neg
 
 end ODE
 end Analysis

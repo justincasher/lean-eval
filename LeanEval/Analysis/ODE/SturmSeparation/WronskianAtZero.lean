@@ -21,7 +21,7 @@ variable {p q y₁ y₂ : ℝ → ℝ} {a b : ℝ} {J : Set ℝ}
 /-- **Wronskian at a zero of `y₁`.** If `y₁ t = 0` then `W(t) = −y₂(t) y₁'(t)`. -/
 theorem wronskian_at_zero {t : ℝ} (ht : y₁ t = 0) :
     wronskian y₁ y₂ t = -(y₂ t * deriv y₁ t) := by
-  sorry
+  simp [wronskian, ht]
 
 end ODE
 end Analysis

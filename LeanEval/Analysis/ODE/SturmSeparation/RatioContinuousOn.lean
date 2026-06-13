@@ -22,7 +22,13 @@ include hJ_sub hy₁ hy₂ hne in
 /-- **The ratio is continuous on `(a,b)`.** -/
 theorem ratio_continuousOn :
     ContinuousOn (ratio y₁ y₂) (Set.Ioo a b) := by
-  sorry
+  have hdiff : DifferentiableOn ℝ (ratio y₁ y₂) (Set.Ioo a b) := by
+    intro x hx
+    have hderiv := ratio_hasDerivAt hJ_sub hy₁ hy₂ hne hx
+    have hdiffAt : DifferentiableAt ℝ (ratio y₁ y₂) x :=
+      hderiv.differentiableAt
+    exact hdiffAt.differentiableWithinAt
+  exact hdiff.continuousOn
 
 end ODE
 end Analysis

@@ -54,6 +54,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \label{lem:uIcc-subset-J}
     \lean{LeanEval.Analysis.ODE.uIcc_subset_of_isOpen_isPreconnected}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/UIccSubset.lean}
+    \leanok
     For all $x_0, x \in J$, the unordered closed interval
     $\mathrm{uIcc}(x_0, x) = [\min(x_0,x), \max(x_0,x)]$ is contained in $J$.
 \end{lemma}
@@ -71,6 +72,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.wronskian_hasDerivAt}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianHasDerivAt.lean}
     \uses{def:wronskian}
+    \leanok
     For every $x \in J$, the Wronskian has derivative
     $W'(x) = -p(x)\,W(x)$; that is, $\mathrm{HasDerivAt}\;W\;(-(p(x)\,W(x)))\;x$.
 \end{lemma}
@@ -93,6 +95,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.p_intervalIntegrable_stronglyMeasurable}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/PIntegMeas.lean}
     \uses{lem:uIcc-subset-J}
+    \leanok
     Fix $x_0 \in J$. Then for every $x \in J$: $p$ is interval integrable on the
     closed interval from $x_0$ to $x$, and $p$ is strongly measurable at the
     neighborhood filter of $x$.
@@ -113,6 +116,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.exists_primitive}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/ExistsPrimitive.lean}
     \uses{lem:p-int-meas}
+    \leanok
     There is a function $P : \mathbb{R} \to \mathbb{R}$ with
     $\mathrm{HasDerivAt}\;P\;(p(x))\;x$ for every $x \in J$.
 \end{lemma}
@@ -132,6 +136,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.wronskian_mul_exp_hasDerivAt_zero}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianMulExpZero.lean}
     \uses{def:wronskian, lem:wronskian-deriv, lem:exists-primitive}
+    \leanok
     Let $P$ be the primitive of Lemma~\ref{lem:exists-primitive} and set
     $h(x) := W(x)\,e^{P(x)}$. Then for every $x \in J$,
     $\mathrm{HasDerivAt}\;h\;0\;x$.
@@ -155,6 +160,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.wronskian_mul_exp_const}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianMulExpConst.lean}
     \uses{lem:h-deriv-zero, lem:uIcc-subset-J}
+    \leanok
     With $h(x) = W(x)\,e^{P(x)}$ as above, fix any $x_0 \in J$. Then for every
     $x \in J$ one has $h(x) = h(x_0)$, i.e.
     $W(x)\,e^{P(x)} = W(x_0)\,e^{P(x_0)}$.
@@ -174,6 +180,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.wronskian_eq_const_mul_exp}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianEqConstMulExp.lean}
     \uses{def:wronskian, lem:W-exp-const, lem:exists-primitive}
+    \leanok
     Let $P$ be the primitive of Lemma~\ref{lem:exists-primitive}. There is a
     constant $C \ne 0$ such that $W(x) = C\,e^{-P(x)}$ for every $x \in J$.
 \end{lemma}
@@ -191,6 +198,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.wronskian_mul_pos}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianMulPos.lean}
     \uses{def:wronskian, lem:W-formula}
+    \leanok
     For all $x, y \in J$ one has $0 < W(x)\,W(y)$. In particular
     $W(x) \ne 0$ for every $x \in J$.
 \end{lemma}
@@ -209,6 +217,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.wronskian_at_zero}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianAtZero.lean}
     \uses{def:wronskian}
+    \leanok
     If $t \in \mathbb{R}$ satisfies $y_1(t) = 0$, then
     $W(t) = -\,y_2(t)\,\mathrm{deriv}\,y_1(t)$.
 \end{lemma}
@@ -225,6 +234,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.factors_nonzero_at_zero}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/FactorsNonzeroAtZero.lean}
     \uses{lem:wronskian-at-zero, lem:wronskian-sign}
+    \leanok
     If $t \in J$ satisfies $y_1(t) = 0$, then $y_2(t) \ne 0$ and
     $\mathrm{deriv}\,y_1(t) \ne 0$.
 \end{lemma}
@@ -241,6 +251,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.endpoints_nonzero}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/EndpointsNonzero.lean}
     \uses{lem:factors-nonzero-at-zero}
+    \leanok
     We have $y_2(a) \ne 0$, $y_2(b) \ne 0$, $\mathrm{deriv}\,y_1(a) \ne 0$ and
     $\mathrm{deriv}\,y_1(b) \ne 0$.
 \end{lemma}
@@ -259,6 +270,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.ratio_hasDerivAt}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/RatioHasDerivAt.lean}
     \uses{def:ratio, def:wronskian}
+    \leanok
     For every $x \in (a,b)$, the ratio $g = y_2 / y_1$ has derivative
     $\mathrm{HasDerivAt}\;g\;\bigl(W(x) / y_1(x)^2\bigr)\;x$.
 \end{lemma}
@@ -277,6 +289,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.ratio_continuousOn}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/RatioContinuousOn.lean}
     \uses{def:ratio, lem:ratio-deriv}
+    \leanok
     The ratio $g = y_2 / y_1$ is continuous on $(a,b)$.
 \end{lemma}
 \begin{proof}
@@ -292,6 +305,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.wronskian_sign_of_ref}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/WronskianSignOfRef.lean}
     \uses{lem:wronskian-sign}
+    \leanok
     Fix $m \in J$. For every $x \in J$: if $W(m) > 0$ then $W(x) > 0$, and if
     $W(m) < 0$ then $W(x) < 0$.
 \end{lemma}
@@ -308,6 +322,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.ratio_strictMonoOn}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/RatioStrictMonoOn.lean}
     \uses{def:ratio, lem:ratio-deriv, lem:ratio-continuous, lem:wronskian-sign-of-mid}
+    \leanok
     Fix $m \in (a,b)$ with $W(m) > 0$. Then $g = y_2/y_1$ is strictly increasing
     on $(a,b)$: $\mathrm{StrictMonoOn}\;g\;(a,b)$.
 \end{lemma}
@@ -327,6 +342,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.ratio_strictAntiOn}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/RatioStrictAntiOn.lean}
     \uses{def:ratio, lem:ratio-deriv, lem:ratio-continuous, lem:wronskian-sign-of-mid}
+    \leanok
     Fix $m \in (a,b)$ with $W(m) < 0$. Then $g = y_2/y_1$ is strictly decreasing
     on $(a,b)$: $\mathrm{StrictAntiOn}\;g\;(a,b)$.
 \end{lemma}
@@ -346,6 +362,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.ratio_injOn}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/RatioInjOn.lean}
     \uses{def:ratio, lem:ratio-strict-mono, lem:ratio-strict-anti, lem:wronskian-sign}
+    \leanok
     The ratio $g = y_2 / y_1$ is injective on $(a,b)$.
 \end{lemma}
 \begin{proof}
@@ -364,6 +381,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \label{lem:deriv-right-nonneg}
     \lean{LeanEval.Analysis.ODE.deriv_right_nonneg}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/DerivRightNonneg.lean}
+    \leanok
     Let $f : \mathbb{R} \to \mathbb{R}$, $L \in \mathbb{R}$, and $a < b$.
     If $\mathrm{HasDerivAt}\;f\;L\;a$, $f(a) = 0$, and $f(x) \ge 0$ for all
     $x \in (a,b)$, then $0 \le L$.
@@ -384,6 +402,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \label{lem:deriv-left-nonpos}
     \lean{LeanEval.Analysis.ODE.deriv_left_nonpos}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/DerivLeftNonpos.lean}
+    \leanok
     Let $f : \mathbb{R} \to \mathbb{R}$, $L \in \mathbb{R}$, and $a < b$.
     If $\mathrm{HasDerivAt}\;f\;L\;b$, $f(b) = 0$, and $f(x) \ge 0$ for all
     $x \in (a,b)$, then $L \le 0$.
@@ -402,6 +421,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \label{lem:no-interior-zero-forces-sign}
     \lean{LeanEval.Analysis.ODE.pos_of_pos_of_no_interior_zero}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/PosOfNoInteriorZero.lean}
+    \leanok
     Let $f : \mathbb{R} \to \mathbb{R}$ be continuous on $[a,b]$ with
     $f(x) \ne 0$ for all $x \in (a,b)$. If $u, v \in (a,b)$ and $f(u) > 0$, then
     $f(v) > 0$.
@@ -421,6 +441,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.const_sign_of_nonzero}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/ConstSignOfNonzero.lean}
     \uses{lem:no-interior-zero-forces-sign}
+    \leanok
     Let $f : \mathbb{R} \to \mathbb{R}$ be continuous on $[a,b]$ with $a < b$ and
     $f(x) \ne 0$ for all $x \in (a,b)$. Then either $f(x) > 0$ for all
     $x \in (a,b)$, or $f(x) < 0$ for all $x \in (a,b)$.
@@ -439,6 +460,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.y1_sign_constant}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/Y1SignConstant.lean}
     \uses{lem:const-sign-of-nonzero}
+    \leanok
     Either $y_1(x) > 0$ for all $x \in (a,b)$, or $y_1(x) < 0$ for all
     $x \in (a,b)$.
 \end{lemma}
@@ -454,6 +476,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.deriv_endpoints_of_pos_interior}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/DerivEndpointsPos.lean}
     \uses{lem:deriv-right-nonneg, lem:deriv-left-nonpos}
+    \leanok
     Let $f : \mathbb{R} \to \mathbb{R}$, $L_a, L_b \in \mathbb{R}$ and $a < b$.
     Suppose $\mathrm{HasDerivAt}\;f\;L_a\;a$, $\mathrm{HasDerivAt}\;f\;L_b\;b$,
     $f(a) = f(b) = 0$, $f(x) > 0$ for all $x \in (a,b)$, and $L_a \ne 0$,
@@ -472,6 +495,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.deriv_endpoints_of_signed_interior}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/DerivEndpointsSigned.lean}
     \uses{lem:positive-deriv-endpoints}
+    \leanok
     Let $f : \mathbb{R} \to \mathbb{R}$, $L_a, L_b \in \mathbb{R}$ and $a < b$.
     Suppose $\mathrm{HasDerivAt}\;f\;L_a\;a$, $\mathrm{HasDerivAt}\;f\;L_b\;b$,
     $f(a) = f(b) = 0$, $L_a \ne 0$, $L_b \ne 0$, and either $f(x) > 0$ for all
@@ -491,6 +515,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.y1_deriv_opposite}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/Y1DerivOpposite.lean}
     \uses{lem:endpoints-nonzero, lem:signed-deriv-endpoints, lem:y1-sign-constant}
+    \leanok
     We have $\mathrm{deriv}\,y_1(a)\,\mathrm{deriv}\,y_1(b) < 0$.
 \end{lemma}
 \begin{proof}
@@ -508,6 +533,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.y2_endpoints_opposite}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/Y2EndpointsOpposite.lean}
     \uses{def:wronskian, lem:wronskian-sign, lem:y1-deriv-opposite}
+    \leanok
     We have $y_2(a)\,y_2(b) < 0$.
 \end{lemma}
 \begin{proof}
@@ -527,6 +553,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.y2_zero_exists}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation/Y2ZeroExists.lean}
     \uses{lem:y2-endpoints-opposite}
+    \leanok
     There exists $c \in (a,b)$ with $y_2(c) = 0$.
 \end{lemma}
 \begin{proof}
@@ -547,6 +574,7 @@ of $y_1$: $y_1(a) = y_1(b) = 0$ and $y_1(x) \ne 0$ for all $x \in (a,b)$.
     \lean{LeanEval.Analysis.ODE.sturm_separation}
     \leanfile{LeanEval/Analysis/ODE/SturmSeparation.lean}
     \uses{def:ratio, lem:y2-zero-exists, lem:ratio-injective}
+    \leanok
     Under the standing hypotheses, $y_2$ has exactly one zero in $(a,b)$:
     there is a unique $c$ with $c \in (a,b)$ and $y_2(c) = 0$.
 \end{theorem}

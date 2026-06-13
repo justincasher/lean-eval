@@ -22,7 +22,27 @@ include hy₁ hy₁' hy₂ hy₂' in
 /-- **Abel/Liouville identity.** The Wronskian satisfies `W'(x) = −p(x) W(x)`. -/
 theorem wronskian_hasDerivAt {x : ℝ} (hx : x ∈ J) :
     HasDerivAt (wronskian y₁ y₂) (-(p x * wronskian y₁ y₂ x)) x := by
-  sorry
+  have hy₁x : HasDerivAt y₁ (deriv y₁ x) x := hy₁ x hx
+  have hy₁'x : HasDerivAt (deriv y₁) (-(p x * deriv y₁ x + q x * y₁ x)) x := hy₁' x hx
+  have hy₂x : HasDerivAt y₂ (deriv y₂ x) x := hy₂ x hx
+  have hy₂'x : HasDerivAt (deriv y₂) (-(p x * deriv y₂ x + q x * y₂ x)) x := hy₂' x hx
+  have hA : HasDerivAt (fun t => y₁ t * deriv y₂ t)
+      ((deriv y₁ x) * (deriv y₂ x) + y₁ x * (-(p x * deriv y₂ x + q x * y₂ x))) x :=
+    HasDerivAt.mul hy₁x hy₂'x
+  have hB : HasDerivAt (fun t => y₂ t * deriv y₁ t)
+      ((deriv y₂ x) * (deriv y₁ x) + y₂ x * (-(p x * deriv y₁ x + q x * y₁ x))) x :=
+    HasDerivAt.mul hy₂x hy₁'x
+  have hW : HasDerivAt (wronskian y₁ y₂)
+      (((deriv y₁ x) * (deriv y₂ x) + y₁ x * (-(p x * deriv y₂ x + q x * y₂ x))) -
+       ((deriv y₂ x) * (deriv y₁ x) + y₂ x * (-(p x * deriv y₁ x + q x * y₁ x)))) x := by
+    simpa [wronskian] using HasDerivAt.sub hA hB
+  have hW' : ((deriv y₁ x) * (deriv y₂ x) + y₁ x * (-(p x * deriv y₂ x + q x * y₂ x))) -
+      ((deriv y₂ x) * (deriv y₁ x) + y₂ x * (-(p x * deriv y₁ x + q x * y₁ x))) =
+      -(p x * wronskian y₁ y₂ x) := by
+    dsimp [wronskian]
+    ring
+  rw [hW'] at hW
+  exact hW
 
 end ODE
 end Analysis

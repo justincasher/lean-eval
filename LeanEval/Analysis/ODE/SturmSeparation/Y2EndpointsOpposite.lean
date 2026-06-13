@@ -24,7 +24,16 @@ include hab hJ_open hJ_conn hJ_sub hp hy₁ hy₁' hy₂ hy₂' hW hza hzb hne i
 /-- **`y₂` takes opposite signs at the endpoints.** `y₂ a · y₂ b < 0`. -/
 theorem y2_endpoints_opposite :
     y₂ a * y₂ b < 0 := by
-  sorry
+  have haJ : a ∈ J := hJ_sub (Set.mem_Icc.mpr ⟨le_rfl, le_of_lt hab⟩)
+  have hbJ : b ∈ J := hJ_sub (Set.mem_Icc.mpr ⟨le_of_lt hab, le_rfl⟩)
+  have hWpos : 0 < wronskian y₁ y₂ a * wronskian y₁ y₂ b :=
+    wronskian_mul_pos hJ_open hJ_conn hp hy₁ hy₁' hy₂ hy₂' hW haJ hbJ
+  have hWa : wronskian y₁ y₂ a = -(y₂ a * deriv y₁ a) := wronskian_at_zero hza
+  have hWb : wronskian y₁ y₂ b = -(y₂ b * deriv y₁ b) := wronskian_at_zero hzb
+  rw [hWa, hWb] at hWpos
+  have hderiv_neg : deriv y₁ a * deriv y₁ b < 0 :=
+    y1_deriv_opposite hab hJ_open hJ_conn hJ_sub hp hy₁ hy₁' hy₂ hy₂' hW hza hzb hne
+  nlinarith
 
 end ODE
 end Analysis

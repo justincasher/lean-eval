@@ -24,7 +24,20 @@ include hJ_open hJ_conn hp hy₁ hy₁' hy₂ hy₂' hW in
 particular `W` is nonzero on `J`. -/
 theorem wronskian_mul_pos {s t : ℝ} (hs : s ∈ J) (ht : t ∈ J) :
     0 < wronskian y₁ y₂ s * wronskian y₁ y₂ t := by
-  sorry
+  have hP : ∃ P : ℝ → ℝ, ∀ x ∈ J, HasDerivAt P (p x) x :=
+    exists_primitive hJ_open hJ_conn hp hW
+  rcases hP with ⟨P, hP⟩
+  have hW_eq : ∃ C : ℝ, C ≠ 0 ∧ ∀ x ∈ J, wronskian y₁ y₂ x = C * Real.exp (-(P x)) :=
+    wronskian_eq_const_mul_exp hJ_open hJ_conn hy₁ hy₁' hy₂ hy₂' hW hP
+  rcases hW_eq with ⟨C, hC_ne, hW_eq⟩
+  have hprod : wronskian y₁ y₂ s * wronskian y₁ y₂ t = C ^ 2 * (Real.exp (-(P s)) * Real.exp (-(P t))) := by
+    rw [hW_eq s hs, hW_eq t ht]
+    ring
+  rw [hprod]
+  have hC_sq_pos : 0 < C ^ 2 := sq_pos_of_ne_zero hC_ne
+  have h_exp_pos_s : 0 < Real.exp (-(P s)) := Real.exp_pos _
+  have h_exp_pos_t : 0 < Real.exp (-(P t)) := Real.exp_pos _
+  exact mul_pos hC_sq_pos (mul_pos h_exp_pos_s h_exp_pos_t)
 
 end ODE
 end Analysis

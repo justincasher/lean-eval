@@ -27,7 +27,14 @@ theorem p_intervalIntegrable_stronglyMeasurable {x₀ : ℝ} (hx₀ : x₀ ∈ J
     {x : ℝ} (hx : x ∈ J) :
     IntervalIntegrable p MeasureTheory.volume x₀ x ∧
       StronglyMeasurableAtFilter p (nhds x) := by
-  sorry
+  have h_uIcc_sub : Set.uIcc x₀ x ⊆ J :=
+    uIcc_subset_of_isOpen_isPreconnected hJ_open hJ_conn hx₀ hx
+  have hp_uIcc : ContinuousOn p (Set.uIcc x₀ x) := hp.mono h_uIcc_sub
+  have h_int : IntervalIntegrable p MeasureTheory.volume x₀ x :=
+    hp_uIcc.intervalIntegrable
+  have h_meas : StronglyMeasurableAtFilter p (nhds x) :=
+    ContinuousOn.stronglyMeasurableAtFilter hJ_open hp x hx
+  exact ⟨h_int, h_meas⟩
 
 end ODE
 end Analysis

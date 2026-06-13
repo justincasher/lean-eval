@@ -22,7 +22,12 @@ include hab hJ_sub hy₁ hne in
 /-- **`y₁` has constant sign on `(a,b)`.** -/
 theorem y1_sign_constant :
     (∀ x ∈ Set.Ioo a b, 0 < y₁ x) ∨ (∀ x ∈ Set.Ioo a b, y₁ x < 0) := by
-  sorry
+  have h_cont : ContinuousOn y₁ (Set.Icc a b) := by
+    intro x hx
+    have hxJ : x ∈ J := hJ_sub hx
+    have hdy : HasDerivAt y₁ (deriv y₁ x) x := hy₁ x hxJ
+    exact hdy.continuousAt.continuousWithinAt
+  exact const_sign_of_nonzero hab h_cont hne
 
 end ODE
 end Analysis

@@ -22,7 +22,14 @@ include hJ_sub hy₁ hy₂ hne in
 /-- **Derivative of the ratio.** On `(a,b)`, `g = y₂/y₁` has derivative `W(x) / y₁(x)²`. -/
 theorem ratio_hasDerivAt {x : ℝ} (hx : x ∈ Set.Ioo a b) :
     HasDerivAt (ratio y₁ y₂) (wronskian y₁ y₂ x / (y₁ x) ^ 2) x := by
-  sorry
+  have hxJ : x ∈ J := hJ_sub (Set.Ioo_subset_Icc_self hx)
+  have hy₁x : HasDerivAt y₁ (deriv y₁ x) x := hy₁ x hxJ
+  have hy₂x : HasDerivAt y₂ (deriv y₂ x) x := hy₂ x hxJ
+  have hy₁_ne : y₁ x ≠ 0 := hne x hx
+  have h_div : HasDerivAt (y₂ / y₁) ((deriv y₂ x * y₁ x - y₂ x * deriv y₁ x) / (y₁ x) ^ 2) x :=
+    HasDerivAt.div hy₂x hy₁x hy₁_ne
+  unfold ratio wronskian
+  simpa [mul_comm, mul_left_comm, mul_assoc] using h_div
 
 end ODE
 end Analysis
