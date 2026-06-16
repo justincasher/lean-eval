@@ -55,8 +55,15 @@ theorem wot_t2space :
 /-- Multiplication on the WOT type copy is separately continuous
 (`lem:wot-separately-continuous-mul`). -/
 theorem wot_separatelyContinuousMul :
-    SeparatelyContinuousMul (ContinuousLinearMapWOT (RingHom.id ℂ) H H) := by
-  sorry
+    SeparatelyContinuousMul (ContinuousLinearMapWOT (RingHom.id ℂ) H H) where
+  continuous_const_mul {a} := by
+    refine ContinuousLinearMapWOT.continuous_of_dual_apply_continuous ?_
+    intro x y
+    exact ContinuousLinearMapWOT.continuous_dual_apply x (y.comp (wotEquiv.symm a))
+  continuous_mul_const {a} := by
+    refine ContinuousLinearMapWOT.continuous_of_dual_apply_continuous ?_
+    intro x y
+    exact ContinuousLinearMapWOT.continuous_dual_apply ((wotEquiv.symm a) x) y
 
 /-- For any subset `Y` of the WOT type copy, its centralizer is closed
 (`lem:wot-centralizer-closed`). -/

@@ -25,11 +25,6 @@ noncomputable def blockEntry (B : (PiLp 2 (fun _ : Fin n => H)) →L[ℂ] (PiLp 
     (i j : Fin n) : H →L[ℂ] H :=
   (ampProj i) ∘L B ∘L (ampSingle j)
 
-/-- `pᵢ ∘ sⱼ = id` when `i = j` and `0` otherwise. -/
-theorem ampProj_comp_ampSingle (i j : Fin n) :
-    (ampProj i) ∘L (ampSingle (H := H) j) = if i = j then ContinuousLinearMap.id ℂ H else 0 := by
-  sorry
-
 /-- `lem:proj-reduction`: two operators into `H^n` are equal iff their
 compositions with every coordinate projection `pᵢ` agree. -/
 theorem proj_reduction
