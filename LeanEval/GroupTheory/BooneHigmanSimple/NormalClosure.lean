@@ -18,6 +18,17 @@ list `R`. -/
 def relatorSet (R : List (Word n)) : Set (FreeGroup (Fin n)) :=
   {x | ∃ r ∈ R, FreeGroup.mk r = x}
 
+/-- **Relator set of an extended list.** Appending a word `w` to the relator list
+adjoins `FreeGroup.mk w` to the relator set. -/
+lemma relatorSet_append (R : List (Word n)) (w : Word n) :
+    relatorSet (R ++ [w]) = relatorSet R ∪ {FreeGroup.mk w} := by
+  sorry
+
+/-- **A generator as a one-letter word.** -/
+lemma of_eq_mk_singleton (i : Fin n) :
+    FreeGroup.of i = FreeGroup.mk [(i, true)] := by
+  sorry
+
 variable {G : Type*} [Group G]
 
 /-- `y` is a single signed conjugate `g · s^{±1} · g⁻¹` of an element `s ∈ S`. -/

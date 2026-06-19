@@ -157,12 +157,33 @@ lemma re_generator_mem (R : List (Word n)) (i : Fin n) :
         Subgroup.normalClosure (relatorSet R ∪ {FreeGroup.mk w})) := by
   sorry
 
+/-- **Negation as a universal over generators.** With `S = relatorSet R` and
+`normalClosure S = ker φ`, `φ (mk w) ≠ 1` iff every generator lies in the
+extended normal closure. -/
+lemma neg_iff_forall_gen [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
+    (hsurj : Function.Surjective φ) (R : List (Word n))
+    (hR : Subgroup.normalClosure (relatorSet R) = MonoidHom.ker φ)
+    (w : Word n) :
+    ¬ wordProblemPred φ w ↔
+      ∀ i : Fin n, FreeGroup.of i ∈
+        Subgroup.normalClosure (relatorSet R ∪ {FreeGroup.mk w}) := by
+  sorry
+
 /-- **Negative side is r.e.**  The complement `w ↦ φ (mk w) ≠ 1` is recursively
 enumerable. -/
 lemma re_negative [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
     (hsurj : Function.Surjective φ)
     (hker : (MonoidHom.ker φ).IsNormalClosureFG) :
     REPred (fun w : Word n => ¬ wordProblemPred φ w) := by
+  sorry
+
+/-- **Post's theorem packaged for the word problem.** If `wordProblemPred φ` is
+r.e. and its complement is r.e., then it is a `ComputablePred`. -/
+lemma post_re_compl (φ : FreeGroup (Fin n) →* G)
+    [DecidablePred (wordProblemPred φ)]
+    (hpos : REPred (wordProblemPred φ))
+    (hneg : REPred (fun w : Word n => ¬ wordProblemPred φ w)) :
+    ComputablePred (wordProblemPred φ) := by
   sorry
 
 /-- **Kuznetsov's theorem** (A.V. Kuznetsov, 1958). A finitely presented simple

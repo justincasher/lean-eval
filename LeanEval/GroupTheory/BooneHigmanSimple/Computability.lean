@@ -243,75 +243,66 @@ lemma eval_computable {n : ℕ} :
       Primrec.fst.comp Primrec.snd
     exact Primrec.comp primrec_reduce h_w_proj
 
+/-- **Free-group word equality is a reduce test.** Two words name the same
+free-group element iff they have equal reductions. -/
+lemma mk_eq_iff_reduce {n : ℕ} (u v : Word n) :
+    FreeGroup.mk u = FreeGroup.mk v ↔ FreeGroup.reduce u = FreeGroup.reduce v := by
+  sorry
+
+/-- **The certificate check is a computable predicate.** Specialisation of
+`eval_computable` to a fixed relator list `R`: the predicate
+`(w, c) ↦ reduce (evalCert R c) = reduce w` is a `ComputablePred`. -/
+lemma check_computablePred {n : ℕ} (R : List (Word n)) :
+    ComputablePred
+      (fun p : Word n × Certificate n =>
+        FreeGroup.reduce (evalCert R p.2) = FreeGroup.reduce p.1) := by
+  sorry
+
+/-- **Decision function of a computable relation.** For a computable, pointwise
+decidable relation `Q`, the boolean function `p ↦ decide (Q p.1 p.2)` on
+`α × β` is computable. -/
+lemma computablePred_decide {α β : Type*} [Primcodable α] [Primcodable β]
+    {Q : α → β → Prop} [∀ a b, Decidable (Q a b)]
+    (hQ : ComputablePred fun p : α × β => Q p.1 p.2) :
+    Computable (fun p : α × β => decide (Q p.1 p.2)) := by
+  sorry
+
+/-- **The search kernel is computable.** Given the decision function of `Q`
+computable, the option-valued search kernel is `Computable₂`. -/
+lemma rproj_kernel {α β : Type*} [Primcodable α] [Primcodable β]
+    {Q : α → β → Prop} [∀ a b, Decidable (Q a b)]
+    (hdec : Computable (fun p : α × β => decide (Q p.1 p.2))) :
+    Computable₂ (fun (a : α) (m : ℕ) =>
+      (Encodable.decode m : Option β).bind
+        (fun b => bif decide (Q a b) then some b else none)) := by
+  sorry
+
+/-- **The unbounded search is partial recursive.** -/
+lemma rproj_search {α β : Type*} [Primcodable α] [Primcodable β]
+    {Q : α → β → Prop} [∀ a b, Decidable (Q a b)]
+    (hk : Computable₂ (fun (a : α) (m : ℕ) =>
+      (Encodable.decode m : Option β).bind
+        (fun b => bif decide (Q a b) then some b else none))) :
+    Partrec (fun a : α => Nat.rfindOpt (fun m =>
+      (Encodable.decode m : Option β).bind
+        (fun b => bif decide (Q a b) then some b else none))) := by
+  sorry
+
+/-- **Domain of the search equals the existential.** -/
+lemma rproj_dom {α β : Type*} [Primcodable α] [Primcodable β]
+    {Q : α → β → Prop} [∀ a b, Decidable (Q a b)] (a : α) :
+    (Nat.rfindOpt (fun m =>
+      (Encodable.decode m : Option β).bind
+        (fun b => bif decide (Q a b) then some b else none))).Dom ↔ ∃ b, Q a b := by
+  sorry
+
 /-- **Recursive enumerability of an existential over a computable relation.**
 If `Q : α → β → Prop` is computable (as a predicate on `α × β`), then
 `a ↦ ∃ b, Q a b` is recursively enumerable. -/
 lemma re_projection {α β : Type*} [Primcodable α] [Primcodable β]
     {Q : α → β → Prop} (hQ : ComputablePred fun p : α × β => Q p.1 p.2) :
     REPred (fun a => ∃ b, Q a b) := by
-  rcases hQ with ⟨hQ_dec, hQ_comp⟩
-  -- Provide decidability instances from hQ_dec
-  haveI (a : α) (b : β) : Decidable (Q a b) := hQ_dec (a, b)
-  haveI (a : α) : DecidablePred (Q a) := fun b => hQ_dec (a, b)
-  -- hQ_comp : Computable (fun p : α × β => decide (Q p.1 p.2))
-  have hQc₂ : Computable₂ (fun (a : α) (b : β) => decide (Q a b)) := hQ_comp
-  -- define g : α → β → Option β where g a b = some b if Q a b holds, else none
-  have h_g_comp : Computable₂ (fun (a : α) (b : β) => cond (decide (Q a b)) (some b) (none : Option β)) := by
-    refine (Computable.cond ?_ ?_ ?_ : Computable (fun (p : α × β) =>
-      cond (decide (Q p.1 p.2)) (some p.2) (none : Option β)))
-    · exact hQ_comp
-    · exact Computable.option_some.comp Computable.snd
-    · exact Computable.const (none : Option β)
-  -- define f : α → ℕ → Option β as f a n = (decode n).bind (λ b => if Q a b then some b else none)
-  have h_f_comp : Computable₂ (fun (a : α) (n : ℕ) =>
-    (Encodable.decode (α := β) n).bind (fun (b : β) => cond (decide (Q a b)) (some b) (none : Option β))) := by
-    have h_decode : Computable (fun (p : α × ℕ) => Encodable.decode (α := β) p.2) :=
-      (Primrec.decode.to_comp (α := β)).comp Computable.snd
-    have h_g'_comp : Computable₂ (fun (p : α × ℕ) (b : β) =>
-      cond (decide (Q p.1 b)) (some b) (none : Option β)) :=
-      h_g_comp.comp (Computable.pair (Computable.fst.comp Computable.fst) Computable.snd)
-    exact Computable.option_bind h_decode h_g'_comp
-  have h_partrec : Partrec (fun (a : α) => Nat.rfindOpt (fun (n : ℕ) =>
-    (Encodable.decode (α := β) n).bind (fun (b : β) => cond (decide (Q a b)) (some b) (none : Option β)))) :=
-    Partrec.rfindOpt h_f_comp
-  have h_dom_eq : ∀ a, (Nat.rfindOpt (fun (n : ℕ) =>
-    (Encodable.decode (α := β) n).bind (fun (b : β) => cond (decide (Q a b)) (some b) (none : Option β)))).Dom ↔ ∃ b, Q a b := by
-    intro a
-    have hQ_dec_a : DecidablePred (Q a) := fun b => hQ_dec (a, b)
-    constructor
-    · intro h
-      rcases (Nat.rfindOpt_dom.mp h) with ⟨n, b, h_mem⟩
-      rw [Option.mem_bind_iff] at h_mem
-      rcases h_mem with ⟨b', h_decode, h_cond⟩
-      have h_eq : b = b' := Option.some_inj.mp h_cond
-      subst h_eq
-      have hQab : Q a b' := by
-        have h_cond' : cond (decide (Q a b')) (some b') (none : Option β) = some b' := h_cond
-        by_contra! h_not
-        have h_dec_false : decide (Q a b') = false := decide_false_iff_not.mpr h_not
-        simp [h_dec_false] at h_cond'
-      exact ⟨b', hQab⟩
-    · intro h
-      rcases h with ⟨b, hb⟩
-      let n := Encodable.encode b
-      have h_decode : Encodable.decode (α := β) n = some b := by
-        simpa using Encodable.encodek (α := β) b
-      have h_cond : cond (decide (Q a b)) (some b) (none : Option β) = some b := by
-        have h_dec : decide (Q a b) = true := decide_eq_true hb
-        simp [h_dec]
-      have h_mem : b ∈ (Encodable.decode (α := β) n).bind (fun (b' : β) =>
-        cond (decide (Q a b')) (some b') (none : Option β)) := by
-        rw [Option.mem_bind_iff]
-        refine ⟨b, h_decode, ?_⟩
-        simpa using h_cond
-      have h_rfindOpt_dom : (Nat.rfindOpt (fun (n : ℕ) =>
-        (Encodable.decode (α := β) n).bind (fun (b' : β) => cond (decide (Q a b')) (some b') (none : Option β)))).Dom :=
-        Nat.rfindOpt_dom.mpr ⟨n, b, h_mem⟩
-      exact h_rfindOpt_dom
-  have h_re_dom : REPred (fun a => (Nat.rfindOpt (fun (n : ℕ) =>
-    (Encodable.decode (α := β) n).bind (fun (b : β) => cond (decide (Q a b)) (some b) (none : Option β)))).Dom) :=
-    Partrec.dom_re h_partrec
-  refine REPred.of_eq h_re_dom h_dom_eq
+  sorry
 
 /-- **Recursive enumerability is closed under conjunction.** -/
 lemma re_and {α : Type*} [Primcodable α] {p q : α → Prop}
