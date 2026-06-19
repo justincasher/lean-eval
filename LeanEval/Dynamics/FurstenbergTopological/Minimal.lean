@@ -187,14 +187,75 @@ theorem omega_forward_invariant (x : X) :
 /-- **`ω`-limit sets are shift-invariant**: `ω(T x) = ω(x)`. The forward orbit of
 `T x` is the forward orbit of `x` shifted by one step, so the two `ω`-limit sets
 agree (the `ω`-limit depends only on the tail of the orbit). -/
+omit [CompactSpace X] [Nonempty X] in
 theorem omega_shift_eq (x : X) :
     omegaFwd (T : X → X) (T x) = omegaFwd (T : X → X) x := by
-  sorry
+  apply Set.eq_of_subset_of_subset
+  · -- ω(T x) ⊆ ω(x): every late return of the shifted orbit is a late return of the orbit
+    intro y hy
+    unfold omegaFwd at hy ⊢
+    rw [mem_omegaLimit_iff_frequently] at hy ⊢
+    intro N hN
+    have hf := hy N hN
+    rw [Filter.frequently_atTop] at hf ⊢
+    intro a
+    obtain ⟨b, hba, hbN⟩ := hf a
+    refine ⟨b + 1, by omega, ?_⟩
+    simp only [Set.singleton_inter_nonempty, Set.mem_preimage] at hbN ⊢
+    rw [Function.iterate_succ_apply]
+    exact hbN
+  · -- ω(x) ⊆ ω(T x): a late return at time b ≥ 1 is a late return of the shifted orbit at b - 1
+    intro y hy
+    unfold omegaFwd at hy ⊢
+    rw [mem_omegaLimit_iff_frequently] at hy ⊢
+    intro N hN
+    have hf := hy N hN
+    rw [Filter.frequently_atTop] at hf ⊢
+    intro a
+    obtain ⟨b, hba, hbN⟩ := hf (a + 1)
+    refine ⟨b - 1, by omega, ?_⟩
+    simp only [Set.singleton_inter_nonempty, Set.mem_preimage] at hbN ⊢
+    have hstep : (T : X → X)^[b - 1] (T x) = (T : X → X)^[b] x := by
+      rw [← Function.iterate_succ_apply]
+      congr 1
+      omega
+    rw [hstep]
+    exact hbN
 
 /-- **`ω`-limit sets are invariant**: `T (ω(x)) = ω(x)`. -/
 theorem omega_two_sided_invariant (x : X) :
     (T : X → X) '' omegaFwd (T : X → X) x = omegaFwd (T : X → X) x := by
-  sorry
+  apply Set.eq_of_subset_of_subset
+  · -- forward inclusion is already available
+    exact omega_forward_invariant T x
+  · -- reverse inclusion via the continuous inverse `T.symm`
+    have hsymm_cont : Continuous (T.symm : X → X) := T.symm.continuous
+    have h_comm : ∀ (t : ℕ) (z : X),
+        (T.symm : X → X) ((T : X → X)^[t] z) = ((T : X → X)^[t]) ((T.symm : X → X) z) := by
+      intro t
+      induction t with
+      | zero => intro z; simp
+      | succ k ih =>
+        intro z
+        rw [Function.iterate_succ_apply, Function.iterate_succ_apply, ih (T z)]
+        simp [Homeomorph.symm_apply_apply, Homeomorph.apply_symm_apply]
+    have hs : Set.MapsTo (T.symm : X → X) ({T x} : Set X) ({(T.symm : X → X) (T x)} : Set X) := by
+      intro z hz
+      simp only [Set.mem_singleton_iff] at hz
+      subst hz
+      simp
+    have h_maps : Set.MapsTo (T.symm : X → X) (omegaFwd (T : X → X) (T x))
+        (omegaFwd (T : X → X) ((T.symm : X → X) (T x))) := by
+      have h := mapsTo_omegaLimit (f := Filter.atTop)
+        (ϕ := fun (n : ℕ) => (T : X → X)^[n]) (ϕ' := fun (n : ℕ) => (T : X → X)^[n])
+        (ga := (T.symm : X → X)) (s' := {(T.symm : X → X) (T x)})
+        (hs := hs) (hg := h_comm) (hgc := hsymm_cont)
+      simpa [omegaFwd] using h
+    have hx_eq : (T.symm : X → X) (T x) = x := T.symm_apply_apply x
+    rw [hx_eq] at h_maps
+    rw [omega_shift_eq T x] at h_maps
+    intro y hy
+    exact ⟨(T.symm : X → X) y, h_maps hy, T.apply_symm_apply y⟩
 
 /-- **`ω`-limit sets are subsystems**: nonempty, closed, and invariant. -/
 theorem omega_limit_properties (x : X) :
