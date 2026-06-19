@@ -47,7 +47,18 @@ and ambient distances coincide, by `isometry_subtype_coe`.) -/
 theorem restricted_iterate_agreement {X : Type*} [MetricSpace X]
     (T : X ≃ₜ X) (M : Set X) (hM : ∀ x, x ∈ M ↔ T x ∈ M) (x : M) (k : ℕ) :
     (↑(((restrict T M hM : M → M))^[k] x) : X) = (T : X → X)^[k] (x : X) := by
-  sorry
+  induction k with
+  | zero =>
+    simp
+  | succ k ih =>
+    calc
+      (↑(((restrict T M hM : M → M))^[k.succ] x) : X)
+          = (T : X → X) (↑(((restrict T M hM : M → M))^[k] x) : X) := by
+        simp [Function.iterate_succ_apply', restrict, Homeomorph.subtype_apply_coe]
+      _ = (T : X → X) ((T : X → X)^[k] (x : X)) := by
+        rw [ih]
+      _ = (T : X → X)^[k.succ] (x : X) := by
+        simp [Function.iterate_succ_apply']
 
 /-- **Transfer from a minimal subsystem to the ambient space.** If `x ∈ M` is
 multiply recurrent for the restricted homeomorphism `T|_M`, then it is multiply
