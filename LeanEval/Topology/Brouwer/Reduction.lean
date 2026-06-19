@@ -27,8 +27,8 @@ theorem convex_body_homeo_ball {m} {B : Set (EuclSp m)} (hconv : Convex ℝ B)
 
 /-- **A nonempty convex set has nonempty relative interior.** -/
 theorem convex_relint_nonempty {d} {K : Set (EuclSp d)} (hconv : Convex ℝ K) (hne : K.Nonempty) :
-    (intrinsicInterior ℝ K).Nonempty := by
-  sorry
+    (intrinsicInterior ℝ K).Nonempty :=
+  hne.intrinsicInterior hconv
 
 /-- **Reduction to full dimension.** A nonempty compact convex `K ⊆ E_d` is, via
 a homeomorphism, a compact convex set `K'` with nonempty interior in `E_m`,
