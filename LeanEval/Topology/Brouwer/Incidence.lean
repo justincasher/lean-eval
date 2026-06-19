@@ -71,7 +71,22 @@ end IncidenceModel
 /-- **Rainbow cells have exactly one door.** -/
 theorem cell_door_rainbow {n} (M : IncidenceModel n) (C : M.Cell) (h : M.IsRainbow C) :
     Nat.card {F // M.Inc C F ∧ M.IsDoor F} = 1 := by
-  sorry
+  -- From the rainbow hypothesis, cellLabel C = univ.val (each label 0,...,n once)
+  have h_labels : M.cellLabel C = (Finset.univ : Finset (Fin (n + 1))).val := h
+  -- Door label multiset {0,...,n-1} equals cellLabel C with label n erased
+  have hT_eq : (Finset.univ : Finset (Fin (n + 1))).val.erase (Fin.last n) = (M.cellLabel C).erase (Fin.last n) := by
+    rw [h_labels]
+  -- Build an equivalence between the two subtype sets using pointwise equivalence
+  have h_set_equiv : {F : M.Facet // M.Inc C F ∧ M.IsDoor F} ≃
+      {F : M.Facet // M.Inc C F ∧ M.facetLabel F = (M.cellLabel C).erase (Fin.last n)} :=
+    Equiv.subtypeEquiv (Equiv.refl _) (λ F => by
+      simp [IncidenceModel.IsDoor, hT_eq])
+  rw [Nat.card_congr h_set_equiv]
+  -- By the multiplicity axiom, the number of these facets equals count of label n
+  have h_count : (M.cellLabel C).count (Fin.last n) = 1 := by
+    rw [h_labels]
+    simp
+  rw [M.mult C (Fin.last n), h_count]
 
 /-- **Non-rainbow cells have an even number of doors.** -/
 theorem cell_door_nonrainbow {n} (M : IncidenceModel n) (C : M.Cell) (h : ¬ M.IsRainbow C) :
