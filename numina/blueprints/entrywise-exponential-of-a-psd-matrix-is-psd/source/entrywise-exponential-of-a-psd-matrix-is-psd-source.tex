@@ -1,0 +1,17 @@
+Entrywise exponential of a PSD matrix is PSD
+← All problems
+
+posSemidef_map_exp
+
+Submitter: Kim Morrison.
+
+Notes: Part of the Schur-Polya-Loewner theory of entrywise functions preserving PSD. The proof uses the Schur product theorem iteratively: exp_⊙(A) = ∑ A^{⊙k}/k!, each Hadamard power is PSD, and the convergent series of PSD matrices is PSD.
+
+Source: I.J. Schoenberg, Positive definite functions on spheres, 1942.
+
+Informal solution: Write exp(a_{ij}) as the convergent series ∑ (a_{ij})^k / k!. The matrix with entries (a_{ij})^k is the k-fold Hadamard product A^{⊙k}, which is PSD by iterated Schur product. The partial sums are nonneg combinations of PSD matrices, hence PSD. PSD is a closed condition, so the limit is PSD.
+
+theorem posSemidef_map_exp {n : Type*} [Fintype n] [DecidableEq n]
+    {A : Matrix n n ℝ} (hA : A.PosSemidef) :
+    (A.map Real.exp).PosSemidef := by
+  sorry
