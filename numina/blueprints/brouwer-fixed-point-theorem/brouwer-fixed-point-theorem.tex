@@ -1,8 +1,999 @@
 % Blueprint: Brouwer fixed-point theorem
 % Created by Numina
+%
+% Strategy.  Mathlib has neither Brouwer nor the usual high-level tools used to
+% prove it (it lacks singular homology of spheres, excision / Mayer--Vietoris
+% for spaces, the no-retraction theorem, and topological degree).  We therefore
+% take the elementary combinatorial route through Sperner's lemma, every leaf of
+% which bottoms out in Mathlib's combinatorics, convex geometry, and point-set
+% topology:
+%
+%   Sperner's lemma  -->  Brouwer for a full-dimensional simplex
+%                    -->  Brouwer for the closed ball (Mathlib convex homeo)
+%                    -->  Brouwer for an arbitrary compact convex set.
+%
+% Throughout, E_n := EuclideanSpace R (Fin n) and
+% S_n := convexHull {0, e_1, ..., e_n} \subseteq E_n is the standard
+% full-dimensional corner simplex.
 
 \begin{document}
 
-% Your blueprint will go here.
+\section{The fixed-point property}
+
+\begin{definition}[Fixed-point property]
+    \label{def:fpp}
+    \lean{LeanEval.Topology.HasFPP}
+    \leanfile{LeanEval/Topology/Brouwer/FixedPoint.lean}
+    \leanok
+    A topological space $X$ has the \emph{fixed-point property} (FPP) if every
+    continuous map $f : X \to X$ has a fixed point: there exists $x \in X$ with
+    $f(x) = x$.
+\end{definition}
+
+\begin{lemma}[FPP is a topological invariant]
+    \label{lem:fpp-homeo}
+    \lean{LeanEval.Topology.fpp_homeo}
+    \leanfile{LeanEval/Topology/Brouwer/FixedPoint.lean}
+    \uses{def:fpp}
+    If $X$ and $Y$ are homeomorphic and $X$ has the fixed-point property, then
+    $Y$ has the fixed-point property.
+\end{lemma}
+\begin{proof}
+    \uses{def:fpp}
+    Let $h : X \simeq Y$ be a homeomorphism and let $g : Y \to Y$ be continuous.
+    Then $h^{-1} \circ g \circ h : X \to X$ is continuous, so it has a fixed
+    point $x$. Setting $y = h(x)$ and applying $h$ to $h^{-1}(g(h(x))) = x$ gives
+    $g(y) = y$.
+\end{proof}
+
+\begin{lemma}[Subtype FPP gives an ambient fixed point]
+    \label{lem:fpp-ambient}
+    \lean{LeanEval.Topology.fpp_ambient}
+    \leanfile{LeanEval/Topology/Brouwer/FixedPoint.lean}
+    \uses{def:fpp}
+    Let $K \subseteq E_d$ and suppose the subspace $K$ (with the subspace
+    topology) has the fixed-point property. Then for every $f : E_d \to E_d$
+    that is continuous on $K$ and maps $K$ into $K$, there exists $x \in K$ with
+    $f(x) = x$.
+\end{lemma}
+\begin{proof}
+    \uses{def:fpp}
+    The hypotheses package $f$ as a continuous self-map $\tilde f : K \to K$ of
+    the subspace. By the fixed-point property of $K$ there is $x \in K$ with
+    $\tilde f(x) = x$, i.e.\ $f(x) = x$.
+\end{proof}
+
+\section{Abstract Sperner combinatorics}
+
+% The finite combinatorics of Sperner's lemma is developed here over an abstract
+% axiomatized incidence model, with no geometry.  All planar/PL content is
+% supplied later by the geometric layer, which merely has to exhibit a model and
+% verify the balancedness axiom.
+
+\begin{definition}[Abstract labeled incidence model]
+    \label{def:incidence-model}
+    \lean{LeanEval.Topology.IncidenceModel}
+    \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
+    \leanok
+    A \emph{labeled incidence model} of dimension $n$ consists of a finite type
+    of \emph{cells} and a finite type of \emph{facets}, an \emph{incidence}
+    relation $\mathrm{Inc}$ between cells and facets, a \emph{boundary} predicate
+    $\partial$ on facets, and a labeling assigning to each cell a multiset of
+    $n+1$ labels from $\{0, \dots, n\}$ and to each facet a multiset of $n$
+    labels from $\{0, \dots, n\}$, subject to the compatibility axiom that
+    whenever $\mathrm{Inc}(C, F)$ the facet multiset of $F$ is obtained from the
+    cell multiset of $C$ by deleting one label. A facet is a \emph{door} if its
+    label multiset is exactly $\{0, \dots, n-1\}$ (each label once); a cell is
+    \emph{rainbow} if its label multiset is exactly $\{0, \dots, n\}$ (each label
+    once). A door is an \emph{interior door} if $\neg\partial$ holds of it and a
+    \emph{boundary door} if $\partial$ holds.
+\end{definition}
+
+\begin{definition}[Balanced model]
+    \label{def:balanced-model}
+    \lean{LeanEval.Topology.IncidenceModel.Balanced}
+    \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
+    \uses{def:incidence-model}
+    \leanok
+    A labeled incidence model is \emph{balanced} if every facet with
+    $\neg\partial$ (an interior facet) is incident to exactly two cells and every
+    facet with $\partial$ (a boundary facet) is incident to exactly one cell.
+\end{definition}
+
+\begin{lemma}[Rainbow cells have exactly one door]
+    \label{lem:cell-door-rainbow}
+    \lean{LeanEval.Topology.cell_door_rainbow}
+    \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
+    \uses{def:incidence-model}
+    A rainbow cell is incident to exactly one door.
+\end{lemma}
+\begin{proof}
+    \uses{def:incidence-model}
+    The cell's label multiset is $\{0, \dots, n\}$, each label appearing once.
+    A facet incident to it is obtained by deleting one label, and the result is
+    $\{0, \dots, n-1\}$ exactly when the deleted label is $n$. The vertex labeled
+    $n$ is unique, so exactly one incident facet is a door
+    (\texttt{Finset.card\_eq\_one}).
+\end{proof}
+
+\begin{lemma}[Non-rainbow cells have an even number of doors]
+    \label{lem:cell-door-nonrainbow}
+    \lean{LeanEval.Topology.cell_door_nonrainbow}
+    \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
+    \uses{def:incidence-model}
+    A cell that is not rainbow is incident to either $0$ or $2$ doors; in
+    particular an even number.
+\end{lemma}
+\begin{proof}
+    \uses{def:incidence-model}
+    Deleting one label of the cell yields $\{0, \dots, n-1\}$ only if the cell's
+    underlying label set already contains $\{0, \dots, n-1\}$. As the cell is not
+    rainbow, its $n+1$ labels are not all distinct, so the only remaining
+    possibility is that its label set is exactly $\{0, \dots, n-1\}$ with one
+    label repeated; then deleting either copy of the repeated label gives a door,
+    and no other deletion does, so there are exactly $2$ doors. If instead some
+    label of $\{0, \dots, n-1\}$ is missing from the cell, no deletion yields a
+    door and there are $0$.
+\end{proof}
+
+\begin{lemma}[Per-cell door parity]
+    \label{lem:cell-door-count}
+    \lean{LeanEval.Topology.cell_door_count}
+    \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
+    \uses{lem:cell-door-rainbow, lem:cell-door-nonrainbow}
+    The number of doors incident to a cell is $1$ if the cell is rainbow and is
+    even otherwise; in particular it is odd if and only if the cell is rainbow.
+\end{lemma}
+\begin{proof}
+    \uses{lem:cell-door-rainbow, lem:cell-door-nonrainbow}
+    Immediate from \Cref{lem:cell-door-rainbow} (rainbow case: exactly $1$, which
+    is odd) and \Cref{lem:cell-door-nonrainbow} (non-rainbow case: even).
+\end{proof}
+
+\begin{lemma}[Door count has rainbow parity]
+    \label{lem:door-count-rainbow-parity}
+    \lean{LeanEval.Topology.door_count_rainbow_parity}
+    \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
+    \uses{lem:cell-door-count}
+    In any labeled incidence model, $\sum_{C} \#\{\text{doors incident to } C\}$
+    has the same parity as the number of rainbow cells.
+\end{lemma}
+\begin{proof}
+    \uses{lem:cell-door-count}
+    By \Cref{lem:cell-door-count} each summand is odd exactly for the rainbow
+    cells, so modulo $2$ the sum equals the number of cells with an odd summand,
+    i.e.\ the number of rainbow cells (sum of a $\{0,1\}$-valued indicator,
+    \texttt{Finset.card\_filter} and \texttt{Nat.even\_add}).
+\end{proof}
+
+\begin{lemma}[Door count via incidence]
+    \label{lem:door-count-incidence}
+    \lean{LeanEval.Topology.door_count_incidence}
+    \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
+    \uses{def:balanced-model}
+    In a balanced model,
+    $\sum_{C} \#\{\text{doors incident to } C\}
+       = 2\,\#\{\text{interior doors}\} + \#\{\text{boundary doors}\}$;
+    in particular it has the same parity as the number of boundary doors.
+\end{lemma}
+\begin{proof}
+    \uses{def:balanced-model}
+    Double count incident (cell, door) pairs: by the bipartite double-counting
+    identity \texttt{Finset.sum\_card\_bipartiteAbove\_eq\_sum\_card\_bipartiteBelow},
+    $\sum_{C} \#\{\text{doors } F : \mathrm{Inc}(C,F)\}
+       = \sum_{\text{doors } F} \#\{C : \mathrm{Inc}(C,F)\}$.
+    By \Cref{def:balanced-model} the inner count is $2$ for an interior door and
+    $1$ for a boundary door, giving
+    $2\,\#\{\text{interior doors}\} + \#\{\text{boundary doors}\}$, which is
+    congruent to $\#\{\text{boundary doors}\}$ modulo $2$.
+\end{proof}
+
+\begin{lemma}[Boundary parity count]
+    \label{lem:sperner-parity}
+    \lean{LeanEval.Topology.sperner_parity}
+    \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
+    \uses{lem:door-count-rainbow-parity, lem:door-count-incidence}
+    In a balanced labeled incidence model, the number of rainbow cells has the
+    same parity as the number of boundary doors.
+\end{lemma}
+\begin{proof}
+    \uses{lem:door-count-rainbow-parity, lem:door-count-incidence}
+    The single quantity $\sum_{C} \#\{\text{doors incident to } C\}$ is congruent
+    modulo $2$ both to the number of rainbow cells
+    (\Cref{lem:door-count-rainbow-parity}) and to the number of boundary doors
+    (\Cref{lem:door-count-incidence}); hence those two numbers are congruent to
+    each other.
+\end{proof}
+
+\section{Triangulations and their incidence model}
+
+\begin{definition}[Triangulation]
+    \label{def:triangulation}
+    \lean{LeanEval.Topology.Triangulation}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \leanok
+    A \emph{triangulation} of the corner simplex
+    $S_n = \mathrm{convexHull}\,\{0, e_1, \dots, e_n\}$ is a bespoke structure
+    -- richer than Mathlib's \texttt{Geometry.SimplicialComplex}, which records
+    faces and the face-to-face condition but neither purity, dimension, nor the
+    requirement that the underlying space be a prescribed set -- packaging the
+    following data and axioms:
+    \begin{itemize}
+        \item a finite set of \emph{cells}, each cell a \texttt{Finset} of points
+            of $E_n$ that is affinely independent (so its convex hull is a
+            nondegenerate simplex), of dimension at most $n$;
+        \item \emph{closure under faces}: every nonempty subset of a cell is a
+            cell;
+        \item the \emph{face-to-face} condition: for cells $C, C'$ the
+            intersection $\mathrm{conv}(C) \cap \mathrm{conv}(C')$ is the convex
+            hull of $C \cap C'$ (a common face);
+        \item \emph{purity of dimension $n$}: every cell is a subset of a
+            \emph{maximal cell} with exactly $n+1$ vertices;
+        \item the \emph{covering} axiom: the union of the convex hulls of the
+            maximal cells equals $S_n$.
+    \end{itemize}
+    The \emph{maximal cells} are the cells with $n+1$ vertices and the
+    \emph{$(n-1)$-faces} (or \emph{facets}) are the cells with $n$ vertices. This
+    structure cannot be expressed by Mathlib's single-simplex constructors,
+    because the vertices of distinct cells are affinely independent only
+    cell-by-cell, not jointly; the bespoke API above is the shared foundational
+    layer used throughout this section.
+\end{definition}
+
+\begin{definition}[Carrier face]
+    \label{def:carrier-face}
+    \lean{LeanEval.Topology.carrierFace}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{def:triangulation}
+    \leanok
+    Writing a point $x \in S_n$ in barycentric coordinates $(x_0, \dots, x_n)$
+    relative to the corner vertices $0, e_1, \dots, e_n$ (so $x_i \ge 0$ and
+    $\sum_i x_i = 1$), the \emph{carrier face} of $x$ is the closed face of $S_n$
+    spanned by the corner vertices indexed by
+    $\mathrm{supp}(x) = \{\, i : x_i > 0 \,\}$; it is the smallest face of $S_n$
+    containing $x$.
+\end{definition}
+
+\begin{definition}[Labeling and Sperner labeling]
+    \label{def:sperner-labeling}
+    \lean{LeanEval.Topology.IsSpernerLabeling}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{def:triangulation, def:carrier-face}
+    \leanok
+    A \emph{labeling} of a triangulation $T$ of $S_n$ is a function $\ell$ from
+    its vertex set to $\{0, 1, \dots, n\}$. It is a \emph{Sperner labeling} if
+    $\ell(v) \in \mathrm{supp}(v)$ for every vertex $v$, i.e.\ each vertex
+    receives a label belonging to the index set of its carrier face. An
+    $(n-1)$-face of $T$ is a \emph{door} if its $n$ vertices carry exactly the
+    labels $\{0, \dots, n-1\}$. A maximal cell is \emph{rainbow} if its $n+1$
+    vertices carry all $n+1$ distinct labels $\{0, \dots, n\}$.
+\end{definition}
+
+\begin{definition}[Incidence model of a triangulation]
+    \label{def:triangulation-model}
+    \lean{LeanEval.Topology.triangulationModel}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{def:triangulation, def:sperner-labeling, def:incidence-model}
+    Given a Sperner-labeled triangulation $T$ of $S_n$, its associated
+    \emph{labeled incidence model} (\Cref{def:incidence-model}) has the maximal
+    cells of $T$ as cells, the $(n-1)$-faces of $T$ as facets, incidence given by
+    ``is a face of'' (i.e.\ $\mathrm{Inc}(C, F)$ iff $F \subseteq C$), boundary
+    predicate $\partial F$ given by $\mathrm{conv}(F) \subseteq \partial S_n$, and
+    labels the vertex labels of $T$. The facet multiset of $F$ is the multiset of
+    labels of its $n$ vertices, which depends only on $F$; deleting from a maximal
+    cell $C \supseteq F$ the label of the unique vertex of $C$ outside $F$
+    recovers it, so the compatibility axiom holds. Doors and rainbow cells of the
+    model coincide with the geometric doors and rainbow maximal cells of $T$.
+\end{definition}
+
+\begin{lemma}[A facet spans an affine hyperplane]
+    \label{lem:facet-hyperplane}
+    \lean{LeanEval.Topology.facet_hyperplane}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{def:triangulation}
+    The affine span $H$ of the $n$ vertices of an $(n-1)$-face $F$ of a
+    triangulation of $S_n$ is an affine hyperplane of $E_n$ (codimension $1$),
+    and $E_n \setminus H$ has exactly two connected components, the two open
+    half-spaces $H^+, H^-$ bounded by $H$.
+\end{lemma}
+\begin{proof}
+    \uses{def:triangulation}
+    The $n$ vertices of $F$ are affinely independent, so $H$ is an affine
+    subspace whose direction has dimension $n-1$, a hyperplane. The complement of
+    an affine hyperplane in $E_n$ is the disjoint union of the two open
+    half-spaces cut out by any defining affine functional (\texttt{AffineMap}
+    to $\mathbb R$ with the two strict sign conditions).
+\end{proof}
+
+\begin{lemma}[An incident cell lies on one side of its facet]
+    \label{lem:cell-one-side}
+    \lean{LeanEval.Topology.cell_one_side}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{lem:facet-hyperplane, def:triangulation}
+    If a maximal cell $C$ has the $(n-1)$-face $F$ as a face, its remaining
+    vertex $w$ lies off the hyperplane $H = \mathrm{aff}(F)$, and $C$ is contained
+    in the closed half-space on $w$'s side, with the relative interior of $C$ in
+    the corresponding open half-space.
+\end{lemma}
+\begin{proof}
+    \uses{lem:facet-hyperplane, def:triangulation}
+    Write $C = F \cup \{w\}$. Affine independence of the $n+1$ vertices of $C$
+    forces $w \notin H$, so $w \in H^+$ say. As $\mathrm{conv}(C)$ is the convex
+    hull of points of $H \cup \{w\}$, all in the closed half-space $\overline{H^+}$,
+    convexity gives $\mathrm{conv}(C) \subseteq \overline{H^+}$, and any point with
+    positive $w$-barycentric weight lies in $H^+$.
+\end{proof}
+
+\begin{lemma}[At most one incident cell per side]
+    \label{lem:one-cell-per-side}
+    \lean{LeanEval.Topology.one_cell_per_side}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{lem:cell-one-side, def:triangulation}
+    Two distinct maximal cells both having $F$ as a face lie on opposite sides of
+    $H = \mathrm{aff}(F)$; equivalently each open side $H^\pm$ contains the
+    relative interior of at most one maximal cell incident to $F$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:cell-one-side, def:triangulation}
+    Suppose maximal cells $C \ne C'$ both contain $F$ and, by
+    \Cref{lem:cell-one-side}, both have relative interior in $H^+$. By the
+    face-to-face axiom $\mathrm{conv}(C) \cap \mathrm{conv}(C') =
+    \mathrm{conv}(C \cap C')$ is a common face containing $F$, hence equal to $F$
+    or to a cell of dimension $\ge n$. The latter forces $C = C'$; the former is
+    impossible because two distinct $n$-simplices sharing the facet $F$ and lying
+    on the same side overlap in a neighborhood of a relative-interior point of
+    $F$ beyond $F$ itself. So at most one incident maximal cell occupies each
+    open side.
+\end{proof}
+
+\begin{lemma}[Both sides of an interior facet are occupied]
+    \label{lem:interior-facet-both-sides}
+    \lean{LeanEval.Topology.interior_facet_both_sides}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{lem:facet-hyperplane, def:triangulation}
+    If an $(n-1)$-face $F$ is not contained in $\partial S_n$, then a
+    relative-interior point of $F$ lies in the topological interior of $S_n$, and
+    each open side $H^\pm$ contains the relative interior of some maximal cell
+    incident to $F$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:facet-hyperplane, def:triangulation}
+    Pick $p$ in the relative interior of $F$. Since $F \not\subseteq \partial
+    S_n$, $p$ is an interior point of $S_n$, so a small ball $B$ around $p$ lies
+    in $S_n$ and meets both open half-spaces $H^\pm$. By the covering axiom each
+    point of $B$ on a given side lies in some maximal cell; a point close enough
+    to $p$ and strictly on one side lies in a maximal cell having $F$ as a face on
+    that side. Thus both sides are occupied.
+\end{proof}
+
+\begin{lemma}[A boundary facet is occupied on one side only]
+    \label{lem:boundary-facet-one-side}
+    \lean{LeanEval.Topology.boundary_facet_one_side}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{lem:facet-hyperplane, def:triangulation}
+    If an $(n-1)$-face $F$ satisfies $\mathrm{conv}(F) \subseteq \partial S_n$,
+    then near a relative-interior point of $F$ the set $S_n$ lies in one closed
+    half-space of $H = \mathrm{aff}(F)$, so only one open side carries the
+    relative interior of a maximal cell incident to $F$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:facet-hyperplane, def:triangulation}
+    A facet of $S_n$ lies in a supporting affine hyperplane of the convex set
+    $S_n$, which (where it meets the relative interior of $F$) coincides with
+    $H$; on one side of a supporting hyperplane $S_n$ is empty. Hence no maximal
+    cell has relative interior on that side, and by the covering axiom the other
+    side is occupied.
+\end{proof}
+
+\begin{lemma}[Door incidence]
+    \label{lem:door-incidence}
+    \lean{LeanEval.Topology.door_incidence}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{lem:interior-facet-both-sides, lem:one-cell-per-side, lem:boundary-facet-one-side, lem:cell-one-side}
+    In a triangulation of $S_n$, an $(n-1)$-face not contained in the topological
+    boundary $\partial S_n$ is a face of exactly two maximal cells, while an
+    $(n-1)$-face contained in $\partial S_n$ is a face of exactly one maximal
+    cell.
+\end{lemma}
+\begin{proof}
+    \uses{lem:interior-facet-both-sides, lem:one-cell-per-side, lem:boundary-facet-one-side, lem:cell-one-side}
+    Every incident maximal cell occupies exactly one open side of $H$
+    (\Cref{lem:cell-one-side}), and each side carries at most one
+    (\Cref{lem:one-cell-per-side}). For an interior facet both sides are occupied
+    (\Cref{lem:interior-facet-both-sides}), giving exactly two; for a boundary
+    facet only one side is (\Cref{lem:boundary-facet-one-side}), giving exactly
+    one.
+\end{proof}
+
+\begin{lemma}[The triangulation model is balanced]
+    \label{lem:triangulation-model-balanced}
+    \lean{LeanEval.Topology.triangulation_model_balanced}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{def:triangulation-model, lem:door-incidence, def:balanced-model}
+    The labeled incidence model of a Sperner-labeled triangulation of $S_n$ is
+    balanced.
+\end{lemma}
+\begin{proof}
+    \uses{def:triangulation-model, lem:door-incidence}
+    The boundary predicate of the model is exactly $\mathrm{conv}(F) \subseteq
+    \partial S_n$, so balancedness -- interior facets incident to two cells and
+    boundary facets to one -- is precisely the statement of
+    \Cref{lem:door-incidence}.
+\end{proof}
+
+\begin{lemma}[The bottom facet is a triangulation of $S_{n-1}$]
+    \label{lem:facet-is-triangulation}
+    \lean{LeanEval.Topology.facet_is_triangulation}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{def:triangulation}
+    Let $T$ be a triangulation of $S_n$ with $n \ge 1$. The cells of $T$
+    contained in $\{x_n = 0\}$, transported by the affine isomorphism dropping the
+    last coordinate, form a triangulation of $S_{n-1}$.
+\end{lemma}
+\begin{proof}
+    \uses{def:triangulation}
+    The set $\{x_n = 0\} \cap S_n$ is the closed face spanned by
+    $0, e_1, \dots, e_{n-1}$, affinely isomorphic to $S_{n-1}$. Restricting a
+    triangulation to a closed face of $S_n$ preserves affine independence,
+    closure under faces, and the face-to-face condition; purity and covering for
+    the face follow because every point of the facet lies in a maximal cell of
+    $T$ whose intersection with the facet is a maximal $(n-1)$-cell of the face.
+    Transporting by the affine isomorphism gives a triangulation of $S_{n-1}$.
+\end{proof}
+
+\begin{lemma}[The restricted labeling is Sperner]
+    \label{lem:facet-labeling-sperner}
+    \lean{LeanEval.Topology.facet_labeling_sperner}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{lem:facet-is-triangulation, def:sperner-labeling, def:carrier-face}
+    The labels of $T$ restrict, on the triangulation of $S_{n-1}$ of
+    \Cref{lem:facet-is-triangulation}, to a Sperner labeling, with all labels
+    lying in $\{0, \dots, n-1\}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:facet-is-triangulation, def:sperner-labeling, def:carrier-face}
+    A vertex $v$ in $\{x_n = 0\}$ has $x_n(v) = 0$, so $n \notin \mathrm{supp}(v)$,
+    and the Sperner condition $\ell(v) \in \mathrm{supp}(v)$ forces
+    $\ell(v) \in \{0, \dots, n-1\}$. The carrier-face condition relative to
+    $S_{n-1}$ is the restriction of that for $S_n$, so the labeling is Sperner.
+\end{proof}
+
+\begin{lemma}[Restriction to a boundary facet]
+    \label{lem:facet-restriction}
+    \lean{LeanEval.Topology.facet_restriction}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{lem:facet-is-triangulation, lem:facet-labeling-sperner}
+    Let $T$ be a Sperner-labeled triangulation of $S_n$ with $n \ge 1$. The faces
+    of $T$ contained in $\{x_n = 0\}$, identified with $S_{n-1}$, form a
+    triangulation of $S_{n-1}$ whose inherited labeling is Sperner.
+\end{lemma}
+\begin{proof}
+    \uses{lem:facet-is-triangulation, lem:facet-labeling-sperner}
+    Combine \Cref{lem:facet-is-triangulation} (the restricted complex is a
+    triangulation of $S_{n-1}$) with \Cref{lem:facet-labeling-sperner} (its
+    inherited labeling is Sperner).
+\end{proof}
+
+\begin{lemma}[Boundary doors lie on the bottom facet]
+    \label{lem:boundary-doors-bottom}
+    \lean{LeanEval.Topology.boundary_doors_bottom}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{def:sperner-labeling}
+    Every door of $T$ contained in $\partial S_n$ lies on the facet
+    $\{x_n = 0\}$.
+\end{lemma}
+\begin{proof}
+    \uses{def:sperner-labeling}
+    The boundary facets of $S_n$ are the faces $\{x_j = 0\}$ opposite the corner
+    vertices $j \in \{0, \dots, n\}$. On $\{x_j = 0\}$ every vertex $v$ has
+    $x_j(v) = 0$, so $j \notin \mathrm{supp}(v)$ and the Sperner condition gives
+    $\ell(v) \ne j$; thus label $j$ is absent from any cell on that facet. A door
+    carries every label in $\{0, \dots, n-1\}$, so if it lies on $\{x_j = 0\}$
+    then $j \notin \{0, \dots, n-1\}$, i.e.\ $j = n$. Hence the door lies on
+    $\{x_n = 0\}$.
+\end{proof}
+
+\begin{lemma}[Bottom-facet doors are rainbow cells]
+    \label{lem:bottom-facet-doors-rainbow}
+    \lean{LeanEval.Topology.bottom_facet_doors_rainbow}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{lem:facet-restriction, def:sperner-labeling}
+    Under the identification of \Cref{lem:facet-restriction}, the doors of $T$
+    lying on $\{x_n = 0\}$ are exactly the rainbow maximal cells of the induced
+    Sperner-labeled triangulation of $S_{n-1}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:facet-restriction, def:sperner-labeling}
+    A door on $\{x_n = 0\}$ is an $(n-1)$-cell whose $n$ vertices carry exactly
+    the labels $\{0, \dots, n-1\}$; under the identification this is precisely an
+    $(n-1)$-dimensional maximal cell of the induced triangulation of $S_{n-1}$ all
+    of whose $n$ vertices carry distinct labels $\{0, \dots, n-1\}$, i.e.\ a
+    rainbow cell.
+\end{proof}
+
+\begin{lemma}[Boundary doors are the rainbow cells of the facet]
+    \label{lem:boundary-doors-facet}
+    \lean{LeanEval.Topology.boundary_doors_facet}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{lem:boundary-doors-bottom, lem:bottom-facet-doors-rainbow}
+    The doors of $T$ contained in $\partial S_n$ are exactly the rainbow maximal
+    cells of the induced Sperner-labeled triangulation of $S_{n-1}$ on
+    $\{x_n = 0\}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:boundary-doors-bottom, lem:bottom-facet-doors-rainbow}
+    By \Cref{lem:boundary-doors-bottom} every boundary door lies on $\{x_n = 0\}$,
+    and by \Cref{lem:bottom-facet-doors-rainbow} the doors there are exactly the
+    rainbow cells of the induced triangulation of $S_{n-1}$.
+\end{proof}
+
+\begin{lemma}[Sperner's lemma]
+    \label{lem:sperner}
+    \lean{LeanEval.Topology.sperner}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{lem:sperner-parity, lem:triangulation-model-balanced, lem:boundary-doors-facet}
+    Every Sperner-labeled triangulation of $S_n$ has an odd number of rainbow
+    maximal cells; in particular it has at least one rainbow cell.
+\end{lemma}
+\begin{proof}
+    \uses{lem:sperner-parity, lem:triangulation-model-balanced, lem:boundary-doors-facet}
+    Induct on $n$. For $n = 0$ the single vertex is forced to carry label $0$,
+    giving exactly one rainbow cell. For $n \ge 1$, apply \Cref{lem:sperner-parity}
+    to the model of $T$, which is balanced by
+    \Cref{lem:triangulation-model-balanced}: the number of rainbow cells has the
+    same parity as the number of boundary doors. By \Cref{lem:boundary-doors-facet}
+    that count equals the number of rainbow cells of the induced Sperner-labeled
+    triangulation of $S_{n-1}$, which is odd by the induction hypothesis. Hence
+    $S_n$ has an odd, so nonzero, number of rainbow cells.
+\end{proof}
+
+\section{Triangulations of small mesh}
+
+\begin{definition}[Mesh]
+    \label{def:mesh}
+    \lean{LeanEval.Topology.Triangulation.mesh}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{def:triangulation}
+    \leanok
+    The \emph{mesh} of a triangulation is the maximum diameter of its maximal
+    cells.
+\end{definition}
+
+\begin{definition}[Barycentric subdivision]
+    \label{def:barycentric-subdivision}
+    \lean{LeanEval.Topology.barycentricSubdivision}
+    \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
+    \uses{def:triangulation}
+    The \emph{barycentric subdivision} of a triangulation $T$ of $S_n$ is the
+    complex whose maximal cells are, for each maximal cell
+    $\mathrm{conv}\{v_0, \dots, v_n\}$ of $T$ and each chain
+    $F_0 \subsetneq \dots \subsetneq F_n$ of its faces ordered by inclusion, the
+    convex hull of the barycenters $b(F_0), \dots, b(F_n)$ of that chain.
+\end{definition}
+
+\begin{lemma}[Chains of faces cover a simplex]
+    \label{lem:bary-chain-cover}
+    \lean{LeanEval.Topology.bary_chain_cover}
+    \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
+    \uses{def:barycentric-subdivision}
+    For a single maximal cell, the chain simplices
+    $\mathrm{conv}\{b(F_0), \dots, b(F_n)\}$ over the strictly increasing flags
+    $F_0 \subsetneq \dots \subsetneq F_n$ of its faces cover the cell and have
+    pairwise disjoint relative interiors; there are $n!$ of them.
+\end{lemma}
+\begin{proof}
+    \uses{def:barycentric-subdivision}
+    A point of the cell, written in barycentric coordinates, determines (after
+    sorting its coordinates) a unique maximal flag of faces and expresses the
+    point as a convex combination of the corresponding barycenters; this is the
+    classical order-complex description, giving the $n!$ flags indexed by
+    permutations, a cover, and disjoint relative interiors.
+\end{proof}
+
+\begin{lemma}[Chain barycenters are affinely independent]
+    \label{lem:bary-chain-indep}
+    \lean{LeanEval.Topology.bary_chain_indep}
+    \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
+    \uses{def:barycentric-subdivision}
+    The barycenters $b(F_0), \dots, b(F_n)$ of a strictly increasing flag
+    $F_0 \subsetneq \dots \subsetneq F_n$ are affinely independent, so their
+    convex hull is a nondegenerate $n$-simplex.
+\end{lemma}
+\begin{proof}
+    \uses{def:barycentric-subdivision}
+    Each $b(F_k)$ involves exactly the vertices of $F_k$ with positive weight,
+    and the supports $F_0 \subsetneq \dots \subsetneq F_n$ are strictly nested, so
+    no $b(F_k)$ is an affine combination of the others; hence the family is
+    affinely independent.
+\end{proof}
+
+\begin{lemma}[Subdivisions match face-to-face]
+    \label{lem:bary-face-to-face}
+    \lean{LeanEval.Topology.bary_face_to_face}
+    \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
+    \uses{def:barycentric-subdivision}
+    On a face shared by two maximal cells, the chain simplices induced from
+    either side coincide, so the subdivisions of adjacent maximal cells agree on
+    their common face.
+\end{lemma}
+\begin{proof}
+    \uses{def:barycentric-subdivision}
+    The barycenter of a face depends only on that face, not on the maximal cell
+    containing it, and the flags lying inside the shared face are the same when
+    read from either side; hence the chain simplices supported on the shared face
+    are identical.
+\end{proof}
+
+\begin{lemma}[Barycentric subdivision covers the same space]
+    \label{lem:barycentric-same-space}
+    \lean{LeanEval.Topology.barycentric_same_space}
+    \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
+    \uses{lem:bary-chain-cover, lem:bary-chain-indep, lem:bary-face-to-face, def:triangulation}
+    The barycentric subdivision of a triangulation of $S_n$ is again a
+    triangulation of $S_n$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:bary-chain-cover, lem:bary-chain-indep, lem:bary-face-to-face}
+    The chain simplices are nondegenerate $n$-simplices
+    (\Cref{lem:bary-chain-indep}), they cover each maximal cell with disjoint
+    relative interiors (\Cref{lem:bary-chain-cover}), and the pieces of adjacent
+    cells agree on shared faces (\Cref{lem:bary-face-to-face}); hence they satisfy
+    the triangulation axioms with the same underlying space $S_n$.
+\end{proof}
+
+\begin{lemma}[Barycenter distance inequality]
+    \label{lem:barycenter-dist-bound}
+    \lean{LeanEval.Topology.barycenter_dist_bound}
+    \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
+    Let $G$ be a face of dimension $d$ of a simplex and $F$ a nonempty face of
+    $G$. Then $\lVert b(F) - b(G) \rVert \le \frac{d}{d+1}\,\mathrm{diam}(G)$,
+    where $b(\cdot)$ denotes the barycenter (centroid) of the vertex set.
+\end{lemma}
+\begin{proof}
+    The barycenter $b(G)$ is the centroid of the $d+1$ vertices of $G$
+    (\texttt{Finset.centroid\_eq\_centerMass}), and $b(F)$ is a convex
+    combination of vertices of $G$. By the convex-combination distance estimate
+    \texttt{Convexity.dist\_sConvexComb\_right\_le}, $\lVert b(F) - b(G) \rVert$
+    is at most $\max_v \lVert v - b(G) \rVert$ over vertices $v$ of $G$. For each
+    vertex $v$, $v - b(G) = \frac{1}{d+1}\sum_{w}(v - w)$ averages the $d$ nonzero
+    differences $v - w$, each of norm $\le \mathrm{diam}(G)$, giving
+    $\lVert v - b(G)\rVert \le \frac{d}{d+1}\,\mathrm{diam}(G)$.
+\end{proof}
+
+\begin{lemma}[Barycentric subdivision shrinks the mesh]
+    \label{lem:barycentric-shrink}
+    \lean{LeanEval.Topology.barycentric_shrink}
+    \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
+    \uses{def:mesh, def:barycentric-subdivision, lem:barycentric-same-space, lem:barycenter-dist-bound}
+    The mesh of the barycentric subdivision of a triangulation of $S_n$ is at
+    most $\frac{n}{n+1}$ times the mesh of the original.
+\end{lemma}
+\begin{proof}
+    \uses{lem:barycenter-dist-bound}
+    The diameter of a chain simplex is the longest of its edges
+    $[\,b(F),\,b(G)\,]$ with $F \subsetneq G$ inside one maximal cell of
+    dimension $d \le n$. By \Cref{lem:barycenter-dist-bound} each such edge has
+    length at most $\frac{d}{d+1}\,\mathrm{diam}(G) \le \frac{n}{n+1}$ times the
+    old mesh (using that $t \mapsto \frac{t}{t+1}$ is increasing). Taking the
+    maximum over chain simplices bounds the new mesh by $\frac{n}{n+1}$ times the
+    old.
+\end{proof}
+
+\begin{lemma}[Iterated subdivision]
+    \label{lem:iterated-subdivision}
+    \lean{LeanEval.Topology.iterated_subdivision}
+    \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
+    \uses{lem:barycentric-shrink}
+    Applying barycentric subdivision $k$ times to the trivial triangulation of
+    $S_n$ (whose single maximal cell is $S_n$) yields a triangulation of mesh at
+    most $\left(\frac{n}{n+1}\right)^k \operatorname{diam}(S_n)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:barycentric-shrink}
+    Induct on $k$. For $k = 0$ the mesh is $\operatorname{diam}(S_n)$. The
+    inductive step multiplies the bound by $\frac{n}{n+1}$ via
+    \Cref{lem:barycentric-shrink}.
+\end{proof}
+
+\begin{lemma}[Fine triangulations exist]
+    \label{lem:fine-triangulation}
+    \lean{LeanEval.Topology.fine_triangulation}
+    \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
+    \uses{lem:iterated-subdivision}
+    For every $\varepsilon > 0$ there is a triangulation of $S_n$ with mesh less
+    than $\varepsilon$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:iterated-subdivision}
+    Since $\frac{n}{n+1} < 1$, the bound
+    $\left(\frac{n}{n+1}\right)^k \operatorname{diam}(S_n)$ of
+    \Cref{lem:iterated-subdivision} tends to $0$ as $k \to \infty$; choose $k$
+    large enough that it falls below $\varepsilon$.
+\end{proof}
+
+\section{Brouwer for the simplex}
+
+\begin{lemma}[A non-increasing positive coordinate exists]
+    \label{lem:label-pigeonhole}
+    \lean{LeanEval.Topology.label_pigeonhole}
+    \leanfile{LeanEval/Topology/Brouwer/Simplex.lean}
+    Let $(x_0, \dots, x_n)$ and $(y_0, \dots, y_n)$ be nonnegative tuples with
+    $\sum_i x_i = \sum_i y_i = 1$. Then there is an index $i$ with $x_i > 0$ and
+    $y_i \le x_i$.
+\end{lemma}
+\begin{proof}
+    Restrict to $J = \{\, i : x_i > 0 \,\}$, nonempty since $\sum_i x_i = 1$. On
+    the complement $x_i = 0$, so $\sum_{i \in J} x_i = 1 \ge \sum_{i \in J} y_i$.
+    Applying \texttt{Finset.exists\_le\_of\_sum\_le} to this inequality over the
+    nonempty $J$ yields some $i \in J$ with $y_i \le x_i$, and $i \in J$ means
+    $x_i > 0$.
+\end{proof}
+
+\begin{definition}[Labeling induced by a self-map]
+    \label{def:induced-labeling}
+    \lean{LeanEval.Topology.inducedLabeling}
+    \leanfile{LeanEval/Topology/Brouwer/Simplex.lean}
+    \uses{def:triangulation, lem:label-pigeonhole}
+    \leanok
+    Let $g : S_n \to S_n$ be continuous, written in barycentric coordinates so
+    that points of $S_n$ correspond to tuples $(x_0, \dots, x_n)$ with
+    $x_i \ge 0$ and $\sum_i x_i = 1$. Given a triangulation, label each vertex
+    $v$ by an index $i$ with $x_i(v) > 0$ and $x_i(g(v)) \le x_i(v)$; such an
+    index exists by \Cref{lem:label-pigeonhole} applied to the coordinate tuples
+    of $v$ and $g(v)$.
+\end{definition}
+
+\begin{lemma}[The induced labeling is Sperner]
+    \label{lem:induced-is-sperner}
+    \lean{LeanEval.Topology.induced_is_sperner}
+    \leanfile{LeanEval/Topology/Brouwer/Simplex.lean}
+    \uses{def:induced-labeling, def:sperner-labeling}
+    For any continuous $g : S_n \to S_n$ and any triangulation, the induced
+    labeling of \Cref{def:induced-labeling} is a Sperner labeling.
+\end{lemma}
+\begin{proof}
+    \uses{def:induced-labeling}
+    A vertex $v$ on the face carried by the index set $I$ has $x_i(v) = 0$ for
+    $i \notin I$. Its induced label is an index $i$ with $x_i(v) > 0$, hence
+    $i \in I$. So the labeling respects carrier faces.
+\end{proof}
+
+\begin{lemma}[Uniform coordinate modulus]
+    \label{lem:coordinate-modulus}
+    \lean{LeanEval.Topology.coordinate_modulus}
+    \leanfile{LeanEval/Topology/Brouwer/Simplex.lean}
+    Fix a continuous $g : S_n \to S_n$. There is a function
+    $\omega_g : (0, \infty) \to (0, \infty)$ with $\omega_g(\varepsilon) \to 0$
+    as $\varepsilon \to 0$ such that for all $p, q \in S_n$ with
+    $\lVert p - q \rVert < \varepsilon$ and all $i$ one has
+    $|x_i(p) - x_i(q)| \le \omega_g(\varepsilon)$ and
+    $|x_i(g(p)) - x_i(g(q))| \le \omega_g(\varepsilon)$.
+\end{lemma}
+\begin{proof}
+    Each barycentric coordinate $x_i$ is continuous, and $S_n$ is compact, so by
+    Heine--Cantor (\texttt{IsCompact.uniformContinuousOn\_of\_continuous}) the maps
+    $x_i$ and $x_i \circ g$ are uniformly continuous on $S_n$. Taking $\omega_g$
+    to be the (finite) maximum over the $2(n+1)$ maps of their moduli of uniform
+    continuity gives a single modulus with the stated bounds and
+    $\omega_g(\varepsilon) \to 0$.
+\end{proof}
+
+\begin{lemma}[Rainbow cell has a witness vertex per label]
+    \label{lem:rainbow-vertex-bound}
+    \lean{LeanEval.Topology.rainbow_vertex_bound}
+    \leanfile{LeanEval/Topology/Brouwer/Simplex.lean}
+    \uses{def:induced-labeling}
+    If $C$ is a rainbow cell for the labeling induced by $g$, then for each $i$
+    there is a vertex $v_i$ of $C$ labeled $i$, and by construction it satisfies
+    $x_i(g(v_i)) \le x_i(v_i)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:induced-labeling}
+    Rainbow means the $n+1$ vertices of $C$ carry all distinct labels
+    $\{0, \dots, n\}$, so for each $i$ exactly one vertex $v_i$ is labeled $i$. By
+    \Cref{def:induced-labeling} a vertex labeled $i$ satisfies
+    $x_i(g(v_i)) \le x_i(v_i)$.
+\end{proof}
+
+\begin{lemma}[One-sided coordinate bound on a rainbow cell]
+    \label{lem:rainbow-one-sided}
+    \lean{LeanEval.Topology.rainbow_one_sided}
+    \leanfile{LeanEval/Topology/Brouwer/Simplex.lean}
+    \uses{lem:rainbow-vertex-bound, lem:coordinate-modulus}
+    Let $\omega_g$ be the modulus of \Cref{lem:coordinate-modulus}. If a
+    triangulation has mesh $< \varepsilon$ and $C$ is a rainbow cell for the
+    induced labeling, then every $x \in C$ satisfies
+    $x_i(g(x)) \le x_i(x) + \omega_g(\varepsilon)$ for all $i$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:rainbow-vertex-bound, lem:coordinate-modulus}
+    Fix $i$ and let $v_i$ be the witness vertex of \Cref{lem:rainbow-vertex-bound},
+    so $x_i(g(v_i)) \le x_i(v_i)$. Since $\mathrm{diam}(C) < \varepsilon$ we have
+    $\lVert x - v_i \rVert < \varepsilon$, so \Cref{lem:coordinate-modulus} gives
+    $x_i(g(x)) \le x_i(g(v_i)) + \omega_g(\varepsilon)$ and
+    $x_i(v_i) \le x_i(x) + \omega_g(\varepsilon)$. Chaining the three inequalities
+    yields $x_i(g(x)) \le x_i(x) + 2\,\omega_g(\varepsilon)$; replacing $\omega_g$
+    by $2\,\omega_g$ (still a modulus tending to $0$) gives the stated bound.
+\end{proof}
+
+\begin{lemma}[A rainbow cell is approximately fixed]
+    \label{lem:rainbow-approx-fixed}
+    \lean{LeanEval.Topology.rainbow_approx_fixed}
+    \leanfile{LeanEval/Topology/Brouwer/Simplex.lean}
+    \uses{lem:rainbow-one-sided}
+    In the setting of \Cref{lem:rainbow-one-sided}, every $x$ in a rainbow cell
+    $C$ satisfies
+    $|x_i(g(x)) - x_i(x)| \le (n+1)\,\omega_g(\varepsilon)$ for all $i$; hence
+    $C$ contains a point within $(n+1)\,\omega_g(\varepsilon)$ of being fixed.
+\end{lemma}
+\begin{proof}
+    \uses{lem:rainbow-one-sided}
+    By \Cref{lem:rainbow-one-sided}, $x_i(g(x)) - x_i(x) \le \omega_g(\varepsilon)$
+    for every $i$. Since $\sum_i x_i(g(x)) = \sum_i x_i(x) = 1$, the displacements
+    sum to zero, so for each fixed $i$,
+    \[
+        x_i(x) - x_i(g(x)) = \sum_{j \ne i}\bigl(x_j(g(x)) - x_j(x)\bigr)
+        \le n\,\omega_g(\varepsilon).
+    \]
+    Combining the two one-sided estimates gives
+    $|x_i(g(x)) - x_i(x)| \le (n+1)\,\omega_g(\varepsilon)$.
+\end{proof}
+
+\begin{lemma}[Vanishing displacement yields a fixed point]
+    \label{lem:approx-fixed-limit}
+    \lean{LeanEval.Topology.approx_fixed_limit}
+    \leanfile{LeanEval/Topology/Brouwer/Simplex.lean}
+    \uses{def:fpp}
+    Let $K \subseteq E_d$ be compact and $g : K \to K$ continuous. If there is a
+    sequence $(x_k)$ in $K$ with $\lVert g(x_k) - x_k \rVert \to 0$, then $g$ has
+    a fixed point in $K$.
+\end{lemma}
+\begin{proof}
+    By compactness of $K$, the sequence $(x_k)$ has a subsequence converging to
+    some $x \in K$. Along it $g(x_{k_j}) \to g(x)$ by continuity, while
+    $g(x_{k_j}) - x_{k_j} \to 0$, so
+    $g(x) - x = \lim_j \bigl(g(x_{k_j}) - x_{k_j}\bigr) = 0$, i.e.\ $g(x) = x$.
+\end{proof}
+
+\begin{theorem}[Brouwer for the standard simplex]
+    \label{thm:simplex-brouwer}
+    \lean{LeanEval.Topology.simplex_brouwer}
+    \leanfile{LeanEval/Topology/Brouwer/Simplex.lean}
+    \uses{def:fpp, lem:sperner, lem:fine-triangulation, lem:induced-is-sperner, lem:rainbow-approx-fixed, lem:approx-fixed-limit, lem:coordinate-modulus}
+    The corner simplex $S_n$ has the fixed-point property.
+\end{theorem}
+\begin{proof}
+    \uses{lem:sperner, lem:fine-triangulation, lem:induced-is-sperner, lem:rainbow-approx-fixed, lem:approx-fixed-limit, lem:coordinate-modulus}
+    Let $g : S_n \to S_n$ be continuous and let $\omega_g$ be the combined
+    coordinate modulus furnished by \Cref{lem:coordinate-modulus} (all
+    uniform-continuity plumbing is confined to that lemma; what follows is pure
+    sequence assembly). For each $k$ choose by \Cref{lem:fine-triangulation} a
+    triangulation of mesh $< 1/k$; its induced labeling is Sperner by
+    \Cref{lem:induced-is-sperner}, so by \Cref{lem:sperner} it has a rainbow
+    cell, and by \Cref{lem:rainbow-approx-fixed} a point $x_k$ with
+    $\lVert g(x_k) - x_k \rVert \le (n+1)\,\omega_g(1/k)$. Since
+    $\omega_g(1/k) \to 0$, \Cref{lem:approx-fixed-limit} applied to the compact
+    $S_n$ produces a point $x$ with $g(x) = x$.
+\end{proof}
+
+\section{Reduction to the simplex}
+
+\begin{lemma}[Full-dimensional convex bodies are homeomorphic to balls]
+    \label{lem:convex-body-homeo-ball}
+    \lean{LeanEval.Topology.convex_body_homeo_ball}
+    \leanfile{LeanEval/Topology/Brouwer/Reduction.lean}
+    Let $B \subseteq E_m$ be convex, bounded, and with nonempty interior. Then
+    its closure is homeomorphic to the closed unit ball of $E_m$; in particular a
+    compact convex set in $E_m$ with nonempty interior is homeomorphic to that
+    ball.
+\end{lemma}
+\begin{proof}
+    Mathlib's
+    \texttt{exists\_homeomorph\_image\_interior\_closure\_frontier\_eq\_unitBall}
+    provides a self-homeomorphism of $E_m$ carrying $\operatorname{interior} B$
+    to the open unit ball and $\operatorname{closure} B$ to the closed unit ball.
+    Restricting this homeomorphism to $\operatorname{closure} B$ gives a
+    homeomorphism onto the closed unit ball of $E_m$.
+\end{proof}
+
+\begin{lemma}[A nonempty convex set has nonempty relative interior]
+    \label{lem:convex-relint-nonempty}
+    \lean{LeanEval.Topology.convex_relint_nonempty}
+    \leanfile{LeanEval/Topology/Brouwer/Reduction.lean}
+    Every nonempty convex set $K \subseteq E_d$ has nonempty intrinsic (relative)
+    interior; equivalently, $K$ has nonempty interior inside its affine span.
+\end{lemma}
+\begin{proof}
+    This is \texttt{intrinsicInterior\_nonempty} (equivalently
+    \texttt{Set.Nonempty.intrinsicInterior}): for a convex set the intrinsic
+    interior is nonempty as soon as the set is, and the intrinsic interior is by
+    definition the interior taken within the affine span.
+\end{proof}
+
+\begin{lemma}[Reduction to full dimension]
+    \label{lem:affine-span-iso}
+    \lean{LeanEval.Topology.affine_span_iso}
+    \leanfile{LeanEval/Topology/Brouwer/Reduction.lean}
+    \uses{lem:convex-relint-nonempty}
+    Let $K \subseteq E_d$ be nonempty, compact, and convex, and let $m$ be the
+    dimension of its affine span $A$. Then there is an affine isometry of $A$
+    onto $E_m$ under which $K$ becomes a compact convex set with nonempty
+    interior (its relative interior) in $E_m$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:convex-relint-nonempty}
+    The affine span $A$ is an $m$-dimensional affine subspace of $E_d$, hence
+    carries an affine isometry onto $E_m$ (\texttt{AffineSubspace.isometryEquivMap}
+    composed with \texttt{AffineIsometryEquiv.ofTop}, using
+    \texttt{finrank\_euclideanSpace}). By \Cref{lem:convex-relint-nonempty} the
+    convex set $K$ has nonempty relative interior inside $A$, and its image under
+    the isometry is a compact convex subset of $E_m$ with nonempty interior.
+\end{proof}
+
+\begin{lemma}[Compact convex bodies are homeomorphic to balls]
+    \label{lem:convex-homeo-ball}
+    \lean{LeanEval.Topology.convex_homeo_ball}
+    \leanfile{LeanEval/Topology/Brouwer/Reduction.lean}
+    \uses{lem:convex-body-homeo-ball, lem:affine-span-iso}
+    Let $K \subseteq E_d$ be nonempty, compact, and convex. Then the subspace
+    $K$ is homeomorphic to the closed unit ball of $E_m$, where $m$ is the
+    dimension of the affine span of $K$ (with the closed ball of $E_0$
+    understood as a single point).
+\end{lemma}
+\begin{proof}
+    \uses{lem:convex-body-homeo-ball, lem:affine-span-iso}
+    By \Cref{lem:affine-span-iso} an affine isometry carries $K$ to a compact
+    convex set with nonempty interior in $E_m$, a homeomorphism of subspaces. By
+    \Cref{lem:convex-body-homeo-ball} that image is homeomorphic to the closed
+    unit ball of $E_m$; composing the two gives a homeomorphism of $K$ onto the
+    ball.
+\end{proof}
+
+\begin{lemma}[The closed ball has the fixed-point property]
+    \label{lem:ball-fpp}
+    \lean{LeanEval.Topology.ball_fpp}
+    \leanfile{LeanEval/Topology/Brouwer/Reduction.lean}
+    \uses{def:fpp, thm:simplex-brouwer, lem:fpp-homeo, lem:convex-homeo-ball}
+    For every $m$, the closed unit ball of $E_m$ has the fixed-point property.
+\end{lemma}
+\begin{proof}
+    \uses{thm:simplex-brouwer, lem:fpp-homeo, lem:convex-homeo-ball}
+    For $m = 0$ the ball is a single point and trivially has FPP. For $m \ge 1$,
+    the corner simplex $S_m$ is a nonempty compact convex body, hence by
+    \Cref{lem:convex-homeo-ball} homeomorphic to the closed unit ball of $E_m$.
+    As $S_m$ has FPP by \Cref{thm:simplex-brouwer}, the closed ball has FPP by
+    \Cref{lem:fpp-homeo}.
+\end{proof}
+
+\begin{lemma}[Compact convex sets have the fixed-point property]
+    \label{lem:convex-fpp}
+    \lean{LeanEval.Topology.convex_fpp}
+    \leanfile{LeanEval/Topology/Brouwer/Reduction.lean}
+    \uses{def:fpp, lem:convex-homeo-ball, lem:ball-fpp, lem:fpp-homeo}
+    Every nonempty compact convex set $K \subseteq E_d$, as a subspace, has the
+    fixed-point property.
+\end{lemma}
+\begin{proof}
+    \uses{lem:convex-homeo-ball, lem:ball-fpp, lem:fpp-homeo}
+    By \Cref{lem:convex-homeo-ball}, $K$ is homeomorphic to a closed unit ball,
+    which has FPP by \Cref{lem:ball-fpp}; transport along the homeomorphism via
+    \Cref{lem:fpp-homeo}.
+\end{proof}
+
+\begin{theorem}[Brouwer fixed-point theorem]
+    \label{thm:brouwer}
+    \lean{LeanEval.Topology.brouwer_fixed_point}
+    \leanfile{LeanEval/Topology/Brouwer.lean}
+    \uses{lem:convex-fpp, lem:fpp-ambient}
+    Let $K \subseteq E_d$ be nonempty, compact, and convex, and let
+    $f : E_d \to E_d$ be continuous on $K$ with $f(K) \subseteq K$. Then $f$ has
+    a fixed point in $K$: there exists $x \in K$ with $f(x) = x$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:convex-fpp, lem:fpp-ambient}
+    By \Cref{lem:convex-fpp} the subspace $K$ has the fixed-point property, and
+    \Cref{lem:fpp-ambient} converts this into an ambient fixed point for $f$,
+    given that $f$ is continuous on $K$ and maps $K$ into $K$.
+\end{proof}
 
 \end{document}

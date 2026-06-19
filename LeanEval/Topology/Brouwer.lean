@@ -1,5 +1,6 @@
 import Mathlib
 import EvalTools.Markers
+import LeanEval.Topology.Brouwer.Reduction
 
 namespace LeanEval
 namespace Topology
