@@ -106,7 +106,7 @@ theorem fine_triangulation {n} {ε : ℝ} (hε : 0 < ε) :
     nlinarith
   by_cases hM_zero : M = 0
   · refine ⟨barycentricSubdivision^[0] (trivialTriangulation n), ?_⟩
-    have h_iter := iterated_subdivision 0
+    have h_iter := iterated_subdivision (n := n) 0
     have h_mul : ((n : ℝ) / (n + 1 : ℝ)) ^ (0 : ℕ) * M = 0 := by simp [hM_zero]
     have h_mesh_nonpos : (barycentricSubdivision^[0] (trivialTriangulation n)).mesh ≤ 0 := by
       linarith
