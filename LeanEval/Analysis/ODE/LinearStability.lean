@@ -10,6 +10,7 @@ import Mathlib.LinearAlgebra.Matrix.Charpoly.Eigs
 import Mathlib.LinearAlgebra.UnitaryGroup
 import Mathlib.LinearAlgebra.Eigenspace.Basic
 import Mathlib.LinearAlgebra.Eigenspace.Matrix
+import LeanEval.Analysis.ODE.LinearStability.SchurTriangulation
 import EvalTools.Markers
 
 namespace LeanEval
@@ -138,7 +139,29 @@ lemma spectrum_exp_eq_schur {n : ℕ} (B : Matrix (Fin n) (Fin n) ℂ) :
       B = (U : Matrix (Fin n) (Fin n) ℂ) * T * star (U : Matrix (Fin n) (Fin n) ℂ) ∧
       spectrum ℂ (NormedSpace.exp B) = spectrum ℂ (NormedSpace.exp T) ∧
       spectrum ℂ B = spectrum ℂ T := by
-  sorry
+  set U := Matrix.schurTriangulationUnitary B with hUdef
+  set T : Matrix (Fin n) (Fin n) ℂ := (Matrix.schurTriangulation B).val with hTdef
+  have hB : B = (U : Matrix (Fin n) (Fin n) ℂ) * T * star (U : Matrix (Fin n) (Fin n) ℂ) :=
+    Matrix.schur_triangulation B
+  -- Conjugation by the unitary `U` commutes with the matrix exponential.
+  have hconj : ∀ X : Matrix (Fin n) (Fin n) ℂ,
+      NormedSpace.exp ((U : Matrix (Fin n) (Fin n) ℂ) * X * star (U : Matrix (Fin n) (Fin n) ℂ))
+        = (U : Matrix (Fin n) (Fin n) ℂ) * NormedSpace.exp X
+            * star (U : Matrix (Fin n) (Fin n) ℂ) := by
+    intro X
+    have h := Matrix.exp_units_conj (Unitary.toUnits U) X
+    simpa using h
+  refine ⟨T, U, (Matrix.schurTriangulation B).property, hB, ?_, ?_⟩
+  · -- `σ(exp B) = σ(exp T)`
+    have hexp : NormedSpace.exp B
+        = (U : Matrix (Fin n) (Fin n) ℂ) * NormedSpace.exp T
+            * star (U : Matrix (Fin n) (Fin n) ℂ) := by
+      rw [hB, hconj]
+    rw [hexp]
+    exact Unitary.spectrum_star_right_conjugate
+  · -- `σ(B) = σ(T)`
+    rw [hB]
+    exact Unitary.spectrum_star_right_conjugate
 
 /-- **Reverse spectral mapping for the exponential.** Every `z ∈ σ(e^{B})` is `e^{μ}`
 for some `μ ∈ σ(B)`. -/
