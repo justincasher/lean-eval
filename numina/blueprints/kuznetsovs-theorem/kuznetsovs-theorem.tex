@@ -100,6 +100,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_reduceStep}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
     \uses{lem:primrec-eq-letter}
+    \leanok
     The single step of free-group reduction, which prepends a letter $a$ to an
     already-reduced word $u$ and cancels it against the head of $u$ when they are
     inverse (the function folded by \texttt{FreeGroup.reduce}), is a
@@ -120,6 +121,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_reduce}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
     \uses{lem:primrec-reduceStep}
+    \leanok
     The map $w \mapsto \mathrm{FreeGroup.reduce}\,w$ on words is primitive
     recursive.
 \end{lemma}
@@ -387,6 +389,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mem_of_cert}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
     \uses{def:certificate, lem:mk-eval-eq-prod}
+    \leanok
     Let $S := \{\mathrm{FreeGroup.mk}\,r : r \in R\}$. If a certificate $c$
     satisfies $\mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) = \mathrm{FreeGroup.mk}\,w$,
     then $\mathrm{FreeGroup.mk}\,w \in \mathrm{normalClosure}\,S$.
@@ -738,6 +741,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.boone_higman_simple}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
     \uses{def:word-pred, lem:re-positive, lem:re-negative}
+    \leanok
     The word problem predicate $P$ of a finitely presented simple group is
     computable; that is, $\mathrm{ComputablePred}\,P$, the solvability of the word
     problem of $\varphi$.

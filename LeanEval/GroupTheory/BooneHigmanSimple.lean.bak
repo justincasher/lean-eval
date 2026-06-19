@@ -101,54 +101,7 @@ lemma collapse [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
     (w : Word n) :
     φ (FreeGroup.mk w) ≠ 1 ↔
       Subgroup.normalClosure (relatorSet R ∪ {FreeGroup.mk w}) = ⊤ := by
-  let S := relatorSet R
-  let N := Subgroup.normalClosure (S ∪ {FreeGroup.mk w})
-  have hN_ker : MonoidHom.ker φ ≤ N := by
-    rw [← hR]
-    apply Subgroup.normalClosure_mono
-    intro x hx
-    exact Set.mem_union_left {FreeGroup.mk w} hx
-  constructor
-  · intro hphi
-    have h_map : Subgroup.map φ N = Subgroup.normalClosure {φ (FreeGroup.mk w)} :=
-      map_normalClosure_insert φ hsurj hR (FreeGroup.mk w)
-    have h_map_eq_top : Subgroup.map φ N = ⊤ := by
-      rw [h_map]
-      exact normalClosure_singleton_top hphi
-    exact (top_iff_map_top φ hsurj hN_ker).mpr h_map_eq_top
-  · intro hN_top
-    by_contra! hphi
-    -- hphi : φ (FreeGroup.mk w) = 1
-    have h_mem : FreeGroup.mk w ∈ MonoidHom.ker φ := by
-      rw [MonoidHom.mem_ker]
-      exact hphi
-    have h_mem' : FreeGroup.mk w ∈ Subgroup.normalClosure S := by
-      rw [hR]
-      exact h_mem
-    have h_sub : S ∪ {FreeGroup.mk w} ⊆ (Subgroup.normalClosure S : Set (FreeGroup (Fin n))) := by
-      intro x hx
-      rcases hx with (hx | hx)
-      · exact Subgroup.subset_normalClosure hx
-      · rw [Set.mem_singleton_iff.mp hx]
-        exact h_mem'
-    have hN_le_ker : N ≤ Subgroup.normalClosure S := by
-      calc
-        N = Subgroup.normalClosure (S ∪ {FreeGroup.mk w}) := rfl
-        _ ≤ Subgroup.normalClosure ((Subgroup.normalClosure S : Set (FreeGroup (Fin n)))) :=
-          Subgroup.normalClosure_mono h_sub
-        _ = Subgroup.normalClosure S := Subgroup.normalClosure_idempotent (s := S)
-    have hN_eq_ker : N = MonoidHom.ker φ := by
-      apply le_antisymm
-      · calc
-          N ≤ Subgroup.normalClosure S := hN_le_ker
-          _ = MonoidHom.ker φ := hR
-      · exact hN_ker
-    have hker_ne_top : MonoidHom.ker φ ≠ ⊤ := ker_ne_top φ hsurj
-    have hN_top' : N = ⊤ := by
-      dsimp [N, S]
-      exact hN_top
-    rw [hN_eq_ker] at hN_top'
-    exact hker_ne_top hN_top'
+  sorry
 
 /-- **Generator membership in the extended closure is r.e.** -/
 lemma re_generator_mem (R : List (Word n)) (i : Fin n) :

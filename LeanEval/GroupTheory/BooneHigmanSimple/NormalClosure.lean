@@ -196,8 +196,8 @@ lemma cert_of_prod (R : List (Word n)) (w : Word n)
           = (l.attach.map (fun (x : {x // x ∈ l}) =>
               FreeGroup.mk (g' x.val x.property) * (FreeGroup.mk (R.getD (k x.val x.property) [])) ^
                 (if ε x.val x.property then (1 : ℤ) else -1) * (FreeGroup.mk (g' x.val x.property))⁻¹)).prod := by
-        rw [List.map_map]
-        simp
+        rw [List.map_map]; apply congrArg List.prod; ext x; dsimp; rfl
+        
       _ = (l.attach.map (fun (x : {x // x ∈ l}) => x.val)).prod := by
         refine congrArg List.prod (List.map_congr_left fun x hx => ?_)
         rcases x with ⟨y, hy⟩
@@ -215,7 +215,46 @@ lemma cert_of_prod (R : List (Word n)) (w : Word n)
 lemma mem_of_cert (R : List (Word n)) (w : Word n) {c : Certificate n}
     (hc : FreeGroup.mk (evalCert R c) = FreeGroup.mk w) :
     FreeGroup.mk w ∈ Subgroup.normalClosure (relatorSet R) := by
-  sorry
+  -- rewrite the goal using hc: we show mk(evalCert) ∈ normalClosure instead
+  rw [← hc]
+  -- express mk(evalCert) as a product of signed conjugates
+  rw [mk_eval_eq_prod R c]
+  -- the normal closure is a subgroup, so list_prod_mem applies
+  apply Subgroup.list_prod_mem
+  intro x hx
+  -- each factor comes from a certificate entry t
+  rcases List.mem_map.mp hx with ⟨t, ht, rfl⟩
+  -- x = (FreeGroup.mk t.1 * (FreeGroup.mk (R.getD t.2.2 [])) ^ (if t.2.1 then (1 : ℤ) else -1)) * (FreeGroup.mk t.1)⁻¹
+  set g := FreeGroup.mk t.1 with hg
+  set r := FreeGroup.mk (R.getD t.2.2 []) with hr
+  set ε := t.2.1 with hε
+  have hN : (Subgroup.normalClosure (relatorSet R)).Normal := inferInstance
+  have h_mem_r : r ∈ Subgroup.normalClosure (relatorSet R) := by
+    by_cases hpos : t.2.2 < R.length
+    · have hr_mem_RS : r ∈ relatorSet R := by
+        dsimp [r, relatorSet]
+        refine ⟨R.get ⟨t.2.2, hpos⟩, ?_, ?_⟩
+        · exact List.get_mem R ⟨t.2.2, hpos⟩
+        · simpa using (congrArg FreeGroup.mk (List.getD_eq_get R [] ⟨t.2.2, hpos⟩)).symm
+      exact Subgroup.subset_normalClosure hr_mem_RS
+    · have hout : R.length ≤ t.2.2 := Nat.not_lt.mp hpos
+      have h_default : R.getD t.2.2 [] = [] :=
+        List.getD_eq_default R [] hout
+      have h_r_one : r = 1 := by
+        dsimp [r]
+        rw [h_default, FreeGroup.one_eq_mk]
+      rw [h_r_one]
+      exact Subgroup.one_mem _
+  have h_mem_r_pow : r ^ (if ε then (1 : ℤ) else -1) ∈ Subgroup.normalClosure (relatorSet R) :=
+    Subgroup.zpow_mem (Subgroup.normalClosure (relatorSet R)) h_mem_r (if ε then (1 : ℤ) else -1)
+  have h_mem_conj : g * (r ^ (if ε then (1 : ℤ) else -1)) * g⁻¹ ∈ Subgroup.normalClosure (relatorSet R) :=
+    hN.conj_mem _ h_mem_r_pow g
+  -- the factor is exactly this conjugate
+  have h_factor : (g * (FreeGroup.mk (R.getD t.2.2 [])) ^ (if t.2.1 then (1 : ℤ) else -1)) * (FreeGroup.mk t.1)⁻¹ =
+      g * (r ^ (if ε then (1 : ℤ) else -1)) * g⁻¹ := by
+    simp [hε, hg, hr]
+  rw [h_factor]
+  exact h_mem_conj
 
 /-- **Membership in a normal closure via certificates.** -/
 lemma mem_normalClosure_cert (R : List (Word n)) (w : Word n) :

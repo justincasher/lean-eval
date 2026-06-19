@@ -61,12 +61,78 @@ lemma primrec_eq_letter {n : ℕ} :
 /-- **The reduction step is primitive recursive.** -/
 lemma primrec_reduceStep {n : ℕ} :
     Primrec₂ (@reduceStep n) := by
-  sorry
+  -- Work with the uncurried form: Primrec (fun p : (Fin n × Bool) × Word n => reduceStep p.1 p.2)
+  have h_nil : Primrec (fun (p : (Fin n × Bool) × Word n) => [p.1]) :=
+    (Primrec.list_cons (α := Fin n × Bool)).comp
+      (Primrec.fst : Primrec (fun p : (Fin n × Bool) × Word n => p.1))
+      (Primrec.const [])
+  -- define the body for the non-nil case
+  let h' : (Fin n × Bool) × Word n → (Fin n × Bool) × Word n → Word n :=
+    fun p q => if p.1 = (q.1.1, !q.1.2) then q.2 else p.1 :: q.1 :: q.2
+  have h_cond : PrimrecPred (fun (pair : ((Fin n × Bool) × Word n) × ((Fin n × Bool) × Word n)) =>
+    pair.1.1 = (pair.2.1.1, !pair.2.1.2)) :=
+    (primrec_eq_letter.2).comp
+      (Primrec.fst.comp Primrec.fst)  -- extracts a = p.1
+      (Primrec.fst.comp Primrec.snd)  -- extracts hd = q.1
+  have h_tl : Primrec (fun (pair : ((Fin n × Bool) × Word n) × ((Fin n × Bool) × Word n)) => pair.2.2) :=
+    Primrec.snd.comp Primrec.snd
+  have h_else : Primrec (fun (pair : ((Fin n × Bool) × Word n) × ((Fin n × Bool) × Word n)) =>
+    pair.1.1 :: pair.2.1 :: pair.2.2) :=
+    (Primrec.list_cons (α := Fin n × Bool)).comp (Primrec.fst.comp Primrec.fst)
+      ((Primrec.list_cons (α := Fin n × Bool)).comp (Primrec.fst.comp Primrec.snd) (Primrec.snd.comp Primrec.snd))
+  have h_pair : Primrec (fun (pair : ((Fin n × Bool) × Word n) × ((Fin n × Bool) × Word n)) =>
+    if pair.1.1 = (pair.2.1.1, !pair.2.1.2) then pair.2.2 else pair.1.1 :: pair.2.1 :: pair.2.2) :=
+    Primrec.ite h_cond h_tl h_else
+  have h_primrec₂ : Primrec₂ h' := h_pair
+  refine (Primrec.list_casesOn (α := (Fin n × Bool) × Word n) (β := Fin n × Bool) (σ := Word n)
+    (f := fun p => p.2) (g := fun p => [p.1]) (h := h') Primrec.snd ?_ h_primrec₂).of_eq ?_
+  · -- g is Primrec
+    simpa using h_nil
+  · -- the constructed function equals reduceStep
+    intro p
+    dsimp [reduceStep]
+    cases p.2 with
+    | nil => rfl
+    | cons hd tl =>
+      dsimp [h']
+      simp [Prod.ext_iff]
+
+/-- **`FreeGroup.reduce` folds `reduceStep` over the word.** -/
+lemma reduce_foldr_eq {n : ℕ} (w : Word n) : w.foldr reduceStep [] = FreeGroup.reduce w := by
+  induction w with
+  | nil => rfl
+  | cons h t ih =>
+    calc
+      (h :: t).foldr reduceStep [] = reduceStep h (t.foldr reduceStep []) := rfl
+      _ = reduceStep h (FreeGroup.reduce t) := by rw [ih]
+      _ = FreeGroup.reduce (h :: t) := by
+        have h_lemma : ∀ (u : Word n),
+            (match u with | [] => [h] | hd :: tl => if h.1 = hd.1 ∧ h.2 = !hd.2 then tl else h :: hd :: tl) =
+            (List.rec [h] (fun head tail _ => if h.1 = head.1 ∧ h.2 = !head.2 then tail else h :: head :: tail) u) := by
+          intro u; cases u <;> rfl
+        calc
+          reduceStep h (FreeGroup.reduce t) =
+              (match FreeGroup.reduce t with | [] => [h] | hd :: tl => if h.1 = hd.1 ∧ h.2 = !hd.2 then tl else h :: hd :: tl) := rfl
+          _ = (List.rec [h] (fun head tail _ => if h.1 = head.1 ∧ h.2 = !head.2 then tail else h :: head :: tail) (FreeGroup.reduce t)) :=
+            h_lemma (FreeGroup.reduce t)
+          _ = FreeGroup.reduce (h :: t) := by
+            simp [FreeGroup.reduce]
 
 /-- **Reduction is primitive recursive.** -/
 lemma primrec_reduce {n : ℕ} :
     Primrec (fun w : Word n => FreeGroup.reduce w) := by
-  sorry
+  have h_foldr : Primrec (fun (w : Word n) => w.foldr reduceStep []) :=
+    Primrec.list_foldr (f := id) (g := fun (_ : Word n) => [])
+      (h := fun (_ : Word n) (p : (Fin n × Bool) × Word n) => reduceStep p.1 p.2)
+      (hf := Primrec.id)
+      (hg := Primrec.const ([] : Word n))
+      (hh := by
+        have h_prs : Primrec (fun (p' : Word n × ((Fin n × Bool) × Word n)) => p'.2.1) :=
+          Primrec.fst.comp Primrec.snd
+        have h_prs2 : Primrec (fun (p' : Word n × ((Fin n × Bool) × Word n)) => p'.2.2) :=
+          Primrec.snd.comp Primrec.snd
+        exact Primrec₂.comp primrec_reduceStep h_prs h_prs2)
+  refine h_foldr.of_eq reduce_foldr_eq
 
 /-- **Reduction is computable.** -/
 lemma reduce_computable {n : ℕ} :
@@ -183,7 +249,69 @@ If `Q : α → β → Prop` is computable (as a predicate on `α × β`), then
 lemma re_projection {α β : Type*} [Primcodable α] [Primcodable β]
     {Q : α → β → Prop} (hQ : ComputablePred fun p : α × β => Q p.1 p.2) :
     REPred (fun a => ∃ b, Q a b) := by
-  sorry
+  rcases hQ with ⟨hQ_dec, hQ_comp⟩
+  -- Provide decidability instances from hQ_dec
+  haveI (a : α) (b : β) : Decidable (Q a b) := hQ_dec (a, b)
+  haveI (a : α) : DecidablePred (Q a) := fun b => hQ_dec (a, b)
+  -- hQ_comp : Computable (fun p : α × β => decide (Q p.1 p.2))
+  have hQc₂ : Computable₂ (fun (a : α) (b : β) => decide (Q a b)) := hQ_comp
+  -- define g : α → β → Option β where g a b = some b if Q a b holds, else none
+  have h_g_comp : Computable₂ (fun (a : α) (b : β) => cond (decide (Q a b)) (some b) (none : Option β)) := by
+    refine (Computable.cond ?_ ?_ ?_ : Computable (fun (p : α × β) =>
+      cond (decide (Q p.1 p.2)) (some p.2) (none : Option β)))
+    · exact hQ_comp
+    · exact Computable.option_some.comp Computable.snd
+    · exact Computable.const (none : Option β)
+  -- define f : α → ℕ → Option β as f a n = (decode n).bind (λ b => if Q a b then some b else none)
+  have h_f_comp : Computable₂ (fun (a : α) (n : ℕ) =>
+    (Encodable.decode (α := β) n).bind (fun (b : β) => cond (decide (Q a b)) (some b) (none : Option β))) := by
+    have h_decode : Computable (fun (p : α × ℕ) => Encodable.decode (α := β) p.2) :=
+      (Primrec.decode.to_comp (α := β)).comp Computable.snd
+    have h_g'_comp : Computable₂ (fun (p : α × ℕ) (b : β) =>
+      cond (decide (Q p.1 b)) (some b) (none : Option β)) :=
+      h_g_comp.comp (Computable.pair (Computable.fst.comp Computable.fst) Computable.snd)
+    exact Computable.option_bind h_decode h_g'_comp
+  have h_partrec : Partrec (fun (a : α) => Nat.rfindOpt (fun (n : ℕ) =>
+    (Encodable.decode (α := β) n).bind (fun (b : β) => cond (decide (Q a b)) (some b) (none : Option β)))) :=
+    Partrec.rfindOpt h_f_comp
+  have h_dom_eq : ∀ a, (Nat.rfindOpt (fun (n : ℕ) =>
+    (Encodable.decode (α := β) n).bind (fun (b : β) => cond (decide (Q a b)) (some b) (none : Option β)))).Dom ↔ ∃ b, Q a b := by
+    intro a
+    have hQ_dec_a : DecidablePred (Q a) := fun b => hQ_dec (a, b)
+    constructor
+    · intro h
+      rcases (Nat.rfindOpt_dom.mp h) with ⟨n, b, h_mem⟩
+      rw [Option.mem_bind_iff] at h_mem
+      rcases h_mem with ⟨b', h_decode, h_cond⟩
+      have h_eq : b = b' := Option.some_inj.mp h_cond
+      subst h_eq
+      have hQab : Q a b' := by
+        have h_cond' : cond (decide (Q a b')) (some b') (none : Option β) = some b' := h_cond
+        by_contra! h_not
+        have h_dec_false : decide (Q a b') = false := decide_false_iff_not.mpr h_not
+        simp [h_dec_false] at h_cond'
+      exact ⟨b', hQab⟩
+    · intro h
+      rcases h with ⟨b, hb⟩
+      let n := Encodable.encode b
+      have h_decode : Encodable.decode (α := β) n = some b := by
+        simpa using Encodable.encodek (α := β) b
+      have h_cond : cond (decide (Q a b)) (some b) (none : Option β) = some b := by
+        have h_dec : decide (Q a b) = true := decide_eq_true hb
+        simp [h_dec]
+      have h_mem : b ∈ (Encodable.decode (α := β) n).bind (fun (b' : β) =>
+        cond (decide (Q a b')) (some b') (none : Option β)) := by
+        rw [Option.mem_bind_iff]
+        refine ⟨b, h_decode, ?_⟩
+        simpa using h_cond
+      have h_rfindOpt_dom : (Nat.rfindOpt (fun (n : ℕ) =>
+        (Encodable.decode (α := β) n).bind (fun (b' : β) => cond (decide (Q a b')) (some b') (none : Option β)))).Dom :=
+        Nat.rfindOpt_dom.mpr ⟨n, b, h_mem⟩
+      exact h_rfindOpt_dom
+  have h_re_dom : REPred (fun a => (Nat.rfindOpt (fun (n : ℕ) =>
+    (Encodable.decode (α := β) n).bind (fun (b : β) => cond (decide (Q a b)) (some b) (none : Option β)))).Dom) :=
+    Partrec.dom_re h_partrec
+  refine REPred.of_eq h_re_dom h_dom_eq
 
 /-- **Recursive enumerability is closed under conjunction.** -/
 lemma re_and {α : Type*} [Primcodable α] {p q : α → Prop}
