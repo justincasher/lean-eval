@@ -42,25 +42,37 @@ Fubini (\texttt{MeasureTheory.intervalIntegral\_integral\_swap}), change of
 variables (\texttt{intervalIntegral.integral\_comp\_smul\_deriv'''}), and
 constancy from a vanishing derivative (\texttt{constant\_of\_derivWithin\_zero}).
 
-The two steps that look hardest -- the closedness of the solid-angle $2$-form
-(\cref{lem:integrand-r-divergence}) and the value of the Gauss integral on the
-Hopf link (\cref{lem:hopf-linking-value}) -- are \emph{not} taken as assumptions;
-there are no axioms. The first is a pointwise multivariable differentiation
-identity, decomposed into the explicit, finite, Mathlib-grounded sub-lemmas
-\cref{lem:quadruple-product-identity} (the Lagrange / scalar quadruple-product
-identity, a coordinate \texttt{ring} identity),
-\cref{lem:recip-norm-cube-deriv} (the $r$-derivative of $\lVert u\rVert^{-3}$ via
-\texttt{Real.hasDerivAt\_rpow\_const} and \texttt{HasDerivAt.inner}),
-\cref{lem:triple-product-deriv} (the product rule for the scalar triple product
-via \texttt{ContinuousLinearMap.hasDerivAt\_of\_bilinear} and
+The first hard step -- the closedness of the solid-angle $2$-form
+(\cref{lem:integrand-r-divergence}) -- is \emph{not} taken as an assumption: it is
+a pointwise multivariable differentiation identity, decomposed into the explicit,
+finite, Mathlib-grounded sub-lemmas \cref{lem:quadruple-product-identity} (the
+Lagrange / scalar quadruple-product identity, a coordinate \texttt{ring}
+identity), \cref{lem:recip-norm-cube-deriv} (the $r$-derivative of
+$\lVert u\rVert^{-3}$ via \texttt{Real.hasDerivAt\_rpow\_const} and
+\texttt{HasDerivAt.inner}), \cref{lem:triple-product-deriv} (the product rule for
+the scalar triple product via
+\texttt{ContinuousLinearMap.hasDerivAt\_of\_bilinear} and
 \texttt{triple\_product\_eq\_det}) and \cref{lem:mixed-partials-symm} (equality of
 mixed partials via \texttt{second\_derivative\_symmetric}); the divergence
-identity is then their algebraic combination. The second is reduced, through the
-closed-form integrand \cref{lem:hopf-integrand}, the denominator bound
-\cref{lem:hopf-denominator-pos} and the algebraic simplification
-\cref{lem:hopf-integrand-reduced}, to one-variable interval integrals evaluated by
-the fundamental theorem of calculus after the half-angle change of variables.
-Every declaration below bottoms out in Mathlib results.
+identity is then their algebraic combination.
+
+The second hard step -- the value of the Gauss integral on the Hopf link
+(\cref{lem:hopf-linking-value}) -- is, by contrast, \emph{not} reached by the
+elementary one-variable route. After the closed-form integrand
+\cref{lem:hopf-integrand}, the denominator bound \cref{lem:hopf-denominator-pos}
+and the algebraic simplification \cref{lem:hopf-integrand-reduced}, the inner
+one-variable integral $\int_0^{2\pi}\bigl(\tfrac12 D^{-1/2}-\tfrac32
+D^{-3/2}\bigr)\,ds$ is a nonzero combination of complete elliptic integrals of the
+parameter $t$ (\cref{lem:hopf-inner-integral}): it has no elementary
+antiderivative, so the iterated fundamental theorem of calculus cannot evaluate
+it in either order. The true value $\mathrm{lk}(L_2)=1$ is a mapping-degree /
+solid-angle fact, and a Mathlib proof of it requires either a theory of complete
+elliptic integrals or smooth degree theory, neither of which is currently
+available. Consequently the chain \cref{lem:hopf-inner-integral} $\to$
+\cref{lem:hopf-outer-integral} $\to$ \cref{lem:hopf-linking-value} is the one
+branch of this blueprint that does \emph{not} bottom out in Mathlib; this
+obstruction is flagged explicitly in those three statements. Every other
+declaration below does reduce to Mathlib results.
 
 \subsection{The Gauss map and the linking number}
 
@@ -96,21 +108,100 @@ Every declaration below bottoms out in Mathlib results.
     torus $T^2 = (\mathbb{R}/2\pi\mathbb{Z})^2$.
 \end{definition}
 
+\begin{lemma}[The cross product of continuous maps is continuous]
+    \label{lem:crossProduct-continuous}
+    Let $f,g : E\to\mathbb{R}^3$ be maps from a normed space. If $f$ and $g$ are
+    continuous then $x\mapsto f(x)\times g(x)$ is continuous.
+\end{lemma}
+\begin{proof}
+    By \texttt{cross\_apply} each of the three coordinates of $f(x)\times g(x)$ is a
+    fixed $\pm$-combination of products $f_i(x)\,g_j(x)$ of coordinate functions of
+    $f$ and $g$. Coordinate evaluation is a continuous linear map, so the $f_i,g_j$
+    inherit continuity from $f,g$; products and differences of continuous scalar
+    functions are again continuous (\texttt{Continuous.mul}, \texttt{Continuous.sub}).
+    Assembling the three coordinates gives the claim.
+\end{proof}
+
+\begin{lemma}[The cross product of smooth maps is smooth]
+    \label{lem:crossProduct-bilinear}
+    \lean{LeanEval.KnotTheory.crossProduct_contDiff}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    Let $f,g : E\to\mathbb{R}^3$ be maps from a normed space. If $f$ and $g$ are
+    $C^\infty$ then $x\mapsto f(x)\times g(x)$ is $C^\infty$.
+\end{lemma}
+\begin{proof}
+    By \texttt{cross\_apply} each of the three coordinates of $f(x)\times g(x)$ is a
+    fixed $\pm$-combination of products $f_i(x)\,g_j(x)$ of coordinate functions,
+    each of which is $C^\infty$ as a composition of $f,g$ with the smooth linear
+    coordinate projections. Products and differences of $C^\infty$ scalar functions
+    are again $C^\infty$ (\texttt{ContDiff.mul}, \texttt{ContDiff.sub}); assembling
+    the three coordinates gives the claim.
+\end{proof}
+
+\begin{lemma}[The inner product is a smooth, continuous bilinear map]
+    \label{lem:inner-bilinear}
+    \lean{LeanEval.KnotTheory.inner_contDiff}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    Let $f,g : E\to\mathbb{R}^3$. If $f,g$ are continuous then
+    $x\mapsto\langle f(x),g(x)\rangle$ is continuous (\texttt{Continuous.inner}); if
+    $f,g$ are $C^\infty$ then $x\mapsto\langle f(x),g(x)\rangle$ is $C^\infty$
+    (\texttt{ContDiff.inner}).
+\end{lemma}
+\begin{proof}
+    The real inner product on $\mathbb{R}^3$ is a continuous bilinear map, so its
+    composition with a pair of continuous (resp.\ $C^\infty$) maps is continuous
+    (resp.\ $C^\infty$): this is exactly \texttt{Continuous.inner} and
+    \texttt{ContDiff.inner}.
+\end{proof}
+
+\begin{lemma}[The difference map is jointly smooth]
+    \label{lem:joint-diff-smooth}
+    \lean{LeanEval.KnotTheory.TwoLink.jointDiff_smooth}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:gauss-map}
+    For a two-component link $L$ the map $(s,t)\mapsto\gamma_K(s)-\gamma_L(t)$ is
+    $C^\infty$ on $\mathbb{R}^2$.
+\end{lemma}
+\begin{proof}
+    The projections $(s,t)\mapsto s$ and $(s,t)\mapsto t$ are $C^\infty$
+    (\texttt{contDiff\_fst}, \texttt{contDiff\_snd}). Each knot is $C^\infty$
+    (\texttt{Knot.smooth}), so $(s,t)\mapsto\gamma_K(s)$ and
+    $(s,t)\mapsto\gamma_L(t)$ are $C^\infty$ by composition (\texttt{ContDiff.comp}),
+    and their difference is $C^\infty$ (\texttt{ContDiff.sub}).
+\end{proof}
+
+\begin{lemma}[The denominator is smooth and positive]
+    \label{lem:joint-denom-pos}
+    \lean{LeanEval.KnotTheory.TwoLink.jointDenom_smooth_pos}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:joint-diff-smooth, lem:components-nonzero}
+    For a two-component link $L$ and any real exponent $p$, the map
+    $(s,t)\mapsto\lVert\gamma_K(s)-\gamma_L(t)\rVert^{p}$ is $C^\infty$ on
+    $\mathbb{R}^2$, and $\lVert\gamma_K(s)-\gamma_L(t)\rVert>0$ for all $s,t$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:joint-diff-smooth, lem:components-nonzero}
+    By \cref{lem:components-nonzero} the difference $u(s,t)=\gamma_K(s)-\gamma_L(t)$
+    is nowhere zero, so $\lVert u\rVert>0$ (\texttt{norm\_pos\_iff}). The difference
+    is $C^\infty$ by \cref{lem:joint-diff-smooth}, and the real power of the norm of a
+    nowhere-vanishing smooth map is $C^\infty$ (\texttt{ContDiff.norm\_rpow}, which
+    subsumes the integer powers $\lVert u\rVert,\lVert u\rVert^{3}$ used below).
+\end{proof}
+
 \begin{lemma}[Smoothness of the Gauss map]
     \label{lem:gauss-map-smooth}
     \lean{LeanEval.KnotTheory.TwoLink.gaussMap_smooth}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:gauss-map, lem:components-nonzero}
+    \uses{def:gauss-map, lem:joint-diff-smooth, lem:joint-denom-pos}
     The Gauss map $g_L : \mathbb{R}^2 \to \mathbb{R}^3$ is $C^\infty$.
 \end{lemma}
 \begin{proof}
-    The numerator $(s,t)\mapsto \gamma_K(s) - \gamma_L(t)$ is smooth, being a
-    difference of the smooth component maps precomposed with the smooth
-    coordinate projections (\texttt{Knot.smooth}, \texttt{ContDiff.sub},
-    \texttt{ContDiff.comp}). Its norm is smooth and nonvanishing away from $0$ by
-    \cref{lem:components-nonzero} (\texttt{ContDiff.norm}). The quotient of a
-    smooth vector field by a smooth nonvanishing scalar is smooth
-    (\texttt{ContDiff.div}).
+    \uses{lem:joint-diff-smooth, lem:joint-denom-pos}
+    The numerator $(s,t)\mapsto\gamma_K(s)-\gamma_L(t)$ is $C^\infty$ by
+    \cref{lem:joint-diff-smooth}, and the scalar $(s,t)\mapsto\lVert\gamma_K(s)-
+    \gamma_L(t)\rVert$ is $C^\infty$ and strictly positive (hence nonvanishing) by
+    \cref{lem:joint-denom-pos}. The quotient of a $C^\infty$ vector field by a
+    $C^\infty$ nowhere-zero scalar is $C^\infty$ (\texttt{ContDiff.div}).
 \end{proof}
 
 \begin{lemma}[Continuity of a knot's velocity]
@@ -127,11 +218,28 @@ Every declaration below bottoms out in Mathlib results.
     $1\le\infty$).
 \end{proof}
 
+\begin{lemma}[Continuity of the linking numerator]
+    \label{lem:integrand-numerator-continuous}
+    \uses{lem:knot-deriv-continuous, lem:crossProduct-continuous, lem:inner-bilinear, lem:joint-diff-smooth}
+    For a two-component link $L$, the numerator
+    $(s,t)\mapsto\bigl\langle \gamma_K(s)-\gamma_L(t),\ \gamma_K'(s)\times\gamma_L'(t)\bigr\rangle$
+    is continuous on $\mathbb{R}^2$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:knot-deriv-continuous, lem:crossProduct-continuous, lem:inner-bilinear, lem:joint-diff-smooth}
+    The velocities $(s,t)\mapsto\gamma_K'(s)$, $(s,t)\mapsto\gamma_L'(t)$ are
+    continuous by \cref{lem:knot-deriv-continuous} (composed with the projections),
+    so their cross product is continuous by \cref{lem:crossProduct-continuous}. The
+    difference $\gamma_K(s)-\gamma_L(t)$ is continuous by \cref{lem:joint-diff-smooth}
+    (smooth, hence continuous), and the inner product of two continuous maps is
+    continuous by \cref{lem:inner-bilinear}.
+\end{proof}
+
 \begin{lemma}[Continuity of the linking integrand]
     \label{lem:integrand-continuous}
     \lean{LeanEval.KnotTheory.TwoLink.linkingIntegrand_continuous}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{lem:components-nonzero, lem:knot-deriv-continuous}
+    \uses{lem:components-nonzero, lem:integrand-numerator-continuous, lem:joint-denom-pos}
     For a two-component link $L$, the function
     \[
         (s,t)\longmapsto
@@ -141,14 +249,10 @@ Every declaration below bottoms out in Mathlib results.
     is continuous on $\mathbb{R}^2$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:knot-deriv-continuous}
-    The maps $\gamma_K,\gamma_L$ are continuous (\texttt{Knot.smooth}) and their
-    derivatives $\gamma_K',\gamma_L'$ are continuous by
-    \cref{lem:knot-deriv-continuous}. The
-    inner product and the cross product $\times$ (\texttt{crossProduct}) are
-    continuous bilinear, so the numerator is continuous. The denominator
-    $\lVert\gamma_K(s)-\gamma_L(t)\rVert^3$ is continuous and, by
-    \cref{lem:components-nonzero}, never zero, so the quotient is continuous
+    \uses{lem:integrand-numerator-continuous, lem:joint-denom-pos}
+    The numerator is continuous by \cref{lem:integrand-numerator-continuous}. The
+    denominator $\lVert\gamma_K(s)-\gamma_L(t)\rVert^{3}$ is continuous and strictly
+    positive by \cref{lem:joint-denom-pos}, so the quotient is continuous
     (\texttt{Continuous.div}).
 \end{proof}
 
@@ -167,6 +271,32 @@ Every declaration below bottoms out in Mathlib results.
     The iterated interval integral exists because the integrand is continuous on
     the compact square $[0,2\pi]^2$ (\cref{lem:integrand-continuous}).
 \end{definition}
+
+\begin{lemma}[The linking integrand is $2\pi$-periodic in each variable]
+    \label{lem:integrand-periodic}
+    \uses{def:linking-number}
+    For a two-component link $L$ the linking integrand
+    \[
+        h(s,t) = \frac{\bigl\langle \gamma_K(s)-\gamma_L(t),\ \gamma_K'(s)\times\gamma_L'(t)\bigr\rangle}
+             {\lVert \gamma_K(s)-\gamma_L(t)\rVert^{3}}
+    \]
+    satisfies $h(s+2\pi,t)=h(s,t)$ and $h(s,t+2\pi)=h(s,t)$ for all $s,t$.
+\end{lemma}
+\begin{proof}
+    \uses{def:linking-number}
+    Each knot is $2\pi$-periodic (\texttt{Knot.periodic}):
+    $\gamma_K(s+2\pi)=\gamma_K(s)$ and $\gamma_L(t+2\pi)=\gamma_L(t)$. The derivative
+    of a $2\pi$-periodic function is $2\pi$-periodic (\texttt{deriv\_comp\_add\_const}
+    together with $\gamma_K(\cdot+2\pi)=\gamma_K$), so $\gamma_K'$ is $2\pi$-periodic,
+    and likewise $\gamma_L'$. Fixing $t$, the maps $s\mapsto\gamma_K(s)$ and
+    $s\mapsto\gamma_K'(s)$ are $2\pi$-periodic while $s\mapsto\gamma_L(t)$,
+    $s\mapsto\gamma_L'(t)$ are constant, hence $2\pi$-periodic; the numerator and the
+    denominator of $h$, being fixed continuous functions of these, are
+    $2\pi$-periodic in $s$ (\texttt{Function.Periodic.sub},
+    \texttt{Function.Periodic.mul}), so $h$ is $2\pi$-periodic in $s$
+    (\texttt{Function.Periodic.div}). The same argument in $t$, with the roles of
+    $\gamma_K$ and $\gamma_L$ exchanged, gives $h(s,t+2\pi)=h(s,t)$.
+\end{proof}
 
 \subsection{Ambient-isotopy invariance of the linking number}
 
@@ -210,23 +340,125 @@ then absorbed by a one-dimensional change of variables.
     $I_0$ is the integrand of \cref{def:linking-number} and $F(0) = \mathrm{lk}(L_1)$.
 \end{definition}
 
+\begin{lemma}[Smoothness of the deformed first component]
+    \label{lem:deformed-a-smooth}
+    \uses{def:deformed-curves}
+    The map $(r,s,t)\mapsto a_r(s)=\Phi_r(\gamma_K(s))$ is $C^\infty$ on
+    $[0,1]\times\mathbb{R}^2$.
+\end{lemma}
+\begin{proof}
+    \uses{def:deformed-curves}
+    The isotopy $\Phi$ is $C^\infty$ and the component $\gamma_K$ is $C^\infty$
+    (\texttt{Knot.smooth}), so $a_r(s)=\Phi_r(\gamma_K(s))$ is $C^\infty$ in
+    $(r,s,t)$ by composition with the smooth coordinate projections
+    (\texttt{ContDiff.comp}, \texttt{contDiff\_fst}, \texttt{contDiff\_snd}).
+\end{proof}
+
+\begin{lemma}[Smoothness of the deformed second component]
+    \label{lem:deformed-b-smooth}
+    \uses{def:deformed-curves}
+    The map $(r,s,t)\mapsto b_r(t)=\Phi_r(\gamma_L(t))$ is $C^\infty$ on
+    $[0,1]\times\mathbb{R}^2$.
+\end{lemma}
+\begin{proof}
+    \uses{def:deformed-curves}
+    As in \cref{lem:deformed-a-smooth}, with $\gamma_L$ in place of $\gamma_K$:
+    $b_r(t)=\Phi_r(\gamma_L(t))$ is a composition of the $C^\infty$ isotopy $\Phi$
+    with the $C^\infty$ component $\gamma_L$ and the smooth projections
+    (\texttt{ContDiff.comp}, \texttt{contDiff\_fst}, \texttt{contDiff\_snd}).
+\end{proof}
+
+\begin{lemma}[Smoothness of the deformed difference]
+    \label{lem:deformed-u-smooth}
+    \uses{def:deformed-curves, lem:deformed-a-smooth, lem:deformed-b-smooth}
+    The map $(r,s,t)\mapsto u_r(s,t)=a_r(s)-b_r(t)$ is $C^\infty$ on
+    $[0,1]\times\mathbb{R}^2$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-a-smooth, lem:deformed-b-smooth}
+    By \cref{lem:deformed-a-smooth} and \cref{lem:deformed-b-smooth} the maps $a_r$
+    and $b_r$ are $C^\infty$, so their difference $u_r=a_r-b_r$ is $C^\infty$
+    (\texttt{ContDiff.sub}).
+\end{proof}
+
+\begin{lemma}[Smoothness of the deformed first velocity]
+    \label{lem:deformed-da-smooth}
+    \uses{def:deformed-curves, lem:deformed-a-smooth}
+    The velocity map $(r,s,t)\mapsto\partial_s a_r(s)$ is $C^\infty$ on
+    $[0,1]\times\mathbb{R}^2$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-a-smooth}
+    By \cref{lem:deformed-a-smooth} the map $a_r(s)$ is $C^\infty$, so its
+    $s$-derivative $\partial_s a_r(s)$ is again $C^\infty$
+    (\texttt{contDiff\_infty\_iff\_deriv}).
+\end{proof}
+
+\begin{lemma}[Smoothness of the deformed second velocity]
+    \label{lem:deformed-db-smooth}
+    \uses{def:deformed-curves, lem:deformed-b-smooth}
+    The velocity map $(r,s,t)\mapsto\partial_t b_r(t)$ is $C^\infty$ on
+    $[0,1]\times\mathbb{R}^2$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-b-smooth}
+    By \cref{lem:deformed-b-smooth} the map $b_r(t)$ is $C^\infty$, so its
+    $t$-derivative $\partial_t b_r(t)$ is again $C^\infty$
+    (\texttt{contDiff\_infty\_iff\_deriv}).
+\end{proof}
+
+\begin{lemma}[Joint smoothness of the deformed component data]
+    \label{lem:deformed-diff-smooth}
+    \lean{LeanEval.KnotTheory.deformedDiff_smooth}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-curves, lem:deformed-a-smooth, lem:deformed-b-smooth, lem:deformed-u-smooth, lem:deformed-da-smooth, lem:deformed-db-smooth}
+    The maps $(r,s,t)\mapsto a_r(s)$, $(r,s,t)\mapsto b_r(t)$,
+    $(r,s,t)\mapsto u_r(s,t)$, and the velocity maps
+    $(r,s,t)\mapsto\partial_s a_r(s)$ and $(r,s,t)\mapsto\partial_t b_r(t)$, are all
+    $C^\infty$ on $[0,1]\times\mathbb{R}^2$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-a-smooth, lem:deformed-b-smooth, lem:deformed-u-smooth, lem:deformed-da-smooth, lem:deformed-db-smooth}
+    This collects \cref{lem:deformed-a-smooth}, \cref{lem:deformed-b-smooth},
+    \cref{lem:deformed-u-smooth}, \cref{lem:deformed-da-smooth} and
+    \cref{lem:deformed-db-smooth}.
+\end{proof}
+
+\begin{lemma}[The deformed denominator is smooth and positive]
+    \label{lem:deformed-denom-pos}
+    \lean{LeanEval.KnotTheory.deformedDenom_smooth_pos}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-curves, lem:deformed-diff-smooth}
+    For any real exponent $p$, the map $(r,s,t)\mapsto\lVert u_r(s,t)\rVert^{p}$ is
+    $C^\infty$ on $[0,1]\times\mathbb{R}^2$, and $\lVert u_r(s,t)\rVert>0$ for all
+    $r,s,t$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-diff-smooth}
+    By \cref{def:deformed-curves} the map $u_r(s,t)$ is nowhere zero, so
+    $\lVert u_r\rVert>0$ (\texttt{norm\_pos\_iff}); it is $C^\infty$ by
+    \cref{lem:deformed-diff-smooth}, and the real power of the norm of a
+    nowhere-vanishing smooth map is $C^\infty$ (\texttt{ContDiff.norm\_rpow}).
+\end{proof}
+
 \begin{lemma}[Joint smoothness of the deformed integrand]
     \label{lem:deformed-integrand-smooth}
     \lean{LeanEval.KnotTheory.deformedIntegrand_smooth}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:deformed-linking, lem:components-nonzero}
+    \uses{def:deformed-linking, lem:deformed-diff-smooth, lem:deformed-denom-pos, lem:crossProduct-bilinear, lem:inner-bilinear}
     The map $(r,s,t)\mapsto I_r(s,t)$ is $C^\infty$ on $[0,1]\times\mathbb{R}^2$, and
     so is $(r,s,t)\mapsto\partial_r I_r(s,t)$; in particular both are continuous.
 \end{lemma}
 \begin{proof}
-    \uses{lem:components-nonzero}
-    The numerator is assembled from $\Phi$, the components $\gamma_K,\gamma_L$ and
-    their derivatives by composition, subtraction, cross product and inner product,
-    all smooth (\texttt{ContDiff.comp}, \texttt{ContDiff.sub}, bilinearity of
-    \texttt{crossProduct} and of the inner product). The denominator
-    $\lVert u_r\rVert^3$ is smooth and nonvanishing by \cref{def:deformed-curves},
-    so the quotient is smooth (\texttt{ContDiff.div}); its $r$-derivative is again
-    a function of the same form, hence smooth and continuous.
+    \uses{lem:deformed-diff-smooth, lem:deformed-denom-pos, lem:crossProduct-bilinear, lem:inner-bilinear}
+    By \cref{lem:deformed-diff-smooth} the maps $u_r$, $\partial_s a_r$,
+    $\partial_t b_r$ are $C^\infty$; their cross product $\partial_s a_r\times
+    \partial_t b_r$ is $C^\infty$ by \cref{lem:crossProduct-bilinear} and the
+    numerator $\langle u_r,\ \partial_s a_r\times\partial_t b_r\rangle$ is $C^\infty$
+    by \cref{lem:inner-bilinear}. The denominator $\lVert u_r\rVert^{3}$ is $C^\infty$
+    and strictly positive by \cref{lem:deformed-denom-pos}, so the quotient $I_r$ is
+    $C^\infty$ (\texttt{ContDiff.div}). Its $r$-derivative is then again $C^\infty$
+    (\texttt{contDiff\_infty\_iff\_deriv}); both are continuous in particular.
 \end{proof}
 
 \begin{definition}[Divergence potentials]
@@ -241,10 +473,99 @@ then absorbed by a one-dimensional change of variables.
         \qquad
         B_r(s,t) = \frac{\det\bigl(u_r,\ \partial_s a_r,\ \dot u_r\bigr)}{\lVert u_r\rVert^{3}} .
     \]
-    Both are $C^\infty$ in $(s,t)$ and, since $\gamma_K,\gamma_L$ are
-    $2\pi$-periodic (\cref{lem:cc-periodic} for the concrete links), so are
-    $A_r,B_r$ in each of $s,t$.
+    Both are $C^\infty$ in $(s,t)$ and $2\pi$-periodic in each of $s,t$; these two
+    facts are recorded as \cref{lem:deformed-potentials-periodic}.
 \end{definition}
+
+\begin{lemma}[Periodicity of the deformed first component and its velocities]
+    \label{lem:deformed-a-periodic}
+    \uses{def:deformed-curves}
+    For every $r$, the maps $s\mapsto a_r(s)$, $s\mapsto\partial_s a_r(s)$ and
+    $s\mapsto\dot a_r(s)$ are $2\pi$-periodic in $s$.
+\end{lemma}
+\begin{proof}
+    \uses{def:deformed-curves}
+    The knot $\gamma_K$ is $2\pi$-periodic (\texttt{Knot.periodic}:
+    $\gamma_K(s+2\pi)=\gamma_K(s)$), so $a_r(s)=\Phi_r(\gamma_K(s))$ is $2\pi$-periodic
+    in $s$ (\texttt{Function.Periodic.comp} with $\Phi_r$). The derivative of a
+    $2\pi$-periodic function is $2\pi$-periodic
+    ($\partial_s a_r(s+2\pi)=\partial_s[a_r(\cdot+2\pi)](s)=\partial_s a_r(s)$ since
+    $a_r(\cdot+2\pi)=a_r$, by \texttt{deriv\_comp\_add\_const}), giving the
+    periodicity of $\partial_s a_r$; the $r$-derivative $\dot a_r$ of the
+    $s$-periodic family $a_r$ is again $s$-periodic for the same reason.
+\end{proof}
+
+\begin{lemma}[Periodicity of the deformed second component and its velocities]
+    \label{lem:deformed-b-periodic}
+    \uses{def:deformed-curves}
+    For every $r$, the maps $t\mapsto b_r(t)$, $t\mapsto\partial_t b_r(t)$ and
+    $t\mapsto\dot b_r(t)$ are $2\pi$-periodic in $t$.
+\end{lemma}
+\begin{proof}
+    \uses{def:deformed-curves}
+    Identical to \cref{lem:deformed-a-periodic} with $\gamma_L$, $b_r$ and the
+    variable $t$ in place of $\gamma_K$, $a_r$ and $s$: $\gamma_L(t+2\pi)=\gamma_L(t)$
+    (\texttt{Knot.periodic}) gives $2\pi$-periodicity of $b_r$ in $t$
+    (\texttt{Function.Periodic.comp}), and differentiation preserves it
+    (\texttt{deriv\_comp\_add\_const}) for $\partial_t b_r$ and $\dot b_r$.
+\end{proof}
+
+\begin{lemma}[The divergence potentials are $2\pi$-periodic]
+    \label{lem:deformed-potentials-periodicity}
+    \uses{def:divergence-potentials, lem:deformed-a-periodic, lem:deformed-b-periodic}
+    For every $r\in[0,1]$ the potentials $A_r,B_r$ of
+    \cref{def:divergence-potentials} are $2\pi$-periodic in each variable separately:
+    $A_r(s+2\pi,t)=A_r(s,t)$, $A_r(s,t+2\pi)=A_r(s,t)$, and likewise for $B_r$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-a-periodic, lem:deformed-b-periodic}
+    By \cref{lem:deformed-a-periodic} the maps $a_r,\partial_s a_r,\dot a_r$ are
+    $2\pi$-periodic in $s$, while $b_r,\partial_t b_r,\dot b_r$ are independent of
+    $s$, hence trivially $s$-periodic; symmetrically, by
+    \cref{lem:deformed-b-periodic} all six are $2\pi$-periodic in $t$. Therefore
+    $u_r=a_r-b_r$, $\dot u_r=\dot a_r-\dot b_r$, $\partial_s a_r$, $\partial_t b_r$
+    are each $2\pi$-periodic in $s$ and in $t$ (\texttt{Function.Periodic.sub}). The
+    determinants $\det(u_r,\dot u_r,\partial_t b_r)$,
+    $\det(u_r,\partial_s a_r,\dot u_r)$ and the factor $\lVert u_r\rVert^{-3}$ are
+    continuous functions of these periodic maps, so $A_r,B_r$ are $2\pi$-periodic in
+    each variable (\texttt{Function.Periodic.mul}).
+\end{proof}
+
+\begin{lemma}[The divergence potentials are $C^1$]
+    \label{lem:deformed-potentials-regularity}
+    \uses{def:divergence-potentials, lem:deformed-diff-smooth, lem:deformed-denom-pos}
+    For every $r\in[0,1]$ the potentials $A_r,B_r$ of
+    \cref{def:divergence-potentials} are $C^1$ (indeed $C^\infty$) on $\mathbb{R}^2$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-diff-smooth, lem:deformed-denom-pos}
+    As in \cref{lem:deformed-integrand-smooth}, the determinants
+    $\det(u_r,\dot u_r,\partial_t b_r)$ and $\det(u_r,\partial_s a_r,\dot u_r)$ are
+    $C^\infty$, being scalar triple products of the $C^\infty$ maps of
+    \cref{lem:deformed-diff-smooth} (a continuous trilinear form of them), and
+    $\lVert u_r\rVert^{-3}$ is $C^\infty$ and strictly positive by
+    \cref{lem:deformed-denom-pos}, so the quotients $A_r,B_r$ are $C^\infty$
+    (\texttt{ContDiff.div}), in particular $C^1$.
+\end{proof}
+
+\begin{lemma}[The divergence potentials are $C^1$ and $2\pi$-periodic]
+    \label{lem:deformed-potentials-periodic}
+    \lean{LeanEval.KnotTheory.divergencePotentials_contDiff_periodic}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:divergence-potentials, lem:deformed-potentials-periodicity, lem:deformed-potentials-regularity}
+    For every $r\in[0,1]$ the potentials $A_r,B_r$ of
+    \cref{def:divergence-potentials} are $C^1$ on $\mathbb{R}^2$ and $2\pi$-periodic
+    in each variable separately:
+    \[
+        A_r(s+2\pi,t)=A_r(s,t),\quad A_r(s,t+2\pi)=A_r(s,t),
+    \]
+    and likewise for $B_r$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-potentials-periodicity, lem:deformed-potentials-regularity}
+    The $2\pi$-periodicity in each variable is \cref{lem:deformed-potentials-periodicity}
+    and the $C^1$ regularity is \cref{lem:deformed-potentials-regularity}.
+\end{proof}
 
 \begin{lemma}[Lagrange / scalar quadruple-product identity]
     \label{lem:quadruple-product-identity}
@@ -312,11 +633,40 @@ then absorbed by a one-dimensional change of variables.
     Rewriting each term by \texttt{triple\_product\_eq\_det} gives the claim.
 \end{proof}
 
+\begin{lemma}[Mixed partials of the deformed first component commute]
+    \label{lem:mixed-partials-symm-a}
+    \uses{def:deformed-curves}
+    For the smooth map $a_r(s)=\Phi_r(\gamma_K(s))$ of \cref{def:deformed-curves},
+    $\partial_r\partial_s a_r(s)=\partial_s\partial_r a_r(s)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:deformed-curves}
+    The map $(r,s)\mapsto a_r(s)$ is $C^\infty$, being a composition of the smooth
+    isotopy $\Phi$ with the smooth component $\gamma_K$ (\texttt{ContDiff.comp}); in
+    particular it is $C^2$, so its second Fréchet derivative is symmetric
+    (\texttt{second\_derivative\_symmetric}). Evaluating that symmetry on the
+    coordinate directions $r$ and $s$ is exactly the stated equality.
+\end{proof}
+
+\begin{lemma}[Mixed partials of the deformed second component commute]
+    \label{lem:mixed-partials-symm-b}
+    \uses{def:deformed-curves}
+    For the smooth map $b_r(t)=\Phi_r(\gamma_L(t))$ of \cref{def:deformed-curves},
+    $\partial_r\partial_t b_r(t)=\partial_t\partial_r b_r(t)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:deformed-curves}
+    Identical to \cref{lem:mixed-partials-symm-a} with $b_r$ and the variable $t$:
+    $(r,t)\mapsto b_r(t)$ is $C^\infty$ (\texttt{ContDiff.comp}), hence $C^2$, so its
+    second Fréchet derivative is symmetric (\texttt{second\_derivative\_symmetric}),
+    and evaluating on directions $r,t$ gives the claim.
+\end{proof}
+
 \begin{lemma}[Mixed partials of the deformed components commute]
     \label{lem:mixed-partials-symm}
     \lean{LeanEval.KnotTheory.mixed_partials_symm}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:deformed-curves}
+    \uses{def:deformed-curves, lem:mixed-partials-symm-a, lem:mixed-partials-symm-b}
     For the smooth maps $a_r(s)=\Phi_r(\gamma_K(s))$ and $b_r(t)=\Phi_r(\gamma_L(t))$
     of \cref{def:deformed-curves},
     \[
@@ -325,55 +675,279 @@ then absorbed by a one-dimensional change of variables.
     \]
 \end{lemma}
 \begin{proof}
+    \uses{lem:mixed-partials-symm-a, lem:mixed-partials-symm-b}
+    The first equality is \cref{lem:mixed-partials-symm-a} and the second is
+    \cref{lem:mixed-partials-symm-b}.
+\end{proof}
+
+\begin{lemma}[The $r$-partial of the deformed difference]
+    \label{lem:u-partial-r}
+    \uses{def:deformed-curves, lem:deformed-diff-smooth}
+    With $u_r(s,t)=a_r(s)-b_r(t)$ and $\dot u_r=\dot a_r-\dot b_r$,
+    $\partial_r u_r(s,t)=\dot u_r(s,t)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-diff-smooth}
+    Both $a_r$ and $b_r$ are differentiable in $r$ by \cref{lem:deformed-diff-smooth},
+    so $\partial_r u=\partial_r a-\partial_r b=\dot a-\dot b=\dot u$
+    (\texttt{HasDerivAt.sub}).
+\end{proof}
+
+\begin{lemma}[The $s$-partial of the deformed difference]
+    \label{lem:u-partial-s}
+    \uses{def:deformed-curves, lem:deformed-diff-smooth}
+    $\partial_s u_r(s,t)=\partial_s a_r(s)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-diff-smooth}
+    Since $u_r=a_r-b_r$ and $b_r(t)$ does not depend on $s$, the rule
+    \texttt{HasDerivAt.sub} with \texttt{hasDerivAt\_const} for the constant summand
+    gives $\partial_s u=\partial_s a-0=\partial_s a$ (using
+    \cref{lem:deformed-diff-smooth} for differentiability of $a_r$).
+\end{proof}
+
+\begin{lemma}[The $t$-partial of the deformed difference]
+    \label{lem:u-partial-t}
+    \uses{def:deformed-curves, lem:deformed-diff-smooth}
+    $\partial_t u_r(s,t)=-\,\partial_t b_r(t)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-diff-smooth}
+    Since $u_r=a_r-b_r$ and $a_r(s)$ does not depend on $t$, the rule
+    \texttt{HasDerivAt.sub} with \texttt{hasDerivAt\_const} for the constant summand
+    gives $\partial_t u=0-\partial_t b=-\partial_t b$ (using
+    \cref{lem:deformed-diff-smooth} for differentiability of $b_r$).
+\end{proof}
+
+\begin{lemma}[First partials of the deformed difference]
+    \label{lem:u-partials}
+    \lean{LeanEval.KnotTheory.deformedU_partials}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-curves, lem:u-partial-r, lem:u-partial-s, lem:u-partial-t}
+    With $u_r(s,t)=a_r(s)-b_r(t)$ and $\dot u_r=\dot a_r-\dot b_r$, the first partial
+    derivatives of $u$ are
+    \[
+        \partial_r u_r(s,t)=\dot u_r(s,t),\qquad
+        \partial_s u_r(s,t)=\partial_s a_r(s),\qquad
+        \partial_t u_r(s,t)=-\,\partial_t b_r(t).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:u-partial-r, lem:u-partial-s, lem:u-partial-t}
+    The three equalities are \cref{lem:u-partial-r}, \cref{lem:u-partial-s} and
+    \cref{lem:u-partial-t}.
+\end{proof}
+
+\begin{lemma}[Cross mixed partials of the deformed components vanish]
+    \label{lem:cross-mixed-partials-vanish}
+    \lean{LeanEval.KnotTheory.deformed_cross_mixed_partials_zero}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:deformed-curves}
-    Each of $(r,s)\mapsto a_r(s)$ and $(r,t)\mapsto b_r(t)$ is $C^\infty$, being a
-    composition of the smooth isotopy $\Phi$ with the smooth components
-    (\texttt{ContDiff.comp}); in particular it is $C^2$, so its second Fréchet
-    derivative is symmetric (\texttt{second\_derivative\_symmetric}). Evaluating
-    that symmetry on the two coordinate directions $r$ and $s$ (resp.\ $r$ and $t$)
-    is exactly the stated equality of mixed second partials.
+    For all $r,s,t$,
+    \[
+        \partial_t\bigl(\partial_s a_r(s)\bigr)=0,\qquad
+        \partial_s\bigl(\partial_t b_r(t)\bigr)=0.
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{def:deformed-curves}
+    The velocity $\partial_s a_r(s)$ depends only on $(r,s)$, not on $t$; the
+    derivative of a function that is constant in $t$ is $0$ (\texttt{deriv\_const},
+    \texttt{hasDerivAt\_const}). Symmetrically $\partial_t b_r(t)$ is independent of
+    $s$, so its $s$-derivative is $0$.
+\end{proof}
+
+\begin{lemma}[Derivative of a triple product over the inverse-cube norm]
+    \label{lem:det-norm-quotient-deriv}
+    \uses{lem:recip-norm-cube-deriv, lem:triple-product-deriv}
+    Let $u,p,q,w:\mathbb{R}\to\mathbb{R}^3$ be differentiable at $v$ with
+    $u(v)\neq0$. Then $v\mapsto\det\bigl(p(v),q(v),w(v)\bigr)\,\lVert u(v)\rVert^{-3}$
+    is differentiable at $v$ with
+    \[
+        \frac{d}{dv}\Bigl[\det(p,q,w)\,\lVert u\rVert^{-3}\Bigr]
+        =\bigl[\det(p',q,w)+\det(p,q',w)+\det(p,q,w')\bigr]\lVert u\rVert^{-3}
+         -3\,\det(p,q,w)\,\langle u,u'\rangle\,\lVert u\rVert^{-5}.
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:recip-norm-cube-deriv, lem:triple-product-deriv}
+    Apply the product rule (\texttt{HasDerivAt.mul}) to the product of the scalar
+    $\det(p,q,w)$ and the scalar $\lVert u\rVert^{-3}$. The first factor is
+    differentiated by \cref{lem:triple-product-deriv}, giving
+    $\det(p',q,w)+\det(p,q',w)+\det(p,q,w')$; the second by
+    \cref{lem:recip-norm-cube-deriv}, giving
+    $-3\,\lVert u\rVert^{-5}\langle u,u'\rangle$. Collecting the two product-rule
+    terms yields the stated formula.
+\end{proof}
+
+\begin{lemma}[The $r$-partial of the deformed integrand]
+    \label{lem:deformed-I-r-partial}
+    \lean{LeanEval.KnotTheory.deformedIntegrand_r_partial}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-linking, lem:det-norm-quotient-deriv, lem:mixed-partials-symm, lem:u-partials}
+    Writing $I_r=\det(u,\partial_s a,\partial_t b)\,\lVert u\rVert^{-3}$
+    (\texttt{triple\_product\_eq\_det}), for all $r,s,t$,
+    \[
+        \partial_r I_r =
+        \bigl[\det(\dot u,\partial_s a,\partial_t b)
+              +\det(u,\partial_s\dot a,\partial_t b)
+              +\det(u,\partial_s a,\partial_t\dot b)\bigr]\lVert u\rVert^{-3}
+        -3\,\det(u,\partial_s a,\partial_t b)\,\langle u,\dot u\rangle\,\lVert u\rVert^{-5}.
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:det-norm-quotient-deriv, lem:mixed-partials-symm, lem:u-partials}
+    Apply \cref{lem:det-norm-quotient-deriv} to the $r$-curve
+    $r\mapsto\det(u,\partial_s a,\partial_t b)\,\lVert u\rVert^{-3}$, with the slot
+    derivatives $\partial_r u=\dot u$ (\cref{lem:u-partials}),
+    $\partial_r\partial_s a=\partial_s\dot a$ and
+    $\partial_r\partial_t b=\partial_t\dot b$ (\cref{lem:mixed-partials-symm}), and
+    $u'=\dot u$ in the norm term. This yields the three determinant terms over
+    $\lVert u\rVert^{-3}$ together with
+    $-3\,\det(u,\partial_s a,\partial_t b)\,\langle u,\dot u\rangle\,\lVert u\rVert^{-5}$.
+\end{proof}
+
+\begin{lemma}[The $s$-partial of the first potential]
+    \label{lem:deformed-A-s-partial}
+    \lean{LeanEval.KnotTheory.deformedA_s_partial}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:divergence-potentials, lem:det-norm-quotient-deriv, lem:u-partials, lem:cross-mixed-partials-vanish}
+    With $A_r=\det(u,\dot u,\partial_t b)\,\lVert u\rVert^{-3}$, for all $r,s,t$,
+    \[
+        \partial_s A_r =
+        \bigl[\det(\partial_s a,\dot u,\partial_t b)
+              +\det(u,\partial_s\dot a,\partial_t b)\bigr]\lVert u\rVert^{-3}
+        -3\,\det(u,\dot u,\partial_t b)\,\langle u,\partial_s a\rangle\,\lVert u\rVert^{-5}.
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:det-norm-quotient-deriv, lem:u-partials, lem:cross-mixed-partials-vanish}
+    Apply \cref{lem:det-norm-quotient-deriv} to the $s$-curve
+    $s\mapsto\det(u,\dot u,\partial_t b)\,\lVert u\rVert^{-3}$. Here
+    $\partial_s u=\partial_s a$ (\cref{lem:u-partials}),
+    $\partial_s\dot u=\partial_s\dot a$ (since $\dot b$ is independent of $s$), and
+    $\partial_s\partial_t b=0$ (\cref{lem:cross-mixed-partials-vanish}), which kills
+    the third determinant term; the norm term contributes
+    $-3\,\det(u,\dot u,\partial_t b)\,\langle u,\partial_s a\rangle\,\lVert u\rVert^{-5}$
+    with $u'=\partial_s a$.
+\end{proof}
+
+\begin{lemma}[The $t$-partial of the second potential]
+    \label{lem:deformed-B-t-partial}
+    \lean{LeanEval.KnotTheory.deformedB_t_partial}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:divergence-potentials, lem:det-norm-quotient-deriv, lem:u-partials, lem:cross-mixed-partials-vanish}
+    With $B_r=\det(u,\partial_s a,\dot u)\,\lVert u\rVert^{-3}$, for all $r,s,t$,
+    \[
+        \partial_t B_r =
+        \bigl[-\det(\partial_t b,\partial_s a,\dot u)
+              -\det(u,\partial_s a,\partial_t\dot b)\bigr]\lVert u\rVert^{-3}
+        +3\,\det(u,\partial_s a,\dot u)\,\langle u,\partial_t b\rangle\,\lVert u\rVert^{-5}.
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:det-norm-quotient-deriv, lem:u-partials, lem:cross-mixed-partials-vanish}
+    Apply \cref{lem:det-norm-quotient-deriv} to the $t$-curve
+    $t\mapsto\det(u,\partial_s a,\dot u)\,\lVert u\rVert^{-3}$. Here
+    $\partial_t u=-\partial_t b$ (\cref{lem:u-partials}),
+    $\partial_t\partial_s a=0$ (\cref{lem:cross-mixed-partials-vanish}), and
+    $\partial_t\dot u=-\partial_t\dot b$ (since $\dot a$ is independent of $t$); the
+    norm term contributes
+    $-3\,\det(u,\partial_s a,\dot u)\,\langle u,\partial_t u\rangle\,\lVert u\rVert^{-5}
+    =+3\,\det(u,\partial_s a,\dot u)\,\langle u,\partial_t b\rangle\,\lVert u\rVert^{-5}$
+    with $u'=\partial_t u=-\partial_t b$.
+\end{proof}
+
+\begin{lemma}[Algebraic closure of the divergence identity]
+    \label{lem:divergence-algebraic-identity}
+    \lean{LeanEval.KnotTheory.divergence_algebraic_identity}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:quadruple-product-identity}
+    Let $u,p,q,w,p^\ast,q^\ast\in\mathbb{R}^3$ be arbitrary (standing for
+    $u,\partial_s a,\partial_t b,\dot u,\partial_s\dot a,\partial_t\dot b$). Then the
+    purely algebraic identity
+    \begin{align*}
+        &\lVert u\rVert^{2}\bigl[\det(w,p,q)+\det(u,p^\ast,q)+\det(u,p,q^\ast)\bigr]
+          -3\,\langle u,w\rangle\det(u,p,q) \\
+        &\quad=\lVert u\rVert^{2}\bigl[\det(p,w,q)+\det(u,p^\ast,q)\bigr]
+          -3\,\langle u,p\rangle\det(u,w,q) \\
+        &\qquad+\lVert u\rVert^{2}\bigl[-\det(q,p,w)-\det(u,p,q^\ast)\bigr]
+          +3\,\langle u,q\rangle\det(u,p,w)
+    \end{align*}
+    holds, where additionally $w=p^\ast$ and $q^\ast$ enter only through the cancelling
+    pair, so that the identity reduces to the scalar quadruple-product identity.
+\end{lemma}
+\begin{proof}
+    \uses{lem:quadruple-product-identity}
+    Expand every scalar triple product as a determinant
+    (\texttt{triple\_product\_eq\_det}, \texttt{Matrix.det\_fin\_three}) and every
+    inner product and $\lVert u\rVert^2=\langle u,u\rangle$ by
+    \texttt{Matrix.vec3\_dotProduct'}. The acceleration determinants
+    $\det(u,p^\ast,q)$ cancel between the two sides and the $\det(u,p,q^\ast)$ terms
+    pair off after the slot transposition $\det(u,p,q^\ast)=-\det(\cdot)$; the
+    determinant terms not involving an inner product match by multilinearity and
+    alternation of $\det$ (a repeated argument vanishes); and the three
+    inner-product-weighted determinant terms are reconciled by the Lagrange identity
+    \cref{lem:quadruple-product-identity} applied with $(u,p,q,w)$. The two sides then
+    coincide by \texttt{ring}.
 \end{proof}
 
 \begin{lemma}[The $r$-derivative is an $(s,t)$-divergence]
     \label{lem:integrand-r-divergence}
     \lean{LeanEval.KnotTheory.deformedIntegrand_r_divergence}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:deformed-linking, def:divergence-potentials, lem:quadruple-product-identity, lem:recip-norm-cube-deriv, lem:triple-product-deriv, lem:mixed-partials-symm}
+    \uses{def:deformed-linking, def:divergence-potentials, lem:deformed-I-r-partial, lem:deformed-A-s-partial, lem:deformed-B-t-partial, lem:divergence-algebraic-identity, lem:deformed-denom-pos}
     For all $r\in[0,1]$ and all $s,t\in\mathbb{R}$,
     \[
         \partial_r I_r(s,t) = \partial_s A_r(s,t) + \partial_t B_r(s,t) .
     \]
 \end{lemma}
 \begin{proof}
-    \uses{lem:quadruple-product-identity, lem:recip-norm-cube-deriv,
-          lem:triple-product-deriv, lem:mixed-partials-symm}
-    Write the three quantities as products of a triple product and
-    $\lVert u\rVert^{-3}$ (\texttt{triple\_product\_eq\_det}):
-    $I_r=\det(u,\partial_s a,\partial_t b)\,\lVert u\rVert^{-3}$,
-    $A_r=\det(u,\dot u,\partial_t b)\,\lVert u\rVert^{-3}$ and
-    $B_r=\det(u,\partial_s a,\dot u)\,\lVert u\rVert^{-3}$. Differentiate each by the
-    product rule, using \cref{lem:triple-product-deriv} on the determinant factor
-    and \cref{lem:recip-norm-cube-deriv} on the $\lVert u\rVert^{-3}$ factor; the
-    relevant first partials of $u=a_r-b_r$ are $\partial_r u=\dot u$,
-    $\partial_s u=\partial_s a$, $\partial_t u=-\partial_t b$, and the mixed partials
-    satisfy $\partial_r\partial_s a=\partial_s\dot a$,
-    $\partial_r\partial_t b=\partial_t\dot b$ by \cref{lem:mixed-partials-symm}
-    (while $\partial_t\partial_s a=\partial_s\partial_t b=0$). Multiplying the target
-    equation $\partial_r I_r=\partial_s A_r+\partial_t B_r$ through by
-    $\lVert u\rVert^{5}$ turns it into an identity among scalar triple products and
-    inner products of $u,\dot u,\partial_s a,\partial_t b,\partial_s\dot a,
-    \partial_t\dot b$: the $\lVert u\rVert^{2}$-weighted determinant terms match by
-    multilinearity and antisymmetry of the determinant (a repeated argument
-    vanishes), and the inner-product-weighted terms are reconciled by the Lagrange
-    identity \cref{lem:quadruple-product-identity} applied with
-    $(p,q,w)=(\partial_s a,\partial_t b,\dot u)$. Both sides coincide, giving the
-    claim.
+    \uses{lem:deformed-I-r-partial, lem:deformed-A-s-partial, lem:deformed-B-t-partial, lem:divergence-algebraic-identity, lem:deformed-denom-pos}
+    Substitute the three closed forms of \cref{lem:deformed-I-r-partial},
+    \cref{lem:deformed-A-s-partial} and \cref{lem:deformed-B-t-partial} for
+    $\partial_r I_r$, $\partial_s A_r$ and $\partial_t B_r$. Since
+    $\lVert u\rVert>0$ (\cref{lem:deformed-denom-pos}) we may clear the common factor
+    $\lVert u\rVert^{-5}$; the resulting equation between $\lVert u\rVert^{2}$-weighted
+    and $\langle u,\cdot\rangle$-weighted triple products is exactly the algebraic
+    identity \cref{lem:divergence-algebraic-identity} with
+    $(p,q,w,p^\ast,q^\ast)=(\partial_s a,\partial_t b,\dot u,\partial_s\dot a,
+    \partial_t\dot b)$. Hence $\partial_r I_r=\partial_s A_r+\partial_t B_r$.
+\end{proof}
+
+\begin{lemma}[The $s$-divergence term integrates to zero]
+    \label{lem:periodic-partial-s-integral-zero}
+    Let $A : \mathbb{R}^2\to\mathbb{R}$ be $C^1$ and $2\pi$-periodic in each
+    variable. Then $\int_0^{2\pi}\!\int_0^{2\pi}\partial_s A(s,t)\,ds\,dt = 0$.
+\end{lemma}
+\begin{proof}
+    For fixed $t$ the inner integral $\int_0^{2\pi}\partial_s A(s,t)\,ds$ equals
+    $A(2\pi,t) - A(0,t)$ by the fundamental theorem of calculus
+    (\texttt{intervalIntegral.integral\_deriv\_eq\_sub}), and this is $0$ by
+    $2\pi$-periodicity in $s$ (\texttt{Function.Periodic}). Integrating the zero
+    function over $t$ gives $0$.
+\end{proof}
+
+\begin{lemma}[The $t$-divergence term integrates to zero]
+    \label{lem:periodic-partial-t-integral-zero}
+    Let $B : \mathbb{R}^2\to\mathbb{R}$ be $C^1$ and $2\pi$-periodic in each
+    variable. Then $\int_0^{2\pi}\!\int_0^{2\pi}\partial_t B(s,t)\,ds\,dt = 0$.
+\end{lemma}
+\begin{proof}
+    Swap the order of integration
+    (\texttt{MeasureTheory.intervalIntegral\_integral\_swap}, valid since
+    $\partial_t B$ is continuous). For fixed $s$ the inner integral
+    $\int_0^{2\pi}\partial_t B(s,t)\,dt = B(s,2\pi)-B(s,0)$ by the fundamental
+    theorem of calculus (\texttt{intervalIntegral.integral\_deriv\_eq\_sub}), which
+    is $0$ by $2\pi$-periodicity in $t$ (\texttt{Function.Periodic}); integrating
+    over $s$ gives $0$.
 \end{proof}
 
 \begin{lemma}[A periodic divergence integrates to zero]
     \label{lem:periodic-divergence-integral-zero}
     \lean{LeanEval.KnotTheory.periodic_divergence_integral_zero}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:periodic-partial-s-integral-zero, lem:periodic-partial-t-integral-zero}
     Let $A,B : \mathbb{R}^2\to\mathbb{R}$ be $C^1$ and $2\pi$-periodic in each
     variable. Then
     \[
@@ -381,21 +955,81 @@ then absorbed by a one-dimensional change of variables.
     \]
 \end{lemma}
 \begin{proof}
-    For fixed $t$ the inner integral $\int_0^{2\pi}\partial_s A(s,t)\,ds$ equals
-    $A(2\pi,t) - A(0,t)$ by the fundamental theorem of calculus
-    (\texttt{intervalIntegral.integral\_deriv\_eq\_sub}), and this is $0$ by
-    $2\pi$-periodicity (\texttt{Function.Periodic}); integrating over $t$ leaves
-    the $\partial_s A$ term equal to $0$. For the $\partial_t B$ term, swap the
-    order of integration (\texttt{MeasureTheory.intervalIntegral\_integral\_swap})
-    and argue identically in $t$, getting
-    $\int_0^{2\pi}\bigl(B(s,2\pi)-B(s,0)\bigr)\,ds = 0$. Adding gives $0$.
+    \uses{lem:periodic-partial-s-integral-zero, lem:periodic-partial-t-integral-zero}
+    By linearity of the integral the left side splits as
+    $\int_0^{2\pi}\!\int_0^{2\pi}\partial_s A + \int_0^{2\pi}\!\int_0^{2\pi}\partial_t B$,
+    and each summand is $0$ by \cref{lem:periodic-partial-s-integral-zero} and
+    \cref{lem:periodic-partial-t-integral-zero} respectively.
+\end{proof}
+
+\begin{lemma}[Uniform bound on the deformed integrand and its $r$-derivative]
+    \label{lem:integrand-uniform-bound}
+    \lean{LeanEval.KnotTheory.deformedIntegrand_uniform_bound}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-linking, lem:deformed-integrand-smooth}
+    There is a constant $M$ such that for all $(r,s,t)\in[0,1]\times[0,2\pi]^2$,
+    \[
+        \lvert I_r(s,t)\rvert \le M \qquad\text{and}\qquad
+        \lvert \partial_r I_r(s,t)\rvert \le M .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-integrand-smooth}
+    Both $I_r(s,t)$ and $\partial_r I_r(s,t)$ are continuous on
+    $[0,1]\times[0,2\pi]^2$ by \cref{lem:deformed-integrand-smooth}, and that box is
+    compact (a product of compact intervals, \texttt{isCompact\_Icc}). A continuous
+    real function on a compact set is bounded
+    (\texttt{IsCompact.exists\_bound\_of\_continuousOn}); taking the larger of the two
+    bounds gives a single $M$.
+\end{proof}
+
+\begin{lemma}[Leibniz rule for a bounded jointly-continuous family]
+    \label{lem:param-interval-integral-hasDerivAt}
+    Let $\phi:[0,1]\times[0,2\pi]\to\mathbb{R}$ be continuous, suppose the
+    $r$-partial $\partial_r\phi$ exists and is continuous on $[0,1]\times[0,2\pi]$,
+    and suppose there is a constant $M$ with $\lvert\partial_r\phi(r,s)\rvert\le M$
+    for all $(r,s)$. Then for each $r\in[0,1]$ the map
+    $r\mapsto\int_0^{2\pi}\phi(r,s)\,ds$ is differentiable with derivative
+    $\int_0^{2\pi}\partial_r\phi(r,s)\,ds$.
+\end{lemma}
+\begin{proof}
+    This discharges the hypotheses of the Leibniz integral rule
+    (\texttt{hasDerivAt\_integral\_of\_dominated\_loc\_of\_deriv\_le}). For each
+    fixed $r$, $s\mapsto\phi(r,s)$ and $s\mapsto\partial_r\phi(r,s)$ are continuous,
+    hence interval-integrable on $[0,2\pi]$ and a.e.-strongly measurable; the
+    constant $s\mapsto M$ dominates $\lvert\partial_r\phi(r,s)\rvert$ and is
+    integrable on $[0,2\pi]$; and $r\mapsto\phi(r,s)$ is differentiable with
+    derivative $\partial_r\phi(r,s)$ on the neighbourhood by hypothesis. The rule
+    then gives differentiability of $r\mapsto\int_0^{2\pi}\phi(r,s)\,ds$ and the
+    stated formula.
+\end{proof}
+
+\begin{lemma}[Differentiating the inner linking integral under the integral sign]
+    \label{lem:inner-integral-hasDerivAt}
+    \lean{LeanEval.KnotTheory.deformedLinking_inner_hasDerivAt}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-linking, lem:deformed-integrand-smooth, lem:integrand-uniform-bound, lem:param-interval-integral-hasDerivAt}
+    For each fixed $t\in[0,2\pi]$ the inner integral
+    $J(r,t)=\int_0^{2\pi} I_r(s,t)\,ds$ is differentiable in $r$ on $[0,1]$ with
+    \[
+        \partial_r J(r,t)=\int_0^{2\pi}\partial_r I_r(s,t)\,ds .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:deformed-integrand-smooth, lem:integrand-uniform-bound, lem:param-interval-integral-hasDerivAt}
+    Fix $t$ and apply \cref{lem:param-interval-integral-hasDerivAt} to
+    $\phi(r,s)=I_r(s,t)$. Its hypotheses hold: $\phi$ and $\partial_r\phi=\partial_r
+    I_r(\cdot,\cdot,t)$ are continuous by \cref{lem:deformed-integrand-smooth}, and
+    $\lvert\partial_r I_r(s,t)\rvert\le M$ on $[0,1]\times[0,2\pi]$ by the uniform
+    bound \cref{lem:integrand-uniform-bound}. The conclusion is exactly the stated
+    formula.
 \end{proof}
 
 \begin{lemma}[Differentiating the linking integral under the integral sign]
     \label{lem:deformed-linking-hasDerivAt}
     \lean{LeanEval.KnotTheory.deformedLinking_hasDerivAt}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:deformed-linking, lem:deformed-integrand-smooth}
+    \uses{def:deformed-linking, lem:deformed-integrand-smooth, lem:integrand-uniform-bound, lem:inner-integral-hasDerivAt, lem:param-interval-integral-hasDerivAt}
     For each $r\in[0,1]$ the function $F$ of \cref{def:deformed-linking} is
     differentiable, with
     \[
@@ -403,79 +1037,207 @@ then absorbed by a one-dimensional change of variables.
     \]
 \end{lemma}
 \begin{proof}
-    \uses{lem:deformed-integrand-smooth}
-    On the compact set $[0,1]\times[0,2\pi]^2$ both $I_r(s,t)$ and $\partial_r I_r(s,t)$
-    are continuous (\cref{lem:deformed-integrand-smooth}), hence bounded; a constant
-    bound is an integrable dominating function on $[0,2\pi]^2$. The Leibniz integral
-    rule (\texttt{hasDerivAt\_integral\_of\_dominated\_loc\_of\_deriv\_le}), applied
-    to each interval integral in turn, allows differentiation under both integral
-    signs and yields the stated formula.
+    \uses{lem:deformed-integrand-smooth, lem:integrand-uniform-bound, lem:inner-integral-hasDerivAt, lem:param-interval-integral-hasDerivAt}
+    Write $4\pi F(r)=\int_0^{2\pi} J(r,t)\,dt$ with $J(r,t)=\int_0^{2\pi}I_r(s,t)\,ds$
+    the inner integral, and apply \cref{lem:param-interval-integral-hasDerivAt} to
+    $\phi(r,t)=J(r,t)$. The required hypotheses hold: $J$ is continuous in $(r,t)$
+    (parametric continuity of the inner interval integral of the continuous $I$,
+    \cref{lem:deformed-integrand-smooth}); by \cref{lem:inner-integral-hasDerivAt}
+    the $r$-partial $\partial_r J(r,t)=\int_0^{2\pi}\partial_r I_r(s,t)\,ds$ exists
+    and is likewise continuous in $(r,t)$; and by the uniform bound
+    \cref{lem:integrand-uniform-bound} it is dominated by the constant $2\pi M$.
+    Hence $4\pi F'(r)=\int_0^{2\pi}\partial_r J(r,t)\,dt=
+     \int_0^{2\pi}\!\int_0^{2\pi}\partial_r I_r(s,t)\,ds\,dt$, the stated formula.
 \end{proof}
 
 \begin{lemma}[The deformed linking number has zero derivative]
     \label{lem:deformed-linking-deriv-zero}
     \lean{LeanEval.KnotTheory.deformedLinking_deriv_zero}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{lem:integrand-r-divergence, lem:periodic-divergence-integral-zero, lem:deformed-linking-hasDerivAt, def:divergence-potentials}
+    \uses{lem:integrand-r-divergence, lem:periodic-divergence-integral-zero, lem:deformed-linking-hasDerivAt, def:divergence-potentials, lem:deformed-potentials-periodic}
     For all $r\in[0,1]$, $F'(r) = 0$.
 \end{lemma}
 \begin{proof}
     \uses{lem:integrand-r-divergence, lem:periodic-divergence-integral-zero,
-          lem:deformed-linking-hasDerivAt}
+          lem:deformed-linking-hasDerivAt, lem:deformed-potentials-periodic}
     By \cref{lem:deformed-linking-hasDerivAt},
     $4\pi\,F'(r) = \int_0^{2\pi}\!\int_0^{2\pi}\partial_r I_r$. By
     \cref{lem:integrand-r-divergence} the integrand equals
     $\partial_s A_r + \partial_t B_r$ with $A_r,B_r$ as in
     \cref{def:divergence-potentials}, which are $C^1$ and $2\pi$-periodic in each of
-    $s,t$. By \cref{lem:periodic-divergence-integral-zero} that integral is $0$, so
+    $s,t$ by \cref{lem:deformed-potentials-periodic}. By
+    \cref{lem:periodic-divergence-integral-zero} that integral is $0$, so
     $F'(r) = 0$.
+\end{proof}
+
+\begin{lemma}[Chain rule for a reparametrized knot]
+    \label{lem:reparam-chain-deriv}
+    \lean{LeanEval.KnotTheory.reparam_chain_deriv}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    Let $\gamma:\mathbb{R}\to\mathbb{R}^3$ be a knot and $\sigma:\mathbb{R}\to
+    \mathbb{R}$ smooth. Then for all $s$,
+    \[
+        (\gamma\circ\sigma)'(s) = \sigma'(s)\,\gamma'(\sigma(s)).
+    \]
+\end{lemma}
+\begin{proof}
+    The knot $\gamma$ is differentiable at $\sigma(s)$ (\texttt{Knot.smooth}) and
+    $\sigma$ is differentiable at $s$; the scalar-input chain rule
+    (\texttt{HasDerivAt.scomp}) gives the derivative of the composite as the scalar
+    $\sigma'(s)$ times $\gamma'(\sigma(s))$.
+\end{proof}
+
+\begin{lemma}[Integrand scaling under reparametrization]
+    \label{lem:reparam-integrand-scaling}
+    \lean{LeanEval.KnotTheory.reparam_integrand_scaling}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:linking-number, lem:reparam-chain-deriv}
+    Let $h$ be the linking integrand of $L$ (components $\gamma_K,\gamma_L$) and $h'$
+    the linking integrand of $L'$ (components $\gamma_K\circ\sigma,\gamma_L\circ\tau$).
+    Then for all $s,t$,
+    \[
+        h'(s,t) = \sigma'(s)\,\tau'(t)\,h\bigl(\sigma(s),\tau(t)\bigr).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:reparam-chain-deriv}
+    By \cref{lem:reparam-chain-deriv} the velocities of the reparametrized components
+    are $\sigma'(s)\,\gamma_K'(\sigma(s))$ and $\tau'(t)\,\gamma_L'(\tau(t))$. The
+    cross product \texttt{crossProduct} is a bilinear map, so it pulls out the scalar
+    factor $\sigma'(s)\,\tau'(t)$ from each argument (\texttt{LinearMap.map\_smul},
+    \texttt{LinearMap.map\_smul\_of\_tower}); the numerator $\langle\cdot,\cdot\rangle$
+    is linear in that argument (\texttt{inner\_smul\_right}) and the denominator
+    $\lVert\gamma_K(\sigma(s))-\gamma_L(\tau(t))\rVert^{3}$ is unchanged, giving the
+    stated factorization.
+\end{proof}
+
+\begin{lemma}[One-dimensional change of variables over a period]
+    \label{lem:reparam-single-cov}
+    \lean{LeanEval.KnotTheory.reparam_single_change_of_variables}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    Let $g:\mathbb{R}\to\mathbb{R}$ be continuous and $2\pi$-periodic, and let
+    $\sigma:\mathbb{R}\to\mathbb{R}$ be smooth with $\sigma(s+2\pi)=\sigma(s)+2\pi$.
+    Then
+    \[
+        \int_0^{2\pi}\sigma'(s)\,g(\sigma(s))\,ds = \int_0^{2\pi} g(x)\,dx .
+    \]
+\end{lemma}
+\begin{proof}
+    The substitution $x=\sigma(s)$ via the change-of-variables formula
+    (\texttt{intervalIntegral.integral\_comp\_smul\_deriv'''}, with $\sigma$
+    differentiable and $g$ continuous) turns the left side into
+    $\int_{\sigma(0)}^{\sigma(2\pi)} g(x)\,dx=\int_{\sigma(0)}^{\sigma(0)+2\pi}g(x)\,dx$,
+    using $\sigma(2\pi)=\sigma(0)+2\pi$. Since $g$ is $2\pi$-periodic, the integral of
+    $g$ over any interval of length $2\pi$ equals its integral over $[0,2\pi]$
+    (\texttt{Function.Periodic.intervalIntegral\_add\_eq}).
+\end{proof}
+
+\begin{lemma}[Inner ($s$) change-of-variables pass over the torus]
+    \label{lem:reparam-inner-cov}
+    \uses{lem:reparam-single-cov}
+    Let $h:\mathbb{R}^2\to\mathbb{R}$ be continuous and $2\pi$-periodic in each
+    variable, and let $\sigma,\tau:\mathbb{R}\to\mathbb{R}$ be smooth with
+    $\sigma(s+2\pi)=\sigma(s)+2\pi$ and $\tau(t+2\pi)=\tau(t)+2\pi$. Then
+    \[
+        \int_0^{2\pi}\!\!\int_0^{2\pi}\sigma'(s)\,\tau'(t)\,h\bigl(\sigma(s),\tau(t)\bigr)\,ds\,dt
+        = \int_0^{2\pi}\!\!\int_0^{2\pi}\tau'(t)\,h\bigl(x,\tau(t)\bigr)\,dx\,dt .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:reparam-single-cov}
+    For each fixed $t$, the function $x\mapsto\tau'(t)\,h(x,\tau(t))$ is continuous
+    and $2\pi$-periodic, so \cref{lem:reparam-single-cov} applied to $\sigma$ gives
+    $\int_0^{2\pi}\sigma'(s)\,\tau'(t)\,h(\sigma(s),\tau(t))\,ds
+       =\int_0^{2\pi}\tau'(t)\,h(x,\tau(t))\,dx$. Integrating both sides over
+    $t\in[0,2\pi]$ gives the claim.
+\end{proof}
+
+\begin{lemma}[Iterated change of variables over the torus]
+    \label{lem:reparam-iterated-cov}
+    \lean{LeanEval.KnotTheory.reparam_iterated_change_of_variables}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:reparam-single-cov, lem:reparam-inner-cov}
+    Let $h:\mathbb{R}^2\to\mathbb{R}$ be continuous and $2\pi$-periodic in each
+    variable, and let $\sigma,\tau:\mathbb{R}\to\mathbb{R}$ be smooth with
+    $\sigma(s+2\pi)=\sigma(s)+2\pi$ and $\tau(t+2\pi)=\tau(t)+2\pi$. Then
+    \[
+        \int_0^{2\pi}\!\!\int_0^{2\pi}\sigma'(s)\,\tau'(t)\,h\bigl(\sigma(s),\tau(t)\bigr)\,ds\,dt
+        = \int_0^{2\pi}\!\!\int_0^{2\pi} h(x,y)\,dx\,dy .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:reparam-single-cov, lem:reparam-inner-cov}
+    By the inner pass \cref{lem:reparam-inner-cov}, the left side equals
+    $\int_0^{2\pi}\!\int_0^{2\pi}\tau'(t)\,h(x,\tau(t))\,dx\,dt$. Swap the order of
+    integration (\texttt{MeasureTheory.intervalIntegral\_integral\_swap}, valid by
+    continuity of $h$); for each fixed $x$ the function $y\mapsto h(x,y)$ is
+    continuous and $2\pi$-periodic, so \cref{lem:reparam-single-cov} applied to
+    $\tau$ gives $\int_0^{2\pi}\tau'(t)\,h(x,\tau(t))\,dt=\int_0^{2\pi}h(x,y)\,dy$.
+    Swapping back yields the claim.
 \end{proof}
 
 \begin{lemma}[Reparametrization invariance of the linking number]
     \label{lem:reparam-invariant}
     \lean{LeanEval.KnotTheory.linkingNumber_reparam}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:linking-number}
+    \uses{def:linking-number, lem:reparam-integrand-scaling, lem:reparam-iterated-cov, lem:integrand-continuous, lem:integrand-periodic}
     Let $\sigma,\tau$ be orientation-preserving smooth circle reparametrizations
     (strictly increasing with $\sigma(s+2\pi)=\sigma(s)+2\pi$, similarly $\tau$). If
     $L'$ has components $\gamma_K\circ\sigma,\ \gamma_L\circ\tau$ and $L$ has
     components $\gamma_K,\gamma_L$, then $\mathrm{lk}(L') = \mathrm{lk}(L)$.
 \end{lemma}
 \begin{proof}
-    The chain rule gives $(\gamma_K\circ\sigma)'(s) = \sigma'(s)\,\gamma_K'(\sigma(s))$
-    and likewise for $\tau$, so the integrand of $\mathrm{lk}(L')$ at $(s,t)$ equals
-    $\sigma'(s)\,\tau'(t)$ times the integrand $h$ of $\mathrm{lk}(L)$ evaluated at
-    $(\sigma(s),\tau(t))$ (the cross product is bilinear and the denominator depends
-    only on $\gamma_K(\sigma(s))-\gamma_L(\tau(t))$). The one-dimensional change of
-    variables (\texttt{intervalIntegral.integral\_comp\_smul\_deriv'''}) turns
-    $\int_0^{2\pi}\sigma'(s)\,h(\sigma(s),\cdot)\,ds$ into
-    $\int_{\sigma(0)}^{\sigma(0)+2\pi} h$, which equals $\int_0^{2\pi} h$ by
-    $2\pi$-periodicity of the integrand; applying this in $s$ and then in $t$ shows
-    the two double integrals agree.
+    \uses{lem:reparam-integrand-scaling, lem:reparam-iterated-cov, lem:integrand-continuous, lem:integrand-periodic}
+    By \cref{lem:reparam-integrand-scaling} the integrand of $\mathrm{lk}(L')$ at
+    $(s,t)$ equals $\sigma'(s)\,\tau'(t)\,h(\sigma(s),\tau(t))$, where $h$ is the
+    integrand of $\mathrm{lk}(L)$, continuous (\cref{lem:integrand-continuous}) and
+    $2\pi$-periodic in each variable (\cref{lem:integrand-periodic}). Applying the iterated
+    change of variables \cref{lem:reparam-iterated-cov} to $h$ with these
+    $\sigma,\tau$ shows the two double integrals agree, so
+    $\mathrm{lk}(L')=\mathrm{lk}(L)$.
+\end{proof}
+
+\begin{lemma}[The deformed linking integral at $r=1$]
+    \label{lem:deformed-linking-at-one}
+    \lean{LeanEval.KnotTheory.deformedLinking_at_one}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{def:deformed-linking, lem:reparam-invariant}
+    Suppose $L_1\cong L_2$ via the ambient isotopy $\Phi$ and orientation-preserving
+    reparametrizations $\sigma,\tau$, and let $F$ be the function of
+    \cref{def:deformed-linking} built from $\Phi$ and $L_1$. Then
+    $F(1) = \mathrm{lk}(L_2)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:reparam-invariant}
+    At $r=1$ the isotopy relations
+    $\Phi_1\circ\gamma_{K_1}=\gamma_{K_2}\circ\sigma$ and
+    $\Phi_1\circ\gamma_{L_1}=\gamma_{L_2}\circ\tau$ give $a_1=\gamma_{K_2}\circ\sigma$
+    and $b_1=\gamma_{L_2}\circ\tau$, so the integrand $I_1$ of
+    \cref{def:deformed-linking} is exactly the linking integrand of the
+    reparametrized link with components $\gamma_{K_2}\circ\sigma,\
+    \gamma_{L_2}\circ\tau$, whence $F(1)$ is its linking number. By
+    \cref{lem:reparam-invariant} (with $\sigma,\tau$ orientation-preserving
+    reparametrizations) this equals $\mathrm{lk}(L_2)$.
 \end{proof}
 
 \begin{theorem}[The linking number is an ambient-isotopy invariant]
     \label{thm:linking-isotopy-invariant}
     \lean{LeanEval.KnotTheory.TwoLink.linkingNumber_isotopy_invariant}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:linking-number, def:deformed-linking, lem:deformed-linking-deriv-zero, lem:reparam-invariant}
+    \uses{def:linking-number, def:deformed-linking, lem:deformed-linking-deriv-zero, lem:deformed-linking-at-one}
     If $L_1 \cong L_2$ (i.e.\ \texttt{TwoLink.Isotopic} $L_1\ L_2$) then
     $\mathrm{lk}(L_1) = \mathrm{lk}(L_2)$.
 \end{theorem}
 \begin{proof}
-    \uses{lem:deformed-linking-deriv-zero, lem:reparam-invariant}
+    \uses{lem:deformed-linking-deriv-zero, lem:deformed-linking-at-one}
     Let $\Phi$ be the ambient isotopy and $\sigma,\tau$ the orientation-preserving
     reparametrizations witnessing $L_1\cong L_2$, and let $F$ be as in
     \cref{def:deformed-linking}. By \cref{lem:deformed-linking-deriv-zero}
     $F'\equiv 0$ on $[0,1]$, so $F$ is constant there
     (\texttt{constant\_of\_derivWithin\_zero} on the convex set $[0,1]$); in
-    particular $F(0) = F(1)$. Now $F(0) = \mathrm{lk}(L_1)$, while at $r=1$ the
-    isotopy relations $\Phi_1\circ\gamma_{K_1} = \gamma_{K_2}\circ\sigma$ and
-    $\Phi_1\circ\gamma_{L_1} = \gamma_{L_2}\circ\tau$ identify $F(1)$ with the
-    linking number of the reparametrized link
-    $(\gamma_{K_2}\circ\sigma,\ \gamma_{L_2}\circ\tau)$, which equals
-    $\mathrm{lk}(L_2)$ by \cref{lem:reparam-invariant}. Hence
-    $\mathrm{lk}(L_1) = \mathrm{lk}(L_2)$.
+    particular $F(0)=F(1)$. Now $F(0)=\mathrm{lk}(L_1)$ by
+    \cref{def:deformed-linking}, and $F(1)=\mathrm{lk}(L_2)$ by
+    \cref{lem:deformed-linking-at-one}. Hence $\mathrm{lk}(L_1)=\mathrm{lk}(L_2)$.
 \end{proof}
 
 \subsection{The unlink and the Hopf link}
@@ -660,11 +1422,37 @@ then absorbed by a one-dimensional change of variables.
 
 \subsection{Computing the two linking numbers}
 
+\begin{lemma}[The unlink velocity cross product]
+    \label{lem:unlink-crossproduct}
+    \uses{def:unlink, lem:cc-deriv}
+    For the unlink $L_1$ (components $c_{0,0,1}$ and $c_{2e_2,0,1}$) the velocity
+    cross product is $\gamma_K'(s)\times\gamma_L'(t) = (0,0,\sin(s-t))$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:cc-deriv}
+    By \cref{lem:cc-deriv}, $\gamma_K'(s) = (-\sin s,\cos s,0)$ and
+    $\gamma_L'(t) = (-\sin t,\cos t,0)$. Their cross product has vanishing first two
+    coordinates and third coordinate $\sin s\cos t-\cos s\sin t = \sin(s-t)$
+    (\texttt{cross\_apply}, \texttt{Real.sin\_sub}).
+\end{proof}
+
+\begin{lemma}[The unlink squared distance]
+    \label{lem:unlink-normsq}
+    \uses{def:unlink}
+    For the unlink $L_1$, with $u=\gamma_K(s)-\gamma_L(t)=(\cos s-\cos t,\ \sin
+    s-\sin t,\ -2)$, one has $\lVert u\rVert^2 = 6 - 2\cos(s-t)$.
+\end{lemma}
+\begin{proof}
+    Expanding, $\lVert u\rVert^2 = (\cos s-\cos t)^2 + (\sin s-\sin t)^2 + 4
+    = \bigl(2 - 2(\cos s\cos t+\sin s\sin t)\bigr) + 4 = 6 - 2\cos(s-t)$, using
+    $\sin^2+\cos^2=1$ and \texttt{Real.cos\_sub}.
+\end{proof}
+
 \begin{lemma}[The unlink linking integrand]
     \label{lem:unlink-integrand}
     \lean{LeanEval.KnotTheory.unlink_integrand}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:unlink, def:linking-number, lem:cc-deriv}
+    \uses{def:unlink, def:linking-number, lem:unlink-crossproduct, lem:unlink-normsq}
     For the unlink $L_1$ (components $c_{0,0,1}$ in the plane $z=0$ and
     $c_{2e_2,0,1}$ in the plane $z=2$) the linking integrand at $(s,t)$ equals
     \[
@@ -672,32 +1460,51 @@ then absorbed by a one-dimensional change of variables.
     \]
 \end{lemma}
 \begin{proof}
-    \uses{lem:cc-deriv}
-    Here $u = (\cos s-\cos t,\ \sin s-\sin t,\ -2)$, while $\gamma_K'(s) =
-    (-\sin s,\cos s,0)$ and $\gamma_L'(t) = (-\sin t,\cos t,0)$ by
-    \cref{lem:cc-deriv}. Their cross product is $(0,0,\ \sin s\cos t-\cos s\sin t) =
-    (0,0,\sin(s-t))$ (\texttt{cross\_apply}, \texttt{Real.sin\_sub}), so the
-    numerator is $\langle u,(0,0,\sin(s-t))\rangle = -2\sin(s-t)$. The denominator is
-    $\lVert u\rVert^3$ with $\lVert u\rVert^2 = (2-2\cos(s-t)) + 4 = 6-2\cos(s-t)$
-    (\texttt{Real.cos\_sub} and $\sin^2+\cos^2=1$).
+    \uses{lem:unlink-crossproduct, lem:unlink-normsq}
+    Here $u = (\cos s-\cos t,\ \sin s-\sin t,\ -2)$. The velocity cross product is
+    $(0,0,\sin(s-t))$ by \cref{lem:unlink-crossproduct}, so the numerator is
+    $\langle u,(0,0,\sin(s-t))\rangle = -2\sin(s-t)$. The denominator is
+    $\lVert u\rVert^3$ with $\lVert u\rVert^2 = 6-2\cos(s-t)$ by
+    \cref{lem:unlink-normsq}.
+\end{proof}
+
+\begin{lemma}[Antiderivative of the unlink integrand]
+    \label{lem:unlink-antideriv}
+    \lean{LeanEval.KnotTheory.unlink_inner_antideriv}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:unlink-integrand}
+    Fix $t$ and set $h(s) = \bigl(6-2\cos(s-t)\bigr)^{-1/2}$. Then for all $s$, $h$
+    has derivative
+    \[
+        h'(s) = \frac{-2\,\sin(s-t)}{\bigl(6-2\cos(s-t)\bigr)^{3/2}} = I_{L_1}(s,t).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:unlink-integrand}
+    The base $\beta(s)=6-2\cos(s-t)$ satisfies $\beta(s)\ge4>0$ (since
+    $\cos\le1$) and has derivative $\beta'(s)=2\sin(s-t)$ by the chain rule
+    (\texttt{Real.hasDerivAt\_cos}, \texttt{HasDerivAt.comp} with $s\mapsto s-t$).
+    The real power rule with exponent $-\tfrac12$ on a positive base
+    (\texttt{Real.hasDerivAt\_rpow\_const}, \texttt{HasDerivAt.rpow\_const}) gives
+    $h'(s)=-\tfrac12\,\beta(s)^{-3/2}\,\beta'(s)
+        =-\sin(s-t)\,\beta(s)^{-3/2}$, which is $I_{L_1}(s,t)$ by
+    \cref{lem:unlink-integrand}.
 \end{proof}
 
 \begin{lemma}[Inner integral of the unlink integrand vanishes]
     \label{lem:unlink-inner-integral-zero}
     \lean{LeanEval.KnotTheory.unlink_inner_integral_zero}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{lem:unlink-integrand}
+    \uses{lem:unlink-integrand, lem:unlink-antideriv}
     For every $t$, $\displaystyle\int_0^{2\pi} I_{L_1}(s,t)\,ds = 0$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:unlink-integrand}
-    The function $h(s) = \bigl(6-2\cos(s-t)\bigr)^{-1/2}$ is differentiable (the base
-    $6-2\cos(\cdot) \ge 4 > 0$) with
-    $h'(s) = \dfrac{-2\sin(s-t)}{\bigl(6-2\cos(s-t)\bigr)^{3/2}} = I_{L_1}(s,t)$
-    by the chain rule (\texttt{Real.deriv\_cos}). By the fundamental theorem of
-    calculus (\texttt{intervalIntegral.integral\_deriv\_eq\_sub}),
-    $\int_0^{2\pi} I_{L_1}(s,t)\,ds = h(2\pi)-h(0) = 0$, since $\cos(\cdot-t)$ is
-    $2\pi$-periodic.
+    \uses{lem:unlink-antideriv}
+    With $h$ the antiderivative of \cref{lem:unlink-antideriv}, the fundamental
+    theorem of calculus (\texttt{intervalIntegral.integral\_deriv\_eq\_sub}) gives
+    $\int_0^{2\pi} I_{L_1}(s,t)\,ds = h(2\pi)-h(0)$, and this is $0$ because
+    $\cos(\cdot-t)$ is $2\pi$-periodic (\texttt{Real.cos\_add\_two\_pi}), so
+    $h(2\pi)=h(0)$.
 \end{proof}
 
 \begin{lemma}[The unlink has linking number zero]
@@ -716,11 +1523,37 @@ then absorbed by a one-dimensional change of variables.
     the zero function, namely $0$. Hence $\mathrm{lk}(L_1) = 0$.
 \end{proof}
 
+\begin{lemma}[The Hopf velocity cross product]
+    \label{lem:hopf-crossproduct}
+    \uses{def:hopf-link, lem:cc-deriv}
+    For the Hopf link $L_2$ (components $c_{0,0,1}$ and $c_{e_0,0,2}$) the velocity
+    cross product is
+    $\gamma_K'(s)\times\gamma_L'(t)=(\cos s\cos t,\ \sin s\cos t,\ \cos s\sin t)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:cc-deriv}
+    By \cref{lem:cc-deriv}, $\gamma_K'(s)=(-\sin s,\cos s,0)$ and
+    $\gamma_L'(t)=(-\sin t,0,\cos t)$. Evaluating \texttt{cross\_apply} coordinatewise
+    gives $(\cos s\cos t,\ \sin s\cos t,\ \cos s\sin t)$.
+\end{proof}
+
+\begin{lemma}[The Hopf squared distance]
+    \label{lem:hopf-normsq}
+    \uses{def:hopf-link}
+    For the Hopf link $L_2$, with $u=\gamma_K(s)-\gamma_L(t)=(\cos s-1-\cos t,\ \sin
+    s,\ -\sin t)$, one has $\lVert u\rVert^2 = 3+2\cos t-2(1+\cos t)\cos s =: D(s,t)$.
+\end{lemma}
+\begin{proof}
+    Expanding $\lVert u\rVert^2=(\cos s-1-\cos t)^2+\sin^2 s+\sin^2 t$ and collecting
+    terms with $\sin^2+\cos^2=1$ (\texttt{Real.sin\_sq\_add\_cos\_sq}) gives
+    $3+2\cos t-2(1+\cos t)\cos s$.
+\end{proof}
+
 \begin{lemma}[The Hopf linking integrand]
     \label{lem:hopf-integrand}
     \lean{LeanEval.KnotTheory.hopf_integrand}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:hopf-link, def:linking-number, lem:cc-deriv}
+    \uses{def:hopf-link, def:linking-number, lem:hopf-crossproduct, lem:hopf-normsq}
     For the Hopf link $L_2$ (components $c_{0,0,1}$ in the $xy$-plane and
     $c_{e_0,0,2}$ in the $xz$-plane centred at $(1,0,0)$) the linking integrand at
     $(s,t)$ equals
@@ -730,16 +1563,14 @@ then absorbed by a one-dimensional change of variables.
     \]
 \end{lemma}
 \begin{proof}
-    \uses{lem:cc-deriv}
+    \uses{lem:hopf-crossproduct, lem:hopf-normsq}
     Here $\gamma_K(s)=(\cos s,\sin s,0)$ and $\gamma_L(t)=(1+\cos t,0,\sin t)$, so
-    $u=\gamma_K(s)-\gamma_L(t)=(\cos s-1-\cos t,\ \sin s,\ -\sin t)$, while
-    $\gamma_K'(s)=(-\sin s,\cos s,0)$ and $\gamma_L'(t)=(-\sin t,0,\cos t)$ by
-    \cref{lem:cc-deriv}. Their cross product is
-    $(\cos s\cos t,\ \sin s\cos t,\ \cos s\sin t)$ (\texttt{cross\_apply}). Taking
-    the inner product with $u$ and simplifying with $\sin^2+\cos^2=1$
-    (\texttt{Real.sin\_sq\_add\_cos\_sq}) gives the numerator
-    $\cos t-(1+\cos t)\cos s$, and the squared norm is
-    $\lVert u\rVert^2=3+2\cos t-2(1+\cos t)\cos s$ by the same identity.
+    $u=\gamma_K(s)-\gamma_L(t)=(\cos s-1-\cos t,\ \sin s,\ -\sin t)$. The velocity
+    cross product is $(\cos s\cos t,\ \sin s\cos t,\ \cos s\sin t)$ by
+    \cref{lem:hopf-crossproduct}. Taking its inner product with $u$ and simplifying
+    with $\sin^2+\cos^2=1$ (\texttt{Real.sin\_sq\_add\_cos\_sq}) gives the numerator
+    $\cos t-(1+\cos t)\cos s$, and the squared norm is $\lVert u\rVert^2=D(s,t)$ by
+    \cref{lem:hopf-normsq}.
 \end{proof}
 
 \begin{lemma}[The Hopf denominator is bounded below]
@@ -778,34 +1609,143 @@ then absorbed by a one-dimensional change of variables.
     $\tfrac12(D-3)\,D^{-3/2}=\tfrac12 D^{-1/2}-\tfrac32 D^{-3/2}$.
 \end{proof}
 
+\begin{lemma}[Explicit half-angle reduction of the Hopf inner integrand]
+    \label{lem:hopf-halfangle-reduction}
+    \lean{LeanEval.KnotTheory.hopf_halfAngle_reduction}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:hopf-integrand-reduced, lem:hopf-denominator-pos}
+    Fix $t$ and write $D(s,t)=\alpha-\beta\cos s$ with $\alpha=3+2\cos t$,
+    $\beta=2(1+\cos t)$, so $\alpha-\beta=1$; put $c=\alpha+\beta=5+4\cos t\ge1$.
+    Under the half-angle parametrization $x=\tan(s/2)$, i.e.\
+    $\cos s=\frac{1-x^2}{1+x^2}$, one has
+    \[
+        D=\frac{1+c\,x^2}{1+x^2}>0,
+    \]
+    and the reduced integrand $\tfrac12 D^{-1/2}-\tfrac32 D^{-3/2}$ multiplied by
+    $\frac{ds}{dx}=\frac{2}{1+x^2}$ equals the explicit function
+    \[
+        \Psi_t(x)=\bigl[(c-3)\,x^2-2\bigr]\,(1+x^2)^{-1/2}(1+c\,x^2)^{-3/2}.
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:hopf-integrand-reduced, lem:hopf-denominator-pos}
+    Since $\alpha-\beta=1$, $\alpha(1+x^2)-\beta(1-x^2)=(\alpha-\beta)+(\alpha+\beta)x^2
+    =1+cx^2$, so $D=\alpha-\beta\frac{1-x^2}{1+x^2}=\frac{1+cx^2}{1+x^2}>0$
+    (\cref{lem:hopf-denominator-pos}). Substituting $D^{-1/2}=(1+x^2)^{1/2}(1+cx^2)^{-1/2}$
+    and $D^{-3/2}=(1+x^2)^{3/2}(1+cx^2)^{-3/2}$ into
+    $\bigl(\tfrac12 D^{-1/2}-\tfrac32 D^{-3/2}\bigr)\cdot\frac{2}{1+x^2}$ and factoring
+    out $(1+x^2)^{-1/2}(1+cx^2)^{-3/2}$ leaves the bracket
+    $(1+cx^2)-3(1+x^2)=(c-3)x^2-2$, by \texttt{Real.rpow\_natCast},
+    \texttt{Real.rpow\_add} and \texttt{ring}.
+\end{proof}
+
+\begin{lemma}[Continuity and periodicity of the Hopf inner integral]
+    \label{lem:hopf-inner-integral-regularity}
+    \lean{LeanEval.KnotTheory.hopf_inner_integral_regularity}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:hopf-integrand-reduced, lem:hopf-denominator-pos}
+    The inner integral
+    $G(t)=\int_0^{2\pi}\bigl(\tfrac12 D(s,t)^{-1/2}-\tfrac32 D(s,t)^{-3/2}\bigr)\,ds$
+    is a continuous, $2\pi$-periodic function of $t$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:hopf-integrand-reduced, lem:hopf-denominator-pos}
+    The integrand $(s,t)\mapsto\tfrac12 D^{-1/2}-\tfrac32 D^{-3/2}$ is continuous on
+    $\mathbb{R}^2$ (with $D\ge1>0$ by \cref{lem:hopf-denominator-pos}, so the real
+    powers of $D$ are continuous), hence the parametric interval integral $G$ is
+    continuous in $t$ (\texttt{intervalIntegral.continuous\_parametric\_intervalIntegral\_of\_continuous}).
+    Periodicity is inherited from $D(s,t+2\pi)=D(s,t)$ (as $\cos$ is $2\pi$-periodic),
+    so $G(t+2\pi)=G(t)$ (\texttt{Function.Periodic}).
+\end{proof}
+
+\begin{lemma}[The Hopf inner integral is an elliptic-integral combination]
+    \label{lem:hopf-inner-integral}
+    \lean{LeanEval.KnotTheory.hopf_inner_integral}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:hopf-integrand-reduced, lem:hopf-denominator-pos, lem:hopf-halfangle-reduction}
+    For each $t$, write $\alpha=3+2\cos t$ and $\beta=2(1+\cos t)$, so that
+    $D(s,t)=\alpha-\beta\cos s$ and $\alpha-\beta=1$. Then the inner integral, a
+    proper interval integral over $[0,2\pi]$, satisfies
+    \[
+        G(t)=\int_0^{2\pi}\Bigl(\tfrac12 D(s,t)^{-1/2}-\tfrac32 D(s,t)^{-3/2}\Bigr)\,ds
+            =\tfrac12\int_0^{2\pi}\!D^{-1/2}\,ds-\tfrac32\int_0^{2\pi}\!D^{-3/2}\,ds ,
+    \]
+    and this is a nonzero combination of the complete elliptic integrals
+    $\int_0^{2\pi}(\alpha-\beta\cos s)^{-1/2}\,ds$ (first kind) and
+    $\int_0^{2\pi}(\alpha-\beta\cos s)^{-3/2}\,ds$ (second kind), of modulus $k$ with
+    $k^2=2\beta/(\alpha+\beta)$; it has no elementary closed form in $t$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:hopf-integrand-reduced, lem:hopf-halfangle-reduction}
+    The displayed equality is linearity of the interval integral applied to the
+    decomposition $\tfrac12 D^{-1/2}-\tfrac32 D^{-3/2}$ of
+    \cref{lem:hopf-integrand-reduced}; each piece is interval-integrable since
+    $D(s,t)\ge1>0$ by \cref{lem:hopf-denominator-pos}, so $G(t)$ is a proper
+    interval integral over $[0,2\pi]$ (no improper integrals occur).
+
+    \textbf{Obstruction.} Both $\int_0^{2\pi}(\alpha-\beta\cos s)^{-1/2}\,ds$ and
+    $\int_0^{2\pi}(\alpha-\beta\cos s)^{-3/2}\,ds$ are complete elliptic integrals of
+    modulus $k^2=2\beta/(\alpha+\beta)$: the half-angle substitution $x=\tan(s/2)$
+    of \cref{lem:hopf-halfangle-reduction}, applied separately on $[0,\pi)$ and
+    $(\pi,2\pi]$, puts each into standard elliptic form after a finite rational
+    antiderivative is subtracted. Their combination is
+    $G(t)=\tfrac{2}{\sqrt{\alpha+\beta}}\,K(k)-\tfrac{6}{\sqrt{\alpha+\beta}}\,E(k)$,
+    which keeps a nonzero coefficient of $K(k)$, so $G$ is \emph{not} an elementary
+    function of $t$. Mathlib has no theory of complete elliptic integrals, so this
+    evaluation does \emph{not} bottom out in Mathlib: it is the obstruction flagged
+    in the introduction, and it is inherited by \cref{lem:hopf-outer-integral} and
+    \cref{lem:hopf-linking-value}.
+\end{proof}
+
+\begin{lemma}[The Hopf outer integral equals $4\pi$]
+    \label{lem:hopf-outer-integral}
+    \lean{LeanEval.KnotTheory.hopf_outer_integral}
+    \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \uses{lem:hopf-inner-integral, lem:hopf-inner-integral-regularity}
+    With $G$ as in \cref{lem:hopf-inner-integral},
+    $\displaystyle\int_0^{2\pi} G(t)\,dt = 4\pi$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:hopf-inner-integral, lem:hopf-inner-integral-regularity}
+    The integral $\int_0^{2\pi}G(t)\,dt$ is well posed: $G$ is continuous and
+    $2\pi$-periodic by \cref{lem:hopf-inner-integral-regularity}, hence
+    interval-integrable. To evaluate it by the fundamental theorem of calculus
+    (\texttt{intervalIntegral.integral\_deriv\_eq\_sub}) one would need an explicit
+    antiderivative of $G$ in $t$.
+
+    \textbf{Obstruction (inherited).} By \cref{lem:hopf-inner-integral}, $G(t)$ is a
+    nontrivial combination of complete elliptic integrals of $t$ and is not an
+    elementary function; \emph{a fortiori} it has no elementary antiderivative in $t$,
+    so the FTC step above cannot be carried out within Mathlib. Note that the double
+    integral $\int_0^{2\pi}\!\int_0^{2\pi}(\tfrac12 D^{-1/2}-\tfrac32 D^{-3/2})\,ds\,dt$
+    nevertheless equals $4\pi$ (the Hopf linking number is $\pm1$), but this value is
+    a mapping-degree/solid-angle fact: the \emph{iterated} one-dimensional evaluation
+    is non-elementary in either order (the inner integral over $t$ for fixed $s$ has
+    the identical $\alpha'-\beta'=1$ structure and is equally elliptic). A Mathlib
+    proof of the Hopf value therefore requires a different ingredient than iterated
+    FTC; see the accompanying report.
+\end{proof}
+
 \begin{lemma}[The Hopf Gauss integral equals $4\pi$]
     \label{lem:hopf-linking-value}
     \lean{LeanEval.KnotTheory.hopf_linking_value}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \uses{def:hopf-link, def:linking-number, lem:integrand-continuous, lem:hopf-integrand-reduced, lem:hopf-denominator-pos}
+    \uses{def:hopf-link, def:linking-number, lem:integrand-continuous, lem:hopf-integrand-reduced, lem:hopf-outer-integral}
     For the Hopf link $L_2$ (components $c_{0,0,1}$ and $c_{e_0,0,2}$),
     $\mathrm{lk}(L_2) = 1$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:hopf-integrand-reduced, lem:hopf-denominator-pos}
+    \uses{lem:hopf-integrand-reduced, lem:hopf-inner-integral, lem:hopf-outer-integral}
     By \cref{def:linking-number} and \cref{lem:hopf-integrand-reduced},
     \[
         4\pi\,\mathrm{lk}(L_2)=\int_0^{2\pi}\!\!\int_0^{2\pi}
-            \Bigl(\tfrac12 D(s,t)^{-1/2}-\tfrac32 D(s,t)^{-3/2}\Bigr)\,ds\,dt ,
+            \Bigl(\tfrac12 D(s,t)^{-1/2}-\tfrac32 D(s,t)^{-3/2}\Bigr)\,ds\,dt
+        =\int_0^{2\pi} G(t)\,dt ,
     \]
-    every integrand continuous since $D\ge1$ (\cref{lem:hopf-denominator-pos}). Fix
-    $t$ and write $D(s,t)=\alpha-\beta\cos s$ with $\alpha=3+2\cos t$,
-    $\beta=2(1+\cos t)$, so $\alpha-\beta=1$ and $\alpha+\beta=5+4\cos t$. The
-    half-angle change of variables $x=\tan(s/2)$
-    (\texttt{intervalIntegral.integral\_comp\_smul\_deriv'''}, with
-    \texttt{HasDerivAt.tan}) converts the inner integral
-    $G(t)=\int_0^{2\pi}\bigl(\tfrac12 D^{-1/2}-\tfrac32 D^{-3/2}\bigr)\,ds$ into a
-    one-variable interval integral on $\mathbb{R}$ whose antiderivative is built
-    from \texttt{Real.hasDerivAt\_rpow\_const} and \texttt{Real.hasDerivAt\_arctan};
-    the fundamental theorem of calculus
-    (\texttt{intervalIntegral.integral\_deriv\_eq\_sub}) then evaluates $G(t)$ in
-    closed form. A second application of the same FTC step to
-    $\int_0^{2\pi}G(t)\,dt$ yields the value $4\pi$. Hence $\mathrm{lk}(L_2)=1$.
+    each integrand continuous (\cref{lem:integrand-continuous}) and the inner
+    integral identified with $G(t)$ as in \cref{lem:hopf-inner-integral}. By
+    \cref{lem:hopf-outer-integral} this equals $4\pi$, so
+    $\mathrm{lk}(L_2)=1$.
 \end{proof}
 
 \begin{lemma}[The Hopf link has nonzero linking number]
