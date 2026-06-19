@@ -1,0 +1,17 @@
+Cayley graph connected iff generators generate the group
+← All problems
+
+mulCayley_connected_iff_closure_eq_top
+
+Submitter: Kim Morrison.
+
+Notes: A foundational result in geometric group theory using the newly defined Cayley graph. Connectivity of the Cayley graph is equivalent to the generating set S generating G as a group.
+
+Source: A. Cayley, On the theory of groups, as depending on the symbolic equation θ^n = 1, 1878.
+
+Informal solution: Forward: if connected, any g ∈ G is reached from 1 by a path, which corresponds to a product of generators. Reverse: if S generates, any g is a product of generators, giving a path from 1 to g.
+
+theorem mulCayley_connected_iff_closure_eq_top {G : Type*} [Group G]
+    (S : Set G) :
+    (SimpleGraph.mulCayley S).Connected ↔ Subgroup.closure S = ⊤ := by
+  sorry
