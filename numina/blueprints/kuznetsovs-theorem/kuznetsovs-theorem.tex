@@ -3,6 +3,730 @@
 
 \begin{document}
 
-% Your blueprint will go here.
+\section{Kuznetsov's theorem: finitely presented simple groups have solvable word problem}
+
+We prove Kuznetsov's theorem: a finitely presented \emph{simple} group has a
+decidable word problem. Fix $n \in \mathbb{N}$, a group $G$ that is simple
+(hence nontrivial), and a homomorphism $\varphi : \mathrm{FreeGroup}(\mathrm{Fin}\,n)
+\to G$ that is surjective and whose kernel is the normal closure of a finite set
+of relators (i.e. $G$ is finitely presented through $\varphi$). Words are signed
+letters $w : \mathrm{List}(\mathrm{Fin}\,n \times \mathrm{Bool})$, and
+$\mathrm{FreeGroup.mk}\,w$ denotes the free-group element they spell.
+
+The word problem predicate is $P(w) :\Leftrightarrow \varphi(\mathrm{FreeGroup.mk}\,w) = 1$,
+and \emph{solvability} of the word problem means $P$ is a computable predicate
+(\texttt{ComputablePred}). The strategy is Kuznetsov's r.e.-from-both-sides
+argument: $P$ is recursively enumerable, its complement is recursively enumerable
+(here is where simplicity is used), and a predicate that is r.e. with r.e.
+complement is computable (Post's theorem, \texttt{ComputablePred.computable\_iff\_re\_compl\_re}).
+
+\subsection{The word problem predicate}
+
+\begin{definition}[Word problem predicate]
+    \label{def:word-pred}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.wordProblemPred}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    The \emph{word problem predicate} of $\varphi$ is
+    \[
+        P : \mathrm{List}(\mathrm{Fin}\,n \times \mathrm{Bool}) \to \mathrm{Prop},
+        \qquad P(w) := \bigl(\varphi(\mathrm{FreeGroup.mk}\,w) = 1\bigr).
+    \]
+    Solvability of the word problem is the statement
+    $\mathrm{ComputablePred}\,P$.
+\end{definition}
+
+\begin{lemma}[Word problem via the kernel]
+    \label{lem:pred-iff-mem-ker}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.pred_iff_mem_ker}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    \uses{def:word-pred}
+    For every word $w$, $P(w)$ holds iff
+    $\mathrm{FreeGroup.mk}\,w \in \ker\varphi$.
+\end{lemma}
+\begin{proof}
+    \uses{def:word-pred}
+    By definition of the kernel, $x \in \ker\varphi \Leftrightarrow \varphi(x) = 1$
+    (\texttt{MonoidHom.mem\_ker}); apply this to $x = \mathrm{FreeGroup.mk}\,w$.
+\end{proof}
+
+\subsection{Recursive enumerability of normal-closure membership}
+
+The engine of both sides is that membership of a free-group word in the normal
+closure of a finite list of relators is recursively enumerable: a word lies in
+the normal closure exactly when it can be spelled as a finite product of
+conjugates of the relators, and such a finite \emph{certificate} can be searched
+for by an unbounded search.
+
+\begin{definition}[Conjugacy certificate]
+    \label{def:certificate}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.evalCert}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    Let $R : \mathrm{List}\,(\mathrm{List}(\mathrm{Fin}\,n \times \mathrm{Bool}))$
+    be a finite list of relator words. A \emph{certificate} is a finite list of
+    triples $(g_j, \varepsilon_j, k_j)$ with $g_j$ a word, $\varepsilon_j \in
+    \mathrm{Bool}$ a sign, and $k_j$ an index into $R$. Its \emph{value word} is
+    the concatenation
+    \[
+        \mathrm{eval}_R(c) := \bigl(g_1\,(R_{k_1})^{\varepsilon_1}\,g_1^{-1}\bigr)
+        \cdots \bigl(g_m\,(R_{k_m})^{\varepsilon_m}\,g_m^{-1}\bigr),
+    \]
+    where $u^{-1}$ is the formal word inverse (\texttt{FreeGroup.invRev}) and
+    $u^{+}=u$. The type of certificates is encodable
+    (\texttt{Primcodable}), being built from lists, products, $\mathrm{Bool}$ and
+    $\mathrm{Fin}$.
+\end{definition}
+
+\begin{lemma}[Letter equality is primitive recursive]
+    \label{lem:primrec-eq-letter}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_eq_letter}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    Equality of signed letters $a, b : \mathrm{Fin}\,n \times \mathrm{Bool}$, and
+    the cancellation test $a = (b.1, \lnot\, b.2)$ deciding whether $a$ cancels
+    against $b$, are primitive-recursive relations.
+\end{lemma}
+\begin{proof}
+    The type $\mathrm{Fin}\,n \times \mathrm{Bool}$ is encodable
+    (\texttt{Primcodable.prod}, \texttt{Primcodable.fin},
+    \texttt{Primcodable.bool}) with decidable equality, so equality is primitive
+    recursive (\texttt{Primrec.eq}). The cancellation test composes this equality
+    with the primitive-recursive projections and boolean negation
+    (\texttt{Primrec.fst}, \texttt{Primrec.snd}, \texttt{Primrec.not}).
+\end{proof}
+
+\begin{lemma}[The reduction step is primitive recursive]
+    \label{lem:primrec-reduceStep}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_reduceStep}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \uses{lem:primrec-eq-letter}
+    The single step of free-group reduction, which prepends a letter $a$ to an
+    already-reduced word $u$ and cancels it against the head of $u$ when they are
+    inverse (the function folded by \texttt{FreeGroup.reduce}), is a
+    primitive-recursive function of $(a, u)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:primrec-eq-letter}
+    The step is a case analysis on whether $u$ is empty and, if not, whether its
+    head cancels against $a$ (Lemma~\ref{lem:primrec-eq-letter}); in the
+    cancelling case it returns the tail of $u$, otherwise $a :: u$. This is built
+    from list case analysis, head/tail access and a primitive-recursive branch
+    (\texttt{Primrec.list\_casesOn}, \texttt{Primrec.list\_head?},
+    \texttt{Primrec.list\_tail}, \texttt{Primrec.ite}).
+\end{proof}
+
+\begin{lemma}[Reduction is primitive recursive]
+    \label{lem:primrec-reduce}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_reduce}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \uses{lem:primrec-reduceStep}
+    The map $w \mapsto \mathrm{FreeGroup.reduce}\,w$ on words is primitive
+    recursive.
+\end{lemma}
+\begin{proof}
+    \uses{lem:primrec-reduceStep}
+    $\mathrm{FreeGroup.reduce}$ is the fold of the reduction step
+    (Lemma~\ref{lem:primrec-reduceStep}) over the input list, so it is obtained
+    from that step by primitive list recursion (\texttt{Primrec.list\_rec}) over
+    the encodable type of words (\texttt{Primcodable.list}).
+\end{proof}
+
+\begin{lemma}[Reduction is computable]
+    \label{lem:reduce-computable}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.reduce_computable}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \uses{lem:primrec-reduce}
+    The map $w \mapsto \mathrm{FreeGroup.reduce}\,w$ on words is a computable
+    function, and word equality after reduction is decidable.
+\end{lemma}
+\begin{proof}
+    \uses{lem:primrec-reduce}
+    Reduction is primitive recursive by Lemma~\ref{lem:primrec-reduce}, hence
+    computable (\texttt{Primrec.to\_comp}). Equality of the resulting reduced
+    words is decidable by \texttt{FreeGroup.instDecidableEq}.
+\end{proof}
+
+\begin{lemma}[Formal inversion is primitive recursive]
+    \label{lem:primrec-invRev}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_invRev}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    The formal word inverse $u \mapsto \mathrm{FreeGroup.invRev}\,u$, which
+    reverses a word and flips the sign of each letter, is primitive recursive.
+\end{lemma}
+\begin{proof}
+    $\mathrm{FreeGroup.invRev}\,u = \mathrm{reverse}\,(\mathrm{map}\,(\lambda
+    (i,b).\,(i, \lnot b))\,u)$. Sign-flipping a letter is primitive recursive
+    (\texttt{Primrec.fst}, \texttt{Primrec.snd}, \texttt{Primrec.not}), so the
+    map over the list is (\texttt{Primrec.list\_map}), as is the reversal
+    (\texttt{Primrec.list\_reverse}).
+\end{proof}
+
+\begin{lemma}[A conjugacy term is primitive recursive]
+    \label{lem:primrec-conjTerm}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_conjTerm}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \uses{def:certificate, lem:primrec-invRev}
+    Taking the relator list $R$ as an argument, the map sending a triple
+    $(g, \varepsilon, k)$ to the word $g\,(R_k)^{\varepsilon}\,g^{-1}$ is a
+    primitive-recursive function of $(R, (g,\varepsilon,k))$.
+\end{lemma}
+\begin{proof}
+    \uses{def:certificate, lem:primrec-invRev}
+    Indexing $R_k$ (with a default for out-of-range $k$) is primitive recursive
+    (\texttt{Primrec.list\_getElem?}), as is choosing $R_k$ or its inverse
+    according to $\varepsilon$ (Lemma~\ref{lem:primrec-invRev},
+    \texttt{Primrec.cond}). The result is the concatenation of $g$, that word,
+    and $\mathrm{invRev}\,g$ (Lemma~\ref{lem:primrec-invRev}), formed by
+    \texttt{Primrec.list\_append}.
+\end{proof}
+
+\begin{lemma}[Certificate evaluation is primitive recursive]
+    \label{lem:primrec-eval}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_eval}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \uses{def:certificate, lem:primrec-conjTerm}
+    Taking the relator list $R$ as an argument, the map
+    $(R, c) \mapsto \mathrm{eval}_R(c)$ is primitive recursive.
+\end{lemma}
+\begin{proof}
+    \uses{def:certificate, lem:primrec-conjTerm}
+    $\mathrm{eval}_R(c)$ is the flattening of the list obtained by mapping the
+    conjugacy-term function (Lemma~\ref{lem:primrec-conjTerm}) over the triples of
+    $c$: a primitive-recursive map (\texttt{Primrec.list\_map}) followed by
+    \texttt{Primrec.list\_flatten}.
+\end{proof}
+
+\begin{lemma}[Certificate evaluation is computable]
+    \label{lem:eval-computable}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.eval_computable}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \uses{def:certificate, lem:reduce-computable, lem:primrec-eval}
+    Taking the relator list $R$ as an explicit argument, the relation
+    \[
+        \mathrm{Check}(R, w, c) :\Leftrightarrow
+        \mathrm{FreeGroup.reduce}(\mathrm{eval}_R(c)) =
+        \mathrm{FreeGroup.reduce}\,w
+    \]
+    is a computable relation in $(R, w, c)$, and for each fixed $(R, w)$ it is a
+    decidable predicate in $c$. In particular this remains computable when $R$ is
+    itself a computable function of the input word, e.g. $R \mathbin{+\!\!+} [w]$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:reduce-computable, lem:primrec-eval}
+    By Lemma~\ref{lem:primrec-eval} the word $\mathrm{eval}_R(c)$ is a primitive
+    recursive, hence computable, function of $(R, c)$. Composing with
+    $\mathrm{FreeGroup.reduce}$ (Lemma~\ref{lem:reduce-computable}) on both sides
+    and testing equality of reduced words (\texttt{Primrec.eq} via
+    \texttt{FreeGroup.instDecidableEq}) makes $\mathrm{Check}$ a computable,
+    pointwise-decidable relation. Allowing $R$ to vary computably with the input
+    is composition with that computable argument (\texttt{Computable.comp}).
+\end{proof}
+
+\begin{lemma}[Products of signed conjugates form a subgroup]
+    \label{lem:prod-conjugates-subgroup}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.prodConjugatesSubgroup}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    Let $S$ be a set in a group $G$. The set
+    \[
+        H_S := \bigl\{\, x \in G : x \text{ is a finite product of terms }
+            g\,s^{\pm 1}\,g^{-1} \text{ with } s \in S \,\bigr\}
+    \]
+    is a subgroup of $G$.
+\end{lemma}
+\begin{proof}
+    We verify the subgroup axioms. The identity $1$ is the empty product, so
+    $1 \in H_S$ (\texttt{one\_mem}, the empty list). If $x, y \in H_S$ are such
+    products, their concatenation witnesses $xy \in H_S$ (\texttt{mul\_mem}).
+    Finally $H_S$ is closed under inverse (\texttt{inv\_mem}): the inverse of a
+    product reverses its factors (\texttt{mul\_inv\_rev}), and each factor inverts
+    to one of the same shape, since
+    $(g\,s^{\pm 1}\,g^{-1})^{-1} = g\,(s^{\pm 1})^{-1}\,g^{-1}
+    = g\,s^{\mp 1}\,g^{-1}$ (\texttt{mul\_inv\_rev}, \texttt{inv\_inv}). Hence
+    $H_S$ is a subgroup.
+\end{proof}
+
+\begin{lemma}[Conjugates lie in the subgroup of products]
+    \label{lem:conjugates-subset-prod}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.conjugates_subset_prod}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{lem:prod-conjugates-subgroup}
+    With $H_S$ as in Lemma~\ref{lem:prod-conjugates-subgroup},
+    $\mathrm{conjugatesOfSet}\,S \subseteq H_S$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:prod-conjugates-subgroup}
+    An element of $\mathrm{conjugatesOfSet}\,S$ is conjugate to some $s \in S$
+    (\texttt{Group.mem\_conjugatesOfSet\_iff}), i.e. of the form $g\,s\,g^{-1}$.
+    This is a single sign-$+$ term, hence lies in $H_S$.
+\end{proof}
+
+\begin{lemma}[Closure elements are products of signed conjugates]
+    \label{lem:closure-prod-conjugates}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.closure_prod_conjugates}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{lem:prod-conjugates-subgroup, lem:conjugates-subset-prod}
+    Let $S$ be a set in a group. Every element of
+    $\mathrm{normalClosure}\,S = \mathrm{closure}(\mathrm{conjugatesOfSet}\,S)$ is
+    a finite product of terms of the form $g\,s^{\pm 1}\,g^{-1}$ with $s \in S$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:prod-conjugates-subgroup, lem:conjugates-subset-prod}
+    By Lemma~\ref{lem:conjugates-subset-prod},
+    $\mathrm{conjugatesOfSet}\,S \subseteq H_S$, and $H_S$ is a subgroup by
+    Lemma~\ref{lem:prod-conjugates-subgroup}; therefore
+    $\mathrm{closure}(\mathrm{conjugatesOfSet}\,S) \le H_S$
+    (\texttt{Subgroup.closure\_le}). Since
+    $\mathrm{normalClosure}\,S = \mathrm{closure}(\mathrm{conjugatesOfSet}\,S)$ by
+    the definition of \texttt{Subgroup.normalClosure}, every element of
+    $\mathrm{normalClosure}\,S$ lies in $H_S$, i.e. is such a product.
+\end{proof}
+
+\begin{lemma}[A single conjugacy term under \texttt{mk}]
+    \label{lem:mk-conjTerm}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mk_conjTerm}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{def:certificate}
+    Let $\mathrm{conjTerm}_R(g, \varepsilon, k) := g \mathbin{+\!\!+}
+    (R_k)^{\varepsilon} \mathbin{+\!\!+} \mathrm{FreeGroup.invRev}\,g$ be the word
+    formed by Lemma~\ref{lem:primrec-conjTerm}, where $(R_k)^{+} = R_k$ and
+    $(R_k)^{-} = \mathrm{FreeGroup.invRev}\,R_k$. Then
+    \[
+        \mathrm{FreeGroup.mk}\bigl(\mathrm{conjTerm}_R(g,\varepsilon,k)\bigr)
+        = \mathrm{FreeGroup.mk}(g)\,
+            (\mathrm{FreeGroup.mk}\,R_k)^{\pm 1}\,
+            \mathrm{FreeGroup.mk}(g)^{-1}.
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{def:certificate}
+    The word $\mathrm{conjTerm}_R(g,\varepsilon,k)$ is a concatenation, and
+    $\mathrm{FreeGroup.mk}$ turns concatenation into the group product:
+    $\mathrm{FreeGroup.mk}(L_1 \mathbin{+\!\!+} L_2) =
+    \mathrm{FreeGroup.mk}\,L_1 \cdot \mathrm{FreeGroup.mk}\,L_2$
+    (\texttt{FreeGroup.mul\_mk}). The last factor is
+    $\mathrm{FreeGroup.mk}(\mathrm{invRev}\,g) = \mathrm{FreeGroup.mk}(g)^{-1}$
+    (\texttt{FreeGroup.mk\_invRev}), and likewise the middle factor is
+    $(\mathrm{FreeGroup.mk}\,R_k)^{\pm 1}$ according to $\varepsilon$ (sign $-$
+    again via \texttt{FreeGroup.mk\_invRev}). Combining gives the stated identity.
+\end{proof}
+
+\begin{lemma}[The value word spells a product of conjugates]
+    \label{lem:mk-eval-eq-prod}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mk_eval_eq_prod}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{def:certificate, lem:mk-conjTerm}
+    For a certificate $c = ((g_j, \varepsilon_j, k_j))_j$ over a relator list $R$,
+    \[
+        \mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) =
+        \prod_j \mathrm{FreeGroup.mk}(g_j)\,
+            (\mathrm{FreeGroup.mk}\,R_{k_j})^{\pm 1}\,
+            \mathrm{FreeGroup.mk}(g_j)^{-1},
+    \]
+    each factor being a signed conjugate of a relator element
+    $\mathrm{FreeGroup.mk}\,R_{k_j} \in S$.
+\end{lemma}
+\begin{proof}
+    \uses{def:certificate, lem:mk-conjTerm}
+    $\mathrm{eval}_R(c)$ is the concatenation of the words
+    $\mathrm{conjTerm}_R(g_j,\varepsilon_j,k_j)$ over the triples of $c$. Since
+    $\mathrm{FreeGroup.mk}$ sends concatenation to the group product
+    (\texttt{FreeGroup.mul\_mk}, iterated as \texttt{map\_list\_prod} over the
+    flattened list), $\mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) =
+    \prod_j \mathrm{FreeGroup.mk}(\mathrm{conjTerm}_R(g_j,\varepsilon_j,k_j))$.
+    Rewriting each factor by Lemma~\ref{lem:mk-conjTerm} yields the stated product
+    of signed conjugates.
+\end{proof}
+
+\begin{lemma}[Relator elements are indexed]
+    \label{lem:relator-index}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.relator_index}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    Let $S := \{\mathrm{FreeGroup.mk}\,r : r \in R\}$. For every $s \in S$ there is
+    an index $k$ into $R$ with $\mathrm{FreeGroup.mk}\,R_k = s$.
+\end{lemma}
+\begin{proof}
+    By definition of $S$, $s = \mathrm{FreeGroup.mk}\,r$ for some $r \in R$
+    (\texttt{List.mem\_map}). Membership in the list $R$ gives an index $k$ with
+    $R_k = r$ (\texttt{List.mem\_iff\_getElem}); then
+    $\mathrm{FreeGroup.mk}\,R_k = \mathrm{FreeGroup.mk}\,r = s$.
+\end{proof}
+
+\begin{lemma}[Certificate from a product of conjugates]
+    \label{lem:cert-of-prod}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.cert_of_prod}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{def:certificate, lem:relator-index, lem:mk-eval-eq-prod}
+    Let $S := \{\mathrm{FreeGroup.mk}\,r : r \in R\}$. If $\mathrm{FreeGroup.mk}\,w$
+    is a finite product of signed conjugates $g_j\, s_j^{\pm 1}\, g_j^{-1}$ with
+    $s_j \in S$, then there is a certificate $c$ with
+    $\mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) = \mathrm{FreeGroup.mk}\,w$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:relator-index, lem:mk-eval-eq-prod}
+    For each factor, write $g_j = \mathrm{FreeGroup.mk}(g_j.\mathrm{toWord})$
+    (\texttt{FreeGroup.mk\_toWord}) and, by Lemma~\ref{lem:relator-index}, choose
+    an index $k_j$ with $\mathrm{FreeGroup.mk}\,R_{k_j} = s_j$. Collecting the
+    triples $(g_j.\mathrm{toWord}, \varepsilon_j, k_j)$ into a certificate $c$,
+    Lemma~\ref{lem:mk-eval-eq-prod} gives
+    $\mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) =
+    \prod_j g_j\, s_j^{\pm 1}\, g_j^{-1} = \mathrm{FreeGroup.mk}\,w$.
+\end{proof}
+
+\begin{lemma}[A certificate witnesses normal-closure membership]
+    \label{lem:mem-of-cert}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mem_of_cert}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{def:certificate, lem:mk-eval-eq-prod}
+    Let $S := \{\mathrm{FreeGroup.mk}\,r : r \in R\}$. If a certificate $c$
+    satisfies $\mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) = \mathrm{FreeGroup.mk}\,w$,
+    then $\mathrm{FreeGroup.mk}\,w \in \mathrm{normalClosure}\,S$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:mk-eval-eq-prod}
+    By Lemma~\ref{lem:mk-eval-eq-prod}, $\mathrm{FreeGroup.mk}\,w$ is a product of
+    signed conjugates of elements $\mathrm{FreeGroup.mk}\,R_{k_j} \in S$. Each such
+    element lies in $\mathrm{normalClosure}\,S$
+    (\texttt{Subgroup.subset\_normalClosure}), its conjugates lie there too
+    (\texttt{Subgroup.conjugatesOfSet\_subset\_normalClosure}), and the subgroup
+    $\mathrm{normalClosure}\,S$ is closed under product and inverse; hence the
+    whole product lies in $\mathrm{normalClosure}\,S$.
+\end{proof}
+
+\begin{lemma}[Membership in a normal closure via certificates]
+    \label{lem:mem-normalClosure-cert}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mem_normalClosure_cert}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{def:certificate, lem:closure-prod-conjugates, lem:cert-of-prod, lem:mem-of-cert}
+    Let $S := \{\mathrm{FreeGroup.mk}\,r : r \in R\}$ be the (finite) set of
+    relator elements. For every word $w$,
+    \[
+        \mathrm{FreeGroup.mk}\,w \in \mathrm{normalClosure}\,S
+        \iff \exists\, c,\; \mathrm{FreeGroup.mk}(\mathrm{eval}_R(c))
+              = \mathrm{FreeGroup.mk}\,w .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:closure-prod-conjugates, lem:cert-of-prod, lem:mem-of-cert}
+    ($\Rightarrow$) By Lemma~\ref{lem:closure-prod-conjugates},
+    $\mathrm{FreeGroup.mk}\,w$ is a finite product of signed conjugates
+    $g_j\, s_j^{\pm 1}\, g_j^{-1}$ with $s_j \in S$; apply
+    Lemma~\ref{lem:cert-of-prod} to obtain the certificate.
+
+    ($\Leftarrow$) This is exactly Lemma~\ref{lem:mem-of-cert}.
+\end{proof}
+
+\begin{lemma}[Recursive enumerability of an existential over a computable relation]
+    \label{lem:re-projection}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_projection}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    Let $\beta$ be an encodable type and $Q : \alpha \to \beta \to \mathrm{Prop}$
+    a relation that is computable and pointwise decidable. Then the predicate
+    $a \mapsto \exists b,\; Q(a, b)$ is recursively enumerable
+    (\texttt{REPred}).
+\end{lemma}
+\begin{proof}
+    Enumerate $\beta$ by $\mathbb{N}$ through its encoding. The partial function
+    that, on input $a$, runs an unbounded search for the least code $m$ whose
+    decoded value $b$ satisfies $Q(a,b)$ (\texttt{Nat.rfind} /
+    \texttt{Partrec.rfind}, using computability of $Q$) is partial recursive, and
+    its domain is exactly $\{a : \exists b,\, Q(a,b)\}$
+    (\texttt{Nat.rfind\_dom}). A predicate equal to the domain of a partial
+    recursive function is \texttt{REPred} by definition.
+\end{proof}
+
+\begin{lemma}[Normal-closure membership is r.e.]
+    \label{lem:re-mem-normalClosure}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_mem_normalClosure}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    \uses{lem:mem-normalClosure-cert, lem:eval-computable, lem:re-projection}
+    Fix a relator list $R$ and $S = \{\mathrm{FreeGroup.mk}\,r : r \in R\}$. The
+    predicate $w \mapsto \mathrm{FreeGroup.mk}\,w \in \mathrm{normalClosure}\,S$
+    is recursively enumerable.
+\end{lemma}
+\begin{proof}
+    \uses{lem:mem-normalClosure-cert, lem:eval-computable, lem:re-projection}
+    By Lemma~\ref{lem:mem-normalClosure-cert} the predicate is equivalent to
+    $w \mapsto \exists c,\; \mathrm{Check}(R, w, c)$, where $\mathrm{Check}$ is
+    computable and pointwise decidable by Lemma~\ref{lem:eval-computable} (using
+    that $\mathrm{FreeGroup.mk}\,u = \mathrm{FreeGroup.mk}\,v$ iff their
+    reductions agree). Apply Lemma~\ref{lem:re-projection} with this relation,
+    then transport along the equivalence (\texttt{REPred.of\_eq}).
+\end{proof}
+
+\subsection{The positive side: the word problem is r.e.}
+
+\begin{lemma}[A finite set of free-group elements is spelled by a word list]
+    \label{lem:finset-to-word-list}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.finset_to_word_list}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    For every finite set $T \subseteq \mathrm{FreeGroup}(\mathrm{Fin}\,n)$ there
+    is a finite list of words $R$ with
+    $\{\mathrm{FreeGroup.mk}\,r : r \in R\} = T$.
+\end{lemma}
+\begin{proof}
+    Take $R := (T.\mathrm{toList}).\mathrm{map}\,(\lambda t.\, t.\mathrm{toWord})$.
+    Each element $t \in T$ equals $\mathrm{FreeGroup.mk}$ of its reduced word
+    (\texttt{FreeGroup.mk\_toWord}), and $T.\mathrm{toList}$ enumerates exactly
+    $T$ (\texttt{Finset.mem\_toList}), so mapping recovers $T$ as the set of
+    $\mathrm{FreeGroup.mk}\,r$ (\texttt{List.mem\_map}).
+\end{proof}
+
+\begin{lemma}[The kernel is a normal closure of relators]
+    \label{lem:ker-eq-normalClosure}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.ker_eq_normalClosure}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    \uses{lem:finset-to-word-list}
+    There is a finite relator list $R$ such that
+    $\ker\varphi = \mathrm{normalClosure}\,\{\mathrm{FreeGroup.mk}\,r : r \in R\}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:finset-to-word-list}
+    By hypothesis $\ker\varphi$ is a finitely generated normal closure
+    (\texttt{Subgroup.IsNormalClosureFG}): there is a finite set
+    $T \subseteq \mathrm{FreeGroup}(\mathrm{Fin}\,n)$ with
+    $\mathrm{normalClosure}\,T = \ker\varphi$. By
+    Lemma~\ref{lem:finset-to-word-list} there is a finite list $R$ with
+    $\{\mathrm{FreeGroup.mk}\,r : r \in R\} = T$, whence the claim.
+\end{proof}
+
+\begin{lemma}[Positive side is r.e.]
+    \label{lem:re-positive}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_positive}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    \uses{def:word-pred, lem:pred-iff-mem-ker, lem:ker-eq-normalClosure, lem:re-mem-normalClosure}
+    The word problem predicate $P$ is recursively enumerable.
+\end{lemma}
+\begin{proof}
+    \uses{lem:pred-iff-mem-ker, lem:ker-eq-normalClosure, lem:re-mem-normalClosure}
+    By Lemma~\ref{lem:pred-iff-mem-ker}, $P(w) \Leftrightarrow
+    \mathrm{FreeGroup.mk}\,w \in \ker\varphi$, and by
+    Lemma~\ref{lem:ker-eq-normalClosure} the kernel is the normal closure of the
+    finite relator set $S$. So $P$ is pointwise equal to the predicate of
+    Lemma~\ref{lem:re-mem-normalClosure}, which is r.e.; conclude with
+    \texttt{REPred.of\_eq}.
+\end{proof}
+
+\subsection{The negative side: simplicity collapses the group}
+
+\begin{lemma}[Normal closure of a nontrivial element in a simple group]
+    \label{lem:normalClosure-singleton-top}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.normalClosure_singleton_top}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    If $g \in G$ and $g \neq 1$, then $\mathrm{normalClosure}\,\{g\} = \top$.
+\end{lemma}
+\begin{proof}
+    The normal closure of any set is a normal subgroup
+    (\texttt{Subgroup.normalClosure\_normal}). Since $G$ is simple, this normal
+    subgroup is $\bot$ or $\top$ (\texttt{Subgroup.Normal.eq\_bot\_or\_eq\_top}).
+    It is not $\bot$: $\mathrm{normalClosure}\,\{g\} = \bot$ would force
+    $\{g\} \subseteq \{1\}$ (\texttt{Subgroup.normalClosure\_eq\_bot\_iff}), i.e.
+    $g = 1$, contrary to hypothesis. Hence it is $\top$.
+\end{proof}
+
+\begin{lemma}[The kernel is not everything]
+    \label{lem:ker-ne-top}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.ker_ne_top}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    \uses{lem:ker-eq-normalClosure}
+    $\ker\varphi \neq \top$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:ker-eq-normalClosure}
+    If $\ker\varphi = \top$ then every element maps to $1$ under $\varphi$
+    (\texttt{MonoidHom.ker\_eq\_top\_iff}); since $\varphi$ is surjective, $G$
+    would be trivial, contradicting that $G$ is simple and therefore nontrivial
+    (\texttt{IsSimpleGroup} extends \texttt{Nontrivial}).
+\end{proof}
+
+\begin{lemma}[A subgroup is everything iff it contains all generators]
+    \label{lem:top-iff-generators}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.top_iff_generators}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    For a subgroup $N \le \mathrm{FreeGroup}(\mathrm{Fin}\,n)$,
+    \[
+        N = \top \iff \forall i : \mathrm{Fin}\,n,\; \mathrm{FreeGroup.of}\,i \in N .
+    \]
+\end{lemma}
+\begin{proof}
+    The generators $\mathrm{FreeGroup.of}\,i$ generate the free group: the
+    subgroup closure of their range is $\top$
+    (\texttt{FreeGroup.closure\_range\_of}). If $N$ contains all of them then
+    $N \ge \mathrm{closure}(\mathrm{range}\,\mathrm{FreeGroup.of}) = \top$, so
+    $N = \top$; the converse is immediate.
+\end{proof}
+
+\begin{lemma}[Surjective image criterion for being everything]
+    \label{lem:top-iff-map-top}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.top_iff_map_top}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    Let $\varphi : G \to H$ be a surjective homomorphism and $N \le G$ a subgroup
+    with $\ker\varphi \le N$. Then
+    $N = \top \iff \mathrm{map}\,\varphi\,N = \top$.
+\end{lemma}
+\begin{proof}
+    Mapping is monotone and $\mathrm{map}\,\varphi\,\top = \top$ by surjectivity
+    (\texttt{Subgroup.map\_top\_of\_surjective}), which gives the forward
+    direction. Conversely, since $\ker\varphi \le N$,
+    $\mathrm{comap}\,\varphi\,(\mathrm{map}\,\varphi\,N) = N$
+    (\texttt{Subgroup.comap\_map\_eq\_self}); so if $\mathrm{map}\,\varphi\,N =
+    \top$ then $N = \mathrm{comap}\,\varphi\,\top = \top$.
+\end{proof}
+
+\begin{lemma}[Image of the extended normal closure]
+    \label{lem:map-normalClosure-insert}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.map_normalClosure_insert}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    Let $\varphi : G \to H$ be a surjective homomorphism, $S$ a set with
+    $\mathrm{normalClosure}\,S = \ker\varphi$, and $x \in G$. Then
+    \[
+        \mathrm{map}\,\varphi\,\bigl(\mathrm{normalClosure}\,(S \cup \{x\})\bigr)
+        = \mathrm{normalClosure}\,\{\varphi(x)\}.
+    \]
+\end{lemma}
+\begin{proof}
+    Since $\varphi$ is surjective, the image of a normal closure is the normal
+    closure of the image (\texttt{Subgroup.map\_normalClosure}):
+    $\mathrm{map}\,\varphi\,(\mathrm{normalClosure}\,(S \cup \{x\})) =
+    \mathrm{normalClosure}\,(\varphi(S) \cup \{\varphi(x)\})$. Every $s \in S$ lies
+    in $\mathrm{normalClosure}\,S = \ker\varphi$, so $\varphi(s) = 1$
+    (\texttt{MonoidHom.mem\_ker}); thus $\varphi(S) \subseteq \{1\}$. Adjoining the
+    identity does not change a normal closure (it already contains $1$, and
+    $\mathrm{normalClosure}$ is the smallest normal subgroup containing the set,
+    \texttt{Subgroup.normalClosure\_subset\_iff}), so
+    $\mathrm{normalClosure}\,(\varphi(S) \cup \{\varphi(x)\}) =
+    \mathrm{normalClosure}\,\{\varphi(x)\}$.
+\end{proof}
+
+\begin{lemma}[Collapse criterion]
+    \label{lem:collapse}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.collapse}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    \uses{lem:pred-iff-mem-ker, lem:ker-eq-normalClosure, lem:normalClosure-singleton-top, lem:ker-ne-top, lem:top-iff-map-top, lem:map-normalClosure-insert}
+    Let $S = \{\mathrm{FreeGroup.mk}\,r : r \in R\}$ be the relator set with
+    $\mathrm{normalClosure}\,S = \ker\varphi$. For every word $w$,
+    \[
+        \varphi(\mathrm{FreeGroup.mk}\,w) \neq 1
+        \iff \mathrm{normalClosure}\,(S \cup \{\mathrm{FreeGroup.mk}\,w\}) = \top .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:pred-iff-mem-ker, lem:ker-eq-normalClosure, lem:normalClosure-singleton-top, lem:ker-ne-top, lem:top-iff-map-top, lem:map-normalClosure-insert}
+    Write $N := \mathrm{normalClosure}\,(S \cup \{\mathrm{FreeGroup.mk}\,w\})$;
+    then $N \supseteq \mathrm{normalClosure}\,S = \ker\varphi$. By
+    Lemma~\ref{lem:map-normalClosure-insert},
+    $\mathrm{map}\,\varphi\,N =
+    \mathrm{normalClosure}\,\{\varphi(\mathrm{FreeGroup.mk}\,w)\}$.
+
+    ($\Rightarrow$) If $\varphi(\mathrm{FreeGroup.mk}\,w) \neq 1$ then
+    $\mathrm{map}\,\varphi\,N = \top$ by
+    Lemma~\ref{lem:normalClosure-singleton-top}. Since $\ker\varphi \le N$,
+    Lemma~\ref{lem:top-iff-map-top} gives $N = \top$.
+
+    ($\Leftarrow$) If instead $\varphi(\mathrm{FreeGroup.mk}\,w) = 1$, then
+    $\mathrm{FreeGroup.mk}\,w \in \ker\varphi = \mathrm{normalClosure}\,S$, so
+    adding it changes nothing and $N = \mathrm{normalClosure}\,S = \ker\varphi
+    \neq \top$ by Lemma~\ref{lem:ker-ne-top}. Contrapositively, $N = \top$ forces
+    $\varphi(\mathrm{FreeGroup.mk}\,w) \neq 1$.
+\end{proof}
+
+\begin{lemma}[Recursive enumerability is closed under conjunction]
+    \label{lem:re-and}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_and}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    If $p$ and $q$ are recursively enumerable predicates on the same encodable
+    type, then $a \mapsto p(a) \wedge q(a)$ is recursively enumerable.
+\end{lemma}
+\begin{proof}
+    A predicate is r.e. iff it is the domain of a partial recursive function.
+    Running the two partial functions in sequence and returning once both halt
+    (\texttt{Partrec.bind} on the \texttt{Part.assert} witnesses) yields a partial
+    recursive function whose domain is $\{a : p(a) \wedge q(a)\}$; conclude with
+    \texttt{REPred.of\_eq}.
+\end{proof}
+
+\begin{lemma}[Finite conjunction over generators is r.e.]
+    \label{lem:re-forall-fin}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_forall_fin}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \uses{lem:re-and}
+    If for each $i : \mathrm{Fin}\,n$ the predicate $p_i$ is recursively
+    enumerable, then $a \mapsto \forall i : \mathrm{Fin}\,n,\; p_i(a)$ is
+    recursively enumerable.
+\end{lemma}
+\begin{proof}
+    \uses{lem:re-and}
+    Induct on $n$. For $n = 0$ the universal statement is vacuously true, a
+    decidable predicate, which is r.e. because every computable (in particular
+    decidable) predicate is recursively enumerable (\texttt{ComputablePred.to\_re}).
+    For the inductive step, a universal over
+    $\mathrm{Fin}(n+1)$ is the conjunction of $p_0$ with a universal over
+    $\mathrm{Fin}\,n$ (\texttt{Fin.forall\_fin\_succ}); apply
+    Lemma~\ref{lem:re-and} and the inductive hypothesis, then
+    \texttt{REPred.of\_eq}.
+\end{proof}
+
+\begin{lemma}[Generator membership in the extended closure is r.e.]
+    \label{lem:re-generator-mem}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_generator_mem}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    \uses{lem:mem-normalClosure-cert, lem:eval-computable, lem:re-projection}
+    For each fixed $i : \mathrm{Fin}\,n$, the predicate
+    \[
+        w \mapsto \mathrm{FreeGroup.of}\,i \in
+            \mathrm{normalClosure}\,(S \cup \{\mathrm{FreeGroup.mk}\,w\})
+    \]
+    is recursively enumerable.
+\end{lemma}
+\begin{proof}
+    \uses{lem:mem-normalClosure-cert, lem:eval-computable, lem:re-projection}
+    The relator list for the extended closure is $R$ with the input word $w$
+    appended, which depends computably on $w$. As in
+    Lemma~\ref{lem:mem-normalClosure-cert}, membership of the fixed element
+    $\mathrm{FreeGroup.of}\,i = \mathrm{FreeGroup.mk}\,[(i,\mathrm{true})]$ in this
+    normal closure is equivalent to the existence of a certificate $c$ with
+    $\mathrm{Check}(R \mathbin{+\!\!+} [w],\, [(i,\mathrm{true})],\, c)$. Because
+    the relator list $R \mathbin{+\!\!+} [w]$ depends computably on $w$, this is a
+    computable relation in $(w, c)$ by Lemma~\ref{lem:eval-computable}. Apply
+    Lemma~\ref{lem:re-projection} and \texttt{REPred.of\_eq}.
+\end{proof}
+
+\begin{lemma}[Negative side is r.e.]
+    \label{lem:re-negative}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_negative}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    \uses{def:word-pred, lem:collapse, lem:top-iff-generators, lem:re-forall-fin, lem:re-generator-mem}
+    The complement predicate $w \mapsto \neg P(w)$, i.e.
+    $\varphi(\mathrm{FreeGroup.mk}\,w) \neq 1$, is recursively enumerable.
+\end{lemma}
+\begin{proof}
+    \uses{lem:collapse, lem:top-iff-generators, lem:re-forall-fin, lem:re-generator-mem}
+    By Lemma~\ref{lem:collapse}, $\neg P(w)$ holds iff
+    $\mathrm{normalClosure}\,(S \cup \{\mathrm{FreeGroup.mk}\,w\}) = \top$, and by
+    Lemma~\ref{lem:top-iff-generators} this holds iff
+    $\forall i,\; \mathrm{FreeGroup.of}\,i \in
+    \mathrm{normalClosure}\,(S \cup \{\mathrm{FreeGroup.mk}\,w\})$. Each clause is
+    r.e. in $w$ by Lemma~\ref{lem:re-generator-mem}, so the finite conjunction is
+    r.e. by Lemma~\ref{lem:re-forall-fin}; transport along the equivalence with
+    \texttt{REPred.of\_eq}.
+\end{proof}
+
+\subsection{Main result}
+
+\begin{theorem}[Kuznetsov / Boone--Higman for simple groups]
+    \label{thm:boone-higman-simple}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.boone_higman_simple}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    \uses{def:word-pred, lem:re-positive, lem:re-negative}
+    The word problem predicate $P$ of a finitely presented simple group is
+    computable; that is, $\mathrm{ComputablePred}\,P$, the solvability of the word
+    problem of $\varphi$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:re-positive, lem:re-negative}
+    Equip $P$ with a classical decidability instance
+    (\texttt{Classical.dec}). By Post's theorem, a decidable-instance predicate
+    is computable iff both it and its complement are recursively enumerable
+    (\texttt{ComputablePred.computable\_iff\_re\_compl\_re}). The predicate $P$ is
+    r.e. by Lemma~\ref{lem:re-positive} and its complement is r.e. by
+    Lemma~\ref{lem:re-negative}; hence $\mathrm{ComputablePred}\,P$.
+\end{proof}
 
 \end{document}

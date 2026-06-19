@@ -1,4 +1,4 @@
-import Mathlib
+import LeanEval.GroupTheory.BooneHigmanSimple.NormalClosure
 import EvalTools.Markers
 
 namespace LeanEval
@@ -9,36 +9,97 @@ namespace BooneHigmanSimpleProblem
 # Kuznetsov / Boone–Higman: simple finitely presented groups have
 solvable word problem
 
-A finitely presented *simple* group has a decidable word problem.
-This is Kuznetsov's theorem (A.V. Kuznetsov, 1958); the later
-Boone–Higman characterisation (W.W. Boone and G. Higman, 1974) gives
-the full iff statement situating Kuznetsov's result. §122 in Knill's
-*Some Fundamental Theorems in Mathematics*.
+A finitely presented *simple* group has a decidable word problem.  This is
+Kuznetsov's theorem (A.V. Kuznetsov, 1958); the later Boone–Higman
+characterisation (W.W. Boone and G. Higman, 1974) gives the full iff statement
+situating Kuznetsov's result.  §122 in Knill's *Some Fundamental Theorems in
+Mathematics*.
 
 A word in the generators `g₁, …, gₙ` and their inverses is encoded as
-`List (Fin n × Bool)`, which is `Primcodable`. The word problem of a
-finite presentation `φ : FreeGroup (Fin n) →* G` is the predicate "the
-word `w` represents the identity of `G`"; it is **solvable** when this
-predicate is decidable by an algorithm, captured by mathlib's
-`ComputablePred`. The hypotheses `hsurj` + `hker` unpack
+`List (Fin n × Bool)`, which is `Primcodable`.  The word problem predicate of a
+finite presentation `φ : FreeGroup (Fin n) →* G` is `P w := φ (mk w) = 1`; it is
+**solvable** when `P` is decidable by an algorithm, captured by mathlib's
+`ComputablePred`.  The hypotheses `hsurj` + `hker` unpack
 `Group.IsFinitelyPresented G` for this particular presentation `φ`.
 
-Mathlib has `Group.IsFinitelyPresented`, `Subgroup.IsNormalClosureFG`,
-`FreeGroup`, `PresentedGroup`, `IsSimpleGroup`, and the
-`ComputablePred` / `Computable` / `Partrec` stack, but no notion of
-the word problem of a group or the Kuznetsov / Boone–Higman / Novikov
-theorems.
+The strategy is Kuznetsov's r.e.-from-both-sides argument: `P` is recursively
+enumerable, its complement is recursively enumerable (here simplicity is used),
+and a predicate that is r.e. with r.e. complement is computable (Post's theorem,
+`ComputablePred.computable_iff_re_compl_re`).
 -/
 
-/-- The word problem of a finite presentation `φ` is **solvable** when
-the predicate "the word `w` represents the identity of `G`" is
-decidable by an algorithm. -/
-def WordProblemSolvable {G : Type*} [Group G] {n : ℕ}
-    (φ : FreeGroup (Fin n) →* G) : Prop :=
-  ComputablePred (fun w : List (Fin n × Bool) => φ (FreeGroup.mk w) = 1)
+variable {G : Type*} [Group G] {n : ℕ}
 
-/-- **Kuznetsov's theorem** (A.V. Kuznetsov, 1958). A finitely presented
-simple group has a solvable word problem. -/
+/-- **The word problem predicate** of a presentation `φ`: the predicate
+`P w := φ (FreeGroup.mk w) = 1` that the word `w` represents the identity. -/
+def wordProblemPred (φ : FreeGroup (Fin n) →* G) : List (Fin n × Bool) → Prop :=
+  fun w => φ (FreeGroup.mk w) = 1
+
+/-- The word problem of a finite presentation `φ` is **solvable** when the word
+problem predicate is decidable by an algorithm. -/
+def WordProblemSolvable (φ : FreeGroup (Fin n) →* G) : Prop :=
+  ComputablePred (wordProblemPred φ)
+
+/-- **Word problem via the kernel.** `P w` holds iff `FreeGroup.mk w ∈ ker φ`. -/
+lemma pred_iff_mem_ker (φ : FreeGroup (Fin n) →* G) (w : List (Fin n × Bool)) :
+    wordProblemPred φ w ↔ FreeGroup.mk w ∈ MonoidHom.ker φ := by
+  sorry
+
+/-- **The kernel is a normal closure of relators.** There is a finite relator
+list `R` with `ker φ = normalClosure (relatorSet R)`. -/
+lemma ker_eq_normalClosure (φ : FreeGroup (Fin n) →* G)
+    (hker : (MonoidHom.ker φ).IsNormalClosureFG) :
+    ∃ R : List (Word n),
+      MonoidHom.ker φ = Subgroup.normalClosure (relatorSet R) := by
+  sorry
+
+/-- **Normal-closure membership is r.e.** -/
+lemma re_mem_normalClosure (R : List (Word n)) :
+    REPred (fun w : Word n =>
+      FreeGroup.mk w ∈ Subgroup.normalClosure (relatorSet R)) := by
+  sorry
+
+/-- **Positive side is r.e.**  The word problem predicate `P` is recursively
+enumerable. -/
+lemma re_positive (φ : FreeGroup (Fin n) →* G)
+    (hker : (MonoidHom.ker φ).IsNormalClosureFG) :
+    REPred (wordProblemPred φ) := by
+  sorry
+
+/-- **The kernel is not everything.** -/
+lemma ker_ne_top [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
+    (hsurj : Function.Surjective φ) :
+    MonoidHom.ker φ ≠ ⊤ := by
+  sorry
+
+/-- **Collapse criterion.** With `S = relatorSet R` and
+`normalClosure S = ker φ`, for every word `w`,
+`φ (mk w) ≠ 1 ↔ normalClosure (S ∪ {mk w}) = ⊤`. -/
+lemma collapse [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
+    (hsurj : Function.Surjective φ) (R : List (Word n))
+    (hR : Subgroup.normalClosure (relatorSet R) = MonoidHom.ker φ)
+    (w : Word n) :
+    φ (FreeGroup.mk w) ≠ 1 ↔
+      Subgroup.normalClosure (relatorSet R ∪ {FreeGroup.mk w}) = ⊤ := by
+  sorry
+
+/-- **Generator membership in the extended closure is r.e.** -/
+lemma re_generator_mem (R : List (Word n)) (i : Fin n) :
+    REPred (fun w : Word n =>
+      FreeGroup.of i ∈
+        Subgroup.normalClosure (relatorSet R ∪ {FreeGroup.mk w})) := by
+  sorry
+
+/-- **Negative side is r.e.**  The complement `w ↦ φ (mk w) ≠ 1` is recursively
+enumerable. -/
+lemma re_negative [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
+    (hsurj : Function.Surjective φ)
+    (hker : (MonoidHom.ker φ).IsNormalClosureFG) :
+    REPred (fun w : Word n => ¬ wordProblemPred φ w) := by
+  sorry
+
+/-- **Kuznetsov's theorem** (A.V. Kuznetsov, 1958). A finitely presented simple
+group has a solvable word problem. -/
 @[eval_problem]
 theorem boone_higman_simple
     {G : Type*} [Group G] [IsSimpleGroup G]
