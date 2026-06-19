@@ -51,6 +51,7 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
     \lean{LeanEval.RepresentationTheory.symAction_commute_glAction}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Defs.lean}
     \uses{def:symAction, def:glAction}
+    \leanok
     For every $\sigma \in S_k$ and every unit $g \in GL(V)$,
     $\mathrm{symAction}(\sigma) \circ \mathrm{glAction}(g)
       = \mathrm{glAction}(g) \circ \mathrm{symAction}(\sigma)$.
@@ -69,6 +70,7 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
     \lean{LeanEval.RepresentationTheory.adjoin_symAction_le_centralizer_glAction}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Defs.lean}
     \uses{lem:sym-gl-commute}
+    \leanok
     $\operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})
       \subseteq \mathcal{C}(\operatorname{range}\mathrm{glAction})$.
 \end{lemma}
@@ -87,6 +89,7 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
     \label{lem:perm-card-invertible}
     \lean{LeanEval.RepresentationTheory.isUnit_card_perm}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
+    \leanok
     The cardinality $|S_k| = k!$ is invertible in $R$.
 \end{lemma}
 \begin{proof}
@@ -116,6 +119,7 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
     \lean{LeanEval.RepresentationTheory.isSemisimpleRing_monoidAlgebra}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
     \uses{lem:perm-card-invertible}
+    \leanok
     The group algebra $R[S_k] = $ \texttt{MonoidAlgebra}$\,R\,(\operatorname{Perm}(\mathrm{Fin}\,k))$
     is a semisimple ring.
 \end{lemma}
@@ -132,6 +136,7 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
     \lean{LeanEval.RepresentationTheory.adjoin_symAction_eq_lift_range}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
     \uses{def:symAction}
+    \leanok
     Let $\widetilde{\mathrm{symAction}} : R[S_k] \to_{A} \operatorname{End}_R(V^{\otimes k})$ be the
     $R$-algebra homomorphism obtained from the monoid homomorphism $\mathrm{symAction}$ by
     \texttt{MonoidAlgebra.lift}. Then
@@ -158,6 +163,7 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
     \lean{LeanEval.RepresentationTheory.isSemisimpleRing_adjoin_symAction}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
     \uses{lem:groupalg-semisimple, lem:symAlg-eq-lift-range}
+    \leanok
     The subalgebra $A := \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})
       \subseteq \operatorname{End}_R(V^{\otimes k})$ is a semisimple ring.
 \end{lemma}
@@ -175,6 +181,7 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
     \lean{LeanEval.RepresentationTheory.isSemisimpleModule_adjoin_symAction}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
     \uses{lem:symAlg-semisimple}
+    \leanok
     As a module over $A = \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})$, the space
     $V^{\otimes k}$ is semisimple.
 \end{lemma}
@@ -191,6 +198,7 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
     \lean{LeanEval.RepresentationTheory.mem_centralizer_adjoin_symAction_iff}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
     \uses{lem:symAlg-semisimple}
+    \leanok
     Let $A = \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})
       \subseteq \operatorname{End}_R(V^{\otimes k})$, and regard $V^{\otimes k}$ as an $A$-module via the
     inclusion. Then an $R$-endomorphism $f$ lies in $\mathcal{C}(A)$ iff it is $A$-linear, i.e.\
@@ -233,6 +241,7 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
     \lean{LeanEval.RepresentationTheory.centralizer_centralizer_adjoin_symAction}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
     \uses{lem:centralizer-eq-module-end, lem:jacobson-density-span}
+    \leanok
     Let $A = \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})
       \subseteq \operatorname{End}_R(V^{\otimes k})$ with $V^{\otimes k}$ finite-dimensional and $A$
     semisimple. Then $\mathcal{C}(\mathcal{C}(A)) = A$.
@@ -268,6 +277,7 @@ permuting the $k$ tensor legs.
     \label{lem:finrank-end-tensor}
     \lean{LeanEval.RepresentationTheory.finrank_endTensor_eq}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/EndTensor.lean}
+    \leanok
     With $V$ finite-dimensional,
     $\dim_R (\operatorname{End}_R V)^{\otimes k} = \dim_R \operatorname{End}_R(V^{\otimes k})$; both equal
     $(\dim_R V)^{2k}$.
@@ -343,6 +353,7 @@ permuting the $k$ tensor legs.
     \lean{LeanEval.RepresentationTheory.coeff_mem_span_values_one}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Polarization.lean}
     \uses{lem:cast-distinct}
+    \leanok
     Let $M$ be an $R$-module and let $p(t) = \sum_{i=0}^{d} c_i\, t^i$ with coefficients
     $c_i \in M$ and $d \le k$. Given $d+1$ pairwise distinct scalars $t_0, \ldots, t_d \in R$ (which
     exist by Lemma~\ref{lem:cast-distinct}), every coefficient $c_i$ — in particular the constant term
@@ -379,6 +390,7 @@ permuting the $k$ tensor legs.
     \lean{LeanEval.RepresentationTheory.symmetriser_idempotent}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Polarization.lean}
     \uses{def:symmetriser}
+    \leanok
     The symmetriser $e$ is idempotent, $e \circ e = e$, and its range equals the subspace of
     $\rho$-invariant (permutation-fixed) tensors: $\operatorname{LinearMap.range} e = \rho.\mathrm{invariants}$.
 \end{lemma}
@@ -398,6 +410,7 @@ permuting the $k$ tensor legs.
     \lean{LeanEval.RepresentationTheory.range_symmetriser_eq_span}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Polarization.lean}
     \uses{def:symmetriser}
+    \leanok
     With $W = \operatorname{End}_R V$, $\operatorname{LinearMap.range} e$ equals the $R$-linear span of the
     symmetrised pure tensors $\{\, e(m_1 \otimes \cdots \otimes m_k) : m_1, \ldots, m_k \in W \,\}$.
 \end{lemma}
@@ -453,6 +466,7 @@ permuting the $k$ tensor legs.
     \lean{LeanEval.RepresentationTheory.sum_perm_tprod_eq}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Polarization.lean}
     \uses{def:symmetriser}
+    \leanok
     Let $W = \operatorname{End}_R V$ and $m_1, \ldots, m_n \in W$. Expanding
     $\bigl(\sum_{j=1}^{n} t_j\, m_j\bigr)^{\otimes k}$ as a polynomial in $t_1, \ldots, t_n$, the
     coefficient of the multilinear monomial $t_1 \cdots t_n$ (for $n = k$, multidegree $(1,\ldots,1)$)
@@ -499,6 +513,7 @@ permuting the $k$ tensor legs.
     \label{lem:shifted-invertible}
     \lean{LeanEval.RepresentationTheory.finite_not_isUnit_shift}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/EndTensor.lean}
+    \leanok
     For $m \in \operatorname{End}_R V$ with $V$ finite-dimensional, the endomorphism
     $m + t\cdot\mathrm{id}$ is invertible (an element of $GL(V)$) for all but at most $\dim V$ values of
     $t \in R$.
@@ -564,6 +579,7 @@ permuting the $k$ tensor legs.
     \label{lem:centralizer-span}
     \lean{LeanEval.RepresentationTheory.centralizer_eq_centralizer_span}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/EndTensor.lean}
+    \leanok
     For any set $S \subseteq \operatorname{End}_R(V^{\otimes k})$, the centralizer is unchanged by passing
     to the $R$-linear span: $\mathcal{C}(S) = \mathcal{C}(\operatorname{span}_R S)$.
 \end{lemma}
@@ -581,6 +597,7 @@ permuting the $k$ tensor legs.
     \lean{LeanEval.RepresentationTheory.symAction_range_eq_centralizer_glAction}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl.lean}
     \uses{lem:adjoin-le-centralizer, lem:double-commutant, lem:units-span-eq, lem:centralizer-sym-eq-symmetric, lem:centralizer-span}
+    \leanok
     With $R$ a field, $V$ finite-dimensional and $k!$ invertible in $R$,
     \[
         \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})
