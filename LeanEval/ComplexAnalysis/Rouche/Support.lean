@@ -379,7 +379,15 @@ theorem logDeriv_analytic_unit {R : ℝ} {U : ℂ → ℂ}
 /-- For `R > 0` the closed disk is preperfect. -/
 theorem closedBall_preperfect {R : ℝ} (hR : 0 < R) :
     Preperfect (Metric.closedBall (0 : ℂ) R) := by
-  sorry
+  have hR_ne_zero : R ≠ 0 := by linarith
+  have hball : Preperfect (Metric.ball (0 : ℂ) R) :=
+    Metric.isOpen_ball.preperfect
+  have hperf : Perfect (closure (Metric.ball (0 : ℂ) R)) :=
+    hball.perfect_closure
+  have hcl : closure (Metric.ball (0 : ℂ) R) = Metric.closedBall (0 : ℂ) R :=
+    closure_ball (0 : ℂ) hR_ne_zero
+  rw [hcl] at hperf
+  exact hperf.acc
 
 /-- Both sides of the factorization `h = φ · U` are meromorphic at each point of the
 closed disk. -/
