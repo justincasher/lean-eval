@@ -35,6 +35,7 @@
     \lean{LeanEval.Topology.fpp_homeo}
     \leanfile{LeanEval/Topology/Brouwer/FixedPoint.lean}
     \uses{def:fpp}
+    \leanok
     If $X$ and $Y$ are homeomorphic and $X$ has the fixed-point property, then
     $Y$ has the fixed-point property.
 \end{lemma}
@@ -51,6 +52,7 @@
     \lean{LeanEval.Topology.fpp_ambient}
     \leanfile{LeanEval/Topology/Brouwer/FixedPoint.lean}
     \uses{def:fpp}
+    \leanok
     Let $K \subseteq E_d$ and suppose the subspace $K$ (with the subspace
     topology) has the fixed-point property. Then for every $f : E_d \to E_d$
     that is continuous on $K$ and maps $K$ into $K$, there exists $x \in K$ with
@@ -141,6 +143,7 @@
     \lean{LeanEval.Topology.cell_door_count}
     \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
     \uses{lem:cell-door-rainbow, lem:cell-door-nonrainbow}
+    \leanok
     The number of doors incident to a cell is $1$ if the cell is rainbow and is
     even otherwise; in particular it is odd if and only if the cell is rainbow.
 \end{lemma}
@@ -155,6 +158,7 @@
     \lean{LeanEval.Topology.door_count_rainbow_parity}
     \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
     \uses{lem:cell-door-count}
+    \leanok
     In any labeled incidence model, $\sum_{C} \#\{\text{doors incident to } C\}$
     has the same parity as the number of rainbow cells.
 \end{lemma}
@@ -171,6 +175,7 @@
     \lean{LeanEval.Topology.door_count_incidence}
     \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
     \uses{def:balanced-model}
+    \leanok
     In a balanced model,
     $\sum_{C} \#\{\text{doors incident to } C\}
        = 2\,\#\{\text{interior doors}\} + \#\{\text{boundary doors}\}$;
@@ -193,6 +198,7 @@
     \lean{LeanEval.Topology.sperner_parity}
     \leanfile{LeanEval/Topology/Brouwer/Incidence.lean}
     \uses{lem:door-count-rainbow-parity, lem:door-count-incidence}
+    \leanok
     In a balanced labeled incidence model, the number of rainbow cells has the
     same parity as the number of boundary doors.
 \end{lemma}
@@ -274,6 +280,7 @@
     \lean{LeanEval.Topology.triangulationModel}
     \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
     \uses{def:triangulation, def:sperner-labeling, def:incidence-model}
+    \leanok
     Given a Sperner-labeled triangulation $T$ of $S_n$, its associated
     \emph{labeled incidence model} (\Cref{def:incidence-model}) has the maximal
     cells of $T$ as cells, the $(n-1)$-faces of $T$ as facets, incidence given by
@@ -410,6 +417,7 @@
     \lean{LeanEval.Topology.triangulation_model_balanced}
     \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
     \uses{def:triangulation-model, lem:door-incidence, def:balanced-model}
+    \leanok
     The labeled incidence model of a Sperner-labeled triangulation of $S_n$ is
     balanced.
 \end{lemma}
@@ -463,6 +471,7 @@
     \lean{LeanEval.Topology.facet_restriction}
     \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
     \uses{lem:facet-is-triangulation, lem:facet-labeling-sperner}
+    \leanok
     Let $T$ be a Sperner-labeled triangulation of $S_n$ with $n \ge 1$. The faces
     of $T$ contained in $\{x_n = 0\}$, identified with $S_{n-1}$, form a
     triangulation of $S_{n-1}$ whose inherited labeling is Sperner.
@@ -612,6 +621,7 @@
     \lean{LeanEval.Topology.bary_face_to_face}
     \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
     \uses{def:barycentric-subdivision}
+    \leanok
     On a face shared by two maximal cells, the chain simplices induced from
     either side coincide, so the subdivisions of adjacent maximal cells agree on
     their common face.
@@ -629,6 +639,7 @@
     \lean{LeanEval.Topology.barycentric_same_space}
     \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
     \uses{lem:bary-chain-cover, lem:bary-chain-indep, lem:bary-face-to-face, def:triangulation}
+    \leanok
     The barycentric subdivision of a triangulation of $S_n$ is again a
     triangulation of $S_n$.
 \end{lemma}
@@ -700,6 +711,7 @@
     \lean{LeanEval.Topology.fine_triangulation}
     \leanfile{LeanEval/Topology/Brouwer/Subdivision.lean}
     \uses{lem:iterated-subdivision}
+    \leanok
     For every $\varepsilon > 0$ there is a triangulation of $S_n$ with mesh less
     than $\varepsilon$.
 \end{lemma}
@@ -717,6 +729,7 @@
     \label{lem:label-pigeonhole}
     \lean{LeanEval.Topology.label_pigeonhole}
     \leanfile{LeanEval/Topology/Brouwer/Simplex.lean}
+    \leanok
     Let $(x_0, \dots, x_n)$ and $(y_0, \dots, y_n)$ be nonnegative tuples with
     $\sum_i x_i = \sum_i y_i = 1$. Then there is an index $i$ with $x_i > 0$ and
     $y_i \le x_i$.

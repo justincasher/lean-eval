@@ -56,14 +56,22 @@ theorem bary_face_to_face {n} (M M' G : Finset (EuclSp n)) (hGM : G ⊆ M) (hGM'
     (c : Fin (n + 1) → Finset (EuclSp n)) (hmono : StrictMono c)
     (htop : c (Fin.last n) ⊆ G) :
     (∀ i, c i ⊆ M) ↔ (∀ i, c i ⊆ M') := by
-  sorry
+  have h_all_sub_G : ∀ i, c i ⊆ G := by
+    intro i
+    have h_sub_last : c i ⊆ c (Fin.last n) := hmono.monotone (Fin.le_last i)
+    exact h_sub_last.trans htop
+  constructor
+  · intro h i
+    exact (h_all_sub_G i).trans hGM'
+  · intro h i
+    exact (h_all_sub_G i).trans hGM
 
 /-- **Barycentric subdivision covers the same space.** The maximal cells of the
 barycentric subdivision still cover `S_n`. -/
 theorem barycentric_same_space {n} (T : Triangulation n) :
     (⋃ C ∈ (barycentricSubdivision T).maximalCells, convexHull ℝ (C : Set (EuclSp n)))
-      = cornerSimplex n := by
-  sorry
+      = cornerSimplex n :=
+  (barycentricSubdivision T).covering
 
 /-- **Barycenter distance inequality.** For a nonempty face `F` of `G`,
 `‖b(F) - b(G)‖ ≤ (|G|-1)/|G| · diam(G)`. -/
@@ -88,7 +96,31 @@ theorem iterated_subdivision {n} (k : ℕ) :
 `S_n` with mesh below `ε`. -/
 theorem fine_triangulation {n} {ε : ℝ} (hε : 0 < ε) :
     ∃ T : Triangulation n, T.mesh < ε := by
-  sorry
+  set M := Metric.diam (cornerSimplex n) with hM_def
+  have hM_nonneg : 0 ≤ M := Metric.diam_nonneg
+  have h_ratio_lt_one : (n : ℝ) / (n + 1 : ℝ) < 1 := by
+    have hpos : 0 < (n : ℝ) + 1 := by
+      have h_nonneg : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg _
+      nlinarith
+    refine (div_lt_one hpos).mpr ?_
+    nlinarith
+  by_cases hM_zero : M = 0
+  · refine ⟨barycentricSubdivision^[0] (trivialTriangulation n), ?_⟩
+    have h_iter := iterated_subdivision 0
+    have h_mul : ((n : ℝ) / (n + 1 : ℝ)) ^ (0 : ℕ) * M = 0 := by simp [hM_zero]
+    have h_mesh_nonpos : (barycentricSubdivision^[0] (trivialTriangulation n)).mesh ≤ 0 := by
+      linarith
+    linarith
+  · have hM_pos : 0 < M := lt_of_le_of_ne hM_nonneg (Ne.symm hM_zero.ne)
+    have h_eps_div_M_pos : 0 < ε / M := div_pos hε hM_pos
+    rcases exists_pow_lt_of_lt_one h_eps_div_M_pos h_ratio_lt_one with ⟨k, hk⟩
+    have h_bound : ((n : ℝ) / (n + 1 : ℝ)) ^ k * M < ε := by
+      calc
+        ((n : ℝ) / (n + 1 : ℝ)) ^ k * M < (ε / M) * M := by nlinarith
+        _ = ε := by field_simp [hM_pos.ne']
+    refine ⟨barycentricSubdivision^[k] (trivialTriangulation n), ?_⟩
+    have h_iter := iterated_subdivision k
+    linarith
 
 end Topology
 end LeanEval

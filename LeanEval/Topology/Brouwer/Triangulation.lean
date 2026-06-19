@@ -111,9 +111,80 @@ noncomputable def triangulationModel {n} (T : Triangulation n) (ℓ : EuclSp n �
   bdry F := convexHull ℝ ((F : Finset (EuclSp n)) : Set (EuclSp n)) ⊆ frontier (cornerSimplex n)
   cellLabel C := ((C : Finset (EuclSp n)).val).map ℓ
   facetLabel F := ((F : Finset (EuclSp n)).val).map ℓ
-  cellLabel_card C := by sorry
-  facetLabel_card F := by sorry
-  compat C F h := by sorry
+  cellLabel_card C := by
+    have hCcard : (C : Finset (EuclSp n)).card = n + 1 := by
+      have hCmem : (C : Finset (EuclSp n)) ∈ T.maximalCells := C.2
+      rcases Finset.mem_filter.mp hCmem with ⟨_, hcard⟩
+      exact hcard
+    calc
+      (((C : Finset (EuclSp n)).val).map ℓ).card = ((C : Finset (EuclSp n)).val).card := by
+        simp [Nat.card_eq_fintype_card, Fintype.card_subtype, Finset.card_filter]
+      _ = (C : Finset (EuclSp n)).card := by simp [Nat.card_eq_fintype_card, Fintype.card_subtype, Finset.card_filter]
+      _ = n + 1 := hCcard
+  facetLabel_card F := by
+    have hFcard : (F : Finset (EuclSp n)).card = n := by
+      have hFmem : (F : Finset (EuclSp n)) ∈ T.facets := F.2
+      rcases Finset.mem_filter.mp hFmem with ⟨_, hcard⟩
+      exact hcard
+    calc
+      (((F : Finset (EuclSp n)).val).map ℓ).card = ((F : Finset (EuclSp n)).val).card := by
+        simp [Nat.card_eq_fintype_card, Fintype.card_subtype, Finset.card_filter]
+      _ = (F : Finset (EuclSp n)).card := by simp [Nat.card_eq_fintype_card, Fintype.card_subtype, Finset.card_filter]
+      _ = n := hFcard
+  compat C F h := by
+    have hsub : (F : Finset (EuclSp n)) ⊆ (C : Finset (EuclSp n)) := h
+    have hCcard : (C : Finset (EuclSp n)).card = n + 1 := by
+      have hCmem : (C : Finset (EuclSp n)) ∈ T.maximalCells := C.2
+      rcases Finset.mem_filter.mp hCmem with ⟨_, hcard⟩
+      exact hcard
+    have hFcard : (F : Finset (EuclSp n)).card = n := by
+      have hFmem : (F : Finset (EuclSp n)) ∈ T.facets := F.2
+      rcases Finset.mem_filter.mp hFmem with ⟨_, hcard⟩
+      exact hcard
+    have hcard_sdiff : ((C : Finset (EuclSp n)) \ (F : Finset (EuclSp n))).card = 1 := by
+      have h := Finset.card_sdiff_add_card_eq_card hsub
+      rw [hFcard, hCcard] at h
+      omega
+    rcases (Finset.card_eq_one.mp hcard_sdiff) with ⟨v, hv⟩
+    have hv_mem : v ∈ (C : Finset (EuclSp n)) := by
+      have hmem_sdiff : v ∈ (C : Finset (EuclSp n)) \ (F : Finset (EuclSp n)) := by
+        simp [hv]
+      exact Finset.mem_sdiff.mp hmem_sdiff |>.left
+    have h_val_sub : (F : Finset (EuclSp n)).val ≤ (C : Finset (EuclSp n)).val :=
+      Finset.val_le_iff.mpr hsub
+    have hCval_eq : (C : Finset (EuclSp n)).val = (F : Finset (EuclSp n)).val + ({v} : Multiset (EuclSp n)) := by
+      have htemp : (C : Finset (EuclSp n)).val = ((C : Finset (EuclSp n)) \ (F : Finset (EuclSp n))).val + (F : Finset (EuclSp n)).val := by
+        calc
+          (C : Finset (EuclSp n)).val
+              = ((C : Finset (EuclSp n)).val - (F : Finset (EuclSp n)).val) + (F : Finset (EuclSp n)).val := by
+                symm; exact Multiset.add_sub_cancel h_val_sub
+          _ = ((C : Finset (EuclSp n)) \ (F : Finset (EuclSp n))).val + (F : Finset (EuclSp n)).val := by
+            simp [Nat.card_eq_fintype_card, Fintype.card_subtype, Finset.card_filter]
+      calc
+        (C : Finset (EuclSp n)).val
+            = ((C : Finset (EuclSp n)) \ (F : Finset (EuclSp n))).val + (F : Finset (EuclSp n)).val := htemp
+        _ = ({v} : Multiset (EuclSp n)) + (F : Finset (EuclSp n)).val := by
+          simp [hv]
+        _ = (F : Finset (EuclSp n)).val + ({v} : Multiset (EuclSp n)) := by
+          rw [Multiset.add_comm]
+    have hcell_map : (((C : Finset (EuclSp n)).val).map ℓ) = (((F : Finset (EuclSp n)).val).map ℓ) + ({ℓ v} : Multiset (Fin (n + 1))) := by
+      calc
+        (((C : Finset (EuclSp n)).val).map ℓ) = (((F : Finset (EuclSp n)).val + ({v} : Multiset (EuclSp n))).map ℓ) := by
+          rw [hCval_eq]
+        _ = (((F : Finset (EuclSp n)).val).map ℓ) + (({v} : Multiset (EuclSp n)).map ℓ) := by
+          rw [Multiset.map_add]
+        _ = (((F : Finset (EuclSp n)).val).map ℓ) + ({ℓ v} : Multiset (Fin (n + 1))) := by
+          simp [Nat.card_eq_fintype_card, Fintype.card_subtype, Finset.card_filter]
+    refine ⟨ℓ v, ?_⟩
+    calc
+      ((F : Finset (EuclSp n)).val).map ℓ
+          = ((F : Finset (EuclSp n)).val).map ℓ + 0 := by simp [Nat.card_eq_fintype_card, Fintype.card_subtype, Finset.card_filter]
+      _ = ((F : Finset (EuclSp n)).val).map ℓ + (({ℓ v} : Multiset (Fin (n + 1))).erase (ℓ v)) := by
+        simp [Nat.card_eq_fintype_card, Fintype.card_subtype, Finset.card_filter]
+      _ = (((F : Finset (EuclSp n)).val).map ℓ + ({ℓ v} : Multiset (Fin (n + 1)))).erase (ℓ v) := by
+        rw [Multiset.erase_add_right_pos _ (by simp : ℓ v ∈ ({ℓ v} : Multiset (Fin (n + 1))))]
+      _ = (((C : Finset (EuclSp n)).val).map ℓ).erase (ℓ v) := by
+        rw [hcell_map]
 
 /-- **A facet spans an affine hyperplane.** The affine span of an `(n-1)`-face
 `F` is the zero set of a surjective (hence nonconstant) affine functional; its
@@ -147,6 +218,16 @@ theorem one_cell_per_side {n} (T : Triangulation n) {F : Finset (EuclSp n)}
     ∃ w ∈ C, ∃ w' ∈ C', φ w * φ w' < 0 := by
   sorry
 
+/-- **Door incidence.** An interior `(n-1)`-face is a face of exactly two
+maximal cells; a boundary `(n-1)`-face is a face of exactly one. -/
+theorem door_incidence {n} (T : Triangulation n) {F : Finset (EuclSp n)}
+    (hF : F ∈ T.facets) :
+    (¬ (convexHull ℝ (F : Set (EuclSp n)) ⊆ frontier (cornerSimplex n)) →
+        Nat.card {C // C ∈ T.maximalCells ∧ F ⊆ C} = 2) ∧
+    ((convexHull ℝ (F : Set (EuclSp n)) ⊆ frontier (cornerSimplex n)) →
+        Nat.card {C // C ∈ T.maximalCells ∧ F ⊆ C} = 1) := by
+  sorry
+
 /-- **Both sides of an interior facet are occupied.** If `F` is not contained in
 `∂S_n`, then each open side carries an incident maximal cell. -/
 theorem interior_facet_both_sides {n} (T : Triangulation n) {F : Finset (EuclSp n)}
@@ -156,7 +237,52 @@ theorem interior_facet_both_sides {n} (T : Triangulation n) {F : Finset (EuclSp 
     (hker : {x | φ x = 0} = (affineSpan ℝ (F : Set (EuclSp n)) : Set (EuclSp n))) :
     (∃ C ∈ T.maximalCells, F ⊆ C ∧ ∃ w ∈ C, 0 < φ w) ∧
     (∃ C ∈ T.maximalCells, F ⊆ C ∧ ∃ w ∈ C, φ w < 0) := by
-  sorry
+  classical
+  -- door_incidence tells us there are exactly two maximal cells containing F
+  have h_card := (door_incidence T hF).1 hint
+  -- h_card : Nat.card {C // C ∈ T.maximalCells ∧ F ⊆ C} = 2
+  have h_filter_card_eq : (T.maximalCells.filter (fun C => F ⊆ C)).card =
+    Nat.card {C // C ∈ T.maximalCells ∧ F ⊆ C} := by
+    simp
+  have h_cardS : (T.maximalCells.filter (fun C => F ⊆ C)).card = 2 := by
+    rw [h_filter_card_eq, h_card]
+  -- card = 2 gives two distinct cells
+  rcases Finset.card_eq_two.mp h_cardS with ⟨C₁, C₂, hne, hS⟩
+  have hC₁mem : C₁ ∈ T.maximalCells.filter (fun C => F ⊆ C) := by
+    rw [hS]; simp [Nat.card_eq_fintype_card, Fintype.card_subtype, Finset.card_filter]
+  have hC₁max : C₁ ∈ T.maximalCells := (Finset.mem_filter.mp hC₁mem).1
+  have hC₁F : F ⊆ C₁ := (Finset.mem_filter.mp hC₁mem).2
+  have hC₂mem : C₂ ∈ T.maximalCells.filter (fun C => F ⊆ C) := by
+    rw [hS]; simp [Nat.card_eq_fintype_card, Fintype.card_subtype, Finset.card_filter]
+  have hC₂max : C₂ ∈ T.maximalCells := (Finset.mem_filter.mp hC₂mem).1
+  have hC₂F : F ⊆ C₂ := (Finset.mem_filter.mp hC₂mem).2
+  -- the two cells lie on opposite sides of the hyperplane
+  have h_opposite : ∃ w ∈ C₁, ∃ w' ∈ C₂, φ w * φ w' < 0 :=
+    one_cell_per_side T hF φ hφ hker hC₁max hC₂max hC₁F hC₂F hne
+  rcases h_opposite with ⟨w₁, hw₁, w₂, hw₂, hprod⟩
+  have h_one_pos_one_neg : (0 < φ w₁ ∧ φ w₂ < 0) ∨ (0 < φ w₂ ∧ φ w₁ < 0) := by
+    have h₁0 : φ w₁ ≠ 0 := by
+      intro hz; rw [hz, zero_mul] at hprod; linarith
+    have h₂0 : φ w₂ ≠ 0 := by
+      intro hz; rw [hz, mul_zero] at hprod; linarith
+    by_cases h₁pos : 0 < φ w₁
+    · have h₂neg : φ w₂ < 0 := by
+        by_contra! hge
+        nlinarith
+      exact Or.inl ⟨h₁pos, h₂neg⟩
+    · have h₁neg : φ w₁ < 0 := by
+        by_contra! hge
+        -- hge : φ w₁ ≥ 0
+        have hle : φ w₁ ≤ 0 := by linarith
+        have h_eq : φ w₁ = 0 := by linarith
+        exact h₁0 h_eq
+      have h₂pos : 0 < φ w₂ := by
+        by_contra! hle
+        nlinarith
+      exact Or.inr ⟨h₂pos, h₁neg⟩
+  rcases h_one_pos_one_neg with ((⟨hpos₁, hneg₂⟩) | (⟨hpos₂, hneg₁⟩))
+  · exact ⟨⟨C₁, hC₁max, hC₁F, w₁, hw₁, hpos₁⟩, ⟨C₂, hC₂max, hC₂F, w₂, hw₂, hneg₂⟩⟩
+  · exact ⟨⟨C₂, hC₂max, hC₂F, w₂, hw₂, hpos₂⟩, ⟨C₁, hC₁max, hC₁F, w₁, hw₁, hneg₁⟩⟩
 
 /-- **A boundary facet is occupied on one side only.** If `conv(F) ⊆ ∂S_n`, then
 all incident maximal cells lie on one closed side of the hyperplane. -/
@@ -169,21 +295,49 @@ theorem boundary_facet_one_side {n} (T : Triangulation n) {F : Finset (EuclSp n)
     (∀ C ∈ T.maximalCells, F ⊆ C → ∀ w ∈ C, φ w ≤ 0) := by
   sorry
 
-/-- **Door incidence.** An interior `(n-1)`-face is a face of exactly two
-maximal cells; a boundary `(n-1)`-face is a face of exactly one. -/
-theorem door_incidence {n} (T : Triangulation n) {F : Finset (EuclSp n)}
-    (hF : F ∈ T.facets) :
-    (¬ (convexHull ℝ (F : Set (EuclSp n)) ⊆ frontier (cornerSimplex n)) →
-        Nat.card {C // C ∈ T.maximalCells ∧ F ⊆ C} = 2) ∧
-    ((convexHull ℝ (F : Set (EuclSp n)) ⊆ frontier (cornerSimplex n)) →
-        Nat.card {C // C ∈ T.maximalCells ∧ F ⊆ C} = 1) := by
-  sorry
-
 /-- **The triangulation model is balanced.** -/
 theorem triangulation_model_balanced {n} (T : Triangulation n) (ℓ : EuclSp n → Fin (n + 1))
     (hℓ : IsSpernerLabeling T ℓ) :
     (triangulationModel T ℓ).Balanced := by
-  sorry
+  let M := triangulationModel T ℓ
+  dsimp [IncidenceModel.Balanced]
+  constructor
+  · intro F hF_not_bdry
+    have hF_mem : F.val ∈ T.facets := F.property
+    have h_card_eq : Nat.card {C : M.Cell // M.Inc C F} =
+      Nat.card {C // C ∈ T.maximalCells ∧ F.val ⊆ C} := by
+      apply Nat.card_congr
+      refine {
+        toFun := λ ⟨⟨C, hC⟩, hsub⟩ => ⟨C, hC, hsub⟩
+        invFun := λ ⟨C, hC, hsub⟩ => ⟨⟨C, hC⟩, hsub⟩
+        left_inv := by
+          intro x; rcases x with ⟨⟨C, hC⟩, hsub⟩; rfl
+        right_inv := by
+          intro x; rcases x with ⟨C, hC, hsub⟩; rfl
+      }
+    rw [h_card_eq]
+    have h_not_bdry : ¬ (convexHull ℝ ((F.val : Set (EuclSp n))) ⊆ frontier (cornerSimplex n)) :=
+      hF_not_bdry
+    have h_door := door_incidence T hF_mem
+    exact h_door.1 h_not_bdry
+  · intro F hF_bdry
+    have hF_mem : F.val ∈ T.facets := F.property
+    have h_card_eq : Nat.card {C : M.Cell // M.Inc C F} =
+      Nat.card {C // C ∈ T.maximalCells ∧ F.val ⊆ C} := by
+      apply Nat.card_congr
+      refine {
+        toFun := λ ⟨⟨C, hC⟩, hsub⟩ => ⟨C, hC, hsub⟩
+        invFun := λ ⟨C, hC, hsub⟩ => ⟨⟨C, hC⟩, hsub⟩
+        left_inv := by
+          intro x; rcases x with ⟨⟨C, hC⟩, hsub⟩; rfl
+        right_inv := by
+          intro x; rcases x with ⟨C, hC, hsub⟩; rfl
+      }
+    rw [h_card_eq]
+    have h_bdry : convexHull ℝ ((F.val : Set (EuclSp n))) ⊆ frontier (cornerSimplex n) :=
+      hF_bdry
+    have h_door := door_incidence T hF_mem
+    exact h_door.2 h_bdry
 
 /-- **The induced bottom-facet restriction data.** `T'` (a triangulation of
 `S_m`) is the restriction of `T` (a triangulation of `S_{m+1}`) to the bottom
@@ -236,7 +390,9 @@ theorem facet_restriction {m} (T : Triangulation (m + 1))
     ∃ (T' : Triangulation m) (e : EuclSp m →ᵃ[ℝ] EuclSp (m + 1)),
       IsFacetRestriction T T' e ∧
       IsSpernerLabeling T' (inducedFacetLabeling ℓ e) := by
-  sorry
+  rcases facet_is_triangulation T with ⟨T', e, he⟩
+  refine ⟨T', e, he, ?_⟩
+  exact facet_labeling_sperner T ℓ hℓ he
 
 /-- **Boundary doors lie on the bottom facet.** Every boundary door of `T` lies
 on the facet `{x_n = 0}`, i.e. all its vertices have last barycentric coordinate
