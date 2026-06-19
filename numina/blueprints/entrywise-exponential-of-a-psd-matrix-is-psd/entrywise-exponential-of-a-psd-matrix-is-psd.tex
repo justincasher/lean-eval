@@ -1,0 +1,249 @@
+% Blueprint: Entrywise exponential of a PSD matrix is PSD
+% Created by Numina
+
+\section{Entrywise exponential of a PSD matrix is PSD}
+
+Throughout, $n$ is a finite type and $A \in \mathbb{R}^{n \times n}$ is a real
+matrix. We write $A^{\odot k}$ for the \emph{entrywise $k$-th power} of $A$,
+the matrix with entries $(A^{\odot k})_{ij} = (a_{ij})^k$; in Lean this is
+$\texttt{A.map}\,(\cdot^k)$. The Hadamard (entrywise) product of $A$ and $B$ is
+written $A \odot B$, with $(A \odot B)_{ij} = a_{ij} b_{ij}$.
+
+The goal is to show that the entrywise exponential $\exp_{\odot}(A)$, the matrix
+with entries $\exp(a_{ij})$ (in Lean $\texttt{A.map}\,\mathrm{Real.exp}$), is
+positive semidefinite whenever $A$ is.
+
+\begin{lemma}[All-ones matrix is PSD]
+    \label{lem:const-one-psd}
+    \lean{LeanEval.LinearAlgebra.posSemidef_const_one}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
+    The matrix $J \in \mathbb{R}^{n \times n}$ all of whose entries equal $1$ is
+    positive semidefinite.
+\end{lemma}
+\begin{proof}
+    Let $\mathbf{1} \in \mathbb{R}^n$ be the all-ones vector. Then
+    $J = \mathbf{1}\,\mathbf{1}^{\!*}$ is the outer product of $\mathbf{1}$ with
+    its own conjugate, since $(\mathbf{1}\,\mathbf{1}^{\!*})_{ij} = 1 \cdot 1 = 1$.
+    An outer product $v v^{*}$ is positive semidefinite, so $J$ is PSD.
+\end{proof}
+
+\begin{lemma}[Entrywise power successor as a Hadamard product]
+    \label{lem:hadamard-pow-succ}
+    \lean{LeanEval.LinearAlgebra.map_pow_succ}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
+    For every matrix $A \in \mathbb{R}^{n \times n}$ and every $k \in \mathbb{N}$,
+    \[
+        A^{\odot (k+1)} \;=\; A \odot A^{\odot k},
+    \]
+    i.e.\ $\texttt{A.map}\,(\cdot^{k+1}) = A \odot \texttt{A.map}\,(\cdot^{k})$.
+\end{lemma}
+\begin{proof}
+    Entrywise: both sides have $(i,j)$-entry $(a_{ij})^{k+1}$, since
+    $(a_{ij})^{k+1} = a_{ij} \cdot (a_{ij})^k$ by $\texttt{pow\_succ}$. The
+    equality follows by $\texttt{ext}$.
+\end{proof}
+
+\begin{lemma}[Entrywise powers are PSD]
+    \label{lem:hadamard-pow-psd}
+    \lean{LeanEval.LinearAlgebra.posSemidef_map_pow}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \uses{lem:const-one-psd, lem:hadamard-pow-succ}
+    \leanok
+    If $A$ is positive semidefinite, then for every $k \in \mathbb{N}$ the
+    entrywise power $A^{\odot k}$ (the matrix with entries $(a_{ij})^k$) is
+    positive semidefinite.
+\end{lemma}
+\begin{proof}
+    \uses{lem:const-one-psd, lem:hadamard-pow-succ}
+    Induction on $k$. For $k = 0$ every entry is $(a_{ij})^0 = 1$, so
+    $A^{\odot 0}$ is the all-ones matrix, which is PSD by
+    Lemma~\ref{lem:const-one-psd}. For the step, rewrite
+    $A^{\odot (k+1)} = A \odot A^{\odot k}$ by
+    Lemma~\ref{lem:hadamard-pow-succ}. Both factors are PSD ($A$ by hypothesis,
+    $A^{\odot k}$ by the induction hypothesis), so by the Schur product theorem
+    ($\texttt{Matrix.PosSemidef.hadamard}$) their Hadamard product is PSD.
+\end{proof}
+
+\begin{lemma}[Entrywise exponential is Hermitian]
+    \label{lem:exp-hermitian}
+    \lean{LeanEval.LinearAlgebra.isHermitian_map_exp}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
+    If $A$ is positive semidefinite (in particular Hermitian), then the
+    entrywise exponential $\exp_{\odot}(A)$ is Hermitian.
+\end{lemma}
+\begin{proof}
+    $A$ is Hermitian, and over $\mathbb{R}$ conjugation is the identity, so
+    $\mathrm{Real.exp}$ commutes with the (trivial) star operation, i.e.
+    $\mathrm{Real.exp}$ is semiconjugate to itself by $\mathrm{star}$. Applying a
+    function that commutes with star entrywise to a Hermitian matrix yields a
+    Hermitian matrix.
+\end{proof}
+
+\begin{lemma}[Quadratic form of an entrywise map as a double sum]
+    \label{lem:quadform-map-double-sum}
+    \lean{LeanEval.LinearAlgebra.quadForm_map_eq_double_sum}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
+    For any function $f : \mathbb{R} \to \mathbb{R}$, any matrix
+    $A \in \mathbb{R}^{n \times n}$, and any vector $x \in \mathbb{R}^n$,
+    \[
+        x^{*}\, (\texttt{A.map}\,f)\, x \;=\; \sum_{i}\sum_{j} x_i\, f(a_{ij})\, x_j .
+    \]
+\end{lemma}
+\begin{proof}
+    The quadratic form $x^{*} M x$ unfolds (via $\texttt{dotProduct}$ and
+    $\texttt{mulVec}$, with $\texttt{star}$ trivial over $\mathbb{R}$) to
+    $\sum_i x_i \sum_j M_{ij}\, x_j$. Taking $M = \texttt{A.map}\,f$ so that
+    $M_{ij} = f(a_{ij})$, and reassociating the scalar product, gives
+    $\sum_i \sum_j x_i\, f(a_{ij})\, x_j$.
+\end{proof}
+
+\begin{lemma}[Per-entry summability of the scaled exponential series]
+    \label{lem:quadform-summable-entry}
+    \lean{LeanEval.LinearAlgebra.summable_quadForm_entry}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
+    For fixed $i, j$ and $x \in \mathbb{R}^n$, the series
+    \[
+        k \;\longmapsto\; x_i\,\Bigl(\frac{(a_{ij})^k}{k!}\Bigr)\, x_j
+    \]
+    is summable over $k \in \mathbb{N}$.
+\end{lemma}
+\begin{proof}
+    The series $k \mapsto (a_{ij})^k / k!$ is summable by
+    $\texttt{Real.summable\_pow\_div\_factorial}$. Multiplying a summable real
+    series by the constants $x_i$ and $x_j$ preserves summability
+    ($\texttt{Summable.mul\_left}$/$\texttt{Summable.mul\_right}$).
+\end{proof}
+
+\begin{lemma}[Per-entry exponential as a tsum]
+    \label{lem:exp-entry-tsum}
+    \lean{LeanEval.LinearAlgebra.exp_entry_eq_tsum}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
+    For fixed $i, j$ and $x \in \mathbb{R}^n$,
+    \[
+        x_i\, \exp(a_{ij})\, x_j \;=\; \sum_{k=0}^{\infty} x_i\,\Bigl(\frac{(a_{ij})^k}{k!}\Bigr)\, x_j .
+    \]
+\end{lemma}
+\begin{proof}
+    By $\texttt{Real.exp\_eq\_exp\_ℝ}$ and $\texttt{NormedSpace.exp\_eq\_tsum\_div}$,
+    $\exp(a_{ij}) = \sum_{k=0}^{\infty} (a_{ij})^k / k!$. Pulling the constants
+    $x_i, x_j$ through the $\texttt{tsum}$ via $\texttt{tsum\_mul\_left}$/
+    $\texttt{tsum\_mul\_right}$ (which are unconditional) gives the claim.
+\end{proof}
+
+\begin{lemma}[Interchange of a single finite sum and the tsum]
+    \label{lem:single-sum-tsum-interchange}
+    \lean{LeanEval.LinearAlgebra.finsetSum_tsum_interchange}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
+    Let $s$ be a finite index set and $g_a : \mathbb{N} \to \mathbb{R}$ a family
+    indexed by $a \in s$ with each $g_a$ summable. Then
+    \[
+        \sum_{a \in s} \;\sum_{k=0}^{\infty} g_a(k)
+        \;=\; \sum_{k=0}^{\infty} \;\sum_{a \in s} g_a(k).
+    \]
+\end{lemma}
+\begin{proof}
+    A finite sum of $\texttt{tsum}$s of summable functions equals the
+    $\texttt{tsum}$ of the finite sum, which is exactly
+    $\texttt{Summable.tsum\_finsetSum}$ (read right-to-left) with the given
+    summability hypotheses.
+\end{proof}
+
+\begin{lemma}[Interchange of the finite double sum and the tsum]
+    \label{lem:quadform-double-sum-tsum-interchange}
+    \lean{LeanEval.LinearAlgebra.double_sum_tsum_interchange}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \uses{lem:quadform-summable-entry, lem:single-sum-tsum-interchange}
+    \leanok
+    For $x \in \mathbb{R}^n$,
+    \[
+        \sum_{i}\sum_{j} \;\sum_{k=0}^{\infty} x_i\,\Bigl(\frac{(a_{ij})^k}{k!}\Bigr)\, x_j
+        \;=\; \sum_{k=0}^{\infty} \;\sum_{i}\sum_{j} x_i\,\Bigl(\frac{(a_{ij})^k}{k!}\Bigr)\, x_j .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:quadform-summable-entry, lem:single-sum-tsum-interchange}
+    Apply Lemma~\ref{lem:single-sum-tsum-interchange} over the $j$-index for each
+    fixed $i$ (each inner series is summable by
+    Lemma~\ref{lem:quadform-summable-entry}), then once more over the $i$-index
+    (each finite $j$-sum of summable series is summable). This moves both finite
+    sums inside the $\texttt{tsum}$.
+\end{proof}
+
+\begin{lemma}[Power term as a scaled power quadratic form]
+    \label{lem:power-term-quadform}
+    \lean{LeanEval.LinearAlgebra.power_term_eq_quadForm}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \uses{lem:quadform-map-double-sum}
+    \leanok
+    For every $k \in \mathbb{N}$ and every vector $x \in \mathbb{R}^n$,
+    \[
+        \sum_{i}\sum_{j} x_i\,\Bigl(\frac{(a_{ij})^k}{k!}\Bigr)\, x_j
+        \;=\; \frac{1}{k!}\,\bigl(x^{*}\, A^{\odot k}\, x\bigr).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:quadform-map-double-sum}
+    Each summand $x_i\,((a_{ij})^k/k!)\,x_j$ equals
+    $\tfrac{1}{k!}\,\bigl(x_i\,(a_{ij})^k\,x_j\bigr)$, so factoring the constant
+    $1/k!$ out of both finite sums (by $\texttt{Finset.mul\_sum}$ applied over
+    the $i$-sum and again over the $j$-sum) gives
+    $\tfrac{1}{k!}\sum_i\sum_j x_i\,(a_{ij})^k\,x_j$. By
+    Lemma~\ref{lem:quadform-map-double-sum} with $f = (\cdot^k)$, the inner double
+    sum equals $x^{*}\,A^{\odot k}\,x$, yielding the claim.
+\end{proof}
+
+\begin{lemma}[Quadratic form as a series of power quadratic forms]
+    \label{lem:quadform-series}
+    \lean{LeanEval.LinearAlgebra.quadForm_map_exp_eq_tsum}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \uses{lem:quadform-map-double-sum, lem:exp-entry-tsum, lem:quadform-double-sum-tsum-interchange, lem:power-term-quadform}
+    \leanok
+    For every vector $x \in \mathbb{R}^n$,
+    \[
+        x^{*} \, \exp_{\odot}(A) \, x
+        \;=\; \sum_{k=0}^{\infty} \frac{1}{k!}\,\bigl(x^{*}\, A^{\odot k}\, x\bigr),
+    \]
+    where the series on the right converges.
+\end{lemma}
+\begin{proof}
+    \uses{lem:quadform-map-double-sum, lem:exp-entry-tsum, lem:quadform-double-sum-tsum-interchange, lem:power-term-quadform}
+    By Lemma~\ref{lem:quadform-map-double-sum} (with $f = \exp$),
+    $x^{*}\exp_{\odot}(A)\,x = \sum_i \sum_j x_i\, \exp(a_{ij})\, x_j$. Replace each
+    summand by its tsum via Lemma~\ref{lem:exp-entry-tsum} ($\texttt{simp\_rw}$),
+    then interchange the finite double sum with the tsum over $k$ by
+    Lemma~\ref{lem:quadform-double-sum-tsum-interchange}. Finally apply
+    $\texttt{tsum\_congr}$: by Lemma~\ref{lem:power-term-quadform} each summand
+    $\sum_i \sum_j x_i\, ((a_{ij})^k/k!)\, x_j$ equals
+    $\tfrac{1}{k!}\,\bigl(x^{*} A^{\odot k} x\bigr)$, giving the claim.
+\end{proof}
+
+\begin{theorem}[Entrywise exponential of a PSD matrix is PSD]
+    \label{thm:posSemidef-map-exp}
+    \lean{LeanEval.LinearAlgebra.posSemidef_map_exp}
+    \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \uses{lem:hadamard-pow-psd, lem:exp-hermitian, lem:quadform-series}
+    \leanok
+    If $A \in \mathbb{R}^{n \times n}$ is positive semidefinite, then its
+    entrywise exponential $\exp_{\odot}(A)$ (the matrix with entries
+    $\exp(a_{ij})$) is positive semidefinite.
+\end{theorem}
+\begin{proof}
+    \uses{lem:hadamard-pow-psd, lem:exp-hermitian, lem:quadform-series}
+    By the characterization of positive semidefiniteness, it suffices to check
+    that $\exp_{\odot}(A)$ is Hermitian and that its quadratic form is
+    nonnegative. Hermitianness is Lemma~\ref{lem:exp-hermitian}. For the
+    quadratic form, fix $x \in \mathbb{R}^n$. By
+    Lemma~\ref{lem:quadform-series},
+    $x^{*}\exp_{\odot}(A)\,x = \sum_{k=0}^{\infty} \frac{1}{k!}\,(x^{*} A^{\odot k} x)$.
+    Each term is a product of $\frac{1}{k!} \ge 0$ with $x^{*} A^{\odot k} x \ge 0$,
+    the latter being nonnegative because $A^{\odot k}$ is PSD by
+    Lemma~\ref{lem:hadamard-pow-psd}. A convergent sum of nonnegative terms is
+    nonnegative, so $x^{*}\exp_{\odot}(A)\,x \ge 0$.
+\end{proof}
