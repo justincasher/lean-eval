@@ -65,7 +65,53 @@ theorem deformedDenom_smooth_pos (Lk : TwoLink) (Φ : AmbientIsotopy) (p : ℝ) 
     ContDiff ℝ (⊤ : ℕ∞)
       (fun q : ℝ × ℝ × ℝ => ‖deformedDiff Lk Φ q.1 q.2.1 q.2.2‖ ^ p) ∧
     ∀ r s t, 0 < ‖deformedDiff Lk Φ r s t‖ := by
-  sorry
+  -- Positive part: deformedDiff is nonzero because Φ.H r is injective (via inv_left)
+  -- and the components are disjoint.
+  have hpos : ∀ r s t, 0 < ‖deformedDiff Lk Φ r s t‖ := by
+    intro r s t
+    rw [norm_pos_iff]
+    intro hzero
+    have h_eq : Φ.H r (Lk.K.curve s) = Φ.H r (Lk.L.curve t) := sub_eq_zero.mp hzero
+    have h_neq : Lk.K.curve s ≠ Lk.L.curve t := by
+      intro h_eq_curves
+      have : Lk.K.curve s - Lk.L.curve t = 0 := sub_eq_zero_of_eq h_eq_curves
+      exact TwoLink.components_nonzero Lk s t this
+    apply h_neq
+    calc
+      Lk.K.curve s = Φ.Hinv r (Φ.H r (Lk.K.curve s)) := by
+        symm; exact Φ.inv_left r (Lk.K.curve s)
+      _ = Φ.Hinv r (Φ.H r (Lk.L.curve t)) := by rw [h_eq]
+      _ = Lk.L.curve t := Φ.inv_left r (Lk.L.curve t)
+  -- Smooth part: deformedDiff is C∞ (deformedDiff_smooth gives the third conjunct),
+  -- hence its norm is C∞ (via contDiffAt_norm at each point since it is nowhere zero),
+  -- and then the p-th power is C∞ (via ContDiffAt.rpow).
+  have h_smooth : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ × ℝ => deformedDiff Lk Φ p.1 p.2.1 p.2.2) :=
+    (deformedDiff_smooth Lk Φ).2.2.1
+  have h_norm_smooth : ContDiff ℝ (⊤ : ℕ∞)
+      (fun q : ℝ × ℝ × ℝ => ‖deformedDiff Lk Φ q.1 q.2.1 q.2.2‖) := by
+    refine (contDiff_iff_contDiffAt.mpr ?_)
+    intro q
+    have h_nonzero : deformedDiff Lk Φ q.1 q.2.1 q.2.2 ≠ 0 :=
+      norm_pos_iff.mp (hpos q.1 q.2.1 q.2.2)
+    have h_diff_at : ContDiffAt ℝ (⊤ : ℕ∞)
+        (fun q' : ℝ × ℝ × ℝ => deformedDiff Lk Φ q'.1 q'.2.1 q'.2.2) q :=
+      (contDiff_iff_contDiffAt.mp h_smooth) q
+    have h_norm_at : ContDiffAt ℝ (⊤ : ℕ∞)
+        (fun y => ‖(fun q' : ℝ × ℝ × ℝ => deformedDiff Lk Φ q'.1 q'.2.1 q'.2.2) y‖) q :=
+      (contDiffAt_norm (𝕜 := ℝ) h_nonzero).comp q h_diff_at
+    simpa using h_norm_at
+  have h_rpow_smooth : ContDiff ℝ (⊤ : ℕ∞)
+      (fun q : ℝ × ℝ × ℝ => ‖deformedDiff Lk Φ q.1 q.2.1 q.2.2‖ ^ p) := by
+    refine (contDiff_iff_contDiffAt.mpr ?_)
+    intro q
+    have h_nz : ‖deformedDiff Lk Φ q.1 q.2.1 q.2.2‖ ≠ 0 := by
+      linarith [hpos q.1 q.2.1 q.2.2]
+    have h_norm_at : ContDiffAt ℝ (⊤ : ℕ∞)
+        (fun q' : ℝ × ℝ × ℝ => ‖deformedDiff Lk Φ q'.1 q'.2.1 q'.2.2‖) q :=
+      (contDiff_iff_contDiffAt.mp h_norm_smooth) q
+    exact h_norm_at.rpow (contDiffAt_const (c := p) (x := q)) h_nz
+  exact ⟨h_rpow_smooth, hpos⟩
 
 /-- **The divergence potentials are `C¹` and `2π`-periodic** in each variable. -/
 theorem divergencePotentials_contDiff_periodic (Lk : TwoLink) (Φ : AmbientIsotopy) (r : ℝ) :
@@ -94,7 +140,9 @@ theorem deformedU_partials (Lk : TwoLink) (Φ : AmbientIsotopy) (r s t : ℝ) :
 theorem deformed_cross_mixed_partials_zero (Lk : TwoLink) (Φ : AmbientIsotopy) (r s t : ℝ) :
     deriv (fun _ : ℝ => deriv (fun s => Φ.H r (Lk.K.curve s)) s) t = 0
       ∧ deriv (fun _ : ℝ => deriv (fun t => Φ.H r (Lk.L.curve t)) t) s = 0 := by
-  sorry
+  refine ⟨?_, ?_⟩
+  · exact deriv_const t (deriv (fun s => Φ.H r (Lk.K.curve s)) s)
+  · exact deriv_const s (deriv (fun t => Φ.H r (Lk.L.curve t)) t)
 
 /-- **The `r`-partial of the deformed integrand.** -/
 theorem deformedIntegrand_r_partial (Lk : TwoLink) (Φ : AmbientIsotopy) (r s t : ℝ) :
@@ -121,7 +169,107 @@ theorem deformedIntegrand_r_partial (Lk : TwoLink) (Φ : AmbientIsotopy) (r s t 
               deriv (fun r => Φ.H r (Lk.K.curve s)) r
                 - deriv (fun r => Φ.H r (Lk.L.curve t)) r⟫
           * (‖deformedDiff Lk Φ r s t‖ ^ 5)⁻¹ := by
-  sorry
+  -- key abbreviations
+  set u := fun r' => deformedDiff Lk Φ r' s t with hu_def
+  set da := fun r' => deriv (fun s' => Φ.H r' (Lk.K.curve s')) s with hda_def
+  set db := fun r' => deriv (fun t' => Φ.H r' (Lk.L.curve t')) t with hdb_def
+  -- derivative values
+  set ū := deriv (fun r' => Φ.H r' (Lk.K.curve s)) r - deriv (fun r' => Φ.H r' (Lk.L.curve t)) r with hū_def
+  set da_s := deriv (fun s' => deriv (fun r' => Φ.H r' (Lk.K.curve s')) r) s with hda_s_def
+  set db_t := deriv (fun t' => deriv (fun r' => Φ.H r' (Lk.L.curve t')) r) t with hdb_t_def
+  -- positivity of denominator
+  have hpos_u : 0 < ‖u r‖ := (deformedDenom_smooth_pos Lk Φ 3).2 r s t
+  have h_ne_zero : u r ≠ 0 := norm_pos_iff.mp hpos_u
+  -- smoothness of u, da, db in r (via deformedDiff_smooth)
+  have h_smooth := deformedDiff_smooth Lk Φ
+  rcases h_smooth with ⟨_, _, hu_contDiff_raw, hda_contDiff_raw, hdb_contDiff_raw⟩
+  have h_map : ContDiff ℝ (⊤ : ℕ∞) (fun (r' : ℝ) => (r', s, t)) :=
+    (contDiff_id : ContDiff ℝ (⊤ : ℕ∞) (fun x : ℝ => x)).prodMk
+      ((contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : ℝ => s)).prodMk
+        (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : ℝ => t)))
+  have hu_contDiff : ContDiff ℝ (⊤ : ℕ∞) u := hu_contDiff_raw.comp h_map
+  have hda_contDiff : ContDiff ℝ (⊤ : ℕ∞) da := hda_contDiff_raw.comp h_map
+  have hdb_contDiff : ContDiff ℝ (⊤ : ℕ∞) db := hdb_contDiff_raw.comp h_map
+  -- differentiability at r via ContDiffAt
+  have hu_diff : DifferentiableAt ℝ u r :=
+    (hu_contDiff.contDiffAt (x := r)).differentiableAt (by decide)
+  have hda_diff : DifferentiableAt ℝ da r :=
+    (hda_contDiff.contDiffAt (x := r)).differentiableAt (by decide)
+  have hdb_diff : DifferentiableAt ℝ db r :=
+    (hdb_contDiff.contDiffAt (x := r)).differentiableAt (by decide)
+  -- HasDerivAt from deriv + differentiability
+  have hu_hasDeriv : HasDerivAt u (deriv u r) r := hu_diff.hasDerivAt
+  have hda_hasDeriv : HasDerivAt da (deriv da r) r := hda_diff.hasDerivAt
+  have hdb_hasDeriv : HasDerivAt db (deriv db r) r := hdb_diff.hasDerivAt
+  -- rewrite derivatives via deformedU_partials and mixed_partials_symm
+  have h_deriv_u : deriv u r = ū := by
+    simpa [u, ū] using (deformedU_partials Lk Φ r s t).1
+  have h_mixed : deriv (fun r => deriv (fun s => Φ.H r (Lk.K.curve s)) s) r
+      = deriv (fun s => deriv (fun r => Φ.H r (Lk.K.curve s)) r) s
+    ∧ deriv (fun r => deriv (fun t => Φ.H r (Lk.L.curve t)) t) r
+      = deriv (fun t => deriv (fun r => Φ.H r (Lk.L.curve t)) r) t :=
+    mixed_partials_symm Lk Φ r s t
+  have h_deriv_da : deriv da r = da_s := by
+    calc
+      deriv da r = deriv (fun r' => deriv (fun s' => Φ.H r' (Lk.K.curve s')) s) r := rfl
+      _ = deriv (fun s' => deriv (fun r' => Φ.H r' (Lk.K.curve s')) r) s := h_mixed.1
+      _ = da_s := rfl
+  have h_deriv_db : deriv db r = db_t := by
+    calc
+      deriv db r = deriv (fun r' => deriv (fun t' => Φ.H r' (Lk.L.curve t')) t) r := rfl
+      _ = deriv (fun t' => deriv (fun r' => Φ.H r' (Lk.L.curve t')) r) t := h_mixed.2
+      _ = db_t := rfl
+  -- HasDerivAt with the right derivative values
+  have hu_hasDeriv' : HasDerivAt u ū r := by
+    rw [h_deriv_u] at hu_hasDeriv
+    exact hu_hasDeriv
+  have hda_hasDeriv' : HasDerivAt da da_s r := by
+    rw [h_deriv_da] at hda_hasDeriv
+    exact hda_hasDeriv
+  have hdb_hasDeriv' : HasDerivAt db db_t r := by
+    rw [h_deriv_db] at hdb_hasDeriv
+    exact hdb_hasDeriv
+  -- HasDerivAt for the triple product numerator
+  have h_num_hasDeriv : HasDerivAt (fun r' => tripleProduct (u r') (da r') (db r'))
+      (tripleProduct ū (da r) (db r) + tripleProduct (u r) da_s (db r)
+        + tripleProduct (u r) (da r) db_t) r :=
+    tripleProduct_deriv hu_hasDeriv' hda_hasDeriv' hdb_hasDeriv'
+  -- HasDerivAt for the denominator factor (‖u‖³)⁻¹
+  have h_den_hasDeriv : HasDerivAt (fun r' => (‖u r'‖ ^ 3)⁻¹)
+      (-3 * (‖u r‖ ^ 5)⁻¹ * ⟪u r, ū⟫) r :=
+    recip_norm_cube_deriv hu_hasDeriv' h_ne_zero
+  -- Product rule: deformedIntegrand = tripleProduct(u, da, db) * (‖u‖³)⁻¹
+  have h_eq : (fun r' : ℝ => deformedIntegrand Lk Φ r' s t)
+      = (fun r' : ℝ => tripleProduct (u r') (da r') (db r') * (‖u r'‖ ^ 3)⁻¹) := by
+    ext r'
+    unfold deformedIntegrand linkingIntegrand
+    simp [u, da, db, div_eq_mul_inv]
+  have h_prod_hasDeriv : HasDerivAt (fun r' => deformedIntegrand Lk Φ r' s t)
+      ((tripleProduct ū (da r) (db r) + tripleProduct (u r) da_s (db r)
+          + tripleProduct (u r) (da r) db_t) * (‖u r‖ ^ 3)⁻¹
+        + tripleProduct (u r) (da r) (db r) * (-3 * (‖u r‖ ^ 5)⁻¹ * ⟪u r, ū⟫)) r := by
+    rw [h_eq]
+    exact HasDerivAt.mul h_num_hasDeriv h_den_hasDeriv
+  -- Convert HasDerivAt to deriv
+  have h_deriv : deriv (fun r' => deformedIntegrand Lk Φ r' s t) r
+      = (tripleProduct ū (da r) (db r) + tripleProduct (u r) da_s (db r)
+          + tripleProduct (u r) (da r) db_t) * (‖u r‖ ^ 3)⁻¹
+        + tripleProduct (u r) (da r) (db r) * (-3 * (‖u r‖ ^ 5)⁻¹ * ⟪u r, ū⟫) :=
+    h_prod_hasDeriv.deriv
+  -- simplify second term and expand abbreviations
+  have h_simplify : (tripleProduct ū (da r) (db r) + tripleProduct (u r) da_s (db r)
+        + tripleProduct (u r) (da r) db_t) * (‖u r‖ ^ 3)⁻¹
+      + tripleProduct (u r) (da r) (db r) * (-3 * (‖u r‖ ^ 5)⁻¹ * ⟪u r, ū⟫)
+      = (tripleProduct ū (da r) (db r) + tripleProduct (u r) da_s (db r)
+          + tripleProduct (u r) (da r) db_t) * (‖u r‖ ^ 3)⁻¹
+        - 3 * tripleProduct (u r) (da r) (db r) * ⟪u r, ū⟫ * (‖u r‖ ^ 5)⁻¹ := by ring
+  have h_deriv' : deriv (fun r' => deformedIntegrand Lk Φ r' s t) r
+      = (tripleProduct ū (da r) (db r) + tripleProduct (u r) da_s (db r)
+          + tripleProduct (u r) (da r) db_t) * (‖u r‖ ^ 3)⁻¹
+        - 3 * tripleProduct (u r) (da r) (db r) * ⟪u r, ū⟫ * (‖u r‖ ^ 5)⁻¹ :=
+    h_deriv.trans h_simplify
+  -- expand abbreviations to match the target statement
+  simpa [u, da, db, ū, da_s, db_t, hu_def, hda_def, hdb_def, hū_def, hda_s_def, hdb_t_def] using h_deriv'
 
 /-- **The `s`-partial of the first potential.** -/
 theorem deformedA_s_partial (Lk : TwoLink) (Φ : AmbientIsotopy) (r s t : ℝ) :
