@@ -56,44 +56,64 @@ lemma exp_upperTriangular {n : ℕ} {T : Matrix (Fin n) (Fin n) ℂ}
     (hT : T.BlockTriangular id) :
     (NormedSpace.exp T).BlockTriangular id ∧
       ∀ i, (NormedSpace.exp T) i i = NormedSpace.exp (T i i) := by
-  refine ⟨Matrix.BlockTriangular.exp hT, ?_⟩
-  intro i
-  -- The diagonal entries of powers of a triangular matrix are powers of the diagonal entry.
-  have hpow : ∀ k : ℕ, (T ^ k) i i = (T i i) ^ k := by
+  -- Powers of a triangular matrix are triangular.
+  have hBT_pow : ∀ k : ℕ, (T ^ k).BlockTriangular id := by
     intro k
     induction k with
-    | zero => simp
-    | succ k ih =>
-        rw [pow_succ, pow_succ, Matrix.mul_apply, Finset.sum_eq_single i]
-        · rw [ih]
-        · intro j _ hji
-          rcases lt_or_gt_of_ne hji with h | h
-          · rw [(Matrix.BlockTriangular.pow hT k) h, zero_mul]
-          · rw [hT h, mul_zero]
-        · intro hi
-          exact absurd (Finset.mem_univ i) hi
-  -- Evaluation at the `(i, i)` entry is a continuous linear map; push it through the series.
-  let φ : Matrix (Fin n) (Fin n) ℂ →ₗ[ℂ] ℂ :=
-    { toFun := fun M => M i i
-      map_add' := fun M N => rfl
-      map_smul' := fun c M => rfl }
-  have hcont : Continuous (fun M : Matrix (Fin n) (Fin n) ℂ => M i i) :=
-    φ.continuous_of_finiteDimensional
-  let φL : Matrix (Fin n) (Fin n) ℂ →L[ℂ] ℂ := ⟨φ, hcont⟩
+    | zero => rw [pow_zero]; exact Matrix.blockTriangular_one
+    | succ k ih => rw [pow_succ]; exact Matrix.BlockTriangular.mul ih hT
+  -- The exponential series for `T`.
   have hsumT : HasSum (fun k : ℕ => ((k.factorial : ℂ)⁻¹) • T ^ k) (NormedSpace.exp T) :=
     NormedSpace.exp_series_hasSum_exp' (𝕂 := ℂ) T
-  have hterm : ∀ k : ℕ,
-      φL ((( k.factorial : ℂ)⁻¹) • T ^ k) = ((k.factorial : ℂ)⁻¹) • (T i i) ^ k := by
-    intro k
-    show (((k.factorial : ℂ)⁻¹) • T ^ k) i i = ((k.factorial : ℂ)⁻¹) • (T i i) ^ k
-    rw [Matrix.smul_apply, hpow k]
-  have h1 : HasSum (fun k : ℕ => ((k.factorial : ℂ)⁻¹) • (T i i) ^ k) ((NormedSpace.exp T) i i) := by
+  -- Evaluation at any fixed entry `(p, q)` is a continuous linear map; push it through the series.
+  have eval : ∀ p q : Fin n,
+      HasSum (fun k : ℕ => ((k.factorial : ℂ)⁻¹) • (T ^ k) p q) ((NormedSpace.exp T) p q) := by
+    intro p q
+    let φ : Matrix (Fin n) (Fin n) ℂ →ₗ[ℂ] ℂ :=
+      { toFun := fun M => M p q
+        map_add' := fun M N => rfl
+        map_smul' := fun c M => rfl }
+    have hcont : Continuous (fun M : Matrix (Fin n) (Fin n) ℂ => M p q) :=
+      φ.continuous_of_finiteDimensional
+    let φL : Matrix (Fin n) (Fin n) ℂ →L[ℂ] ℂ := ⟨φ, hcont⟩
     have hmap := hsumT.mapL φL
-    rw [funext hterm] at hmap
+    have hfun : (fun k : ℕ => φL ((( k.factorial : ℂ)⁻¹) • T ^ k))
+        = (fun k : ℕ => ((k.factorial : ℂ)⁻¹) • (T ^ k) p q) := by
+      funext k
+      show (((k.factorial : ℂ)⁻¹) • T ^ k) p q = ((k.factorial : ℂ)⁻¹) • (T ^ k) p q
+      rw [Matrix.smul_apply]
+    rw [hfun] at hmap
     exact hmap
-  have h2 : HasSum (fun k : ℕ => ((k.factorial : ℂ)⁻¹) • (T i i) ^ k) (NormedSpace.exp (T i i)) :=
-    NormedSpace.exp_series_hasSum_exp' (𝕂 := ℂ) (T i i)
-  exact h1.unique h2
+  refine ⟨?_, ?_⟩
+  · -- `exp T` is triangular: each strictly-lower entry is a sum of zeros.
+    intro i j hij
+    have e := eval i j
+    have hz : (fun k : ℕ => ((k.factorial : ℂ)⁻¹) • (T ^ k) i j) = (fun _ : ℕ => (0 : ℂ)) := by
+      funext k
+      rw [(hBT_pow k) hij, smul_zero]
+    rw [hz] at e
+    exact e.unique hasSum_zero
+  · -- The diagonal entries: `(exp T) i i = exp (T i i)`.
+    intro i
+    have hpow : ∀ k : ℕ, (T ^ k) i i = (T i i) ^ k := by
+      intro k
+      induction k with
+      | zero => simp
+      | succ k ih =>
+          rw [pow_succ, pow_succ, Matrix.mul_apply, Finset.sum_eq_single i]
+          · rw [ih]
+          · intro j _ hji
+            rcases lt_or_gt_of_ne hji with h | h
+            · rw [(hBT_pow k) h, zero_mul]
+            · rw [hT h, mul_zero]
+          · intro hi
+            exact absurd (Finset.mem_univ i) hi
+    have e := eval i i
+    have hfun2 : (fun k : ℕ => ((k.factorial : ℂ)⁻¹) • (T ^ k) i i)
+        = (fun k : ℕ => ((k.factorial : ℂ)⁻¹) • (T i i) ^ k) := by
+      funext k; rw [hpow k]
+    rw [hfun2] at e
+    exact e.unique (NormedSpace.exp_series_hasSum_exp' (𝕂 := ℂ) (T i i))
 
 /-- **Spectrum of the exponential of an upper-triangular matrix.** Every `z ∈ σ(e^T)`
 equals `e^{T i i}` for some index `i`, with `T i i ∈ σ(T)`. -/

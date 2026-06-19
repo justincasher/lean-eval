@@ -78,6 +78,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \label{lem:exp_upperTriangular}
     \lean{LeanEval.Analysis.ODE.exp_upperTriangular}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
     If $T \in \mathbb{C}^{n \times n}$ is upper triangular (block triangular with
     respect to the identity ordering), then so is $e^{T}$, and its diagonal is
     $(e^{T})_{ii} = e^{T_{ii}}$.
@@ -284,6 +285,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.norm_exp_smul_le}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:exp_smul_split, lem:bddAbove_exp_smul_unit}
+    \leanok
     Let $B \in \mathbb{C}^{n \times n}$. There exists $M \ge 0$ such that for
     every $t \ge 0$, with $m = \lfloor t \rfloor$,
     \[ \|e^{t \cdot B}\| \le \|(e^{B})^{m}\| \cdot M. \]
