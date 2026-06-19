@@ -136,53 +136,7 @@ noncomputable def linkingIntegrand (γK γL : ℝ → R3) (s t : ℝ) : ℝ :=
 /-- **Continuity of the linking integrand.** -/
 theorem TwoLink.linkingIntegrand_continuous (Lk : TwoLink) :
     Continuous (fun p : ℝ × ℝ => linkingIntegrand Lk.K.curve Lk.L.curve p.1 p.2) := by
-  unfold linkingIntegrand
-  have hnum : Continuous (fun (p : ℝ × ℝ) => tripleProduct (Lk.K.curve p.1 - Lk.L.curve p.2) (deriv Lk.K.curve p.1) (deriv Lk.L.curve p.2)) := by
-    have h_cont_diff : Continuous (fun (p : ℝ × ℝ) => Lk.K.curve p.1 - Lk.L.curve p.2) :=
-      (TwoLink.jointDiff_smooth Lk).continuous
-    have h_cont_derivK : Continuous (fun (p : ℝ × ℝ) => deriv Lk.K.curve p.1) :=
-      (Knot.continuous_deriv Lk.K).comp continuous_fst
-    have h_cont_derivL : Continuous (fun (p : ℝ × ℝ) => deriv Lk.L.curve p.2) :=
-      (Knot.continuous_deriv Lk.L).comp continuous_snd
-    have h_triple_cont : Continuous (λ (x : R3 × R3 × R3) => tripleProduct x.1 x.2.1 x.2.2) := by
-      unfold tripleProduct
-      refine continuous_finset_sum Finset.univ (λ i hi => ?_)
-      have h_equiv_cont : Continuous (EuclideanSpace.equiv (𝕜 := ℝ) (ι := Fin 3)) :=
-        (EuclideanSpace.equiv (𝕜 := ℝ) (ι := Fin 3)).continuous
-      have h_u : Continuous (λ (x : R3 × R3 × R3) => (x.1.ofLp i)) :=
-        (continuous_apply i).comp (h_equiv_cont.comp continuous_fst)
-      have h_cross : Continuous (λ (x : R3 × R3 × R3) => (crossProduct x.2.1.ofLp x.2.2.ofLp) i) := by
-        have h_cross_proj : Continuous (λ (z : (Fin 3 → ℝ) × (Fin 3 → ℝ)) => (crossProduct z.1 z.2) i) := by
-          have h_z1 (j : Fin 3) : Continuous (λ (z : (Fin 3 → ℝ) × (Fin 3 → ℝ)) => z.1 j) :=
-            (continuous_apply j).comp continuous_fst
-          have h_z2 (j : Fin 3) : Continuous (λ (z : (Fin 3 → ℝ) × (Fin 3 → ℝ)) => z.2 j) :=
-            (continuous_apply j).comp continuous_snd
-          fin_cases i
-          · simp_rw [cross_apply]
-            refine ((h_z1 1).mul (h_z2 2)).sub ((h_z1 2).mul (h_z2 1))
-          · simp_rw [cross_apply]
-            refine ((h_z1 2).mul (h_z2 0)).sub ((h_z1 0).mul (h_z2 2))
-          · simp_rw [cross_apply]
-            refine ((h_z1 0).mul (h_z2 1)).sub ((h_z1 1).mul (h_z2 0))
-        have h_pair : Continuous (λ (x : R3 × R3 × R3) => (x.2.1.ofLp, x.2.2.ofLp)) :=
-          (h_equiv_cont.comp (continuous_fst.comp continuous_snd)).prodMk
-            (h_equiv_cont.comp (continuous_snd.comp continuous_snd))
-        exact h_cross_proj.comp h_pair
-      exact h_u.mul h_cross
-    have h_input : Continuous (λ (p : ℝ × ℝ) => (Lk.K.curve p.1 - Lk.L.curve p.2, deriv Lk.K.curve p.1, deriv Lk.L.curve p.2)) :=
-      h_cont_diff.prodMk (h_cont_derivK.prodMk h_cont_derivL)
-    exact h_triple_cont.comp h_input
-  have hden : Continuous (fun (p : ℝ × ℝ) => ‖Lk.K.curve p.1 - Lk.L.curve p.2‖ ^ 3) := by
-    have h_cont_diff : Continuous (fun (p : ℝ × ℝ) => Lk.K.curve p.1 - Lk.L.curve p.2) :=
-      (TwoLink.jointDiff_smooth Lk).continuous
-    exact (continuous_norm.comp h_cont_diff).pow 3
-  have hden_ne_zero : ∀ p : ℝ × ℝ, ‖Lk.K.curve p.1 - Lk.L.curve p.2‖ ^ 3 ≠ 0 := by
-    intro p
-    have hnonzero : Lk.K.curve p.1 - Lk.L.curve p.2 ≠ 0 := TwoLink.components_nonzero Lk p.1 p.2
-    have h_norm_ne_zero : ‖Lk.K.curve p.1 - Lk.L.curve p.2‖ ≠ 0 := by
-      rwa [norm_ne_zero_iff]
-    exact pow_ne_zero 3 h_norm_ne_zero
-  exact hnum.div hden hden_ne_zero
+  sorry
 
 /-- **Gauss linking number.** The normalized double integral of the linking
 integrand over the fundamental square `[0, 2π]²`. -/
@@ -196,32 +150,12 @@ noncomputable def TwoLink.linkingNumber (Lk : TwoLink) : ℝ :=
 /-- **Lagrange / scalar quadruple-product identity.** For all `u p q w : ℝ³`,
 `⟨u,w⟩ det(u,p,q) = ‖u‖² det(w,p,q) + ⟨u,p⟩ det(u,w,q) + ⟨u,q⟩ det(u,p,w)`.
 The determinant analogue of `cross_dot_cross`, a coordinate `ring` identity. -/
-private lemma tripleProduct_coord (a b c : R3) : tripleProduct a b c =
-    a.ofLp 0 * (b.ofLp 1 * c.ofLp 2 - b.ofLp 2 * c.ofLp 1) +
-    a.ofLp 1 * (b.ofLp 2 * c.ofLp 0 - b.ofLp 0 * c.ofLp 2) +
-    a.ofLp 2 * (b.ofLp 0 * c.ofLp 1 - b.ofLp 1 * c.ofLp 0) := by
-  unfold tripleProduct
-  simp [Fin.sum_univ_three, cross_apply]
-
-private lemma inner_coord (a b : R3) : ⟪a, b⟫ = a.ofLp 0 * b.ofLp 0 + a.ofLp 1 * b.ofLp 1 + a.ofLp 2 * b.ofLp 2 := by
-  have h_inner_real : ∀ (x y : ℝ), inner ℝ x y = x * y := by
-    intro x y; dsimp [inner]; simp [mul_comm]
-  calc
-    ⟪a, b⟫ = ∑ i : Fin 3, inner ℝ (a.ofLp i) (b.ofLp i) := by
-      rw [PiLp.inner_apply]
-    _ = ∑ i : Fin 3, a.ofLp i * b.ofLp i := by
-      simp [h_inner_real]
-    _ = a.ofLp 0 * b.ofLp 0 + a.ofLp 1 * b.ofLp 1 + a.ofLp 2 * b.ofLp 2 := by
-      simp [Fin.sum_univ_three]
-
 theorem quadruple_product_identity (u p q w : R3) :
     ⟪u, w⟫ * tripleProduct u p q
       = ‖u‖ ^ 2 * tripleProduct w p q
         + ⟪u, p⟫ * tripleProduct u w q
         + ⟪u, q⟫ * tripleProduct u p w := by
-  rw [← real_inner_self_eq_norm_sq (x := u)]
-  simp only [inner_coord, tripleProduct_coord]
-  ring
+  sorry
 
 /-- **Algebraic closure of the divergence identity.** The Lagrange / scalar
 quadruple-product identity in the form used to close the divergence equation. -/

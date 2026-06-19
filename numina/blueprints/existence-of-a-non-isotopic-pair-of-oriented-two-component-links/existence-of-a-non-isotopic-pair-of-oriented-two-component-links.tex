@@ -160,6 +160,7 @@ declaration below does reduce to Mathlib results.
     \lean{LeanEval.KnotTheory.TwoLink.jointDiff_smooth}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:gauss-map}
+    \leanok
     For a two-component link $L$ the map $(s,t)\mapsto\gamma_K(s)-\gamma_L(t)$ is
     $C^\infty$ on $\mathbb{R}^2$.
 \end{lemma}
@@ -176,6 +177,7 @@ declaration below does reduce to Mathlib results.
     \lean{LeanEval.KnotTheory.TwoLink.jointDenom_smooth_pos}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{lem:joint-diff-smooth, lem:components-nonzero}
+    \leanok
     For a two-component link $L$ and any real exponent $p$, the map
     $(s,t)\mapsto\lVert\gamma_K(s)-\gamma_L(t)\rVert^{p}$ is $C^\infty$ on
     $\mathbb{R}^2$, and $\lVert\gamma_K(s)-\gamma_L(t)\rVert>0$ for all $s,t$.
@@ -194,6 +196,7 @@ declaration below does reduce to Mathlib results.
     \lean{LeanEval.KnotTheory.TwoLink.gaussMap_smooth}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:gauss-map, lem:joint-diff-smooth, lem:joint-denom-pos}
+    \leanok
     The Gauss map $g_L : \mathbb{R}^2 \to \mathbb{R}^3$ is $C^\infty$.
 \end{lemma}
 \begin{proof}
@@ -240,6 +243,7 @@ declaration below does reduce to Mathlib results.
     \lean{LeanEval.KnotTheory.TwoLink.linkingIntegrand_continuous}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{lem:components-nonzero, lem:integrand-numerator-continuous, lem:joint-denom-pos}
+    \leanok
     For a two-component link $L$, the function
     \[
         (s,t)\longmapsto
@@ -571,6 +575,7 @@ then absorbed by a one-dimensional change of variables.
     \label{lem:quadruple-product-identity}
     \lean{LeanEval.KnotTheory.quadruple_product_identity}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
+    \leanok
     For all vectors $u,p,q,w\in\mathbb{R}^3$,
     \[
         \langle u,w\rangle\,\det(u,p,q)
@@ -1494,6 +1499,7 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.unlink_inner_integral_zero}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{lem:unlink-integrand, lem:unlink-antideriv}
+    \leanok
     For every $t$, $\displaystyle\int_0^{2\pi} I_{L_1}(s,t)\,ds = 0$.
 \end{lemma}
 \begin{proof}
@@ -1510,6 +1516,7 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.linking_unlink_zero}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:unlink, def:linking-number, lem:unlink-inner-integral-zero}
+    \leanok
     $\mathrm{lk}(L_1) = 0$.
 \end{lemma}
 \begin{proof}
@@ -1552,6 +1559,7 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.hopf_integrand}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:hopf-link, def:linking-number, lem:hopf-crossproduct, lem:hopf-normsq}
+    \leanok
     For the Hopf link $L_2$ (components $c_{0,0,1}$ in the $xy$-plane and
     $c_{e_0,0,2}$ in the $xz$-plane centred at $(1,0,0)$) the linking integrand at
     $(s,t)$ equals
@@ -1591,6 +1599,7 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.hopf_integrand_reduced}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{lem:hopf-integrand, lem:hopf-denominator-pos}
+    \leanok
     For all $s,t$,
     \[
         I_{L_2}(s,t)=\tfrac12\,D(s,t)^{-1/2}-\tfrac32\,D(s,t)^{-3/2}.
@@ -1611,6 +1620,7 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.hopf_halfAngle_reduction}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{lem:hopf-integrand-reduced, lem:hopf-denominator-pos}
+    \leanok
     Fix $t$ and write $D(s,t)=\alpha-\beta\cos s$ with $\alpha=3+2\cos t$,
     $\beta=2(1+\cos t)$, so $\alpha-\beta=1$; put $c=\alpha+\beta=5+4\cos t\ge1$.
     Under the half-angle parametrization $x=\tan(s/2)$, i.e.\
@@ -1641,6 +1651,7 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.hopf_inner_integral_regularity}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{lem:hopf-integrand-reduced, lem:hopf-denominator-pos}
+    \leanok
     The inner integral
     $G(t)=\int_0^{2\pi}\bigl(\tfrac12 D(s,t)^{-1/2}-\tfrac32 D(s,t)^{-3/2}\bigr)\,ds$
     is a continuous, $2\pi$-periodic function of $t$.
