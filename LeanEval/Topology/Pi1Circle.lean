@@ -35,7 +35,24 @@ theorem two_pi_cancel {n m : ℤ}
 
 /-- **Integer parametrization of the fibre.** The fibre `Circle.exp ⁻¹' {1}` is in bijection with
 `ℤ` via `⟨r⟩ ↦ n` where `r = n · 2π`; the inverse is `n ↦ ⟨n · 2π⟩`. -/
-def fiberEquivInt : ↥(Circle.exp ⁻¹' {1}) ≃ ℤ := sorry
+def fiberEquivInt : ↥(Circle.exp ⁻¹' {1}) ≃ ℤ :=
+  { toFun := λ x =>
+      Classical.choose (Circle.exp_eq_one.mp x.property)
+    invFun := λ n => ⟨(n : ℝ) * (2 * Real.pi), mem_exp_preimage_one.mpr (Circle.exp_int_mul_two_pi n)⟩
+    left_inv := by
+      intro x
+      have hx' : ∃ n : ℤ, x.val = (n : ℝ) * (2 * Real.pi) := Circle.exp_eq_one.mp x.property
+      let n := Classical.choose hx'
+      have hn : x.val = (n : ℝ) * (2 * Real.pi) := Classical.choose_spec hx'
+      ext; exact hn.symm
+    right_inv := by
+      intro n
+      have hr' : ∃ m : ℤ, (n : ℝ) * (2 * Real.pi) = (m : ℝ) * (2 * Real.pi) :=
+        Circle.exp_eq_one.mp (Circle.exp_int_mul_two_pi n)
+      let m := Classical.choose hr'
+      have hm : (n : ℝ) * (2 * Real.pi) = (m : ℝ) * (2 * Real.pi) := Classical.choose_spec hr'
+      exact (two_pi_cancel hm).symm
+  }
 
 /-- **Fibre parametrization on integers.** The fibre point assigned to `n` has underlying real
 number `n · 2π`. -/
@@ -109,7 +126,22 @@ theorem quotient_subsingleton (c : ℝ) :
 /-- The homotopy class in `ℝ` of the lift of `toPath γ` starting at `0`. -/
 def liftClass (γ : FundamentalGroup Circle 1) :
     Path.Homotopic.Quotient (0 : ℝ)
-      (Circle.isCoveringMap_exp.monodromy (FundamentalGroup.toPath γ) fiberBasePt).val := sorry
+      (Circle.isCoveringMap_exp.monodromy (FundamentalGroup.toPath γ) fiberBasePt).val :=
+  let p0 := (FundamentalGroup.toPath γ).out
+  let γ_0 := p0.source.trans fiberBasePt.2.symm
+  let lp := Circle.isCoveringMap_exp.liftPath p0 fiberBasePt γ_0
+  have h_source : lp 0 = (0 : ℝ) := by
+    simpa [fiberBasePt] using Circle.isCoveringMap_exp.liftPath_zero p0 fiberBasePt γ_0
+  have h_target : lp 1 = (Circle.isCoveringMap_exp.monodromy (FundamentalGroup.toPath γ) fiberBasePt).val := by
+    have h_mk : Path.Homotopic.Quotient.mk p0 = FundamentalGroup.toPath γ := Quotient.out_eq _
+    calc
+      lp 1 = (Circle.isCoveringMap_exp.monodromy (Path.Homotopic.Quotient.mk p0) fiberBasePt).val := rfl
+      _ = (Circle.isCoveringMap_exp.monodromy (FundamentalGroup.toPath γ) fiberBasePt).val := by rw [h_mk]
+  Path.Homotopic.Quotient.mk
+    { toFun := lp
+      continuous_toFun := lp.continuous
+      source' := h_source
+      target' := h_target }
 
 /-- **Pushing the lift class forward recovers the loop.** The image of `liftClass γ` under the map
 induced by `Circle.exp` (cast to a class of loops at `1`) equals `toPath γ`. -/
