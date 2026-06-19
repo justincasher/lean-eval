@@ -448,7 +448,20 @@ noncomputable def coordinateCircle (p₀ : R3) (i j : Fin 3) (t : ℝ) : R3 :=
 /-- **Smoothness of a coordinate circle.** -/
 theorem coordinateCircle_smooth (p₀ : R3) (i j : Fin 3) :
     ContDiff ℝ (⊤ : ℕ∞) (coordinateCircle p₀ i j) := by
-  sorry
+  have hcos : ContDiff ℝ (⊤ : ℕ∞) Real.cos := Real.contDiff_cos
+  have hsin : ContDiff ℝ (⊤ : ℕ∞) Real.sin := Real.contDiff_sin
+  have hconst1 : ContDiff ℝ (⊤ : ℕ∞) (fun (_ : ℝ) => EuclideanSpace.single i (1 : ℝ)) :=
+    contDiff_const
+  have hconst2 : ContDiff ℝ (⊤ : ℕ∞) (fun (_ : ℝ) => EuclideanSpace.single j (1 : ℝ)) :=
+    contDiff_const
+  have hterm1 : ContDiff ℝ (⊤ : ℕ∞) (fun (t : ℝ) => Real.cos t • EuclideanSpace.single i (1 : ℝ)) :=
+    hcos.smul hconst1
+  have hterm2 : ContDiff ℝ (⊤ : ℕ∞) (fun (t : ℝ) => Real.sin t • EuclideanSpace.single j (1 : ℝ)) :=
+    hsin.smul hconst2
+  have hp0 : ContDiff ℝ (⊤ : ℕ∞) (fun (_ : ℝ) => p₀) := contDiff_const
+  have hsum : ContDiff ℝ (⊤ : ℕ∞) (fun (t : ℝ) => p₀ + Real.cos t • EuclideanSpace.single i (1 : ℝ)) :=
+    hp0.add hterm1
+  simpa [coordinateCircle] using hsum.add hterm2
 
 /-- **Periodicity of a coordinate circle.** -/
 theorem coordinateCircle_periodic (p₀ : R3) (i j : Fin 3) (t : ℝ) :
