@@ -78,6 +78,7 @@ Thus $f(c) = (2c^2)!$ works.
     \label{lem:involution-conj}
     \lean{LeanEval.GroupTheory.orderOf_conj_eq_two}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
     Let $g, a \in G$ with $\operatorname{orderOf} a = 2$. Then
     $\operatorname{orderOf}(g a g^{-1}) = 2$. Consequently the conjugacy class of
     any involution is contained in $\mathcal{I}$.
@@ -93,6 +94,7 @@ Thus $f(c) = (2c^2)!$ works.
     \label{lem:involution-inv}
     \lean{LeanEval.GroupTheory.inv_eq_and_mul_self_eq_one}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
     Let $a \in G$ with $\operatorname{orderOf} a = 2$. Then $a^{-1} = a$, and
     consequently $a a = 1$.
 \end{lemma}
@@ -106,6 +108,7 @@ Thus $f(c) = (2c^2)!$ works.
     \label{lem:center-bot}
     \lean{LeanEval.GroupTheory.center_eq_bot}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
     Let $G$ be a simple group that is not commutative (there exist
     $a, b \in G$ with $ab \ne ba$). Then $Z(G) = \bot$.
 \end{lemma}
@@ -122,6 +125,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.centralizer_lt_top_of_ne_one}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{lem:center-bot}
+    \leanok
     Let $G$ be a nonabelian simple group and $x \in G$ with $x \ne 1$. Then
     $C_G(x) < \top$; in particular $|C_G(x)| < n$.
 \end{lemma}
@@ -141,6 +145,7 @@ Thus $f(c) = (2c^2)!$ works.
     \label{lem:normalcore-bot}
     \lean{LeanEval.GroupTheory.normalCore_eq_bot}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
     Let $G$ be a simple group and $H < \top$ a proper subgroup. Then the normal
     core $\operatorname{normalCore}(H) = \bot$.
 \end{lemma}
@@ -157,6 +162,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.toPermHom_injective}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{lem:normalcore-bot}
+    \leanok
     Let $G$ be a simple group and $H < \top$ a proper subgroup. Then the
     permutation representation
     $\varphi = \texttt{MulAction.toPermHom}\,G\,(G/H) : G \to
@@ -175,6 +181,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.card_le_index_factorial}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{lem:toPermHom-injective}
+    \leanok
     Let $G$ be a finite simple group and $H < \top$ a proper subgroup with index
     $m = [G : H]$. Then $n = |G| \le m!$.
 \end{lemma}
@@ -194,6 +201,7 @@ Thus $f(c) = (2c^2)!$ works.
     \label{lem:orbit-centralizer}
     \lean{LeanEval.GroupTheory.card_orbit_mul_card_centralizer}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
     For any $g \in G$, the orbit of $g$ under the \texttt{ConjAct G} action
     (which by \texttt{ConjAct.orbit\_eq\_carrier\_conjClasses} is exactly the
     conjugacy class $g^G$) satisfies
@@ -217,6 +225,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.card_le_numInvolutions_mul_centralizer}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{def:involution-set, def:k, lem:involution-conj, lem:orbit-centralizer}
+    \leanok
     With $t$ an involution, $c = |C_G(t)|$ and $k = |\mathcal{I}|$, one has
     $n \le k c$.
 \end{lemma}
@@ -231,6 +240,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.two_le_numInvolutions}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{def:involution-set, def:k, lem:involution-conj, lem:orbit-centralizer, lem:centralizer-proper}
+    \leanok
     Let $G$ be a nonabelian simple group and $t$ an involution. Then
     $2 \le k$.
 \end{lemma}
@@ -247,6 +257,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.involutionPairCount_one}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{def:involution-set, def:k, def:r, lem:involution-inv}
+    \leanok
     One has $r(1) = k$.
 \end{lemma}
 \begin{proof}
@@ -264,6 +275,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.sum_involutionPairCount}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{def:involution-set, def:k, def:r}
+    \leanok
     The fibers of the product map cover all involution pairs:
     \[
         \sum_{x \in G} r(x) \;=\; k^2 .
@@ -282,6 +294,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.sum_involutionPairCount_erase_one}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{def:involution-set, def:k, def:r, lem:r-one-eq-k, lem:sum-r-eq-k-sq}
+    \leanok
     The total number of ordered pairs of involutions is $k^2$, and exactly $k$ of
     them have product $1$; hence
     \[
@@ -301,6 +314,7 @@ Thus $f(c) = (2c^2)!$ works.
     \label{lem:inverts}
     \lean{LeanEval.GroupTheory.inverts_of_mul_eq}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
     Let $a, b \in G$ with $\operatorname{orderOf} a = \operatorname{orderOf} b = 2$
     and $ab = x$. Then $a x a^{-1} = x^{-1}$, i.e. $a$ inverts $x$.
 \end{lemma}
@@ -315,6 +329,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.involutionPairCount_eq_filter}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{def:involution-set, def:r, lem:involution-inv}
+    \leanok
     For every $x \in G$,
     \[
         r(x) \;=\; \bigl|\{a \in \mathcal{I} : a x \in \mathcal{I}\}\bigr| .
@@ -335,6 +350,7 @@ Thus $f(c) = (2c^2)!$ works.
     \label{lem:inv-mul-mem-centralizer}
     \lean{LeanEval.GroupTheory.inv_mul_mem_centralizer}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
     Let $x, a, a_0 \in G$ with $a x a^{-1} = x^{-1}$ and
     $a_0 x a_0^{-1} = x^{-1}$. Then $a_0^{-1} a \in C_G(x)$.
 \end{lemma}
@@ -356,6 +372,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.inverter_map_injOn_centralizer}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{lem:inv-mul-mem-centralizer}
+    \leanok
     Let $x, a_0 \in G$ with $a_0 x a_0^{-1} = x^{-1}$, and let $S \subseteq G$ be
     a set each element of which inverts $x$ (i.e. $a x a^{-1} = x^{-1}$ for all
     $a \in S$). Then the map $\iota : a \mapsto a_0^{-1} a$ is injective on $S$
@@ -374,6 +391,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.involutionPairCount_le_centralizer}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{def:involution-set, def:r, lem:inverts, lem:r-eq-invert-card, lem:inverter-map-injective}
+    \leanok
     For every $x \in G$, $r(x) \le |C_G(x)|$.
 \end{lemma}
 \begin{proof}
@@ -392,6 +410,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.exists_averaging}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{def:r}
+    \leanok
     Let $G$ be nontrivial, so the set $G \setminus \{1\}$ of non-identity
     elements is nonempty with cardinality $n - 1$. Then there exists $x \ne 1$
     with
@@ -412,6 +431,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.exists_big_centralizer}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{lem:sum-pairs, lem:r-le-centralizer, lem:averaging}
+    \leanok
     There exists $x \in G$ with $x \ne 1$ and
     \[
         (n - 1)\, |C_G(x)| \;\ge\; k^2 - k .
@@ -432,6 +452,7 @@ Thus $f(c) = (2c^2)!$ works.
     \label{lem:index-arith}
     \lean{LeanEval.GroupTheory.index_arith}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
     Let $n, k, c, d, m$ be natural numbers with $2 \le n$, $2 \le k$,
     $1 \le d$, $n \le k c$, $k^2 \le (n-1)\, d + k$, and $m\, d = n$. Then
     $m \le 2 c^2$.
@@ -458,6 +479,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.order_bound}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{lem:many-involutions, lem:two-le-k, lem:big-centralizer, lem:index-arith, lem:centralizer-proper, lem:card-le-index-factorial}
+    \leanok
     Let $G$ be a finite nonabelian simple group and $t \in G$ an involution.
     Then $n = |G| \le (2 c^2)!$ where $c = |C_G(t)|$.
 \end{proposition}
@@ -479,6 +501,7 @@ Thus $f(c) = (2c^2)!$ works.
     \lean{LeanEval.GroupTheory.brauer_fowler}
     \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
     \uses{prop:order-bound}
+    \leanok
     There is a function $f : \mathbb{N} \to \mathbb{N}$ such that for every finite
     nonabelian simple group $G$ and every involution $t \in G$,
     \[
