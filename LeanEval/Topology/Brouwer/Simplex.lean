@@ -92,12 +92,14 @@ theorem induced_is_sperner {n} (g : EuclSp n → EuclSp n)
   intro v hv
   have hv_corner : v ∈ cornerSimplex n := by
     rcases T.purity ({v} : Finset (EuclSp n)) hv with ⟨M, hM, hsub, hcard⟩
-    have hM_max : M ∈ T.maximalCells := Finset.mem_filter.mpr ⟨hM, hcard⟩
+    have hM_max : M ∈ T.cells.filter (fun C => C.card = n + 1) :=
+      Finset.mem_filter.mpr ⟨hM, hcard⟩
     have hM_cover : convexHull ℝ (M : Set (EuclSp n)) ⊆ cornerSimplex n := by
       calc
         convexHull ℝ (M : Set (EuclSp n))
             ⊆ ⋃ C ∈ T.cells.filter (fun C => C.card = n + 1), convexHull ℝ (C : Set (EuclSp n)) :=
-          Set.subset_biUnion hM_max
+          Finset.subset_set_biUnion_of_mem
+            (f := fun C : Finset (EuclSp n) => convexHull ℝ (↑C : Set (EuclSp n))) hM_max
         _ = cornerSimplex n := T.covering
     have hv_M : v ∈ (M : Set (EuclSp n)) := by
       have hmem : v ∈ ({v} : Finset (EuclSp n)) := by simp
