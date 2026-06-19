@@ -423,7 +423,74 @@ theorem circleIntegrable_logDeriv_factorizedRational {h : ℂ → ℂ} {R : ℝ}
     (hsupp : (divisor h (Metric.closedBall 0 R)).support ⊆ Metric.ball 0 R) :
     CircleIntegrable
       (logDeriv (∏ᶠ u, (fun x => x - u) ^ (divisor h (Metric.closedBall 0 R)) u)) 0 R := by
-  sorry
+  let d := divisor h (Metric.closedBall 0 R)
+  have hfinite : Function.HasFiniteSupport d :=
+    Function.locallyFinsuppWithin.finiteSupport d (isCompact_closedBall 0 R)
+  by_cases hRnonneg : 0 ≤ R
+  · have habs : |R| = R := abs_of_nonneg hRnonneg
+    -- The family (d u) * (· - u)⁻¹ has finite support, so finsum_apply applies
+    have hF_finsupport : Function.HasFiniteSupport (fun (u : ℂ) (z : ℂ) => (d u : ℂ) * (z - u)⁻¹) := by
+      refine hfinite.subset ?_
+      intro u hu
+      rw [Function.mem_support] at hu ⊢
+      intro hzero
+      apply hu
+      ext z
+      simp [hzero]
+    -- Each term is circle-integrable
+    have h_int_each : ∀ u : ℂ, CircleIntegrable (fun z : ℂ => (d u : ℂ) * (z - u)⁻¹) 0 R := by
+      intro u
+      by_cases hu : u ∈ d.support
+      · have hu_ball : u ∈ Metric.ball (0 : ℂ) R := hsupp hu
+        have h_int_sub : CircleIntegrable (fun z => (z - u)⁻¹) 0 R := circleIntegrable_sub_inv hu_ball
+        simpa [smul_eq_mul] using CircleIntegrable.const_fun_smul (a := (d u : ℂ)) h_int_sub
+      · have hd_zero : (d u : ℂ) = 0 := by
+          simpa [Function.mem_support] using hu
+        simp [hd_zero, circleIntegrable_const]
+    -- The finite sum is circle-integrable
+    set F := ∑ᶠ u, (fun z : ℂ => (d u : ℂ) * (z - u)⁻¹) with hF
+    have hF_int : CircleIntegrable F 0 R := CircleIntegrable.finsum h_int_each
+    -- On the sphere, logDeriv φ and F agree pointwise
+    have hsphere_eq : Set.EqOn (logDeriv (∏ᶠ u, (fun x => x - u) ^ d u)) F
+        (Metric.sphere (0 : ℂ) |R|) := by
+      intro z hz
+      rw [Metric.mem_sphere, dist_eq_norm, sub_zero] at hz
+      rw [habs] at hz
+      have hz_not_support : z ∉ Function.support d := by
+        intro hz_support
+        have hz_ball : z ∈ Metric.ball (0 : ℂ) R := hsupp hz_support
+        rw [Metric.mem_ball, dist_eq_norm, sub_zero] at hz_ball
+        linarith
+      calc
+        logDeriv (∏ᶠ u, (fun x => x - u) ^ d u) z = ∑ᶠ u, (d u : ℂ) * (z - u)⁻¹ :=
+          logDeriv_factorizedRational hfinite hz_not_support
+        _ = F z := by
+          simp [F, finsum_apply hF_finsupport z]
+    -- Convert pointwise equality to an `EventuallyEq` for the codiscrete filter
+    have h_codisc : logDeriv (∏ᶠ u, (fun x => x - u) ^ d u) =ᶠ[
+        Filter.codiscreteWithin (Metric.sphere (0 : ℂ) |R|)] F := by
+      filter_upwards [Filter.self_mem_codiscreteWithin (Metric.sphere (0 : ℂ) |R|)] with z hz
+      exact hsphere_eq hz
+    -- Transfer circle-integrability across equality on the sphere
+    exact ((circleIntegrable_congr_codiscreteWithin h_codisc).mpr hF_int)
+  · -- When R < 0, the ball is empty, so d is identically zero
+    have hd_zero : d = 0 := by
+      ext u
+      by_contra! hne
+      have hmem_support : u ∈ Function.support d := by
+        rw [Function.mem_support]
+        exact hne
+      have hu_ball : u ∈ Metric.ball (0 : ℂ) R := hsupp hmem_support
+      have hball_empty : Metric.ball (0 : ℂ) R = ∅ :=
+        (Metric.ball_eq_empty).mpr (by linarith)
+      rw [hball_empty] at hu_ball
+      exact hu_ball
+    have h_prod : (∏ᶠ u, (fun x => x - u) ^ d u) = 1 := by
+      simp [hd_zero]
+    have h_log : logDeriv (1 : ℂ → ℂ) = (0 : ℂ → ℂ) := by
+      ext z; simp [logDeriv_apply]
+    rw [h_prod, h_log]
+    exact circleIntegrable_const (a := (0 : ℂ)) (c := 0) (R := R)
 
 /-- `logDeriv U` is circle-integrable for `U` analytic and nowhere zero on the
 closed disk. -/
