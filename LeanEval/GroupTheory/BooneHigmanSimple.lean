@@ -192,7 +192,10 @@ lemma re_generator_mem (R : List (Word n)) (i : Fin n) :
         FreeGroup.reduce ([(i, true)] : Word n)) :=
     computablePred_comp eval_computable hg
   -- assemble via the existential-projection lemma and the membership equivalence
-  refine REPred.of_eq (re_projection hQ) (fun w => ?_)
+  refine REPred.of_eq
+    (re_projection (Q := fun (w : Word n) (c : Certificate n) =>
+      FreeGroup.reduce (evalCert (R ++ [w]) c) =
+        FreeGroup.reduce ([(i, true)] : Word n)) hQ) (fun w => ?_)
   rw [← relatorSet_append, of_eq_mk_singleton, mem_normalClosure_cert]
   exact exists_congr (fun c => (mk_eq_iff_reduce _ _).symm)
 
