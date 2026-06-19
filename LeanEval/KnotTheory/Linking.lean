@@ -473,7 +473,25 @@ theorem coordinateCircle_deriv (p₀ : R3) (i j : Fin 3) (t : ℝ) :
     deriv (coordinateCircle p₀ i j) t
       = -Real.sin t • EuclideanSpace.single i (1 : ℝ)
         + Real.cos t • EuclideanSpace.single j (1 : ℝ) := by
-  sorry
+  have hcos : HasDerivAt (Real.cos : ℝ → ℝ) (-Real.sin t) t := Real.hasDerivAt_cos t
+  have hsin : HasDerivAt (Real.sin : ℝ → ℝ) (Real.cos t) t := Real.hasDerivAt_sin t
+  set e_i := EuclideanSpace.single i (1 : ℝ) with he_i
+  set e_j := EuclideanSpace.single j (1 : ℝ) with he_j
+  have h1 : HasDerivAt (fun (t' : ℝ) => Real.cos t' • e_i) ((-Real.sin t) • e_i) t :=
+    hcos.smul_const e_i
+  have h2 : HasDerivAt (fun (t' : ℝ) => Real.sin t' • e_j) (Real.cos t • e_j) t :=
+    hsin.smul_const e_j
+  have hsum : HasDerivAt (fun (t' : ℝ) => Real.cos t' • e_i + Real.sin t' • e_j)
+      ((-Real.sin t) • e_i + Real.cos t • e_j) t :=
+    h1.add h2
+  have h_f : coordinateCircle p₀ i j = (fun t' : ℝ => (Real.cos t' • e_i + Real.sin t' • e_j) + p₀) := by
+    ext t' k
+    simp [coordinateCircle, he_i, he_j, add_assoc, add_comm]
+  have h_total : HasDerivAt (coordinateCircle p₀ i j)
+      ((-Real.sin t) • e_i + Real.cos t • e_j) t := by
+    rw [h_f]
+    exact hsum.add_const p₀
+  simpa [he_i, he_j] using h_total.deriv
 
 /-- **Immersion property of a coordinate circle.** -/
 theorem coordinateCircle_immersion (p₀ : R3) {i j : Fin 3} (hij : i ≠ j) (t : ℝ) :
