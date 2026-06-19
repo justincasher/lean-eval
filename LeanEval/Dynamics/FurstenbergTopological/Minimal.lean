@@ -40,6 +40,7 @@ def omegaFwd (f : X → X) (x : X) : Set X :=
 
 variable (T : X ≃ₜ X)
 
+omit [Nonempty X] in
 /-- **Directed intersections of compact sets are nonempty.** A downward-directed
 family of nonempty closed subsets of a compact space has nonempty intersection. -/
 theorem directed_inter_nonempty {ι : Type*} [Nonempty ι] (C : ι → Set X)
@@ -48,6 +49,7 @@ theorem directed_inter_nonempty {ι : Type*} [Nonempty ι] (C : ι → Set X)
   IsCompact.nonempty_iInter_of_directed_nonempty_isCompact_isClosed C hdir hne
     (fun i => (hcl i).isCompact) hcl
 
+omit [Nonempty X] in
 /-- **Chains of subsystems have a subsystem lower bound.** A nonempty
 downward-directed family of nonempty closed invariant sets has an intersection
 that is again nonempty, closed, and invariant. -/
@@ -121,17 +123,20 @@ theorem exists_minimal_subsystem :
   have hM_sub_C : M ⊆ C := hM.2 hC_S hC_sub
   exact Set.Subset.antisymm hC_sub hM_sub_C
 
+omit [Nonempty X] in
 /-- **`ω`-limit sets are nonempty.** -/
 theorem omega_nonempty (x : X) : (omegaFwd (T : X → X) x).Nonempty := by
   unfold omegaFwd
   exact nonempty_omegaLimit Filter.atTop (fun n : ℕ => (T : X → X)^[n]) {x} (Set.singleton_nonempty x)
 
+omit [CompactSpace X] [Nonempty X] in
 /-- **`ω`-limit sets are closed.** -/
 theorem omega_closed (x : X) : IsClosed (omegaFwd (T : X → X) x) := by
   -- omegaFwd expands to omegaLimit, and Mathlib's isClosed_omegaLimit handles the rest
   simpa [omegaFwd] using isClosed_omegaLimit (f := Filter.atTop)
     (ϕ := fun (n : ℕ) => (T : X → X)^[n]) (s := {x})
 
+omit [CompactSpace X] [Nonempty X] in
 /-- **`ω`-limit sets are forward invariant**: `T (ω(x)) ⊆ ω(x)`. -/
 theorem omega_forward_invariant (x : X) :
     (T : X → X) '' omegaFwd (T : X → X) x ⊆ omegaFwd (T : X → X) x := by
@@ -184,10 +189,10 @@ theorem omega_forward_invariant (x : X) :
     h_mapsTo_Tx.image_subset
   exact Set.Subset.trans h_image_subset h_subset
 
+omit [CompactSpace X] [Nonempty X] in
 /-- **`ω`-limit sets are shift-invariant**: `ω(T x) = ω(x)`. The forward orbit of
 `T x` is the forward orbit of `x` shifted by one step, so the two `ω`-limit sets
 agree (the `ω`-limit depends only on the tail of the orbit). -/
-omit [CompactSpace X] [Nonempty X] in
 theorem omega_shift_eq (x : X) :
     omegaFwd (T : X → X) (T x) = omegaFwd (T : X → X) x := by
   apply Set.eq_of_subset_of_subset
@@ -222,6 +227,7 @@ theorem omega_shift_eq (x : X) :
     rw [hstep]
     exact hbN
 
+omit [CompactSpace X] [Nonempty X] in
 /-- **`ω`-limit sets are invariant**: `T (ω(x)) = ω(x)`. -/
 theorem omega_two_sided_invariant (x : X) :
     (T : X → X) '' omegaFwd (T : X → X) x = omegaFwd (T : X → X) x := by
@@ -257,6 +263,7 @@ theorem omega_two_sided_invariant (x : X) :
     intro y hy
     exact ⟨(T.symm : X → X) y, h_maps hy, T.apply_symm_apply y⟩
 
+omit [Nonempty X] in
 /-- **`ω`-limit sets are subsystems**: nonempty, closed, and invariant. -/
 theorem omega_limit_properties (x : X) :
     (omegaFwd (T : X → X) x).Nonempty ∧ IsClosed (omegaFwd (T : X → X) x) ∧
@@ -267,6 +274,7 @@ theorem omega_limit_properties (x : X) :
     omega_two_sided_invariant T x
   exact ⟨h_nonempty, h_closed, h_inv⟩
 
+omit [Nonempty X] in
 /-- **Forward orbits are dense in a minimal system.** If `T` is minimal then for
 every `x` the forward orbit `{T^[k] x : k ≥ 0}` is dense. -/
 theorem minimal_forward_dense (hmin : IsMinimal (T : X → X)) (x : X) :
