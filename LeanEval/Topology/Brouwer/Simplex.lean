@@ -114,26 +114,13 @@ lemma cornerSimplex_sum_le_one {n} {v : EuclSp n} (hv : v ∈ cornerSimplex n) :
 
 /-- For points in the corner simplex, the barycentric coordinates are nonnegative. -/
 lemma cornerSimplex_baryCoord_nonneg {n} {v : EuclSp n} (hv : v ∈ cornerSimplex n)
-    (i : Fin (n + 1)) : 0 ≤ baryCoord n v i := by
-  rcases i with (i | i)
-  · -- i = 0: baryCoord n v 0 = 1 - ∑ v j
-    dsimp [baryCoord]
-    have hsum := cornerSimplex_sum_le_one hv
-    nlinarith
-  · -- i = Fin.succ k: baryCoord n v (Fin.succ k) = v k
-    dsimp [baryCoord]
-    exact cornerSimplex_coord_nonneg hv i
+    (i : Fin (n + 1)) : 0 ≤ baryCoord n v i :=
+  (mem_cornerSimplex_iff n v).mp hv i
 
 /-- For points in the corner simplex, the barycentric coordinates sum to 1. -/
 lemma cornerSimplex_baryCoord_sum_one {n} {v : EuclSp n} (hv : v ∈ cornerSimplex n) :
     (∑ i : Fin (n + 1), baryCoord n v i) = 1 := by
-  calc
-    (∑ i : Fin (n + 1), baryCoord n v i) =
-        baryCoord n v 0 + (∑ i : Fin n, baryCoord n v (Fin.succ i)) := by
-      simp [Fin.sum_univ_succ]
-    _ = (1 - ∑ j : Fin n, v j) + (∑ j : Fin n, v j) := by
-      simp [baryCoord]
-    _ = 1 := by ring
+  simpa [baryCoord] using (cornerBasis n).sum_coord_apply_eq_one v
 
 /-- **The induced labeling is Sperner** for any triangulation. -/
 theorem induced_is_sperner {n} (g : EuclSp n → EuclSp n)

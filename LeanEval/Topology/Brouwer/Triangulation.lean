@@ -57,7 +57,11 @@ noncomputable def carrierFace (n : ℕ) (p : EuclSp n) : Set (EuclSp n) :=
 barycentric coordinates are nonnegative. -/
 theorem mem_cornerSimplex_iff (n : ℕ) (p : EuclSp n) :
     p ∈ cornerSimplex n ↔ ∀ i, 0 ≤ baryCoord n p i := by
-  sorry
+  have hrange : Set.range (cornerVertex n) = Set.range (cornerBasis n) := rfl
+  have h := (cornerBasis n).convexHull_eq_nonneg_coord
+  show p ∈ convexHull ℝ (Set.range (cornerVertex n)) ↔ _
+  rw [hrange, h]
+  rfl
 
 /-- **Triangulation of the corner simplex `S_n`.** A *finite* geometric simplicial
 complex (extending `Geometry.SimplicialComplex ℝ (EuclSp n)`, which already
