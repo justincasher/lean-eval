@@ -388,6 +388,15 @@ lemma re_projection {α β : Type*} [Primcodable α] [Primcodable β]
   -- Rewrite the domain predicate to the existential using rproj_dom
   refine REPred.of_eq hdom fun a => rproj_dom (Q := Q) a
 
+/-- **`ComputablePred` is closed under computable precomposition.** Keeping `p`
+and `g` abstract makes the underlying `decide`-instance unification cheap, which
+matters when the concrete predicate is a large term. -/
+lemma computablePred_comp {α β : Type*} [Primcodable α] [Primcodable β]
+    {p : β → Prop} (hp : ComputablePred p) {g : α → β} (hg : Computable g) :
+    ComputablePred (fun a => p (g a)) := by
+  classical
+  exact Computable.computablePred ((ComputablePred.decide hp).comp hg)
+
 /-- **Recursive enumerability is closed under conjunction.** -/
 lemma re_and {α : Type*} [Primcodable α] {p q : α → Prop}
     (hp : REPred p) (hq : REPred q) :

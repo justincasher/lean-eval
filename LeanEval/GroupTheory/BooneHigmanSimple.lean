@@ -170,7 +170,6 @@ lemma collapse [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
     exact hker_ne_top hN_top'
 
 /-- **Generator membership in the extended closure is r.e.** -/
-set_option maxHeartbeats 1000000 in
 lemma re_generator_mem (R : List (Word n)) (i : Fin n) :
     REPred (fun w : Word n =>
       FreeGroup.of i ∈
@@ -191,7 +190,7 @@ lemma re_generator_mem (R : List (Word n)) (i : Fin n) :
   have hQ : ComputablePred (fun p : Word n × Certificate n =>
       FreeGroup.reduce (evalCert (R ++ [p.1]) p.2) =
         FreeGroup.reduce ([(i, true)] : Word n)) :=
-    Computable.computablePred ((ComputablePred.decide eval_computable).comp hg)
+    computablePred_comp eval_computable hg
   -- assemble via the existential-projection lemma and the membership equivalence
   refine REPred.of_eq (re_projection hQ) (fun w => ?_)
   rw [← relatorSet_append, of_eq_mk_singleton, mem_normalClosure_cert]
