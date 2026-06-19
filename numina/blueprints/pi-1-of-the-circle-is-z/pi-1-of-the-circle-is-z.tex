@@ -33,6 +33,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \label{lem:two-pi-cancel}
     \lean{LeanEval.Topology.two_pi_cancel}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \leanok
     For integers \(n, m\), if \(n \cdot 2\pi = m \cdot 2\pi\) as real numbers, then \(n = m\).
 \end{lemma}
 \begin{proof}
@@ -59,6 +60,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \lean{LeanEval.Topology.fiberEquivInt_symm_apply}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
     \uses{def:fiber-equiv-int}
+    \leanok
     For every integer \(n\), the fibre point assigned to \(n\) by the inverse of the parametrization
     of Definition~\ref{def:fiber-equiv-int} has underlying real number \(n\cdot 2\pi\); that is,
     \(\bigl(\mathrm{fiberEquivInt}^{-1}(n) : \mathbb{R}\bigr) = n\cdot(2\pi)\).
@@ -73,6 +75,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \label{lem:translated-lift-is-lift}
     \lean{LeanEval.Topology.translatedLift_eq_liftPath}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \leanok
     Let \(\gamma_0\) be a path (loop) in \(\mathbb{S}^1\) based at \(1\), let \(a \in \mathbb{R}\)
     satisfy \(\exp(a) = 1\), and let \(e\) be a point of the fibre over \(1\). Writing
     \(\mathrm{liftPath}\,\gamma_0\,e\) (Mathlib's \texttt{IsCoveringMap.liftPath}) for the lift of the
@@ -121,6 +124,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \lean{LeanEval.Topology.monodromy_val_of_fibre}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
     \uses{lem:monodromy-translation}
+    \leanok
     For a class \(\gamma\) in the fundamental group at \(1\) and any fibre point \(e\) over \(1\),
     \[
       \bigl(\operatorname{monodromy}(\operatorname{toPath}\gamma)(e)\bigr).\mathrm{val}
@@ -141,6 +145,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \lean{LeanEval.Topology.wind}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
     \uses{def:fiber-equiv-int}
+    \leanok
     For a class \(\gamma\) in the fundamental group of \(\mathbb{S}^1\) at \(1\), the
     \emph{winding number} \(w(\gamma) \in \mathbb{Z}\) is the integer assigned by
     Definition~\ref{def:fiber-equiv-int} to the fibre point
@@ -156,6 +161,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \lean{LeanEval.Topology.wind_spec}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
     \uses{def:wind, lem:fiber-equiv-int-symm}
+    \leanok
     For a class \(\gamma\) in the fundamental group at \(1\), the underlying real number of the
     fibre point \(\operatorname{monodromy}(\operatorname{toPath}\gamma)(\langle 0\rangle)\) equals
     \(w(\gamma)\cdot 2\pi\).
@@ -173,6 +179,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \label{lem:mul-eq-trans}
     \lean{LeanEval.Topology.toPath_mul}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \leanok
     For classes \(\gamma, \delta\) in the fundamental group at \(1\),
     \[
       \operatorname{toPath}(\gamma \cdot \delta)
@@ -194,6 +201,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \lean{LeanEval.Topology.wind_mul_real}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
     \uses{def:wind, lem:wind-spec, lem:mul-eq-trans, lem:monodromy-val-of-fibre}
+    \leanok
     For all classes \(\gamma, \delta\) in the fundamental group at \(1\),
     \[
       w(\gamma\cdot\delta)\cdot 2\pi = w(\gamma)\cdot 2\pi + w(\delta)\cdot 2\pi .
@@ -223,6 +231,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \lean{LeanEval.Topology.wind_mul}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
     \uses{lem:wind-mul-real, lem:two-pi-cancel}
+    \leanok
     For all classes \(\gamma, \delta\) in the fundamental group at \(1\),
     \(w(\gamma \cdot \delta) = w(\gamma) + w(\delta)\).
 \end{lemma}
@@ -238,6 +247,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \label{lem:quotient-subsingleton}
     \lean{LeanEval.Topology.quotient_subsingleton}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \leanok
     For any \(c \in \mathbb{R}\), the type \(\operatorname{Path.Homotopic.Quotient}(0, c)\) of
     homotopy classes (rel endpoints) of paths in \(\mathbb{R}\) from \(0\) to \(c\) is a
     subsingleton.
@@ -306,6 +316,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \label{lem:exp-comp-topath}
     \lean{LeanEval.Topology.toPath_fromPath_exp}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \leanok
     Let \(L\) be a path in \(\mathbb{R}\) from \(0\) to \(c\) with \(\exp(c) = 1\), so
     \(\exp \circ L\) is a loop based at \(1\) and
     \(\gamma := \operatorname{fromPath}\,\llbracket \exp\circ L\rrbracket\) is an element of the
@@ -321,6 +332,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \label{lem:exp-comp-monodromy}
     \lean{LeanEval.Topology.monodromy_exp_comp}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \leanok
     Let \(L\) be a path in \(\mathbb{R}\) from \(0\) to \(c\). Then
     \[
       \operatorname{monodromy}(\llbracket \exp\circ L\rrbracket)(\langle 0\rangle) = \langle c\rangle .
@@ -358,6 +370,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \lean{LeanEval.Topology.wind_surjective}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
     \uses{def:wind, lem:explicit-loop-lift, lem:wind-spec, lem:two-pi-cancel}
+    \leanok
     The winding number map \(w\) is surjective.
 \end{lemma}
 \begin{proof}
@@ -374,6 +387,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \lean{LeanEval.Topology.windEquiv}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
     \uses{def:wind, lem:wind-mul, lem:wind-injective, lem:wind-surjective}
+    \leanok
     The winding number, regarded as a map to \(\operatorname{Multiplicative}\mathbb{Z}\) via
     \(\gamma \mapsto \operatorname{ofAdd}(w(\gamma))\), is a group isomorphism
     \[
@@ -389,6 +403,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \lean{LeanEval.Topology.pi1_circle_mulEquiv_int}
     \leanfile{LeanEval/Topology/HomotopyGroups.lean}
     \uses{def:wind-equiv}
+    \leanok
     The first homotopy group of the complex unit circle \(\mathbb{S}^1\) based at \(1\) is
     isomorphic, as a group, to \(\operatorname{Multiplicative}\mathbb{Z}\):
     \[
