@@ -3,6 +3,631 @@
 
 \begin{document}
 
-% Your blueprint will go here.
+\section{The Euler--Lagrange equation}
+
+We work with a Lagrangian $L : \mathbb{R} \times \mathbb{R} \times \mathbb{R} \to
+\mathbb{R}$, written $L(t, y, z)$, and a path $x : \mathbb{R} \to \mathbb{R}$.
+Throughout, $x'$ denotes $\mathrm{deriv}\, x$ and $h'$ denotes
+$\mathrm{deriv}\, h$. The action of a path $y$ on $(a,b)$ is
+$I(y) = \int_a^b L(t, y(t), y'(t))\, dt$.
+
+The goal (\S44 of Knill) is: if $L$ and $x$ are $C^2$ and $x$ is a variational
+extremum of the action on $(a,b)$, then the pointwise Euler--Lagrange equation
+\[
+  \frac{\partial L}{\partial x}\bigl(t, x(t), x'(t)\bigr)
+  = \frac{d}{dt}\Bigl(\frac{\partial L}{\partial x'}\bigl(t, x(t), x'(t)\bigr)\Bigr)
+\]
+holds for every $t \in (a,b)$.
+
+The argument is the classical one: differentiate the action along a smooth
+compactly supported variation $h$ (first variation), integrate the velocity
+term by parts so the boundary terms drop (compact support inside $(a,b)$),
+obtaining the weak Euler--Lagrange identity $\int_a^b (\partial_x L - \frac{d}{dt}
+\partial_{x'} L)\, h = 0$ for all such $h$, and then apply the fundamental lemma
+of the calculus of variations to the continuous defect
+$\partial_x L - \frac{d}{dt}\partial_{x'} L$.
+
+\subsection{Partial derivatives of the Lagrangian along the path}
+
+\begin{definition}[$\partial L/\partial x$ along $x$]
+    \label{def:lagrangian-partial-x}
+    \lean{LeanEval.Analysis.lagrangianPartialX}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \leanok
+    For a Lagrangian $L$ and path $x$, define
+    $\partial_x L(t) := \mathrm{deriv}\,(y \mapsto L(t, y, x'(t)))\,(x(t))$,
+    the derivative of the first spatial partial map at the point $x(t)$. This is
+    \texttt{LeanEval.Analysis.lagrangianPartialX $L$ $x$}.
+\end{definition}
+
+\begin{definition}[$\partial L/\partial x'$ along $x$]
+    \label{def:lagrangian-partial-v}
+    \lean{LeanEval.Analysis.lagrangianPartialV}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \leanok
+    For a Lagrangian $L$ and path $x$, define
+    $\partial_{x'} L(t) := \mathrm{deriv}\,(z \mapsto L(t, x(t), z))\,(x'(t))$,
+    the derivative of the velocity partial map at the point $x'(t)$. This is
+    \texttt{LeanEval.Analysis.lagrangianPartialV $L$ $x$}.
+\end{definition}
+
+\begin{definition}[Variational extremum]
+    \label{def:variational-extremum}
+    \lean{LeanEval.Analysis.IsVariationalExtremum}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \leanok
+    A $C^1$ path $x$ is a \emph{variational extremum} of the action on $(a,b)$
+    if for every $h : \mathbb{R} \to \mathbb{R}$ that is smooth
+    ($C^\infty$), has compact support, and satisfies $\mathrm{tsupport}\, h
+    \subseteq (a,b)$, the first variation vanishes:
+    \[
+      \frac{d}{d\varepsilon}\Bigg|_{\varepsilon = 0}
+        \int_{(a,b)} L\bigl(t,\, x(t) + \varepsilon\, h(t),\,
+          x'(t) + \varepsilon\, h'(t)\bigr)\, dt = 0 .
+    \]
+\end{definition}
+
+\begin{definition}[Shifted partials $\partial_x L_\varepsilon$, $\partial_{x'} L_\varepsilon$]
+    \label{def:shifted-partials}
+    \lean{LeanEval.Analysis.lagrangianPartialXShifted}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:lagrangian-partial-x, def:lagrangian-partial-v}
+    \leanok
+    Fix a variation $h$ and a parameter $\varepsilon \in \mathbb{R}$, and write the
+    \emph{shifted configuration} at time $t$ via
+    $x_\varepsilon(t) := x(t) + \varepsilon\, h(t)$ and
+    $x'_\varepsilon(t) := x'(t) + \varepsilon\, h'(t)$. Define the shifted spatial
+    and velocity partials of $L$ along this configuration by
+    \[
+      \partial_x L_\varepsilon(t) := \mathrm{deriv}\,\bigl(y \mapsto
+        L(t,\, y,\, x'_\varepsilon(t))\bigr)\,(x_\varepsilon(t)), \qquad
+      \partial_{x'} L_\varepsilon(t) := \mathrm{deriv}\,\bigl(z \mapsto
+        L(t,\, x_\varepsilon(t),\, z)\bigr)\,(x'_\varepsilon(t)).
+    \]
+    At $\varepsilon = 0$ they reduce to $\partial_x L(t)$ and
+    $\partial_{x'} L(t)$ of \cref{def:lagrangian-partial-x},
+    \cref{def:lagrangian-partial-v}.
+\end{definition}
+
+\subsection{Regularity of the partials along the path}
+
+\begin{lemma}[Directional derivative equals the Fr\'echet derivative on that direction]
+    \label{lem:directional-deriv-eq-fderiv}
+    \lean{LeanEval.Analysis.directional_deriv_eq_fderiv}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    Let $E$ be a real normed space, $f : E \to \mathbb{R}$ differentiable at a
+    point $p$, and $d \in E$. Then
+    \[
+      \mathrm{deriv}\,\bigl(\varepsilon \mapsto f(p + \varepsilon \cdot d)\bigr)\,0
+        = \mathrm{fderiv}\,\mathbb{R}\, f\, p\, d .
+    \]
+    In particular, taking $d$ a standard basis vector exhibits the one-variable
+    slice (partial) derivative of $f$ in that coordinate as
+    $\mathrm{fderiv}\,f\,p$ applied to the basis vector.
+\end{lemma}
+\begin{proof}
+    The line $\varepsilon \mapsto p + \varepsilon \cdot d$ has derivative $d$ at
+    $0$ (\texttt{HasDerivAt.const\_add}, \texttt{HasDerivAt.smul\_const},
+    \texttt{hasDerivAt\_id}) and takes value $p$ at $0$. As $f$ is differentiable
+    at $p$ it has a Fr\'echet derivative there
+    (\texttt{DifferentiableAt.hasFDerivAt}), so the chain rule
+    (\texttt{HasFDerivAt.comp\_hasDerivAt}) gives that
+    $\varepsilon \mapsto f(p + \varepsilon d)$ has derivative
+    $\mathrm{fderiv}\,f\,p\,d$ at $0$; \texttt{HasDerivAt.deriv} reads it off.
+\end{proof}
+
+\begin{lemma}[A partial derivative of a $C^2$ function is $C^1$]
+    \label{lem:partial-deriv-contdiff}
+    \lean{LeanEval.Analysis.partialDeriv_contDiff}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    Let $F : \mathbb{R} \times \mathbb{R} \times \mathbb{R} \to \mathbb{R}$ be
+    $C^2$ and fix one coordinate slot. Then the partial-derivative map sending a
+    point $p$ to the derivative of the one-variable slice of $F$ through $p$ in
+    that slot is $C^1$ on $\mathbb{R}^3$; in particular it is continuous.
+\end{lemma}
+\begin{proof}
+    \uses{lem:directional-deriv-eq-fderiv}
+    By \cref{lem:directional-deriv-eq-fderiv} the slice derivative in the chosen
+    slot is, as a function of $p$, the map
+    $p \mapsto \mathrm{fderiv}\,\mathbb{R}\,F\,p\,(e_i)$ evaluated on the fixed
+    basis vector $e_i$ of that slot. The Fr\'echet-derivative map
+    $p \mapsto \mathrm{fderiv}\,\mathbb{R}\,F\,p$ of the $C^2$ family $F$ is $C^1$
+    by \texttt{ContDiff.fderiv} (the hypothesis $n+1\le m$ holds as $1+1\le 2$),
+    and evaluating a $C^1$ family of continuous-linear maps at the fixed vector
+    $e_i$ preserves $C^1$ (\texttt{ContDiff.clm\_apply} against the constant map
+    $e_i$). Being $C^1$ it is continuous (\texttt{ContDiff.continuous}). (This is
+    the multivariable analogue of \texttt{Space.deriv\_contDiff};
+    \texttt{ContDiff.deriv'} does \emph{not} apply, being single-variable only.)
+\end{proof}
+
+\begin{lemma}[The curve $(t, x(t), x'(t))$ is $C^1$]
+    \label{lem:curve-contdiff}
+    \lean{LeanEval.Analysis.curve_contDiff}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    If $x$ is $C^2$, then $\gamma(t) := (t, x(t), x'(t))$ is a $C^1$ map
+    $\mathbb{R} \to \mathbb{R}^3$.
+\end{lemma}
+\begin{proof}
+    The identity $t \mapsto t$ is $C^1$ (\texttt{contDiff\_id}); $x$ is $C^1$
+    since it is $C^2$; and $x' = \mathrm{deriv}\,x$ is $C^1$ because $x$ is $C^2$
+    (\texttt{ContDiff.deriv'}, which is legitimate here because $x$ is a
+    one-variable function). Pairing $C^1$ maps is $C^1$ (\texttt{ContDiff.prod}).
+\end{proof}
+
+\begin{lemma}[The velocity partial along $x$ is $C^1$]
+    \label{lem:partial-v-contdiff}
+    \lean{LeanEval.Analysis.lagrangianPartialV_contDiff}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:lagrangian-partial-v}
+    If $L$ is $C^2$ and $x$ is $C^2$, then the map $t \mapsto \partial_{x'} L(t)$
+    is $C^1$ on $\mathbb{R}$; in particular it is differentiable everywhere, so
+    $\frac{d}{dt}\partial_{x'} L$ exists, and both $\partial_{x'} L$ and its
+    derivative are continuous.
+\end{lemma}
+\begin{proof}
+    \uses{def:lagrangian-partial-v, lem:partial-deriv-contdiff, lem:curve-contdiff}
+    The velocity partial of $L$ on $\mathbb{R}^3$,
+    $L_z(t,y,z) := \mathrm{deriv}\,(w \mapsto L(t,y,w))\,z$, is the partial
+    derivative of the $C^2$ function $L$ in the third slot, hence $C^1$ by
+    \cref{lem:partial-deriv-contdiff}. The curve $\gamma(t) = (t, x(t), x'(t))$ is
+    $C^1$ by \cref{lem:curve-contdiff}. Since $\partial_{x'} L(t) =
+    L_z(\gamma(t))$ is a composition of $C^1$ maps it is $C^1$
+    (\texttt{ContDiff.comp}); differentiability and continuity of the derivative
+    then follow (\texttt{ContDiff.differentiable},
+    \texttt{ContDiff.continuous\_deriv}).
+\end{proof}
+
+\begin{lemma}[The spatial partial along $x$ is continuous]
+    \label{lem:partial-x-continuous}
+    \lean{LeanEval.Analysis.lagrangianPartialX_continuous}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:lagrangian-partial-x}
+    If $L$ is $C^2$ and $x$ is $C^2$, then the map $t \mapsto \partial_x L(t)$ is
+    continuous on $\mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    \uses{def:lagrangian-partial-x, lem:partial-deriv-contdiff, lem:curve-contdiff}
+    The spatial partial of $L$ on $\mathbb{R}^3$,
+    $L_y(t,y,z) := \mathrm{deriv}\,(w \mapsto L(t,w,z))\,y$, is the partial
+    derivative of the $C^2$ function $L$ in the second slot, hence $C^1$ and in
+    particular continuous by \cref{lem:partial-deriv-contdiff}. The curve
+    $\gamma(t) = (t,x(t),x'(t))$ is $C^1$, hence continuous, by
+    \cref{lem:curve-contdiff}, and $\partial_x L(t) = L_y(\gamma(t))$, so
+    $\partial_x L$ is continuous as a composition (\texttt{Continuous.comp}).
+\end{proof}
+
+\begin{lemma}[The Euler--Lagrange defect is continuous]
+    \label{lem:el-defect-continuous}
+    \lean{LeanEval.Analysis.el_defect_continuous}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, lem:partial-v-contdiff, lem:partial-x-continuous}
+    Under the hypotheses above, the defect
+    $D(t) := \partial_x L(t) - \frac{d}{dt}\partial_{x'} L(t)$ is continuous on
+    $\mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:partial-v-contdiff, lem:partial-x-continuous}
+    By \cref{lem:partial-x-continuous} the first term is continuous, and by
+    \cref{lem:partial-v-contdiff} the derivative $\frac{d}{dt}\partial_{x'} L$
+    is continuous. The difference of continuous functions is continuous
+    (\texttt{Continuous.sub}).
+\end{proof}
+
+\subsection{The first variation}
+
+\begin{lemma}[Continuous with compact support is integrable]
+    \label{lem:continuous-compact-support-integrable}
+    \lean{LeanEval.Analysis.continuous_compactSupport_integrable}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    A continuous function $\mathbb{R} \to \mathbb{R}$ with compact support is
+    integrable for the volume measure.
+\end{lemma}
+\begin{proof}
+    Immediate from \texttt{Continuous.integrable\_of\_hasCompactSupport}.
+\end{proof}
+
+\begin{lemma}[Coordinate decomposition of a bivariate Fr\'echet derivative]
+    \label{lem:fderiv-decomp}
+    \lean{LeanEval.Analysis.fderiv_decomp}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    Let $\Phi : \mathbb{R} \times \mathbb{R} \to \mathbb{R}$ be differentiable at
+    $(y_0, z_0)$. Then for all $(u, v)$,
+    \[
+      \mathrm{fderiv}\,\Phi\,(y_0, z_0)\,(u, v)
+        = \partial_1 \Phi\,(y_0, z_0)\, u + \partial_2 \Phi\,(y_0, z_0)\, v ,
+    \]
+    where $\partial_1 \Phi$, $\partial_2 \Phi$ are the slice (partial) derivatives
+    in the first and second coordinates.
+\end{lemma}
+\begin{proof}
+    \uses{lem:directional-deriv-eq-fderiv}
+    Write $(u, v) = u\cdot(1,0) + v\cdot(0,1)$ and use linearity of the Fr\'echet
+    derivative as a continuous-linear map
+    (\texttt{ContinuousLinearMap.map\_add}, \texttt{map\_smul}), giving
+    $\mathrm{fderiv}\,\Phi\,(y_0,z_0)\,(u,v) =
+      u\,\mathrm{fderiv}\,\Phi\,(y_0,z_0)\,(1,0)
+      + v\,\mathrm{fderiv}\,\Phi\,(y_0,z_0)\,(0,1)$. By
+    \cref{lem:directional-deriv-eq-fderiv} applied to the basis directions
+    $(1,0)$ and $(0,1)$, the values $\mathrm{fderiv}\,\Phi\,(y_0,z_0)\,(1,0)$ and
+    $\mathrm{fderiv}\,\Phi\,(y_0,z_0)\,(0,1)$ are exactly the slice derivatives
+    $\partial_1 \Phi\,(y_0,z_0)$ and $\partial_2 \Phi\,(y_0,z_0)$.
+\end{proof}
+
+\begin{lemma}[Derivative of the shifted-configuration curve]
+    \label{lem:variation-curve-hasDerivAt}
+    \lean{LeanEval.Analysis.variation_curve_hasDerivAt}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:shifted-partials}
+    Fix $t$ and a variation $h$. For every $\varepsilon \in \mathbb{R}$ the curve
+    $\sigma(\varepsilon) := (x(t) + \varepsilon h(t),\, x'(t) + \varepsilon h'(t))$
+    has derivative $(h(t), h'(t))$ at $\varepsilon$, and
+    $\sigma(\varepsilon) = (x_\varepsilon(t),\, x'_\varepsilon(t))$.
+\end{lemma}
+\begin{proof}
+    Each component is affine in $\varepsilon$: $\varepsilon \mapsto x(t) +
+    \varepsilon h(t)$ has derivative $h(t)$ at every $\varepsilon$
+    (\texttt{HasDerivAt.const\_add}, \texttt{HasDerivAt.smul\_const},
+    \texttt{hasDerivAt\_id}), and similarly the velocity component has derivative
+    $h'(t)$. Pairing the two (\texttt{HasDerivAt.prod}) gives derivative
+    $(h(t), h'(t))$ at every $\varepsilon$; the value identity is definitional.
+\end{proof}
+
+\begin{lemma}[Pointwise $\varepsilon$-derivative of the integrand at a shifted configuration]
+    \label{lem:integrand-hasDerivAt}
+    \lean{LeanEval.Analysis.integrand_hasDerivAt}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:shifted-partials}
+    Fix $t$, a $C^1$ variation $h$, and a parameter $\varepsilon_0 \in
+    \mathbb{R}$. If $L$ is differentiable at the shifted configuration
+    $(t,\, x_{\varepsilon_0}(t),\, x'_{\varepsilon_0}(t))$, then the map
+    $\varepsilon \mapsto L(t,\, x(t) + \varepsilon h(t),\, x'(t) + \varepsilon h'(t))$
+    has derivative
+    $\partial_x L_{\varepsilon_0}(t)\, h(t) + \partial_{x'} L_{\varepsilon_0}(t)\,
+    h'(t)$ at $\varepsilon = \varepsilon_0$. (At $\varepsilon_0 = 0$ this is the
+    classical first-variation integrand
+    $\partial_x L(t)\, h(t) + \partial_{x'} L(t)\, h'(t)$.) The statement is given
+    at general $\varepsilon_0$ because the Leibniz rule
+    (\cref{lem:first-variation}) requires the pointwise derivative for all
+    $\varepsilon$ in a neighbourhood of $0$, not only at $0$.
+\end{lemma}
+\begin{proof}
+    \uses{def:shifted-partials, lem:variation-curve-hasDerivAt, lem:fderiv-decomp}
+    Write the integrand as $\Phi \circ \sigma$ where
+    $\sigma(\varepsilon) = (x(t) + \varepsilon h(t),\, x'(t) + \varepsilon h'(t))$
+    and $\Phi(y,z) = L(t,y,z)$. By \cref{lem:variation-curve-hasDerivAt} the curve
+    $\sigma$ has derivative $(h(t), h'(t))$ at $\varepsilon_0$, with
+    $\sigma(\varepsilon_0) = (x_{\varepsilon_0}(t), x'_{\varepsilon_0}(t))$. Since
+    $\Phi$ is differentiable at $\sigma(\varepsilon_0)$, the chain rule
+    (\texttt{HasFDerivAt.comp\_hasDerivAt}) gives derivative
+    $\mathrm{fderiv}\, \Phi\, (x_{\varepsilon_0}(t),x'_{\varepsilon_0}(t))\,
+    (h(t), h'(t))$. By \cref{lem:fderiv-decomp} this equals
+    $\partial_1 \Phi \cdot h(t) + \partial_2 \Phi \cdot h'(t)$, and the slice
+    partials $\partial_1 \Phi$, $\partial_2 \Phi$ at the shifted configuration are
+    exactly $\partial_x L_{\varepsilon_0}(t)$ and
+    $\partial_{x'} L_{\varepsilon_0}(t)$ by \cref{def:shifted-partials}.
+\end{proof}
+
+\begin{lemma}[The $\varepsilon$-derivative integrand is supported in $\mathrm{tsupport}\,h$]
+    \label{lem:deriv-integrand-support}
+    \lean{LeanEval.Analysis.deriv_integrand_support}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:shifted-partials}
+    Let $h$ have compact support. For every $\varepsilon$ the
+    $\varepsilon$-derivative integrand
+    $t \mapsto \partial_x L_\varepsilon(t)\,h(t) + \partial_{x'} L_\varepsilon(t)\,
+    h'(t)$ vanishes for $t \notin \mathrm{tsupport}\,h$; hence it is supported in
+    the compact set $K := \mathrm{tsupport}\,h$.
+\end{lemma}
+\begin{proof}
+    Both $h$ and $h'$ vanish off $K$: $h$ by
+    \texttt{image\_eq\_zero\_of\_nmem\_tsupport}, and $h' = \mathrm{deriv}\,h$ by
+    the same lemma together with $\mathrm{tsupport}\,h' \subseteq K$
+    (\texttt{tsupport\_deriv\_subset}). Each summand carries a factor $h(t)$ or
+    $h'(t)$, so the whole integrand vanishes off $K$, which is compact since $h$
+    has compact support.
+\end{proof}
+
+\begin{lemma}[Uniform bound of the shifted partials over the $\varepsilon$-tube]
+    \label{lem:tube-bound}
+    \lean{LeanEval.Analysis.tube_bound}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:shifted-partials, lem:partial-deriv-contdiff}
+    Let $L, x$ be $C^2$ and $h$ smooth with compact support, and fix $r > 0$.
+    Then $\partial_x L_\varepsilon(t)$ and $\partial_{x'} L_\varepsilon(t)$ are
+    bounded by a single constant $M$ over the compact $\varepsilon$-tube
+    \[
+      T_r := \bigl\{ (t, x(t)+\varepsilon h(t), x'(t)+\varepsilon h'(t)) :
+        t \in \mathrm{tsupport}\,h,\ |\varepsilon| \le r \bigr\}.
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:partial-deriv-contdiff}
+    The shifted spatial and velocity partials are the continuous $\mathbb{R}^3$
+    partial maps $L_y, L_z$ of \cref{lem:partial-deriv-contdiff} (slots two and
+    three of $L$) evaluated at the shifted configuration, i.e.
+    $\partial_x L_\varepsilon(t) = L_y(t, x_\varepsilon(t), x'_\varepsilon(t))$
+    and likewise for $L_z$. The map
+    $(t,\varepsilon) \mapsto (t, x_\varepsilon(t), x'_\varepsilon(t))$ is
+    continuous, and $\mathrm{tsupport}\,h \times [-r,r]$ is compact, so its image
+    $T_r$ is compact (\texttt{IsCompact.image}). The continuous $L_y, L_z$ are
+    therefore bounded on $T_r$ (\texttt{IsCompact.exists\_bound\_of\_continuousOn});
+    take $M$ the larger of the two bounds.
+\end{proof}
+
+\begin{lemma}[Integrable dominating bound for the $\varepsilon$-derivative]
+    \label{lem:dominating-bound}
+    \lean{LeanEval.Analysis.dominating_bound}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:shifted-partials, lem:deriv-integrand-support, lem:tube-bound}
+    If $L$ and $x$ are $C^2$ and $h$ is smooth with compact support and
+    $\mathrm{tsupport}\,h \subseteq (a,b)$, then there is an integrable
+    $g \ge 0$ that dominates the $\varepsilon$-derivative integrand
+    $t \mapsto \partial_x L_\varepsilon(t)\,h(t) + \partial_{x'} L_\varepsilon(t)\,
+    h'(t)$ pointwise, \emph{uniformly} for all $\varepsilon$ with $|\varepsilon|
+    \le r$ (a fixed $r > 0$), as required by the Leibniz rule.
+\end{lemma}
+\begin{proof}
+    \uses{lem:deriv-integrand-support, lem:tube-bound}
+    By \cref{lem:deriv-integrand-support} the integrand vanishes off the compact
+    set $K = \mathrm{tsupport}\,h$ for every $\varepsilon$. On $K$, by
+    \cref{lem:tube-bound} the shifted partials are bounded by a constant $M$
+    uniformly over $|\varepsilon| \le r$, and the continuous $h, h'$ are bounded
+    by some $H$ on $K$ (\texttt{IsCompact.exists\_bound\_of\_continuousOn}). Hence
+    $g := 2MH \cdot \mathbf{1}_K$ dominates the integrand pointwise for all such
+    $\varepsilon$. It is integrable because $K$ has finite measure
+    (\texttt{IsCompact.measure\_lt\_top}) and a constant times the indicator of a
+    finite-measure set is integrable (\texttt{integrableOn\_const},
+    \texttt{Integrable.indicator}).
+\end{proof}
+
+\begin{lemma}[A.e.-measurability of the integrand family]
+    \label{lem:integrand-ae-measurable}
+    \lean{LeanEval.Analysis.integrand_aestronglyMeasurable}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{lem:integrand-hasDerivAt}
+    Under the same hypotheses, for $\varepsilon$ near $0$ both the integrand
+    $t \mapsto L(t, x(t) + \varepsilon h(t), x'(t) + \varepsilon h'(t))$ and its
+    $\varepsilon$-derivative are a.e.-strongly-measurable on $(a,b)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:integrand-hasDerivAt}
+    Both maps are continuous in $t$: $L$, $x$, $x'$, $h$, $h'$ are continuous,
+    and the derivative integrand is the continuous expression of
+    \cref{lem:integrand-hasDerivAt}. A continuous function is
+    a.e.-strongly-measurable (\texttt{Continuous.aestronglyMeasurable}).
+\end{proof}
+
+\begin{lemma}[Integrability of the base integrand]
+    \label{lem:base-integrand-integrable}
+    \lean{LeanEval.Analysis.base_integrand_integrable}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{lem:curve-contdiff}
+    Let $a < b$ and let $L, x$ be $C^2$. Then the $\varepsilon = 0$ integrand
+    $t \mapsto L(t, x(t), x'(t))$ is integrable on $(a,b)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:curve-contdiff}
+    The integrand is $L \circ \gamma$ with $\gamma(t) = (t,x(t),x'(t))$ continuous
+    (\cref{lem:curve-contdiff}), so $L\circ\gamma$ is continuous on the closed
+    interval $[a,b]$, hence integrable on $[a,b]$
+    (\texttt{ContinuousOn.integrableOn\_Icc}); restricting to $(a,b)$ (whose
+    complement in $[a,b]$ is null) keeps it integrable
+    (\texttt{MeasureTheory.IntegrableOn.mono\_set}, using $(a,b)\subseteq[a,b]$).
+\end{proof}
+
+\begin{lemma}[First variation as an integral]
+    \label{lem:first-variation}
+    \lean{LeanEval.Analysis.first_variation}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, lem:integrand-hasDerivAt}
+    If $L$ is $C^2$, $x$ is $C^2$, and $h$ is smooth with compact support and
+    $\mathrm{tsupport}\, h \subseteq (a,b)$, then
+    \[
+      \frac{d}{d\varepsilon}\Bigg|_{0}
+        \int_{(a,b)} L\bigl(t, x(t) + \varepsilon h(t), x'(t) + \varepsilon h'(t)\bigr)\, dt
+      = \int_{(a,b)} \bigl(\partial_x L(t)\, h(t) + \partial_{x'} L(t)\, h'(t)\bigr)\, dt .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:integrand-hasDerivAt, lem:dominating-bound, lem:integrand-ae-measurable, lem:base-integrand-integrable}
+    Apply the Leibniz rule for differentiation under the integral sign
+    (\texttt{hasDerivAt\_integral\_of\_dominated\_loc\_of\_deriv\_le}) on the
+    measure $\mathrm{volume}$ restricted to $(a,b)$, at the base point
+    $\varepsilon_0 = 0$. Its hypotheses are supplied as separate steps:
+    \begin{itemize}
+      \item integrability of the base integrand $L(t,x(t),x'(t))$
+        (\texttt{hF\_int}) by \cref{lem:base-integrand-integrable};
+      \item the pointwise $\varepsilon$-derivative of the integrand \emph{for all
+        $\varepsilon$ in a ball around $0$} by \cref{lem:integrand-hasDerivAt}
+        (this is why that lemma is stated at general $\varepsilon_0$);
+      \item a.e.-strong-measurability of the family by
+        \cref{lem:integrand-ae-measurable};
+      \item the integrable dominating bound, uniform over that ball, by
+        \cref{lem:dominating-bound}.
+    \end{itemize}
+    The rule then equates the derivative of the integral at $0$ with the integral
+    of the $\varepsilon=0$ pointwise derivative
+    $\partial_x L(t)\,h(t) + \partial_{x'} L(t)\,h'(t)$.
+\end{proof}
+
+\subsection{Integration by parts and the weak equation}
+
+\begin{lemma}[A compactly supported variation vanishes at the endpoints]
+    \label{lem:boundary-vanishing}
+    \lean{LeanEval.Analysis.boundary_vanishing}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    Let $a < b$ and $h : \mathbb{R} \to \mathbb{R}$ with
+    $\mathrm{tsupport}\,h \subseteq (a,b)$. Then $h(a) = h(b) = 0$.
+\end{lemma}
+\begin{proof}
+    Since $a \notin (a,b)$ and $b \notin (a,b)$, neither endpoint lies in
+    $\mathrm{tsupport}\,h$, so $h(a) = h(b) = 0$
+    (\texttt{image\_eq\_zero\_of\_nmem\_tsupport}).
+\end{proof}
+
+\begin{lemma}[Integral over $(a,b)$ as an interval integral]
+    \label{lem:ioo-interval-conversion}
+    \lean{LeanEval.Analysis.ioo_interval_conversion}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    Let $a < b$ and let $f$ be integrable on $(a,b)$. Then
+    $\int_{(a,b)} f = \int_a^b f$.
+\end{lemma}
+\begin{proof}
+    The interval integral $\int_a^b f$ with $a \le b$ is the integral over the
+    half-open $(a,b]$ (\texttt{intervalIntegral.integral\_of\_le}), which equals
+    the integral over the open $(a,b)$ since the missing endpoint has measure
+    zero (\texttt{MeasureTheory.integral\_Ioc\_eq\_integral\_Ioo}).
+\end{proof}
+
+\begin{lemma}[Differentiability and interval-integrability for integration by parts]
+    \label{lem:ibp-hypotheses}
+    \lean{LeanEval.Analysis.ibp_hypotheses}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:lagrangian-partial-v, lem:partial-v-contdiff}
+    Let $L, x$ be $C^2$ and $h$ smooth. Then at every $t$ both $\partial_{x'} L$
+    and $h$ have derivatives ($\tfrac{d}{dt}\partial_{x'} L(t)$ and $h'(t)$
+    respectively), and the products $\partial_{x'} L \cdot h'$ and
+    $(\tfrac{d}{dt}\partial_{x'} L)\cdot h$ are interval-integrable on $[a,b]$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:partial-v-contdiff}
+    By \cref{lem:partial-v-contdiff} $\partial_{x'} L$ is $C^1$, so at each $t$ it
+    is differentiable with derivative $\tfrac{d}{dt}\partial_{x'} L(t)$
+    (\texttt{DifferentiableAt.hasDerivAt}) and this derivative is continuous;
+    $h$ is smooth, so it has derivative $h'(t)$ at each $t$ with $h'$ continuous.
+    All four factors $\partial_{x'} L$, $h'$, $\tfrac{d}{dt}\partial_{x'} L$, $h$
+    are continuous, so the two products are continuous
+    (\texttt{Continuous.mul}) and hence interval-integrable on $[a,b]$
+    (\texttt{Continuous.intervalIntegrable}).
+\end{proof}
+
+\begin{lemma}[Integration by parts for the velocity term]
+    \label{lem:integration-by-parts}
+    \lean{LeanEval.Analysis.integration_by_parts}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:lagrangian-partial-v, lem:partial-v-contdiff, lem:ibp-hypotheses}
+    Let $a < b$. If $L$ is $C^2$, $x$ is $C^2$, and $h$ is smooth with compact
+    support and $\mathrm{tsupport}\, h \subseteq (a,b)$, then
+    \[
+      \int_{(a,b)} \partial_{x'} L(t)\, h'(t)\, dt
+        = - \int_{(a,b)} \Bigl(\tfrac{d}{dt}\partial_{x'} L(t)\Bigr)\, h(t)\, dt .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:ibp-hypotheses, lem:boundary-vanishing, lem:ioo-interval-conversion}
+    By \cref{lem:ioo-interval-conversion} both integrals over $(a,b)$ equal the
+    corresponding interval integrals $\int_a^b$. Apply integration by parts
+    (\texttt{intervalIntegral.integral\_mul\_deriv\_eq\_deriv\_mul}) with
+    $u = \partial_{x'} L$ and $v = h$; the required HasDerivAt facts and
+    interval-integrability of the two product integrands are supplied by
+    \cref{lem:ibp-hypotheses}. This yields
+    $\int_a^b \partial_{x'} L \cdot h' = \partial_{x'} L(b)\, h(b)
+      - \partial_{x'} L(a)\, h(a) - \int_a^b (\tfrac{d}{dt}\partial_{x'} L)\, h$.
+    The boundary terms vanish because $h(a) = h(b) = 0$
+    (\cref{lem:boundary-vanishing}).
+\end{proof}
+
+\begin{lemma}[The weak-equation integrands are integrable]
+    \label{lem:weak-el-integrands-integrable}
+    \lean{LeanEval.Analysis.weak_el_integrands_integrable}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, lem:partial-x-continuous, lem:partial-v-contdiff, lem:continuous-compact-support-integrable}
+    Let $L, x$ be $C^2$ and $h$ smooth with compact support. Then each of
+    $\partial_x L\cdot h$, $\partial_{x'} L\cdot h'$, and
+    $(\tfrac{d}{dt}\partial_{x'} L)\cdot h$ is continuous with compact support,
+    hence integrable.
+\end{lemma}
+\begin{proof}
+    \uses{lem:partial-x-continuous, lem:partial-v-contdiff, lem:continuous-compact-support-integrable}
+    $\partial_x L$ is continuous (\cref{lem:partial-x-continuous}), and both
+    $\partial_{x'} L$ and its derivative $\tfrac{d}{dt}\partial_{x'} L$ are
+    continuous (\cref{lem:partial-v-contdiff}); $h$ and $h'$ are continuous with
+    compact support. Each product is therefore continuous and compactly supported
+    (\texttt{HasCompactSupport.mul\_left}), hence integrable
+    (\cref{lem:continuous-compact-support-integrable}).
+\end{proof}
+
+\begin{lemma}[Weak Euler--Lagrange equation]
+    \label{lem:weak-euler-lagrange}
+    \lean{LeanEval.Analysis.weak_euler_lagrange}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, def:variational-extremum, lem:first-variation, lem:integration-by-parts}
+    Let $a < b$, $L$ and $x$ be $C^2$, and $x$ a variational extremum on
+    $(a,b)$. Then for every smooth $h$ with compact support and
+    $\mathrm{tsupport}\, h \subseteq (a,b)$,
+    \[
+      \int_{(a,b)} \Bigl(\partial_x L(t) - \tfrac{d}{dt}\partial_{x'} L(t)\Bigr)
+        h(t)\, dt = 0 .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{def:variational-extremum, lem:first-variation, lem:integration-by-parts, lem:weak-el-integrands-integrable}
+    By \cref{def:variational-extremum} the first variation is $0$, and by
+    \cref{lem:first-variation} it equals
+    $\int_{(a,b)} (\partial_x L\, h + \partial_{x'} L\, h')$, so this integral is
+    $0$. Replace the second summand using \cref{lem:integration-by-parts}:
+    $\int_{(a,b)} \partial_{x'} L\, h' = - \int_{(a,b)} (\tfrac{d}{dt}\partial_{x'}
+    L)\, h$. All three integrands are integrable
+    (\cref{lem:weak-el-integrands-integrable}), so the integral of the sum splits
+    (\texttt{MeasureTheory.integral\_add}) and recombines into the single integral
+    of $(\partial_x L - \tfrac{d}{dt}\partial_{x'} L)\, h$, which therefore
+    vanishes.
+\end{proof}
+
+\subsection{The Euler--Lagrange equation}
+
+\begin{lemma}[Weak equation in $\int g \bullet f$ shape over the full measure]
+    \label{lem:defect-test-integral-vanishes}
+    \lean{LeanEval.Analysis.defect_test_integral_vanishes}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, lem:weak-euler-lagrange}
+    Let $a < b$, $L, x$ be $C^2$, and $x$ a variational extremum on $(a,b)$. Write
+    $D(t) = \partial_x L(t) - \frac{d}{dt}\partial_{x'} L(t)$. Then for every
+    smooth $h$ with compact support and $\mathrm{tsupport}\,h \subseteq (a,b)$,
+    \[
+      \int_{\mathbb{R}} h(t) \bullet D(t)\, d(\mathrm{volume}) = 0 ,
+    \]
+    the integral against the full volume measure in the $\int g \bullet f$ shape
+    required by the fundamental lemma (scalar $\bullet$ being multiplication).
+\end{lemma}
+\begin{proof}
+    \uses{lem:weak-euler-lagrange}
+    By \cref{lem:weak-euler-lagrange}, $\int_{(a,b)} D(t)\,h(t)\,dt = 0$. The
+    integrand $t \mapsto h(t)\,D(t)$ vanishes outside
+    $\mathrm{tsupport}\,h \subseteq (a,b)$
+    (\texttt{image\_eq\_zero\_of\_nmem\_tsupport}), so its integral over the whole
+    line equals its integral over $(a,b)$
+    (\texttt{MeasureTheory.setIntegral\_eq\_integral\_of\_forall\_compl\_eq\_zero}),
+    which is $0$. Commutativity rewrites $D \cdot h$ as $h \cdot D = h \bullet D$.
+\end{proof}
+
+\begin{theorem}[Euler--Lagrange equation]
+    \label{thm:euler-lagrange}
+    \lean{LeanEval.Analysis.euler_lagrange_equation}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, def:variational-extremum, lem:defect-test-integral-vanishes, lem:el-defect-continuous}
+    Let $a < b$. If $L$ is $C^2$, $x$ is $C^2$, and $x$ is a variational extremum
+    of the action on $(a,b)$, then for every $t \in (a,b)$,
+    \[
+      \partial_x L(t) = \frac{d}{dt}\, \partial_{x'} L(t) .
+    \]
+\end{theorem}
+\begin{proof}
+    \uses{lem:defect-test-integral-vanishes, lem:el-defect-continuous}
+    Let $D(t) = \partial_x L(t) - \frac{d}{dt}\partial_{x'} L(t)$. By
+    \cref{lem:defect-test-integral-vanishes}, $\int_{\mathbb{R}} h \bullet D = 0$
+    for every smooth compactly supported $h$ with
+    $\mathrm{tsupport}\, h \subseteq (a,b)$. $D$ is continuous
+    (\cref{lem:el-defect-continuous}), hence locally integrable on the open set
+    $(a,b)$. The fundamental lemma of the calculus of variations in its
+    $C^\infty$ test-function form
+    (\texttt{IsOpen.ae\_eq\_zero\_of\_integral\_contDiff\_smul\_eq\_zero}, applied
+    to the open set $(a,b)$ and matching the $C^\infty$ test functions of
+    \cref{def:variational-extremum}) gives $D = 0$ almost everywhere on $(a,b)$.
+    Since $D$ is continuous, almost-everywhere vanishing upgrades to vanishing
+    everywhere on $(a,b)$ (\texttt{MeasureTheory.Measure.eqOn\_Ioo\_of\_ae\_eq}).
+    Thus $D(t) = 0$, i.e. $\partial_x L(t) = \frac{d}{dt}\partial_{x'} L(t)$, for
+    all $t \in (a,b)$.
+\end{proof}
 
 \end{document}
