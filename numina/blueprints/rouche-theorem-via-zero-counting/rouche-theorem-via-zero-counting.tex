@@ -705,36 +705,22 @@ the result.
     is the difference of the logarithmic derivatives.
 \end{proof}
 
-\begin{lemma}[Logarithmic derivative of an analytic nonvanishing function is circle-integrable]
-    \label{lem:circleIntegrable-logDeriv-of-analytic-ne}
-    \lean{LeanEval.ComplexAnalysis.circleIntegrable_logDeriv_of_analytic_ne}
-    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \leanok
-    Let $k$ be analytic at every $z \in S$ with $k(z) \neq 0$ there. Then
-    $\operatorname{logDeriv} k$ is circle-integrable on $C(0,R)$.
-\end{lemma}
-\begin{proof}
-    On a neighbourhood of every $z \in S$, $k$ is analytic and nonzero, so
-    $\operatorname{logDeriv} k = k'/k$ is continuous at $z$; being continuous on
-    the circle it is circle-integrable (\texttt{ContinuousOn.circleIntegrable}).
-\end{proof}
-
 \begin{lemma}[The logarithmic derivatives are circle-integrable]
     \label{lem:logDeriv-circleIntegrable}
     \lean{LeanEval.ComplexAnalysis.logDeriv_circleIntegrable}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \uses{lem:f-analytic-sphere, lem:fg-analytic-sphere, lem:circleIntegrable-logDeriv-of-analytic-ne}
+    \uses{lem:f-analytic-sphere, lem:fg-analytic-sphere}
     \leanok
     The functions $\operatorname{logDeriv} f$ and $\operatorname{logDeriv}(f+g)$
     are circle-integrable on $C(0,R)$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:f-analytic-sphere, lem:fg-analytic-sphere, lem:circleIntegrable-logDeriv-of-analytic-ne}
+    \uses{lem:f-analytic-sphere, lem:fg-analytic-sphere}
     By Lemmas~\ref{lem:f-analytic-sphere} and~\ref{lem:fg-analytic-sphere}, each of
-    $f$ and $f+g$ is analytic and nonzero at every $z \in S$. Applying
-    Lemma~\ref{lem:circleIntegrable-logDeriv-of-analytic-ne} to $f$ and to $f+g$
-    shows $\operatorname{logDeriv} f$ and $\operatorname{logDeriv}(f+g)$ are
-    circle-integrable on $C(0,R)$.
+    $f$ and $f+g$ is analytic and nonzero at every $z \in S$. Hence
+    $\operatorname{logDeriv} f = f'/f$ and $\operatorname{logDeriv}(f+g)$ are
+    continuous on the circle, and a continuous function on the circle is
+    circle-integrable (\texttt{ContinuousOn.circleIntegrable}).
 \end{proof}
 
 \begin{lemma}[Equality of the two winding integrals]
