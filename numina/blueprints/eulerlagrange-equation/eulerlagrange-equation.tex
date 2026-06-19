@@ -95,6 +95,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \label{lem:directional-deriv-eq-fderiv}
     \lean{LeanEval.Analysis.directional_deriv_eq_fderiv}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \leanok
     Let $E$ be a real normed space, $f : E \to \mathbb{R}$ differentiable at a
     point $p$, and $d \in E$. Then
     \[
@@ -120,6 +121,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \label{lem:partial-deriv-contdiff}
     \lean{LeanEval.Analysis.partialDeriv_contDiff}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \leanok
     Let $F : \mathbb{R} \times \mathbb{R} \times \mathbb{R} \to \mathbb{R}$ be
     $C^2$ and fix one coordinate slot. Then the partial-derivative map sending a
     point $p$ to the derivative of the one-variable slice of $F$ through $p$ in
@@ -144,6 +146,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \label{lem:curve-contdiff}
     \lean{LeanEval.Analysis.curve_contDiff}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \leanok
     If $x$ is $C^2$, then $\gamma(t) := (t, x(t), x'(t))$ is a $C^1$ map
     $\mathbb{R} \to \mathbb{R}^3$.
 \end{lemma}
@@ -159,6 +162,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.lagrangianPartialV_contDiff}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:lagrangian-partial-v}
+    \leanok
     If $L$ is $C^2$ and $x$ is $C^2$, then the map $t \mapsto \partial_{x'} L(t)$
     is $C^1$ on $\mathbb{R}$; in particular it is differentiable everywhere, so
     $\frac{d}{dt}\partial_{x'} L$ exists, and both $\partial_{x'} L$ and its
@@ -182,6 +186,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.lagrangianPartialX_continuous}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:lagrangian-partial-x}
+    \leanok
     If $L$ is $C^2$ and $x$ is $C^2$, then the map $t \mapsto \partial_x L(t)$ is
     continuous on $\mathbb{R}$.
 \end{lemma}
@@ -201,6 +206,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.el_defect_continuous}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, lem:partial-v-contdiff, lem:partial-x-continuous}
+    \leanok
     Under the hypotheses above, the defect
     $D(t) := \partial_x L(t) - \frac{d}{dt}\partial_{x'} L(t)$ is continuous on
     $\mathbb{R}$.
@@ -219,6 +225,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \label{lem:continuous-compact-support-integrable}
     \lean{LeanEval.Analysis.continuous_compactSupport_integrable}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \leanok
     A continuous function $\mathbb{R} \to \mathbb{R}$ with compact support is
     integrable for the volume measure.
 \end{lemma}
@@ -230,6 +237,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \label{lem:fderiv-decomp}
     \lean{LeanEval.Analysis.fderiv_decomp}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \leanok
     Let $\Phi : \mathbb{R} \times \mathbb{R} \to \mathbb{R}$ be differentiable at
     $(y_0, z_0)$. Then for all $(u, v)$,
     \[
@@ -258,6 +266,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.variation_curve_hasDerivAt}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:shifted-partials}
+    \leanok
     Fix $t$ and a variation $h$. For every $\varepsilon \in \mathbb{R}$ the curve
     $\sigma(\varepsilon) := (x(t) + \varepsilon h(t),\, x'(t) + \varepsilon h'(t))$
     has derivative $(h(t), h'(t))$ at $\varepsilon$, and
@@ -277,6 +286,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.integrand_hasDerivAt}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:shifted-partials}
+    \leanok
     Fix $t$, a $C^1$ variation $h$, and a parameter $\varepsilon_0 \in
     \mathbb{R}$. If $L$ is differentiable at the shifted configuration
     $(t,\, x_{\varepsilon_0}(t),\, x'_{\varepsilon_0}(t))$, then the map
@@ -312,6 +322,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.deriv_integrand_support}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:shifted-partials}
+    \leanok
     Let $h$ have compact support. For every $\varepsilon$ the
     $\varepsilon$-derivative integrand
     $t \mapsto \partial_x L_\varepsilon(t)\,h(t) + \partial_{x'} L_\varepsilon(t)\,
@@ -359,6 +370,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.dominating_bound}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:shifted-partials, lem:deriv-integrand-support, lem:tube-bound}
+    \leanok
     If $L$ and $x$ are $C^2$ and $h$ is smooth with compact support and
     $\mathrm{tsupport}\,h \subseteq (a,b)$, then there is an integrable
     $g \ge 0$ that dominates the $\varepsilon$-derivative integrand
@@ -402,6 +414,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.base_integrand_integrable}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{lem:curve-contdiff}
+    \leanok
     Let $a < b$ and let $L, x$ be $C^2$. Then the $\varepsilon = 0$ integrand
     $t \mapsto L(t, x(t), x'(t))$ is integrable on $(a,b)$.
 \end{lemma}
@@ -420,6 +433,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.first_variation}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, lem:integrand-hasDerivAt}
+    \leanok
     If $L$ is $C^2$, $x$ is $C^2$, and $h$ is smooth with compact support and
     $\mathrm{tsupport}\, h \subseteq (a,b)$, then
     \[
@@ -456,6 +470,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \label{lem:boundary-vanishing}
     \lean{LeanEval.Analysis.boundary_vanishing}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \leanok
     Let $a < b$ and $h : \mathbb{R} \to \mathbb{R}$ with
     $\mathrm{tsupport}\,h \subseteq (a,b)$. Then $h(a) = h(b) = 0$.
 \end{lemma}
@@ -469,6 +484,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \label{lem:ioo-interval-conversion}
     \lean{LeanEval.Analysis.ioo_interval_conversion}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \leanok
     Let $a < b$ and let $f$ be integrable on $(a,b)$. Then
     $\int_{(a,b)} f = \int_a^b f$.
 \end{lemma}
@@ -484,6 +500,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.ibp_hypotheses}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:lagrangian-partial-v, lem:partial-v-contdiff}
+    \leanok
     Let $L, x$ be $C^2$ and $h$ smooth. Then at every $t$ both $\partial_{x'} L$
     and $h$ have derivatives ($\tfrac{d}{dt}\partial_{x'} L(t)$ and $h'(t)$
     respectively), and the products $\partial_{x'} L \cdot h'$ and
@@ -506,6 +523,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.integration_by_parts}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:lagrangian-partial-v, lem:partial-v-contdiff, lem:ibp-hypotheses}
+    \leanok
     Let $a < b$. If $L$ is $C^2$, $x$ is $C^2$, and $h$ is smooth with compact
     support and $\mathrm{tsupport}\, h \subseteq (a,b)$, then
     \[
@@ -532,6 +550,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.weak_el_integrands_integrable}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, lem:partial-x-continuous, lem:partial-v-contdiff, lem:continuous-compact-support-integrable}
+    \leanok
     Let $L, x$ be $C^2$ and $h$ smooth with compact support. Then each of
     $\partial_x L\cdot h$, $\partial_{x'} L\cdot h'$, and
     $(\tfrac{d}{dt}\partial_{x'} L)\cdot h$ is continuous with compact support,
@@ -552,6 +571,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.weak_euler_lagrange}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, def:variational-extremum, lem:first-variation, lem:integration-by-parts}
+    \leanok
     Let $a < b$, $L$ and $x$ be $C^2$, and $x$ a variational extremum on
     $(a,b)$. Then for every smooth $h$ with compact support and
     $\mathrm{tsupport}\, h \subseteq (a,b)$,
@@ -581,6 +601,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.defect_test_integral_vanishes}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, lem:weak-euler-lagrange}
+    \leanok
     Let $a < b$, $L, x$ be $C^2$, and $x$ a variational extremum on $(a,b)$. Write
     $D(t) = \partial_x L(t) - \frac{d}{dt}\partial_{x'} L(t)$. Then for every
     smooth $h$ with compact support and $\mathrm{tsupport}\,h \subseteq (a,b)$,
@@ -606,6 +627,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.euler_lagrange_equation}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:lagrangian-partial-x, def:lagrangian-partial-v, def:variational-extremum, lem:defect-test-integral-vanishes, lem:el-defect-continuous}
+    \leanok
     Let $a < b$. If $L$ is $C^2$, $x$ is $C^2$, and $x$ is a variational extremum
     of the action on $(a,b)$, then for every $t \in (a,b)$,
     \[
