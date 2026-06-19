@@ -52,6 +52,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.stabilizer_inf_eq_bot}
     \leanfile{LeanEval/GroupTheory/Frobenius/Basic.lean}
     \uses{lem:stabilizer-conj, def:frobenius-hypotheses}
+    \leanok
     If $x, y \in X$ are distinct, then $\mathrm{Stab}_G(x) \cap
     \mathrm{Stab}_G(y) = \{1\}$. Equivalently, for $g \notin H$ one has
     $H \cap gHg^{-1} = \{1\}$.
@@ -70,6 +71,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.partition}
     \leanfile{LeanEval/GroupTheory/Frobenius/Basic.lean}
     \uses{def:frobenius-kernel, def:frobenius-hypotheses}
+    \leanok
     Every $g \in G$ with $g \neq 1$ either fixes no point of $X$ (so $g \in K$),
     or fixes exactly one point of $X$. In the latter case $g$ lies in a unique
     point stabiliser, namely $\mathrm{Stab}_G(x)$ for the unique fixed point $x$.
@@ -176,6 +178,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.inner_eq_dim_hom}
     \leanfile{LeanEval/GroupTheory/Frobenius/Character.lean}
     \uses{lem:inner-product-as-character-sum, def:irreducible-character}
+    \leanok
     For representations $V, W$ of a finite group $\Gamma$ over $\mathbb{C}$ with
     characters $\chi_V, \chi_W$,
     $\langle \chi_V, \chi_W \rangle_\Gamma = \dim_{\mathbb{C}}
@@ -284,6 +287,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.induced_is_char_of_ind}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{def:induced-class-function, def:irreducible-character, lem:ind-trace-sum}
+    \leanok
     Let $\iota : H \hookrightarrow G$ be the inclusion. If $\varphi$ is the
     character of an $H$-representation $V$, then $\mathrm{Ind}_H^G \varphi$ is the
     character of the induced $G$-representation $\mathrm{ind}_\iota V$ (Mathlib's
@@ -324,6 +328,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.indClassFun_one}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{def:induced-class-function}
+    \leanok
     For any class function $\varphi$ on $H$, $(\mathrm{Ind}_H^G \varphi)(1) =
     [G:H]\,\varphi(1)$.
 \end{lemma}
@@ -339,6 +344,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.ind_inner_as_hom_dim}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{lem:induced-is-char-of-ind, lem:inner-product-eq-dim-hom}
+    \leanok
     Let $V, W$ realise the characters $\varphi$ of $H$ and $\psi$ of $G$. Then
     $\langle \mathrm{Ind}_H^G\varphi, \psi\rangle_G = \dim_{\mathbb{C}}
     \mathrm{Hom}_G(W, \mathrm{ind}_\iota V)$.
@@ -356,6 +362,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.res_inner_as_hom_dim}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{lem:inner-product-eq-dim-hom}
+    \leanok
     Let $V, W$ realise the characters $\varphi$ of $H$ and $\psi$ of $G$. Then
     $\langle \varphi, \psi|_H\rangle_H = \dim_{\mathbb{C}}
     \mathrm{Hom}_H(\mathrm{res}_\iota W, V)$, where $\mathrm{res}_\iota W$ is $W$
@@ -417,6 +424,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.indClassFun_vanishing_on_kernel}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{def:induced-class-function, lem:partition, def:frobenius-kernel}
+    \leanok
     Let $\varphi$ be any class function on $H$. Then $(\mathrm{Ind}_H^G
     \varphi)(g) = 0$ for every fixed-point-free $g$ (every $g \in K \setminus
     \{1\}$).
@@ -434,6 +442,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.conjugators_into_H}
     \leanfile{LeanEval/GroupTheory/Frobenius/Basic.lean}
     \uses{lem:trivial-intersection, def:frobenius-hypotheses}
+    \leanok
     Let $h \in H$ with $h \neq 1$. If $x \in G$ satisfies $x^{-1} h x \in H$, then
     $x \in H$. Consequently $\{x \in G : x^{-1} h x \in H\} = H$.
 \end{lemma}
@@ -469,6 +478,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.indClassFun_vanishing_restriction}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{lem:induced-vanishing-on-kernel, lem:induced-restriction-to-H}
+    \leanok
     Let $\varphi$ be a class function on $H$ with $\varphi(1) = 0$. Then
     $(\mathrm{Ind}_H^G \varphi)(h) = \varphi(h)$ for every $h \in H$, and
     $(\mathrm{Ind}_H^G \varphi)(g) = 0$ for every $g \in K \setminus \{1\}$.
@@ -582,6 +592,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.liftClassFun_restricts}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{def:lifted-class-function, lem:induced-vanishing-restriction}
+    \leanok
     For every $h \in H$, $\widetilde{\chi}(h) = \chi(h)$. In particular
     $\widetilde{\chi}(1) = \chi(1)$.
 \end{lemma}
@@ -697,6 +708,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.norm_one_virtual_is_irreducible}
     \leanfile{LeanEval/GroupTheory/Frobenius/Character.lean}
     \uses{def:irreducible-character, lem:norm-one-virtual-is-plus-minus-irr, lem:inner-product-eq-dim-hom}
+    \leanok
     Let $\alpha$ be a virtual character of a finite group $\Gamma$ (an integer
     combination of irreducible characters) with $\langle\alpha,\alpha\rangle_\Gamma
     = 1$ and $\alpha(1) > 0$. Then $\alpha$ is an irreducible character of
@@ -739,6 +751,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.char_eq_degree_eigenvalues_one}
     \leanfile{LeanEval/GroupTheory/Frobenius/Character.lean}
     \uses{def:irreducible-character, lem:rep-element-eigenvalues-roots-of-unity}
+    \leanok
     With the notation of
     Lemma~\ref{lem:rep-element-eigenvalues-roots-of-unity}, if
     $\chi(g) = \chi(1) = d$ then every eigenvalue $\lambda_i$ of $\rho(g)$ equals
@@ -761,6 +774,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.trace_eq_degree_iff_identity}
     \leanfile{LeanEval/GroupTheory/Frobenius/Character.lean}
     \uses{def:irreducible-character, lem:rep-element-eigenvalues-roots-of-unity, lem:char-eq-degree-implies-eigenvalues-one}
+    \leanok
     Let $\rho$ be a finite-dimensional complex representation of a finite group
     $\Gamma$ with character $\chi$. For $g \in \Gamma$, $\rho(g) = 1$ if and only
     if $\chi(g) = \chi(1)$.
@@ -780,6 +794,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.lifted_kernel_isNormalSubgroup}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{lem:lift-is-irreducible}
+    \leanok
     For each non-trivial irreducible character $\chi$ of $H$ with lift
     $\widetilde{\rho}$, the set $\{g \in G : \widetilde{\rho}(g) = 1\}$ is a normal
     subgroup of $G$.
@@ -797,6 +812,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.kernel_normal}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{lem:lifted-kernel-is-normal-subgroup, lem:trace-eq-degree-iff-identity}
+    \leanok
     For each non-trivial irreducible character $\chi$ of $H$, the set
     $\ker \widetilde{\chi} = \{ g \in G : \widetilde{\chi}(g) =
     \widetilde{\chi}(1)\}$ equals $\{g \in G : \widetilde\rho(g) = 1\}$ and is a
@@ -815,6 +831,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.frobenius_kernel_in_each}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{def:lifted-class-function, lem:induced-vanishing-restriction, lem:lift-restricts}
+    \leanok
     Every $g \in K$ satisfies $\widetilde{\chi}(g) = \widetilde{\chi}(1)$ for each
     irreducible character $\chi$ of $H$; that is, $K \subseteq \ker
     \widetilde{\chi}$.
@@ -851,6 +868,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.non_kernel_conjugate_to_H}
     \leanfile{LeanEval/GroupTheory/Frobenius/Basic.lean}
     \uses{lem:partition, def:frobenius-hypotheses, lem:stabilizer-conj}
+    \leanok
     Let $g \in G$ with $g \neq 1$ and $g \notin K$. Then $g$ is conjugate in $G$
     to a non-identity element $h \in H$; explicitly there is $s \in G$ with $h =
     s^{-1} g s \in H$ and $h \neq 1$.
@@ -870,6 +888,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.intersection_subset_kernel}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{lem:lift-restricts, lem:non-kernel-conjugate-to-H, lem:irr-separates, lem:trace-eq-degree-iff-identity}
+    \leanok
     If $g \in \bigcap_{\chi \in \mathrm{Irr}(H)} \ker \widetilde{\chi}$ then $g \in
     K$; that is, $\bigcap_\chi \ker\widetilde\chi \subseteq K$.
 \end{lemma}
@@ -890,6 +909,7 @@ is a normal subgroup of $G$. The only known proof is character-theoretic.
     \lean{LeanEval.GroupTheory.intersection_equals_kernel}
     \leanfile{LeanEval/GroupTheory/Frobenius/Induction.lean}
     \uses{lem:frobenius-kernel-in-each, lem:intersection-subset-kernel}
+    \leanok
     The intersection $\bigcap_{\chi \in \mathrm{Irr}(H)} \ker \widetilde{\chi}$,
     over all irreducible characters $\chi$ of $H$, equals $K$ as a subset of $G$.
 \end{lemma}
