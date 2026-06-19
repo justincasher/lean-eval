@@ -91,8 +91,14 @@ theorem rouche_zero_count_eq
   have hfg_order_sphere : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt (f + g) z = 0 := by
     intro z hz
     exact (fg_analytic_sphere hf hg hbound hz).2.2
-  have h_ap_f := argument_principle hR hf.meromorphicOn hf_ne_top hf_order_sphere
-  have h_ap_fg := argument_principle hR hfg_merm hfg_ne_top hfg_order_sphere
+  have hf_ana_sphere : ∀ z : ℂ, ‖z‖ = R → AnalyticAt ℂ f z := by
+    intro z hz
+    exact (f_analytic_sphere hf hbound hz).2.1
+  have hfg_ana_sphere : ∀ z : ℂ, ‖z‖ = R → AnalyticAt ℂ (f + g) z := by
+    intro z hz
+    exact (fg_analytic_sphere hf hg hbound hz).1
+  have h_ap_f := argument_principle hR hf.meromorphicOn hf_ne_top hf_order_sphere hf_ana_sphere
+  have h_ap_fg := argument_principle hR hfg_merm hfg_ne_top hfg_order_sphere hfg_ana_sphere
   have h_int_eq : (∮ z in C(0, R), logDeriv (f + g) z) = (∮ z in C(0, R), logDeriv f z) :=
     logDeriv_diff hR hf hg hbound
   have h_signed_eq_ℂ : ((∑ᶠ z, (divisor (f + g) D) z : ℤ) : ℂ) =
