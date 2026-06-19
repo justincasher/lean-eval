@@ -75,43 +75,6 @@ some index `i` with `x_i(v) > 0` and `x_i(g v) ≤ x_i(v)` (existence guaranteed
 noncomputable def inducedLabeling {n} (g : EuclSp n → EuclSp n) (v : EuclSp n) : Fin (n + 1) :=
   if h : ∃ i, 0 < baryCoord n v i ∧ baryCoord n (g v) i ≤ baryCoord n v i then h.choose else 0
 
-/-- For points in the corner simplex, all Euclidean coordinates are nonnegative. -/
-lemma cornerSimplex_coord_nonneg {n} {v : EuclSp n} (hv : v ∈ cornerSimplex n) (i : Fin n) :
-    0 ≤ v i := by
-  have hi_nonneg_convex : Convex ℝ {x : EuclSp n | 0 ≤ x i} :=
-    (convex_Ici (0 : ℝ)).preimage ((LinearMap.proj i : EuclSp n →ₗ[ℝ] ℝ).toAffineMap)
-  have h_generators : Set.range (cornerVertex n) ⊆ {x : EuclSp n | 0 ≤ x i} := by
-    intro x hx
-    rcases hx with ⟨j, rfl⟩
-    rcases j with (j | j)
-    · simp [cornerVertex]
-    · simp [cornerVertex, EuclideanSpace.single_apply]
-  have h_contained : cornerSimplex n ⊆ {x : EuclSp n | 0 ≤ x i} :=
-    calc
-      cornerSimplex n = convexHull ℝ (Set.range (cornerVertex n)) := rfl
-      _ ⊆ {x : EuclSp n | 0 ≤ x i} :=
-        convexHull_subset hi_nonneg_convex h_generators
-  exact h_contained hv
-
-/-- For points in the corner simplex, the sum of Euclidean coordinates is at most 1. -/
-lemma cornerSimplex_sum_le_one {n} {v : EuclSp n} (hv : v ∈ cornerSimplex n) :
-    (∑ i : Fin n, v i) ≤ 1 := by
-  have h_sum_convex : Convex ℝ {x : EuclSp n | (∑ i : Fin n, x i) ≤ 1} :=
-    (convex_Iic (1 : ℝ)).preimage
-      ((∑ i : Fin n, (LinearMap.proj i : EuclSp n →ₗ[ℝ] ℝ)).toAffineMap)
-  have h_generators : Set.range (cornerVertex n) ⊆ {x : EuclSp n | (∑ i : Fin n, x i) ≤ 1} := by
-    intro x hx
-    rcases hx with ⟨j, rfl⟩
-    rcases j with (j | j)
-    · simp [cornerVertex]
-    · simp [cornerVertex, EuclideanSpace.single_apply]
-  have h_contained : cornerSimplex n ⊆ {x : EuclSp n | (∑ i : Fin n, x i) ≤ 1} :=
-    calc
-      cornerSimplex n = convexHull ℝ (Set.range (cornerVertex n)) := rfl
-      _ ⊆ {x : EuclSp n | (∑ i : Fin n, x i) ≤ 1} :=
-        convexHull_subset h_sum_convex h_generators
-  exact h_contained hv
-
 /-- For points in the corner simplex, the barycentric coordinates are nonnegative. -/
 lemma cornerSimplex_baryCoord_nonneg {n} {v : EuclSp n} (hv : v ∈ cornerSimplex n)
     (i : Fin (n + 1)) : 0 ≤ baryCoord n v i :=
