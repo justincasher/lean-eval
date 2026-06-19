@@ -1,0 +1,358 @@
+\section{Linear programming: maximum principle and vertex optimality}
+
+We work with a linear program in standard inequality form on $\mathbb{R}^m$ with
+$n$ constraints: maximise $c \cdot x$ subject to $A x \le b$ and $0 \le x$.
+This formalises \S101 of Oliver Knill's \emph{Some Fundamental Theorems in
+Mathematics}.
+
+\begin{definition}[Linear program]
+    \label{def:linear-program}
+    \lean{LeanEval.ConvexGeometry.LinearProgram}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    A \emph{linear program} $\mathrm{lp}$ on $\mathbb{R}^m$ with $n$ constraints
+    consists of an objective coefficient vector $c \in \mathbb{R}^m$, a
+    right-hand side $b \in \mathbb{R}^n$, and a constraint matrix
+    $A \in \mathbb{R}^{n \times m}$. Its \emph{feasible region} is
+    \[
+        \mathrm{feasible} = \{\, x \in \mathbb{R}^m \mid A x \le b \ \text{and}\ 0 \le x \,\},
+    \]
+    where both inequalities are componentwise, and its \emph{objective} is the
+    function $x \mapsto c \cdot x$.
+\end{definition}
+
+\begin{lemma}[Feasible region as an intersection of half-spaces]
+    \label{lem:feasible-as-inter}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.feasible_eq_iInter}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program}
+    \leanok
+    The feasible region equals the intersection
+    \[
+        \Big(\bigcap_{i} \{x \mid (A x)_i \le b_i\}\Big)
+        \cap
+        \Big(\bigcap_{j} \{x \mid 0 \le x_j\}\Big),
+    \]
+    taken over each constraint row $i$ and each coordinate $j$.
+\end{lemma}
+\begin{proof}
+    \uses{def:linear-program}
+    By definition $x$ is feasible iff $A x \le b$ and $0 \le x$ hold
+    componentwise, i.e.\ iff $(A x)_i \le b_i$ for every row $i$ and $0 \le x_j$
+    for every coordinate $j$. Unfolding each componentwise order as a universal
+    quantifier over indices gives exactly the displayed intersection.
+\end{proof}
+
+\begin{lemma}[Each constraint row is a continuous linear functional]
+    \label{lem:Ax-coord-clm}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.mulVec_coord_isLinear_continuous}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program}
+    \leanok
+    For each constraint row index $i$, the map $x \mapsto (A x)_i$ from
+    $\mathbb{R}^m$ to $\mathbb{R}$ is a continuous linear map.
+\end{lemma}
+\begin{proof}
+    The map $x \mapsto A x$ is the linear map $\mathrm{mulVecLin}\,A$, and
+    post-composing with the $i$-th coordinate projection (itself linear) keeps it
+    linear, so $x \mapsto (A x)_i$ is linear. Since $\mathbb{R}^m$ is
+    finite-dimensional, every linear map out of it is continuous; hence
+    $x \mapsto (A x)_i$ is a continuous linear map.
+\end{proof}
+
+\subsection{Maximum principle}
+
+\begin{lemma}[Feasible region is convex]
+    \label{lem:feasible-convex}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.feasible_convex}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:feasible-as-inter, lem:Ax-coord-clm}
+    \leanok
+    The feasible region of a linear program is a convex subset of $\mathbb{R}^m$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:feasible-as-inter, lem:Ax-coord-clm}
+    By Lemma~\ref{lem:feasible-as-inter} the feasible region is an intersection
+    of the half-spaces $\{x \mid (A x)_i \le b_i\}$ and $\{x \mid 0 \le x_j\}$.
+    For fixed $i$ the map $x \mapsto (A x)_i$ is a continuous linear map
+    (Lemma~\ref{lem:Ax-coord-clm}), so the half-space $\{x \mid (A x)_i \le b_i\}$
+    is convex; each $\{x \mid 0 \le x_j\}$ is convex likewise. An intersection of
+    convex sets is convex.
+\end{proof}
+
+\begin{lemma}[Objective is concave]
+    \label{lem:objective-concave}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.objective_concaveOn}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:feasible-convex}
+    \leanok
+    The objective $x \mapsto c \cdot x$ is a concave function on the feasible
+    region.
+\end{lemma}
+\begin{proof}
+    \uses{lem:feasible-convex}
+    The objective is linear, and a linear map is concave on any convex set;
+    the feasible region is convex.
+\end{proof}
+
+\begin{lemma}[Local maximisers are global]
+    \label{lem:local-max-global}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.isMaxOn_of_isLocalMaxOn}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:feasible-convex, lem:objective-concave}
+    \leanok
+    If $x$ is feasible and a local maximiser of the objective on the feasible
+    region, then $x$ is a global maximiser of the objective on the feasible
+    region.
+\end{lemma}
+\begin{proof}
+    \uses{lem:feasible-convex, lem:objective-concave}
+    The feasible region is convex and the objective is concave on it, so a
+    local maximum of the objective is a global maximum.
+\end{proof}
+
+\begin{lemma}[The self dot product of a nonzero vector is positive]
+    \label{lem:dotProduct-self-pos}
+    \lean{LeanEval.ConvexGeometry.dotProduct_self_pos}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program}
+    \leanok
+    Let $c \in \mathbb{R}^m$ with $c \ne 0$. Then $0 < c \cdot c$.
+\end{lemma}
+\begin{proof}
+    The self dot product $c \cdot c = \sum_i c_i^2$ is a sum of squares, hence
+    nonnegative, and $c \cdot c = 0$ holds iff $c = 0$; as $c \ne 0$ it is
+    nonzero. A nonnegative nonzero real is positive, so $0 < c \cdot c$. (Note we
+    use $c \cdot c > 0$ on $\mathbb{R}^m$, not the Euclidean identity
+    $c \cdot c = \lVert c \rVert^2$, which holds only in $\mathrm{EuclideanSpace}$.)
+\end{proof}
+
+\begin{lemma}[Moving along $c$ strictly increases the objective]
+    \label{lem:dotProduct-ascent}
+    \lean{LeanEval.ConvexGeometry.dotProduct_lt_add_smul_self}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:dotProduct-self-pos}
+    \leanok
+    Let $c \in \mathbb{R}^m$ with $c \ne 0$, let $x \in \mathbb{R}^m$, and let
+    $t > 0$. Then $c \cdot (x + t \cdot c) > c \cdot x$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:dotProduct-self-pos}
+    By distributivity of the dot product over addition and its commutation with
+    the scalar $t$, $c \cdot (x + t \cdot c) = c \cdot x + t\,(c \cdot c)$. By
+    Lemma~\ref{lem:dotProduct-self-pos} we have $c \cdot c > 0$ since $c \ne 0$;
+    as $t > 0$ this gives $t\,(c \cdot c) > 0$, hence
+    $c \cdot (x + t \cdot c) > c \cdot x$.
+\end{proof}
+
+\begin{lemma}[A small step stays feasible]
+    \label{lem:small-step-feasible}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.add_smul_mem_feasible}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program}
+    \leanok
+    Let $x \in \mathbb{R}^m$ and $\varepsilon > 0$ with
+    $B(x, \varepsilon) \subseteq \mathrm{feasible}$, and let $t > 0$ satisfy
+    $t \lVert c \rVert < \varepsilon$. Then $x + t \cdot c \in \mathrm{feasible}$.
+\end{lemma}
+\begin{proof}
+    \uses{def:linear-program}
+    The distance from $x + t \cdot c$ to $x$ is
+    $\lVert (x + t \cdot c) - x \rVert = \lVert t \cdot c \rVert = t \lVert c \rVert < \varepsilon$,
+    so $x + t \cdot c \in B(x, \varepsilon)$, which is contained in the feasible
+    region by hypothesis.
+\end{proof}
+
+\begin{lemma}[A feasible ball yields a strictly better feasible point]
+    \label{lem:ball-gives-better-point}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.exists_mem_feasible_objective_lt}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:small-step-feasible, lem:dotProduct-ascent}
+    \leanok
+    Let $x \in \mathbb{R}^m$ and $\varepsilon > 0$ with
+    $B(x, \varepsilon) \subseteq \mathrm{feasible}$, and let $c \ne 0$. Then there
+    exists $y \in \mathrm{feasible}$ with $c \cdot y > c \cdot x$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:small-step-feasible, lem:dotProduct-ascent}
+    As $c \ne 0$ we have $\lVert c \rVert > 0$, so
+    $t = \varepsilon / (2 \lVert c \rVert)$ satisfies $t > 0$ and
+    $t \lVert c \rVert = \varepsilon/2 < \varepsilon$. Put $y = x + t \cdot c$. By
+    Lemma~\ref{lem:small-step-feasible} the point $y$ is feasible, and by
+    Lemma~\ref{lem:dotProduct-ascent} $c \cdot y > c \cdot x$.
+\end{proof}
+
+\begin{lemma}[A maximiser is not interior]
+    \label{lem:max-not-interior}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.not_mem_interior_of_isMaxOn}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:ball-gives-better-point}
+    \leanok
+    Let $x$ be a global maximiser of the objective on the feasible region. If
+    $c \ne 0$, then $x$ does not lie in the topological interior of the feasible
+    region.
+\end{lemma}
+\begin{proof}
+    \uses{lem:ball-gives-better-point}
+    Suppose $x$ were interior; then some ball $B(x, \varepsilon)$ with
+    $\varepsilon > 0$ is contained in the feasible region. By
+    Lemma~\ref{lem:ball-gives-better-point} there is a feasible point $y$ with
+    $c \cdot y > c \cdot x$, contradicting $x$ being a global maximiser.
+\end{proof}
+
+\begin{lemma}[Maximiser lies on the frontier]
+    \label{lem:max-on-frontier}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.mem_frontier_of_isMaxOn}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:max-not-interior}
+    \leanok
+    Let $x$ be feasible and a global maximiser of the objective on the feasible
+    region. If $c \ne 0$, then $x$ lies on the topological frontier of the
+    feasible region.
+\end{lemma}
+\begin{proof}
+    \uses{lem:max-not-interior}
+    The frontier is the closure minus the interior. Since $x$ is feasible it
+    belongs to the closure of the feasible region, and by
+    Lemma~\ref{lem:max-not-interior} it is not interior; hence $x$ is on the
+    frontier.
+\end{proof}
+
+\begin{theorem}[Maximum principle for linear programming]
+    \label{thm:lp-maximum-principle}
+    \lean{LeanEval.ConvexGeometry.lp_maximum_principle}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:local-max-global, lem:max-on-frontier}
+    \leanok
+    Let $x$ be feasible and a local maximiser of the objective on the feasible
+    region. Then $x$ is a global maximiser; and if $c \ne 0$, then $x$ lies on
+    the topological frontier of the feasible region.
+\end{theorem}
+\begin{proof}
+    \uses{lem:local-max-global, lem:max-on-frontier}
+    Globality is Lemma~\ref{lem:local-max-global}. Given $c \ne 0$, the frontier
+    membership follows from the global maximiser and
+    Lemma~\ref{lem:max-on-frontier}.
+\end{proof}
+
+\subsection{Vertex optimality}
+
+\begin{lemma}[Feasible region is closed]
+    \label{lem:feasible-closed}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.feasible_isClosed}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:feasible-as-inter, lem:Ax-coord-clm}
+    \leanok
+    The feasible region of a linear program is a closed subset of $\mathbb{R}^m$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:feasible-as-inter, lem:Ax-coord-clm}
+    By Lemma~\ref{lem:feasible-as-inter} the feasible region is an intersection
+    of the sets $\{x \mid (A x)_i \le b_i\}$ and $\{x \mid 0 \le x_j\}$. By
+    Lemma~\ref{lem:Ax-coord-clm} the map $x \mapsto (A x)_i$ is continuous, and
+    each coordinate map $x \mapsto x_j$ is continuous, so each set is the preimage
+    of a closed half-line under a continuous function, hence closed; an
+    intersection of closed sets is closed.
+\end{proof}
+
+\begin{lemma}[Bounded feasible regions are compact]
+    \label{lem:feasible-compact}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.feasible_isCompact}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:feasible-closed}
+    \leanok
+    If the feasible region is bounded, then it is compact.
+\end{lemma}
+\begin{proof}
+    \uses{lem:feasible-closed}
+    By Lemma~\ref{lem:feasible-closed} the feasible region is closed, and
+    $\mathbb{R}^m$ is finite-dimensional, so by the Heine--Borel theorem a closed
+    bounded set is compact.
+\end{proof}
+
+\begin{lemma}[The objective as a continuous linear map]
+    \label{lem:dotProduct-clm}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.objective_isLinear_continuous}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program}
+    \leanok
+    The objective $x \mapsto c \cdot x$ is a continuous linear map from
+    $\mathbb{R}^m$ to $\mathbb{R}$; in particular it is continuous.
+\end{lemma}
+\begin{proof}
+    The dot product $x \mapsto c \cdot x$ is linear in $x$, and on the
+    finite-dimensional space $\mathbb{R}^m$ every linear map is continuous; hence
+    it packages as a continuous linear map, and a fortiori it is continuous.
+\end{proof}
+
+\begin{lemma}[The maximiser set is an extreme subset]
+    \label{lem:maximizer-set-exposed}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.maximizerSet_isExposed}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:dotProduct-clm}
+    \leanok
+    The set $M = \{\, x \in \mathrm{feasible} \mid \forall y \in \mathrm{feasible},\ c \cdot y \le c \cdot x \,\}$
+    of global maximisers of the objective is an exposed, hence extreme, subset of
+    the feasible region.
+\end{lemma}
+\begin{proof}
+    \uses{lem:dotProduct-clm}
+    The set $M$ is exactly the exposed set of the feasible region cut out by the
+    continuous linear functional $x \mapsto c \cdot x$ of
+    Lemma~\ref{lem:dotProduct-clm}, so it is exposed; and every exposed subset is
+    an extreme subset.
+\end{proof}
+
+\begin{lemma}[The maximiser set is compact]
+    \label{lem:maximizer-set-compact}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.maximizerSet_isCompact}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:feasible-compact, lem:maximizer-set-exposed}
+    \leanok
+    If the feasible region is bounded, then the maximiser set $M$ of
+    Lemma~\ref{lem:maximizer-set-exposed} is compact.
+\end{lemma}
+\begin{proof}
+    \uses{lem:feasible-compact, lem:maximizer-set-exposed}
+    The maximiser set is exposed, hence closed, and is contained in the feasible
+    region, which is compact by Lemma~\ref{lem:feasible-compact}; a closed subset
+    of a compact set is compact.
+\end{proof}
+
+\begin{lemma}[The maximiser set is nonempty]
+    \label{lem:maximizer-set-nonempty}
+    \lean{LeanEval.ConvexGeometry.LinearProgram.maximizerSet_nonempty}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:feasible-compact, lem:dotProduct-clm}
+    \leanok
+    If the feasible region is nonempty and bounded, then the maximiser set $M$
+    of Lemma~\ref{lem:maximizer-set-exposed} is nonempty.
+\end{lemma}
+\begin{proof}
+    \uses{lem:feasible-compact, lem:dotProduct-clm}
+    By Lemma~\ref{lem:feasible-compact} the feasible region is compact, and it is
+    nonempty; by Lemma~\ref{lem:dotProduct-clm} the objective is a continuous
+    linear map, in particular continuous. By the extreme value theorem the
+    objective attains its maximum at some feasible point, which is a member of
+    $M$.
+\end{proof}
+
+\begin{theorem}[Vertex optimality]
+    \label{thm:simplex-algorithm}
+    \lean{LeanEval.ConvexGeometry.simplex_algorithm}
+    \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
+    \uses{def:linear-program, lem:maximizer-set-exposed, lem:maximizer-set-compact, lem:maximizer-set-nonempty}
+    \leanok
+    Every linear program with a nonempty bounded feasible region admits a global
+    maximiser of the objective that is an extreme point (vertex) of the feasible
+    region.
+\end{theorem}
+\begin{proof}
+    \uses{lem:maximizer-set-exposed, lem:maximizer-set-compact, lem:maximizer-set-nonempty}
+    Let $M$ be the maximiser set of Lemma~\ref{lem:maximizer-set-exposed}. By
+    Lemmas~\ref{lem:maximizer-set-compact} and~\ref{lem:maximizer-set-nonempty},
+    $M$ is compact and nonempty, so by the Krein--Milman lemma it has an extreme
+    point $x$. As $x \in M$, it is feasible and a global maximiser of the
+    objective. Since $M$ is an extreme subset of the feasible region
+    (Lemma~\ref{lem:maximizer-set-exposed}), an extreme point of $M$ is an extreme
+    point of the feasible region. Thus $x$ is an optimal vertex.
+\end{proof}
