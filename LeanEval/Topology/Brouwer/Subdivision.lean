@@ -111,7 +111,7 @@ theorem fine_triangulation {n} {ε : ℝ} (hε : 0 < ε) :
     have h_mesh_nonpos : (barycentricSubdivision^[0] (trivialTriangulation n)).mesh ≤ 0 := by
       linarith
     linarith
-  · have hM_pos : 0 < M := lt_of_le_of_ne hM_nonneg (Ne.symm hM_zero.ne)
+  · have hM_pos : 0 < M := lt_of_le_of_ne hM_nonneg (Ne.symm hM_zero)
     have h_eps_div_M_pos : 0 < ε / M := div_pos hε hM_pos
     rcases exists_pow_lt_of_lt_one h_eps_div_M_pos h_ratio_lt_one with ⟨k, hk⟩
     have h_bound : ((n : ℝ) / (n + 1 : ℝ)) ^ k * M < ε := by
@@ -119,7 +119,7 @@ theorem fine_triangulation {n} {ε : ℝ} (hε : 0 < ε) :
         ((n : ℝ) / (n + 1 : ℝ)) ^ k * M < (ε / M) * M := by nlinarith
         _ = ε := by field_simp [hM_pos.ne']
     refine ⟨barycentricSubdivision^[k] (trivialTriangulation n), ?_⟩
-    have h_iter := iterated_subdivision k
+    have h_iter := iterated_subdivision (n := n) k
     linarith
 
 end Topology
