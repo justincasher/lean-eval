@@ -228,28 +228,86 @@ for by an unbounded search.
     is composition with that computable argument (\texttt{Computable.comp}).
 \end{proof}
 
+\begin{definition}[Signed conjugate and the factor-list encoding]
+    \label{def:signed-conj}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.signedConj}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    For $g, s$ in a group $G$ and $\varepsilon : \mathrm{Bool}$, the \emph{signed
+    conjugate} is
+    \[
+        \mathrm{sconj}(g, \varepsilon, s) := g\,s^{\varepsilon}\,g^{-1},
+        \qquad s^{\mathrm{true}} := s,\quad s^{\mathrm{false}} := s^{-1}.
+    \]
+    Given a set $S \subseteq G$, a \emph{factor list} over $S$ is a list
+    $L : \mathrm{List}\,(G \times \mathrm{Bool} \times S)$ of factor data; its
+    \emph{value} is the group product
+    \[
+        \mathrm{sconjProd}(L) :=
+        \bigl(L.\mathrm{map}\,(\lambda (g,\varepsilon,s).\,
+        \mathrm{sconj}(g,\varepsilon,s.\mathrm{val}))\bigr).\mathrm{prod}.
+    \]
+    The carrier of $H_S$ is the set of values of factor lists over $S$, i.e.
+    $H_S := \{\, \mathrm{sconjProd}(L) : L \text{ a factor list over } S \,\}$.
+    This explicit \texttt{List}-of-factor-data encoding is the carrier used in the
+    three lemmas below.
+\end{definition}
+
+\begin{lemma}[Inverse of a signed conjugate]
+    \label{lem:conjTerm-inv}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.signedConj_inv}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{def:signed-conj}
+    For $g, s \in G$ and $\varepsilon : \mathrm{Bool}$,
+    \[
+        \mathrm{sconj}(g, \varepsilon, s)^{-1} =
+        \mathrm{sconj}(g, \lnot\varepsilon, s).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{def:signed-conj}
+    The inverse distributes as $(g\,s^{\varepsilon}\,g^{-1})^{-1} =
+    g\,(s^{\varepsilon})^{-1}\,g^{-1}$ (\texttt{mul\_inv\_rev}, \texttt{inv\_inv}).
+    A case split on $\varepsilon$ gives $(s^{\varepsilon})^{-1} = s^{\lnot\varepsilon}$
+    ($\varepsilon = \mathrm{false}$ via \texttt{inv\_inv}), so the right-hand side is
+    $\mathrm{sconj}(g, \lnot\varepsilon, s)$.
+\end{proof}
+
+\begin{lemma}[The carrier is closed under inverse]
+    \label{lem:carrier-inv-closed}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.signedConjProd_inv_mem}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{def:signed-conj, lem:conjTerm-inv}
+    If $x \in H_S$, i.e. $x = \mathrm{sconjProd}(L)$ for a factor list $L$ over $S$,
+    then $x^{-1} \in H_S$.
+\end{lemma}
+\begin{proof}
+    \uses{def:signed-conj, lem:conjTerm-inv}
+    The inverse of a list product is the product of the reversed list of inverted
+    factors (\texttt{List.prod\_inv\_reverse}). By Lemma~\ref{lem:conjTerm-inv}
+    each inverted factor $\mathrm{sconj}(g,\varepsilon,s)^{-1} =
+    \mathrm{sconj}(g,\lnot\varepsilon,s)$ is again a signed conjugate with the same
+    $s \in S$. Hence $x^{-1} = \mathrm{sconjProd}(L')$ for the factor list $L'$
+    obtained from $L$ by reversing and flipping each sign
+    (\texttt{List.map\_map}, \texttt{List.map\_reverse}), so $x^{-1} \in H_S$.
+\end{proof}
+
 \begin{lemma}[Products of signed conjugates form a subgroup]
     \label{lem:prod-conjugates-subgroup}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.prodConjugatesSubgroup}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{def:signed-conj, lem:carrier-inv-closed}
     \leanok
-    Let $S$ be a set in a group $G$. The set
-    \[
-        H_S := \bigl\{\, x \in G : x \text{ is a finite product of terms }
-            g\,s^{\pm 1}\,g^{-1} \text{ with } s \in S \,\bigr\}
-    \]
-    is a subgroup of $G$.
+    Let $S$ be a set in a group $G$. The carrier $H_S$ of
+    Definition~\ref{def:signed-conj} is a subgroup of $G$.
 \end{lemma}
 \begin{proof}
-    We verify the subgroup axioms. The identity $1$ is the empty product, so
-    $1 \in H_S$ (\texttt{one\_mem}, the empty list). If $x, y \in H_S$ are such
-    products, their concatenation witnesses $xy \in H_S$ (\texttt{mul\_mem}).
-    Finally $H_S$ is closed under inverse (\texttt{inv\_mem}): the inverse of a
-    product reverses its factors (\texttt{mul\_inv\_rev}), and each factor inverts
-    to one of the same shape, since
-    $(g\,s^{\pm 1}\,g^{-1})^{-1} = g\,(s^{\pm 1})^{-1}\,g^{-1}
-    = g\,s^{\mp 1}\,g^{-1}$ (\texttt{mul\_inv\_rev}, \texttt{inv\_inv}). Hence
-    $H_S$ is a subgroup.
+    \uses{def:signed-conj, lem:carrier-inv-closed}
+    Bundle the three subgroup fields. The identity is the value of the empty
+    factor list, so $1 \in H_S$ (\texttt{one\_mem} via \texttt{List.prod\_nil}).
+    For \texttt{mul\_mem}, the concatenation of two factor lists is a factor list
+    whose value is the product of the two values (\texttt{List.prod\_append}),
+    giving $xy \in H_S$. For \texttt{inv\_mem}, invoke
+    Lemma~\ref{lem:carrier-inv-closed}.
 \end{proof}
 
 \begin{lemma}[Conjugates lie in the subgroup of products]
@@ -320,11 +378,33 @@ for by an unbounded search.
     again via \texttt{FreeGroup.mk\_invRev}). Combining gives the stated identity.
 \end{proof}
 
+\begin{lemma}[The value word as a list product of conjugacy terms]
+    \label{lem:mk-eval-eq-map-prod}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mk_eval_eq_map_prod}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{def:certificate}
+    \leanok
+    For a certificate $c$ over a relator list $R$,
+    \[
+        \mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) =
+        \bigl(c.\mathrm{map}\,(\mathrm{FreeGroup.mk} \circ \mathrm{conjTerm}_R)\bigr).\mathrm{prod}.
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{def:certificate}
+    $\mathrm{eval}_R(c)$ is the flattening of $c.\mathrm{map}\,\mathrm{conjTerm}_R$.
+    The map $\mathrm{FreeGroup.mk}$ is a monoid homomorphism, so it sends the
+    flattened concatenation to the list product of the images of the parts
+    (\texttt{FreeGroup.mul\_mk} packaged as \texttt{map\_list\_prod} over the
+    flattened list, with \texttt{List.map\_map}). This is exactly
+    $(c.\mathrm{map}\,(\mathrm{FreeGroup.mk} \circ \mathrm{conjTerm}_R)).\mathrm{prod}$.
+\end{proof}
+
 \begin{lemma}[The value word spells a product of conjugates]
     \label{lem:mk-eval-eq-prod}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mk_eval_eq_prod}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
-    \uses{def:certificate, lem:mk-conjTerm}
+    \uses{def:certificate, lem:mk-eval-eq-map-prod, lem:mk-conjTerm}
     \leanok
     For a certificate $c = ((g_j, \varepsilon_j, k_j))_j$ over a relator list $R$,
     \[
@@ -337,15 +417,16 @@ for by an unbounded search.
     $\mathrm{FreeGroup.mk}\,R_{k_j} \in S$.
 \end{lemma}
 \begin{proof}
-    \uses{def:certificate, lem:mk-conjTerm}
-    $\mathrm{eval}_R(c)$ is the concatenation of the words
-    $\mathrm{conjTerm}_R(g_j,\varepsilon_j,k_j)$ over the triples of $c$. Since
-    $\mathrm{FreeGroup.mk}$ sends concatenation to the group product
-    (\texttt{FreeGroup.mul\_mk}, iterated as \texttt{map\_list\_prod} over the
-    flattened list), $\mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) =
-    \prod_j \mathrm{FreeGroup.mk}(\mathrm{conjTerm}_R(g_j,\varepsilon_j,k_j))$.
-    Rewriting each factor by Lemma~\ref{lem:mk-conjTerm} yields the stated product
-    of signed conjugates.
+    \uses{lem:mk-eval-eq-map-prod, lem:mk-conjTerm}
+    By Lemma~\ref{lem:mk-eval-eq-map-prod},
+    $\mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) =
+    (c.\mathrm{map}\,(\mathrm{FreeGroup.mk} \circ \mathrm{conjTerm}_R)).\mathrm{prod}$.
+    Rewriting each mapped factor by Lemma~\ref{lem:mk-conjTerm}
+    (\texttt{List.map\_congr\_left}) replaces
+    $\mathrm{FreeGroup.mk}(\mathrm{conjTerm}_R(g_j,\varepsilon_j,k_j))$ by
+    $\mathrm{FreeGroup.mk}(g_j)\,(\mathrm{FreeGroup.mk}\,R_{k_j})^{\pm 1}\,
+    \mathrm{FreeGroup.mk}(g_j)^{-1}$, yielding the stated product of signed
+    conjugates.
 \end{proof}
 
 \begin{lemma}[Relator elements are indexed]
@@ -363,24 +444,51 @@ for by an unbounded search.
     $\mathrm{FreeGroup.mk}\,R_k = \mathrm{FreeGroup.mk}\,r = s$.
 \end{proof}
 
+\begin{lemma}[A signed conjugate as the image of a conjugacy term]
+    \label{lem:factor-eq-mk-conjTerm}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.factor_eq_mk_conjTerm}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{def:certificate, lem:mk-conjTerm, lem:relator-index}
+    Let $S := \{\mathrm{FreeGroup.mk}\,r : r \in R\}$. For $g \in
+    \mathrm{FreeGroup}(\mathrm{Fin}\,n)$, $\varepsilon : \mathrm{Bool}$ and $s \in
+    S$, there is an index $k$ into $R$ with
+    \[
+        g\, s^{\pm 1}\, g^{-1} =
+        \mathrm{FreeGroup.mk}\bigl(\mathrm{conjTerm}_R(g.\mathrm{toWord},
+        \varepsilon, k)\bigr).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:mk-conjTerm, lem:relator-index}
+    By Lemma~\ref{lem:relator-index} choose $k$ with $\mathrm{FreeGroup.mk}\,R_k =
+    s$. By Lemma~\ref{lem:mk-conjTerm},
+    $\mathrm{FreeGroup.mk}(\mathrm{conjTerm}_R(g.\mathrm{toWord}, \varepsilon, k)) =
+    \mathrm{FreeGroup.mk}(g.\mathrm{toWord})\,(\mathrm{FreeGroup.mk}\,R_k)^{\pm 1}\,
+    \mathrm{FreeGroup.mk}(g.\mathrm{toWord})^{-1}$. Since
+    $\mathrm{FreeGroup.mk}(g.\mathrm{toWord}) = g$ (\texttt{FreeGroup.mk\_toWord})
+    and $\mathrm{FreeGroup.mk}\,R_k = s$, this equals $g\, s^{\pm 1}\, g^{-1}$.
+\end{proof}
+
 \begin{lemma}[Certificate from a product of conjugates]
     \label{lem:cert-of-prod}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.cert_of_prod}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
-    \uses{def:certificate, lem:relator-index, lem:mk-eval-eq-prod}
+    \uses{def:certificate, lem:factor-eq-mk-conjTerm, lem:mk-eval-eq-prod}
     Let $S := \{\mathrm{FreeGroup.mk}\,r : r \in R\}$. If $\mathrm{FreeGroup.mk}\,w$
     is a finite product of signed conjugates $g_j\, s_j^{\pm 1}\, g_j^{-1}$ with
     $s_j \in S$, then there is a certificate $c$ with
     $\mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) = \mathrm{FreeGroup.mk}\,w$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:relator-index, lem:mk-eval-eq-prod}
-    For each factor, write $g_j = \mathrm{FreeGroup.mk}(g_j.\mathrm{toWord})$
-    (\texttt{FreeGroup.mk\_toWord}) and, by Lemma~\ref{lem:relator-index}, choose
-    an index $k_j$ with $\mathrm{FreeGroup.mk}\,R_{k_j} = s_j$. Collecting the
-    triples $(g_j.\mathrm{toWord}, \varepsilon_j, k_j)$ into a certificate $c$,
-    Lemma~\ref{lem:mk-eval-eq-prod} gives
-    $\mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) =
+    \uses{lem:factor-eq-mk-conjTerm, lem:mk-eval-eq-prod}
+    Apply Lemma~\ref{lem:factor-eq-mk-conjTerm} to each factor $g_j\, s_j^{\pm 1}\,
+    g_j^{-1}$, obtaining an index $k_j$ with that factor equal to
+    $\mathrm{FreeGroup.mk}(\mathrm{conjTerm}_R(g_j.\mathrm{toWord}, \varepsilon_j,
+    k_j))$. Collect the triples $(g_j.\mathrm{toWord}, \varepsilon_j, k_j)$ into a
+    certificate $c$ by a \texttt{List.map} over the factors. Then by
+    Lemma~\ref{lem:mk-eval-eq-prod},
+    $\mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) = \prod_j
+    \mathrm{FreeGroup.mk}(\mathrm{conjTerm}_R(\dots)) =
     \prod_j g_j\, s_j^{\pm 1}\, g_j^{-1} = \mathrm{FreeGroup.mk}\,w$.
 \end{proof}
 
@@ -429,6 +537,83 @@ for by an unbounded search.
     ($\Leftarrow$) This is exactly Lemma~\ref{lem:mem-of-cert}.
 \end{proof}
 
+\begin{lemma}[Decision function of a computable relation]
+    \label{lem:computablePred-decide}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.computablePred_decide}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    Let $\alpha, \beta$ be encodable types and $Q : \alpha \to \beta \to
+    \mathrm{Prop}$ a computable, pointwise decidable relation. Then the boolean
+    function $p \mapsto \mathrm{decide}\,Q(p.1, p.2)$ on $\alpha \times \beta$ is
+    computable.
+\end{lemma}
+\begin{proof}
+    A decidable predicate is computable iff its boolean decision function is
+    computable (\texttt{computablePred\_iff\_computable\_decide}). Applying this to
+    the computable predicate $p \mapsto Q(p.1, p.2)$ on $\alpha \times \beta$
+    gives computability of $p \mapsto \mathrm{decide}\,Q(p.1, p.2)$.
+\end{proof}
+
+\begin{lemma}[The search kernel is computable]
+    \label{lem:rproj-kernel}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.rproj_kernel}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \uses{lem:computablePred-decide}
+    With $Q$ as above and $\beta$ encodable, the option-valued function
+    \[
+        k(a, m) := (\mathrm{decode}\,m : \mathrm{Option}\,\beta)\ \mathbf{bind}\
+            \bigl(\lambda b.\ \mathbf{if}\ Q(a,b)\ \mathbf{then}\ \mathrm{some}\,b\
+            \mathbf{else}\ \mathrm{none}\bigr)
+    \]
+    is a computable function of $(a, m) : \alpha \times \mathbb{N}$ (i.e.
+    \texttt{Computable₂}).
+\end{lemma}
+\begin{proof}
+    \uses{lem:computablePred-decide}
+    Decoding $m$ to $\mathrm{Option}\,\beta$ is computable
+    (\texttt{Computable.decode}). The inner map $b \mapsto \mathbf{if}\ Q(a,b)\
+    \mathbf{then}\ \mathrm{some}\,b\ \mathbf{else}\ \mathrm{none}$ is computable in
+    $(a, b)$, being an \texttt{ite} on the computable boolean
+    $\mathrm{decide}\,Q(a,b)$ (Lemma~\ref{lem:computablePred-decide}). Binding the
+    decoded option through this map is computable (\texttt{Computable.option\_bind},
+    equivalently \texttt{Computable.bind\_decode\_iff}).
+\end{proof}
+
+\begin{lemma}[The unbounded search is partial recursive]
+    \label{lem:rproj-search}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.rproj_search}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \uses{lem:rproj-kernel}
+    With $k$ as in Lemma~\ref{lem:rproj-kernel}, the partial function
+    $a \mapsto \mathrm{Nat.rfindOpt}\,(\lambda m.\ k(a,m))$ is partial recursive
+    (\texttt{Partrec}).
+\end{lemma}
+\begin{proof}
+    \uses{lem:rproj-kernel}
+    Immediate from \texttt{Partrec.rfindOpt} applied to the computable kernel $k$
+    (Lemma~\ref{lem:rproj-kernel}).
+\end{proof}
+
+\begin{lemma}[Domain of the search equals the existential]
+    \label{lem:rproj-dom}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.rproj_dom}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \uses{lem:rproj-kernel}
+    With $k$ as in Lemma~\ref{lem:rproj-kernel}, for every $a$,
+    \[
+        \bigl(\mathrm{Nat.rfindOpt}\,(\lambda m.\ k(a,m))\bigr).\mathrm{Dom}
+        \iff \exists b,\ Q(a,b).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:rproj-kernel}
+    By \texttt{Nat.rfindOpt\_dom}, the search halts on $a$ iff there exist $m$ and
+    $b$ with $b \in k(a,m)$, and by definition of $k$ this means
+    $\mathrm{decode}\,m = \mathrm{some}\,b$ and $Q(a,b)$. The forward direction
+    yields a $b$ with $Q(a,b)$. Conversely, given $b$ with $Q(a,b)$, take
+    $m := \mathrm{encode}\,b$; then $\mathrm{decode}\,m = \mathrm{some}\,b$
+    (\texttt{Encodable.encodek}), so $b \in k(a,m)$ and the search halts.
+\end{proof}
+
 \begin{lemma}[Recursive enumerability of an existential over a computable relation]
     \label{lem:re-projection}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_projection}
@@ -439,32 +624,77 @@ for by an unbounded search.
     (\texttt{REPred}).
 \end{lemma}
 \begin{proof}
-    Enumerate $\beta$ by $\mathbb{N}$ through its encoding. The partial function
-    that, on input $a$, runs an unbounded search for the least code $m$ whose
-    decoded value $b$ satisfies $Q(a,b)$ (\texttt{Nat.rfind} /
-    \texttt{Partrec.rfind}, using computability of $Q$) is partial recursive, and
-    its domain is exactly $\{a : \exists b,\, Q(a,b)\}$
-    (\texttt{Nat.rfind\_dom}). A predicate equal to the domain of a partial
-    recursive function is \texttt{REPred} by definition.
+    \uses{lem:rproj-search, lem:rproj-dom}
+    By Lemma~\ref{lem:rproj-search} the search
+    $a \mapsto \mathrm{Nat.rfindOpt}\,(\lambda m.\ k(a,m))$ is partial recursive,
+    and by Lemma~\ref{lem:rproj-dom} its domain is exactly
+    $\{a : \exists b,\ Q(a,b)\}$. Since \texttt{REPred} is by definition the
+    predicate cut out by the domain of a partial recursive function (via the
+    \texttt{Part.assert} witness), the predicate $a \mapsto \exists b,\ Q(a,b)$ is
+    \texttt{REPred}; conclude with \texttt{REPred.of\_eq} (equivalently
+    \texttt{Partrec.of\_eq}).
+\end{proof}
+
+\begin{lemma}[Free-group word equality is a reduce test]
+    \label{lem:mk-eq-iff-reduce}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mk_eq_iff_reduce}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    For words $u, v$,
+    \[
+        \mathrm{FreeGroup.mk}\,u = \mathrm{FreeGroup.mk}\,v
+        \iff \mathrm{FreeGroup.reduce}\,u = \mathrm{FreeGroup.reduce}\,v.
+    \]
+\end{lemma}
+\begin{proof}
+    ($\Leftarrow$) Words with equal reductions name the same free-group element
+    (\texttt{FreeGroup.reduce.exact}). ($\Rightarrow$) Apply $\mathrm{toWord}$ to
+    both sides; since $(\mathrm{FreeGroup.mk}\,u).\mathrm{toWord} =
+    \mathrm{FreeGroup.reduce}\,u$ (\texttt{FreeGroup.toWord\_mk}), this yields
+    $\mathrm{FreeGroup.reduce}\,u = \mathrm{FreeGroup.reduce}\,v$.
+\end{proof}
+
+\begin{lemma}[The certificate check is a computable predicate]
+    \label{lem:check-computablePred}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.check_computablePred}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \uses{lem:eval-computable}
+    Fix a relator list $R$. The predicate
+    \[
+        (w, c) \mapsto \mathrm{FreeGroup.reduce}(\mathrm{eval}_R(c))
+            = \mathrm{FreeGroup.reduce}\,w
+    \]
+    on $\mathrm{Word} \times \mathrm{Certificate}$ is a \texttt{ComputablePred}
+    (and pointwise decidable).
+\end{lemma}
+\begin{proof}
+    \uses{lem:eval-computable}
+    This is the relation $\mathrm{Check}(R, w, c)$ of
+    Lemma~\ref{lem:eval-computable} with $R$ fixed, repackaged as a predicate of
+    the single pair $(w, c) : \mathrm{Word} \times \mathrm{Certificate}$. It is
+    computable and pointwise decidable there, hence a \texttt{ComputablePred}.
 \end{proof}
 
 \begin{lemma}[Normal-closure membership is r.e.]
     \label{lem:re-mem-normalClosure}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_mem_normalClosure}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
-    \uses{lem:mem-normalClosure-cert, lem:eval-computable, lem:re-projection}
+    \uses{lem:mem-normalClosure-cert, lem:mk-eq-iff-reduce, lem:check-computablePred, lem:re-projection}
     Fix a relator list $R$ and $S = \{\mathrm{FreeGroup.mk}\,r : r \in R\}$. The
     predicate $w \mapsto \mathrm{FreeGroup.mk}\,w \in \mathrm{normalClosure}\,S$
     is recursively enumerable.
 \end{lemma}
 \begin{proof}
-    \uses{lem:mem-normalClosure-cert, lem:eval-computable, lem:re-projection}
+    \uses{lem:mem-normalClosure-cert, lem:mk-eq-iff-reduce, lem:check-computablePred, lem:re-projection}
     By Lemma~\ref{lem:mem-normalClosure-cert} the predicate is equivalent to
-    $w \mapsto \exists c,\; \mathrm{Check}(R, w, c)$, where $\mathrm{Check}$ is
-    computable and pointwise decidable by Lemma~\ref{lem:eval-computable} (using
-    that $\mathrm{FreeGroup.mk}\,u = \mathrm{FreeGroup.mk}\,v$ iff their
-    reductions agree). Apply Lemma~\ref{lem:re-projection} with this relation,
-    then transport along the equivalence (\texttt{REPred.of\_eq}).
+    $w \mapsto \exists c,\; \mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) =
+    \mathrm{FreeGroup.mk}\,w$. By the bridge Lemma~\ref{lem:mk-eq-iff-reduce} each
+    such equality is the reduce test
+    $\mathrm{FreeGroup.reduce}(\mathrm{eval}_R(c)) = \mathrm{FreeGroup.reduce}\,w$,
+    so the predicate is equivalent to $w \mapsto \exists c,\; \mathrm{Check}(R, w, c)$.
+    The relation $\mathrm{Check}$ (with $R$ fixed) is a computable, pointwise
+    decidable predicate of $(w, c)$ by Lemma~\ref{lem:check-computablePred}; apply
+    Lemma~\ref{lem:re-projection} to the existential over $c$ and transport along
+    the equivalence (\texttt{REPred.of\_eq}).
 \end{proof}
 
 \subsection{The positive side: the word problem is r.e.}
@@ -593,10 +823,30 @@ for by an unbounded search.
     \top$ then $N = \mathrm{comap}\,\varphi\,\top = \top$.
 \end{proof}
 
+\begin{lemma}[Adjoining a subset of the identity preserves the normal closure]
+    \label{lem:normalClosure-insert-subset-one}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.normalClosure_union_subset_one}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    Let $A, T$ be sets in a group with $T \subseteq \{1\}$. Then
+    $\mathrm{normalClosure}\,(A \cup T) = \mathrm{normalClosure}\,A$.
+\end{lemma}
+\begin{proof}
+    By antisymmetry. For $\ge$: $A \subseteq A \cup T$ gives
+    $\mathrm{normalClosure}\,A \le \mathrm{normalClosure}\,(A \cup T)$ by
+    monotonicity (\texttt{Subgroup.normalClosure\_mono}). For $\le$: since
+    $\mathrm{normalClosure}\,A$ is normal and minimal among normal subgroups
+    containing $A$ (\texttt{Subgroup.normalClosure\_subset\_iff}), it suffices that
+    $A \cup T \subseteq \mathrm{normalClosure}\,A$; indeed $A \subseteq
+    \mathrm{normalClosure}\,A$ (\texttt{Subgroup.subset\_normalClosure}) and
+    $T \subseteq \{1\} \subseteq \mathrm{normalClosure}\,A$ as the latter contains
+    $1$ (\texttt{one\_mem}). Hence both closures coincide.
+\end{proof}
+
 \begin{lemma}[Image of the extended normal closure]
     \label{lem:map-normalClosure-insert}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.map_normalClosure_insert}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \uses{lem:normalClosure-insert-subset-one}
     \leanok
     Let $\varphi : G \to H$ be a surjective homomorphism, $S$ a set with
     $\mathrm{normalClosure}\,S = \ker\varphi$, and $x \in G$. Then
@@ -606,15 +856,15 @@ for by an unbounded search.
     \]
 \end{lemma}
 \begin{proof}
+    \uses{lem:normalClosure-insert-subset-one}
     Since $\varphi$ is surjective, the image of a normal closure is the normal
     closure of the image (\texttt{Subgroup.map\_normalClosure}):
     $\mathrm{map}\,\varphi\,(\mathrm{normalClosure}\,(S \cup \{x\})) =
     \mathrm{normalClosure}\,(\varphi(S) \cup \{\varphi(x)\})$. Every $s \in S$ lies
     in $\mathrm{normalClosure}\,S = \ker\varphi$, so $\varphi(s) = 1$
-    (\texttt{MonoidHom.mem\_ker}); thus $\varphi(S) \subseteq \{1\}$. Adjoining the
-    identity does not change a normal closure (it already contains $1$, and
-    $\mathrm{normalClosure}$ is the smallest normal subgroup containing the set,
-    \texttt{Subgroup.normalClosure\_subset\_iff}), so
+    (\texttt{MonoidHom.mem\_ker}); thus $\varphi(S) \subseteq \{1\}$. Apply
+    Lemma~\ref{lem:normalClosure-insert-subset-one} with $A = \{\varphi(x)\}$ and
+    $T = \varphi(S)$ to conclude
     $\mathrm{normalClosure}\,(\varphi(S) \cup \{\varphi(x)\}) =
     \mathrm{normalClosure}\,\{\varphi(x)\}$.
 \end{proof}
@@ -689,11 +939,42 @@ for by an unbounded search.
     \texttt{REPred.of\_eq}.
 \end{proof}
 
+\begin{lemma}[Relator set of an extended list]
+    \label{lem:relatorSet-append}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.relatorSet_append}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    For a relator list $R$ and a word $w$, writing
+    $S_R := \{\mathrm{FreeGroup.mk}\,r : r \in R\}$,
+    \[
+        S_{R \mathbin{+\!\!+} [w]} = S_R \cup \{\mathrm{FreeGroup.mk}\,w\}.
+    \]
+\end{lemma}
+\begin{proof}
+    By set extensionality. An element lies in $S_{R \mathbin{+\!\!+} [w]}$ iff it is
+    $\mathrm{FreeGroup.mk}\,r$ for some $r \in R \mathbin{+\!\!+} [w]$, and
+    $r \in R \mathbin{+\!\!+} [w] \iff r \in R \vee r = w$
+    (\texttt{List.mem\_append}, \texttt{List.mem\_singleton}). Splitting the
+    disjunction identifies this with membership in
+    $S_R \cup \{\mathrm{FreeGroup.mk}\,w\}$.
+\end{proof}
+
+\begin{lemma}[A generator as a one-letter word]
+    \label{lem:of-eq-mk-singleton}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.of_eq_mk_singleton}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    For $i : \mathrm{Fin}\,n$,
+    $\mathrm{FreeGroup.of}\,i = \mathrm{FreeGroup.mk}\,[(i, \mathrm{true})]$.
+\end{lemma}
+\begin{proof}
+    This is the definition of $\mathrm{FreeGroup.of}$ as the class of the
+    one-letter word $[(i, \mathrm{true})]$ (\texttt{FreeGroup.of}).
+\end{proof}
+
 \begin{lemma}[Generator membership in the extended closure is r.e.]
     \label{lem:re-generator-mem}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_generator_mem}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
-    \uses{lem:mem-normalClosure-cert, lem:eval-computable, lem:re-projection}
+    \uses{lem:relatorSet-append, lem:of-eq-mk-singleton, lem:mem-normalClosure-cert, lem:eval-computable, lem:re-projection}
     For each fixed $i : \mathrm{Fin}\,n$, the predicate
     \[
         w \mapsto \mathrm{FreeGroup.of}\,i \in
@@ -702,58 +983,109 @@ for by an unbounded search.
     is recursively enumerable.
 \end{lemma}
 \begin{proof}
-    \uses{lem:mem-normalClosure-cert, lem:eval-computable, lem:re-projection}
-    The relator list for the extended closure is $R$ with the input word $w$
-    appended, which depends computably on $w$. As in
-    Lemma~\ref{lem:mem-normalClosure-cert}, membership of the fixed element
-    $\mathrm{FreeGroup.of}\,i = \mathrm{FreeGroup.mk}\,[(i,\mathrm{true})]$ in this
-    normal closure is equivalent to the existence of a certificate $c$ with
+    \uses{lem:relatorSet-append, lem:of-eq-mk-singleton, lem:mem-normalClosure-cert, lem:eval-computable, lem:re-projection}
+    By Lemma~\ref{lem:relatorSet-append} the extended relator set is
+    $S \cup \{\mathrm{FreeGroup.mk}\,w\} = S_{R \mathbin{+\!\!+} [w]}$, so the normal
+    closure in question is generated by the list $R \mathbin{+\!\!+} [w]$, which
+    depends computably on $w$ (appending is a computable function of $w$). Writing
+    the fixed generator as the one-letter word
+    $\mathrm{FreeGroup.of}\,i = \mathrm{FreeGroup.mk}\,[(i,\mathrm{true})]$
+    (Lemma~\ref{lem:of-eq-mk-singleton}) and applying
+    Lemma~\ref{lem:mem-normalClosure-cert} to the list $R \mathbin{+\!\!+} [w]$,
+    membership is equivalent to the existence of a certificate $c$ with
     $\mathrm{Check}(R \mathbin{+\!\!+} [w],\, [(i,\mathrm{true})],\, c)$. Because
-    the relator list $R \mathbin{+\!\!+} [w]$ depends computably on $w$, this is a
-    computable relation in $(w, c)$ by Lemma~\ref{lem:eval-computable}. Apply
-    Lemma~\ref{lem:re-projection} and \texttt{REPred.of\_eq}.
+    $R \mathbin{+\!\!+} [w]$ varies computably with $w$, this is a computable,
+    pointwise decidable relation in $(w, c)$ by Lemma~\ref{lem:eval-computable}
+    (its $R$-varies-computably form). Apply Lemma~\ref{lem:re-projection} to the
+    existential over $c$ and conclude with \texttt{REPred.of\_eq}.
+\end{proof}
+
+\begin{lemma}[Negation as a universal over generators]
+    \label{lem:neg-iff-forall-gen}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.neg_iff_forall_gen}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    \uses{lem:collapse, lem:top-iff-generators}
+    Let $S = \{\mathrm{FreeGroup.mk}\,r : r \in R\}$ be the relator set with
+    $\mathrm{normalClosure}\,S = \ker\varphi$. For every word $w$,
+    \[
+        \varphi(\mathrm{FreeGroup.mk}\,w) \neq 1
+        \iff \forall i : \mathrm{Fin}\,n,\ \mathrm{FreeGroup.of}\,i \in
+            \mathrm{normalClosure}\,(S \cup \{\mathrm{FreeGroup.mk}\,w\}).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:collapse, lem:top-iff-generators}
+    By Lemma~\ref{lem:collapse}, $\varphi(\mathrm{FreeGroup.mk}\,w) \neq 1$ holds
+    iff $\mathrm{normalClosure}\,(S \cup \{\mathrm{FreeGroup.mk}\,w\}) = \top$, and
+    by Lemma~\ref{lem:top-iff-generators} the latter holds iff every generator
+    $\mathrm{FreeGroup.of}\,i$ lies in that normal closure.
 \end{proof}
 
 \begin{lemma}[Negative side is r.e.]
     \label{lem:re-negative}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_negative}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
-    \uses{def:word-pred, lem:collapse, lem:top-iff-generators, lem:re-forall-fin, lem:re-generator-mem}
+    \uses{def:word-pred, lem:neg-iff-forall-gen, lem:collapse, lem:top-iff-generators, lem:re-forall-fin, lem:re-generator-mem, lem:ker-eq-normalClosure}
     The complement predicate $w \mapsto \neg P(w)$, i.e.
     $\varphi(\mathrm{FreeGroup.mk}\,w) \neq 1$, is recursively enumerable.
 \end{lemma}
 \begin{proof}
-    \uses{lem:collapse, lem:top-iff-generators, lem:re-forall-fin, lem:re-generator-mem}
-    By Lemma~\ref{lem:collapse}, $\neg P(w)$ holds iff
-    $\mathrm{normalClosure}\,(S \cup \{\mathrm{FreeGroup.mk}\,w\}) = \top$, and by
-    Lemma~\ref{lem:top-iff-generators} this holds iff
-    $\forall i,\; \mathrm{FreeGroup.of}\,i \in
-    \mathrm{normalClosure}\,(S \cup \{\mathrm{FreeGroup.mk}\,w\})$. Each clause is
-    r.e. in $w$ by Lemma~\ref{lem:re-generator-mem}, so the finite conjunction is
-    r.e. by Lemma~\ref{lem:re-forall-fin}; transport along the equivalence with
-    \texttt{REPred.of\_eq}.
+    \uses{lem:neg-iff-forall-gen, lem:re-forall-fin, lem:re-generator-mem, lem:ker-eq-normalClosure}
+    Unfolding $P$, the complement is $w \mapsto
+    \varphi(\mathrm{FreeGroup.mk}\,w) \neq 1$. Fix the finite relator list $R$ with
+    $S = \{\mathrm{FreeGroup.mk}\,r : r \in R\}$ and $\mathrm{normalClosure}\,S =
+    \ker\varphi$ (Lemma~\ref{lem:ker-eq-normalClosure}). By
+    Lemma~\ref{lem:neg-iff-forall-gen} this complement is pointwise equal to
+    \[
+        w \mapsto \forall i : \mathrm{Fin}\,n,\ \mathrm{FreeGroup.of}\,i \in
+            \mathrm{normalClosure}\,(S \cup \{\mathrm{FreeGroup.mk}\,w\}).
+    \]
+    For each fixed $i$ the inner predicate is r.e. in $w$ by
+    Lemma~\ref{lem:re-generator-mem}, so the finite conjunction over
+    $\mathrm{Fin}\,n$ is r.e. by Lemma~\ref{lem:re-forall-fin}; transport along the
+    equivalence with \texttt{REPred.of\_eq}.
 \end{proof}
 
 \subsection{Main result}
+
+\begin{lemma}[Post's theorem packaged for the word problem]
+    \label{lem:post-re-compl}
+    \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.post_re_compl}
+    \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
+    \uses{def:word-pred}
+    Let $P$ be the word problem predicate, equipped with a classical decidability
+    instance. If $P$ is recursively enumerable and the complement
+    $w \mapsto \neg P(w)$ is recursively enumerable, then
+    $\mathrm{ComputablePred}\,P$.
+\end{lemma}
+\begin{proof}
+    \uses{def:word-pred}
+    Choose a $\mathrm{DecidablePred}$ instance for $P$ classically
+    (\texttt{Classical.dec}). Post's theorem
+    (\texttt{ComputablePred.computable\_iff\_re\_compl\_re}) states, for a
+    predicate with a decidability instance, that $\mathrm{ComputablePred}\,P \iff
+    \mathrm{REPred}\,P \wedge \mathrm{REPred}\,(\lambda w.\ \neg P(w))$. The
+    right-hand conjunction is exactly the hypothesis, so the backward direction of
+    the iff gives $\mathrm{ComputablePred}\,P$.
+\end{proof}
 
 \begin{theorem}[Kuznetsov / Boone--Higman for simple groups]
     \label{thm:boone-higman-simple}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.boone_higman_simple}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
-    \uses{def:word-pred, lem:re-positive, lem:re-negative}
+    \uses{def:word-pred, lem:post-re-compl, lem:re-positive, lem:re-negative}
     \leanok
     The word problem predicate $P$ of a finitely presented simple group is
     computable; that is, $\mathrm{ComputablePred}\,P$, the solvability of the word
     problem of $\varphi$.
 \end{theorem}
 \begin{proof}
-    \uses{lem:re-positive, lem:re-negative}
-    Equip $P$ with a classical decidability instance
-    (\texttt{Classical.dec}). By Post's theorem, a decidable-instance predicate
-    is computable iff both it and its complement are recursively enumerable
-    (\texttt{ComputablePred.computable\_iff\_re\_compl\_re}). The predicate $P$ is
-    r.e. by Lemma~\ref{lem:re-positive} and its complement is r.e. by
-    Lemma~\ref{lem:re-negative}; hence $\mathrm{ComputablePred}\,P$.
+    \uses{lem:post-re-compl, lem:re-positive, lem:re-negative}
+    Apply Lemma~\ref{lem:post-re-compl}. Its two hypotheses are that $P$ is r.e.
+    (Lemma~\ref{lem:re-positive}) and that the complement $w \mapsto \neg P(w)$ is
+    r.e. (Lemma~\ref{lem:re-negative}, whose statement is already in the
+    complement shape $\mathrm{REPred}\,(\lambda w.\ \neg P(w))$ that Post's theorem
+    expects). Hence $\mathrm{ComputablePred}\,P$.
 \end{proof}
 
 \end{document}
