@@ -92,7 +92,28 @@ theorem orderZero_bundle {f g : ℂ → ℂ} {R : ℝ} (hR : 0 < R)
         ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt f z = 0) ∧
       (MeromorphicOn (f + g) Set.univ ∧ (∃ z, meromorphicOrderAt (f + g) z ≠ ⊤) ∧
         ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt (f + g) z = 0) := by
-  sorry
+  have hz_sphere : ∃ z : ℂ, ‖z‖ = R := by
+    refine ⟨(R : ℂ), ?_⟩
+    calc
+      ‖(R : ℂ)‖ = |R| := by simp
+      _ = R := abs_of_pos hR
+  rcases hz_sphere with ⟨z, hz⟩
+  have hf_order : meromorphicOrderAt f z = 0 := (f_analytic_sphere hf hbound hz).1
+  have hf_ne_top : ∃ z, meromorphicOrderAt f z ≠ ⊤ :=
+    ⟨z, by simp [hf_order]⟩
+  have hf_order_sphere : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt f z = 0 := by
+    intro z' hz'
+    exact (f_analytic_sphere hf hbound hz').1
+  have hfg_merm : MeromorphicOn (f + g) Set.univ :=
+    hf.meromorphicOn.add (fun z' hz' => (hg.analyticAt (isOpen_univ.mem_nhds hz')).meromorphicAt)
+  have hfg_order : meromorphicOrderAt (f + g) z = 0 :=
+    (fg_analytic_sphere hf hg hbound hz).2.2
+  have hfg_ne_top : ∃ z, meromorphicOrderAt (f + g) z ≠ ⊤ :=
+    ⟨z, by simp [hfg_order]⟩
+  have hfg_order_sphere : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt (f + g) z = 0 := by
+    intro z' hz'
+    exact (fg_analytic_sphere hf hg hbound hz').2.2
+  exact ⟨⟨hf.meromorphicOn, hf_ne_top, hf_order_sphere⟩, ⟨hfg_merm, hfg_ne_top, hfg_order_sphere⟩⟩
 
 /-- The positive-part mass decomposes as the signed mass plus the negative-part
 mass. -/
