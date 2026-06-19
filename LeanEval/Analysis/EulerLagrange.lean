@@ -339,6 +339,24 @@ theorem deriv_integrand_support
     simp [hh_zero, hderiv_zero]
   exact ht hF_zero
 
+/-- **Shifted partials as Fréchet derivatives on basis vectors.** For a `C²`
+Lagrangian, each shifted slice partial along the configuration `x + ε h` equals
+the Fréchet derivative of `(t, y, z) ↦ L t y z` at that configuration applied to
+the corresponding standard basis vector: `(0, 1, 0)` for the spatial partial and
+`(0, 0, 1)` for the velocity partial. This is the bridge from the one-variable
+`deriv` definitions to the multivariable `fderiv`, used to get continuity and
+boundedness of the shifted partials. -/
+theorem shiftedPartials_eq_fderiv
+    (L : ℝ → ℝ → ℝ → ℝ) (x h : ℝ → ℝ) (ε t : ℝ)
+    (hL : ContDiff ℝ 2 (fun p : ℝ × ℝ × ℝ => L p.1 p.2.1 p.2.2)) :
+    lagrangianPartialXShifted L x h ε t
+        = fderiv ℝ (fun p : ℝ × ℝ × ℝ => L p.1 p.2.1 p.2.2)
+            (t, x t + ε * h t, deriv x t + ε * deriv h t) (0, 1, 0)
+    ∧ lagrangianPartialVShifted L x h ε t
+        = fderiv ℝ (fun p : ℝ × ℝ × ℝ => L p.1 p.2.1 p.2.2)
+            (t, x t + ε * h t, deriv x t + ε * deriv h t) (0, 0, 1) := by
+  sorry
+
 /-- **Uniform bound of the shifted partials over the `ε`-tube.** For `L, x` `C²`,
 `h` smooth with compact support, and `r > 0`, there is a single constant `M`
 bounding both shifted partials over `tsupport h × [-r, r]`. -/

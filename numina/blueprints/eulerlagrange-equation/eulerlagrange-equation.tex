@@ -117,6 +117,37 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     $\mathrm{fderiv}\,f\,p\,d$ at $0$; \texttt{HasDerivAt.deriv} reads it off.
 \end{proof}
 
+\begin{lemma}[Shifted partials as Fr\'echet derivatives on basis vectors]
+    \label{lem:shifted-partial-eq-fderiv}
+    \lean{LeanEval.Analysis.shiftedPartials_eq_fderiv}
+    \leanfile{LeanEval/Analysis/EulerLagrange.lean}
+    \uses{def:shifted-partials, lem:directional-deriv-eq-fderiv}
+    Let $L$ be $C^2$. For all $\varepsilon, t$ the shifted spatial and velocity
+    partials along the configuration $x + \varepsilon h$ are the Fr\'echet
+    derivative of $(t, y, z) \mapsto L(t, y, z)$ at the configuration applied to
+    the matching standard basis vector:
+    \[
+      \partial_x L_\varepsilon(t)
+        = \mathrm{fderiv}\,\mathbb{R}\, L\,
+          \bigl(t, x_\varepsilon(t), x'_\varepsilon(t)\bigr)\,(0,1,0),
+      \qquad
+      \partial_{x'} L_\varepsilon(t)
+        = \mathrm{fderiv}\,\mathbb{R}\, L\,
+          \bigl(t, x_\varepsilon(t), x'_\varepsilon(t)\bigr)\,(0,0,1).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:directional-deriv-eq-fderiv}
+    Each shifted partial is a one-variable slice derivative of $L$ at a point
+    other than $0$; translating the base point to $0$ rewrites it as
+    $\mathrm{deriv}\,(\varepsilon' \mapsto L(p_0 + \varepsilon'\, e))\,0$ for the
+    configuration $p_0 = (t, x_\varepsilon(t), x'_\varepsilon(t))$ and the
+    relevant basis vector $e$. Since $L$ is $C^2$ it is differentiable at $p_0$
+    (\texttt{ContDiff.differentiable}, using $1 \le 2$), so
+    \cref{lem:directional-deriv-eq-fderiv} identifies that derivative with
+    $\mathrm{fderiv}\,\mathbb{R}\,L\,p_0\,e$.
+\end{proof}
+
 \begin{lemma}[A partial derivative of a $C^2$ function is $C^1$]
     \label{lem:partial-deriv-contdiff}
     \lean{LeanEval.Analysis.partialDeriv_contDiff}
