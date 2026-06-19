@@ -3,6 +3,7 @@ import Mathlib.LinearAlgebra.CrossProduct
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Analysis.Calculus.ContDiff.Deriv
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 import Mathlib.Analysis.InnerProductSpace.Calculus
 import EvalTools.Markers
 
