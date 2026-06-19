@@ -216,7 +216,74 @@ theorem logDeriv_zpow_shift (u : ℂ) (n : ℤ) {z : ℂ} (hz : z ≠ u) :
 theorem logDeriv_factorizedRational {d : ℂ → ℤ} (hd : Function.HasFiniteSupport d)
     {z : ℂ} (hz : z ∉ Function.support d) :
     logDeriv (∏ᶠ u, (fun w => w - u) ^ d u) z = ∑ᶠ u, (d u : ℂ) * (z - u)⁻¹ := by
-  sorry
+  -- The finite product over all `u` reduces to a product over the finite support.
+  have h_mulSupport_subset : Function.mulSupport (fun u : ℂ => (fun w : ℂ => w - u) ^ d u) ⊆
+      (hd.toFinset : Set ℂ) := by
+    intro u hu
+    have h_nonzero : d u ≠ 0 := by
+      intro hzero
+      apply hu
+      simp [hzero]
+    exact hd.mem_toFinset.mpr (by rwa [Function.mem_support])
+  have h_prod_eq : (∏ᶠ u, (fun w : ℂ => w - u) ^ d u) = ∏ u ∈ hd.toFinset, (fun w : ℂ => w - u) ^ d u :=
+    finprod_eq_prod_of_mulSupport_subset _ h_mulSupport_subset
+  -- For each `u` in the finite support, `z ≠ u` (otherwise `z` would be in the support of `d`).
+  have hz_ne_u : ∀ u ∈ hd.toFinset, z ≠ u := by
+    intro u hu
+    intro h_eq
+    apply hz
+    have h_support : u ∈ Function.support d := hd.mem_toFinset.mp hu
+    rw [h_eq]
+    exact h_support
+  -- Every factor is nonzero at `z`.
+  have hf_nonzero : ∀ u ∈ hd.toFinset, ((fun w : ℂ => w - u) ^ d u) z ≠ 0 := by
+    intro u hu
+    have h_val_ne_zero : (z - u) ≠ 0 := sub_ne_zero.mpr (hz_ne_u u hu)
+    simpa [Pi.pow_apply] using zpow_ne_zero (d u) h_val_ne_zero
+  -- Every factor is differentiable at `z`.
+  have h_diff : ∀ u ∈ hd.toFinset, DifferentiableAt ℂ ((fun w : ℂ => w - u) ^ d u) z := by
+    intro u hu
+    have hz_ne_u' : z ≠ u := hz_ne_u u hu
+    have h_sub_diff : DifferentiableAt ℂ (fun w : ℂ => w - u) z :=
+      (differentiableAt_id (x := z)).sub_const u
+    have h_val_ne_zero : (fun w : ℂ => w - u) z ≠ 0 := by
+      simpa [sub_ne_zero] using hz_ne_u'
+    exact h_sub_diff.zpow (m := d u) (Or.inl h_val_ne_zero)
+  -- Apply the logarithmic derivative rule for a finite product.
+  have h_log_prod : logDeriv (∏ u ∈ hd.toFinset, (fun w : ℂ => w - u) ^ d u) z
+      = ∑ u ∈ hd.toFinset, logDeriv ((fun w : ℂ => w - u) ^ d u) z := by
+    have htemp := logDeriv_prod hf_nonzero h_diff
+    have h_eq_fun : (∏ u ∈ hd.toFinset, (fun w : ℂ => w - u) ^ d u) =
+        (fun x : ℂ => ∏ u ∈ hd.toFinset, ((fun w : ℂ => w - u) ^ d u) x) := by
+      ext x; simp
+    rw [h_eq_fun]
+    exact htemp
+  -- Each summand simplifies by `logDeriv_zpow_shift`.
+  have h_log_sum : ∑ u ∈ hd.toFinset, logDeriv ((fun w : ℂ => w - u) ^ d u) z
+      = ∑ u ∈ hd.toFinset, (d u : ℂ) * (z - u)⁻¹ := by
+    refine Finset.sum_congr rfl fun u hu => ?_
+    simpa [Pi.pow_apply] using logDeriv_zpow_shift u (d u) (hz_ne_u u hu)
+  -- The infinite sum on the right equals the finite sum over the support.
+  have h_finsum_eq : ∑ᶠ u, (d u : ℂ) * (z - u)⁻¹ = ∑ u ∈ hd.toFinset, (d u : ℂ) * (z - u)⁻¹ :=
+    finsum_eq_sum_of_support_subset (fun u : ℂ => (d u : ℂ) * (z - u)⁻¹) (s := hd.toFinset) (by
+      intro u hu
+      have h_nonzero : (d u : ℂ) * (z - u)⁻¹ ≠ 0 := hu
+      have h_d_nonzero : d u ≠ 0 := by
+        intro hzero
+        apply h_nonzero
+        simp [hzero]
+      have h_support : u ∈ Function.support d := by
+        rw [Function.mem_support]
+        exact h_d_nonzero
+      rw [Finset.mem_coe, hd.mem_toFinset]
+      exact h_support)
+  -- Combine everything.
+  calc
+    logDeriv (∏ᶠ u, (fun w : ℂ => w - u) ^ d u) z
+        = logDeriv (∏ u ∈ hd.toFinset, (fun w : ℂ => w - u) ^ d u) z := by rw [h_prod_eq]
+    _ = ∑ u ∈ hd.toFinset, logDeriv ((fun w : ℂ => w - u) ^ d u) z := h_log_prod
+    _ = ∑ u ∈ hd.toFinset, (d u : ℂ) * (z - u)⁻¹ := h_log_sum
+    _ = ∑ᶠ u, (d u : ℂ) * (z - u)⁻¹ := by rw [h_finsum_eq]
 
 /-- Each simple pole `(· - u)⁻¹` with `u` in the open disk is circle-integrable. -/
 theorem circleIntegrable_sub_inv {R : ℝ} {u : ℂ} (hu : u ∈ Metric.ball (0 : ℂ) R) :
@@ -601,7 +668,41 @@ theorem circleIntegral_logDeriv_factorizedRational {h : ℂ → ℂ} {R : ℝ}
     (∮ z in C(0, R),
         logDeriv (∏ᶠ u, (fun x => x - u) ^ (divisor h (Metric.closedBall 0 R)) u) z)
       = (∑ᶠ u, ((divisor h (Metric.closedBall 0 R)) u : ℂ)) * (2 * (Real.pi : ℂ) * Complex.I) := by
-  sorry
+  let d := divisor h (Metric.closedBall 0 R)
+  have hfinite : Function.HasFiniteSupport d :=
+    Function.locallyFinsuppWithin.finiteSupport d (isCompact_closedBall 0 R)
+  by_cases hRnonneg : 0 ≤ R
+  · have hsphere_eq : ∀ z ∈ Metric.sphere (0 : ℂ) R,
+      logDeriv (∏ᶠ u, (fun x => x - u) ^ d u) z = ∑ᶠ u, (d u : ℂ) * (z - u)⁻¹ := by
+      intro z hz
+      rw [Metric.mem_sphere, dist_eq_norm, sub_zero] at hz
+      have hz_not_support : z ∉ Function.support d := by
+        intro hz_support
+        have hz_ball : z ∈ Metric.ball (0 : ℂ) R := hsupp hz_support
+        rw [Metric.mem_ball, dist_eq_norm, sub_zero] at hz_ball
+        linarith
+      exact logDeriv_factorizedRational hfinite hz_not_support
+    calc
+      (∮ z in C(0, R), logDeriv (∏ᶠ u, (fun x => x - u) ^ d u) z)
+          = (∮ z in C(0, R), ∑ᶠ u, (d u : ℂ) * (z - u)⁻¹) := by
+        rw [circleIntegral.integral_congr hRnonneg hsphere_eq]
+      _ = (∑ᶠ u, (d u : ℂ)) * (2 * (Real.pi : ℂ) * Complex.I) :=
+        circleIntegral_sum_inv hfinite hsupp
+  · -- When R < 0, the ball is empty, so d is identically zero and both sides are zero
+    have hd_zero : divisor h (Metric.closedBall 0 R) = 0 := by
+      ext u
+      by_contra! hne
+      have hmem_support : u ∈ Function.support (divisor h (Metric.closedBall 0 R)) := by
+        rw [Function.mem_support]
+        exact hne
+      have hu_ball : u ∈ Metric.ball (0 : ℂ) R := hsupp hmem_support
+      have hball_empty : Metric.ball (0 : ℂ) R = ∅ :=
+        (Metric.ball_eq_empty).mpr (by linarith)
+      rw [hball_empty] at hu_ball
+      exact hu_ball
+    rw [hd_zero]
+    simp [Pi.zero_apply, zpow_zero, logDeriv_apply, deriv_const]
+    simp [circleIntegral, smul_zero, intervalIntegral.integral_zero]
 
 /-- Integral evaluation of the logarithmic derivative. -/
 theorem argument_principle_integral {h : ℂ → ℂ} {R : ℝ}
