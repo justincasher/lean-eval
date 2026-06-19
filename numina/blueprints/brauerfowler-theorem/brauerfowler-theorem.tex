@@ -1,0 +1,517 @@
+% Blueprint: Brauer--Fowler theorem
+% Created by Numina
+
+\begin{document}
+
+\section{Brauer--Fowler Theorem}
+
+The \emph{Brauer--Fowler theorem} states that the order of a finite nonabelian
+simple group is bounded by a function of the order of any involution
+centralizer: there is $f : \mathbb{N} \to \mathbb{N}$ such that for every finite
+nonabelian simple group $G$ and every involution $t \in G$,
+\[
+    |G| \;\le\; f\bigl(|C_G(t)|\bigr).
+\]
+
+Throughout, $G$ is a finite group, $n = |G| = \operatorname{Nat.card} G$, and for
+$g \in G$ we write $C_G(g)$ for the centralizer of $\{g\}$
+(Mathlib: \texttt{Subgroup.centralizer}). We fix an involution $t$ (i.e.
+$\operatorname{orderOf} t = 2$), put $C = C_G(t)$ and $c = |C|$. Let
+$\mathcal{I} = \{g \in G : \operatorname{orderOf} g = 2\}$ be the set of
+involutions and $k = |\mathcal{I}|$. For $x \in G$ let
+\[
+    r(x) \;=\; \#\{(a,b) \in \mathcal{I} \times \mathcal{I} : ab = x\}.
+\]
+
+The proof is a counting argument. We show (i) there are many involutions
+($n \le kc$); (ii) some non-identity $x$ is a product of two involutions in many
+ways, forcing $|C_G(x)|$ to be large, hence $C_G(x)$ to be a proper subgroup of
+small index $m \le 2c^2$; and (iii) a simple group acting on the $m$ cosets of a
+proper subgroup embeds into the symmetric group $S_m$, so $n \le m! \le (2c^2)!$.
+Thus $f(c) = (2c^2)!$ works.
+
+\subsection{Basic definitions}
+
+\begin{definition}[Set of involutions]
+    \label{def:involution-set}
+    \lean{LeanEval.GroupTheory.involutionSet}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
+    The \emph{set of involutions} of $G$ is the finite set
+    \[
+        \mathcal{I} \;=\; \{g \in G : \operatorname{orderOf} g = 2\},
+    \]
+    regarded as a \texttt{Finset G} (the \texttt{Set.toFinset} of
+    $\{g \mid \operatorname{orderOf} g = 2\}$, using that $G$ is finite). All
+    cardinalities below are \texttt{Finset.card} of subsets of $G$ (equivalently
+    \texttt{Nat.card} of the corresponding subtypes).
+\end{definition}
+
+\begin{definition}[Number of involutions]
+    \label{def:k}
+    \lean{LeanEval.GroupTheory.numInvolutions}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{def:involution-set}
+    \leanok
+    We write $k = |\mathcal{I}| = \texttt{Finset.card}\,\mathcal{I}$ for the number
+    of involutions of $G$.
+\end{definition}
+
+\begin{definition}[Involution-pair count]
+    \label{def:r}
+    \lean{LeanEval.GroupTheory.involutionPairCount}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{def:involution-set}
+    \leanok
+    For $x \in G$, let
+    \[
+        r(x) \;=\; \bigl|\{(a,b) \in \mathcal{I} \times \mathcal{I} : ab = x\}\bigr|
+    \]
+    be the number of ordered pairs of involutions with product $x$, i.e.
+    $\texttt{Finset.card}$ of the filter of $\mathcal{I} \times^{\mathrm s}
+    \mathcal{I}$ (the \texttt{Finset.product}) by the predicate $ab = x$.
+\end{definition}
+
+\subsection{Group-theoretic preliminaries}
+
+\begin{lemma}[Conjugates of an involution are involutions]
+    \label{lem:involution-conj}
+    \lean{LeanEval.GroupTheory.orderOf_conj_eq_two}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
+    Let $g, a \in G$ with $\operatorname{orderOf} a = 2$. Then
+    $\operatorname{orderOf}(g a g^{-1}) = 2$. Consequently the conjugacy class of
+    any involution is contained in $\mathcal{I}$.
+\end{lemma}
+\begin{proof}
+    Conjugate elements have equal order: $g a g^{-1}$ is semiconjugate to $a$ via
+    $g$, so $\operatorname{orderOf}(g a g^{-1}) = \operatorname{orderOf} a = 2$
+    (Mathlib: \texttt{SemiconjBy.orderOf\_eq}). The conjugacy class of an
+    involution therefore consists of involutions.
+\end{proof}
+
+\begin{lemma}[An involution is its own inverse]
+    \label{lem:involution-inv}
+    \lean{LeanEval.GroupTheory.inv_eq_and_mul_self_eq_one}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
+    Let $a \in G$ with $\operatorname{orderOf} a = 2$. Then $a^{-1} = a$, and
+    consequently $a a = 1$.
+\end{lemma}
+\begin{proof}
+    An element of order two is its own inverse
+    (\texttt{inv\_eq\_self\_of\_orderOf\_eq\_two}), so $a^{-1} = a$; substituting
+    this into $a a^{-1} = 1$ (\texttt{mul\_inv\_cancel}) gives $a a = 1$.
+\end{proof}
+
+\begin{lemma}[The center of a nonabelian simple group is trivial]
+    \label{lem:center-bot}
+    \lean{LeanEval.GroupTheory.center_eq_bot}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
+    Let $G$ be a simple group that is not commutative (there exist
+    $a, b \in G$ with $ab \ne ba$). Then $Z(G) = \bot$.
+\end{lemma}
+\begin{proof}
+    The center $Z(G)$ is a normal subgroup (\texttt{Subgroup.center\_normal}), so
+    by simplicity it is either $\bot$ or $\top$
+    (\texttt{Subgroup.Normal.eq\_bot\_or\_eq\_top}). If $Z(G) = \top$ then every
+    pair of elements commutes (\texttt{Subgroup.center\_eq\_top\_iff}),
+    contradicting the existence of $a, b$ with $ab \ne ba$. Hence $Z(G) = \bot$.
+\end{proof}
+
+\begin{lemma}[Centralizers of non-identity elements are proper]
+    \label{lem:centralizer-proper}
+    \lean{LeanEval.GroupTheory.centralizer_lt_top_of_ne_one}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{lem:center-bot}
+    \leanok
+    Let $G$ be a nonabelian simple group and $x \in G$ with $x \ne 1$. Then
+    $C_G(x) < \top$; in particular $|C_G(x)| < n$.
+\end{lemma}
+\begin{proof}
+    If $C_G(x) = \top$ then $x$ commutes with every element of $G$, i.e.
+    $x \in Z(G)$. By Lemma~\ref{lem:center-bot}, $Z(G) = \bot$, so $x = 1$,
+    contradicting $x \ne 1$. Hence $C_G(x) \ne \top$, so $C_G(x) < \top$. For the
+    cardinality bound, $|C_G(x)| \le n$
+    (\texttt{Subgroup.card\_le\_card\_group}); and if $|C_G(x)| = n$ then
+    $C_G(x) = \top$ (\texttt{Subgroup.eq\_top\_of\_card\_eq}), contradicting
+    properness. Therefore $|C_G(x)| < n$.
+\end{proof}
+
+\subsection{Embedding a simple group via a proper subgroup}
+
+\begin{lemma}[Trivial normal core of a proper subgroup]
+    \label{lem:normalcore-bot}
+    \lean{LeanEval.GroupTheory.normalCore_eq_bot}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
+    Let $G$ be a simple group and $H < \top$ a proper subgroup. Then the normal
+    core $\operatorname{normalCore}(H) = \bot$.
+\end{lemma}
+\begin{proof}
+    The normal core is a normal subgroup
+    (\texttt{Subgroup.normalCore\_normal}), hence $\bot$ or $\top$ by simplicity
+    (\texttt{Subgroup.Normal.eq\_bot\_or\_eq\_top}). Since
+    $\operatorname{normalCore}(H) \le H < \top$
+    (\texttt{Subgroup.normalCore\_le}), it cannot be $\top$, so it is $\bot$.
+\end{proof}
+
+\begin{lemma}[The coset permutation representation is injective]
+    \label{lem:toPermHom-injective}
+    \lean{LeanEval.GroupTheory.toPermHom_injective}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{lem:normalcore-bot}
+    \leanok
+    Let $G$ be a simple group and $H < \top$ a proper subgroup. Then the
+    permutation representation
+    $\varphi = \texttt{MulAction.toPermHom}\,G\,(G/H) : G \to
+    \operatorname{Perm}(G/H)$ of the left-multiplication action of $G$ on the
+    coset space $G/H$ is injective.
+\end{lemma}
+\begin{proof}
+    The kernel of $\varphi$ is the normal core of $H$
+    (\texttt{Subgroup.normalCore\_eq\_ker}), which is $\bot$ by
+    Lemma~\ref{lem:normalcore-bot}. A homomorphism with trivial kernel is
+    injective (\texttt{MonoidHom.ker\_eq\_bot\_iff}).
+\end{proof}
+
+\begin{lemma}[Order bound from a proper subgroup]
+    \label{lem:card-le-index-factorial}
+    \lean{LeanEval.GroupTheory.card_le_index_factorial}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{lem:toPermHom-injective}
+    \leanok
+    Let $G$ be a finite simple group and $H < \top$ a proper subgroup with index
+    $m = [G : H]$. Then $n = |G| \le m!$.
+\end{lemma}
+\begin{proof}
+    Let $\varphi = \texttt{MulAction.toPermHom}\,G\,(G/H) : G \to
+    \operatorname{Perm}(G/H)$. By Lemma~\ref{lem:toPermHom-injective} $\varphi$ is
+    injective, so $|G| \le |\operatorname{Perm}(G/H)|$
+    (\texttt{Nat.card\_le\_card\_of\_injective}). Finally
+    $|\operatorname{Perm}(G/H)| = |G/H|! = m!$
+    (\texttt{Nat.card\_perm}, with $[G:H] = |G/H|$ by definition of
+    \texttt{Subgroup.index}).
+\end{proof}
+
+\subsection{Counting involutions}
+
+\begin{lemma}[Conjugacy class size times centralizer order]
+    \label{lem:orbit-centralizer}
+    \lean{LeanEval.GroupTheory.card_orbit_mul_card_centralizer}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
+    For any $g \in G$, the orbit of $g$ under the \texttt{ConjAct G} action
+    (which by \texttt{ConjAct.orbit\_eq\_carrier\_conjClasses} is exactly the
+    conjugacy class $g^G$) satisfies
+    $|\operatorname{orbit}(\texttt{ConjAct}\,G)\,g| \cdot |C_G(g)| = n$.
+\end{lemma}
+\begin{proof}
+    Apply the orbit--stabilizer theorem to the \texttt{ConjAct G} action of $G$
+    on itself: $|\operatorname{orbit}(\texttt{ConjAct}\,G)\,g| \cdot
+    |\operatorname{stab}_{\texttt{ConjAct}\,G}(g)| = |G|$
+    (\texttt{MulAction.card\_orbit\_mul\_card\_stabilizer\_eq\_card\_group}). The
+    stabilizer of $g$ for this action is the centralizer $C_G(g)$, and has the
+    same cardinality
+    (\texttt{ConjAct.stabilizer\_eq\_centralizer}, together with
+    \texttt{Subgroup.nat\_card\_centralizer\_nat\_card\_stabilizer}); since the
+    orbit equals the conjugacy class
+    (\texttt{ConjAct.orbit\_eq\_carrier\_conjClasses}), this gives the claim.
+\end{proof}
+
+\begin{lemma}[Many involutions]
+    \label{lem:many-involutions}
+    \lean{LeanEval.GroupTheory.card_le_numInvolutions_mul_centralizer}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{def:involution-set, def:k, lem:involution-conj, lem:orbit-centralizer}
+    \leanok
+    With $t$ an involution, $c = |C_G(t)|$ and $k = |\mathcal{I}|$, one has
+    $n \le k c$.
+\end{lemma}
+\begin{proof}
+    By Lemma~\ref{lem:involution-conj} the conjugacy class $t^G$ is contained in
+    $\mathcal{I}$, so $|t^G| \le k$. By Lemma~\ref{lem:orbit-centralizer},
+    $n = |t^G| \cdot c \le k c$.
+\end{proof}
+
+\begin{lemma}[At least two involutions]
+    \label{lem:two-le-k}
+    \lean{LeanEval.GroupTheory.two_le_numInvolutions}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{def:involution-set, def:k, lem:involution-conj, lem:orbit-centralizer, lem:centralizer-proper}
+    \leanok
+    Let $G$ be a nonabelian simple group and $t$ an involution. Then
+    $2 \le k$.
+\end{lemma}
+\begin{proof}
+    By Lemma~\ref{lem:centralizer-proper} (with $x = t \ne 1$), $c = |C_G(t)| < n$.
+    By Lemma~\ref{lem:orbit-centralizer}, $|t^G| \cdot c = n$; since $c < n$ and
+    $c \ge 1$, this forces $|t^G| \ge 2$ (if $|t^G| \le 1$ then $n \le c < n$).
+    By Lemma~\ref{lem:involution-conj}, $t^G \subseteq \mathcal{I}$, so
+    $k \ge |t^G| \ge 2$.
+\end{proof}
+
+\begin{lemma}[Pairs with product $1$ are the diagonal]
+    \label{lem:r-one-eq-k}
+    \lean{LeanEval.GroupTheory.involutionPairCount_one}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{def:involution-set, def:k, def:r, lem:involution-inv}
+    \leanok
+    One has $r(1) = k$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:involution-inv}
+    A pair $(a,b)$ of involutions has $ab = 1$ iff $b = a^{-1}$, and by
+    Lemma~\ref{lem:involution-inv} an involution is its own inverse, so $b = a$.
+    The bijection $\beta : a \mapsto (a,a)$ from $\mathcal{I}$ onto the fiber of
+    pairs with product $1$ witnesses this (\texttt{Finset.card\_bij}): it is
+    injective on first coordinates, and surjective by the previous sentence.
+    Therefore $r(1) = |\mathcal{I}| = k$.
+\end{proof}
+
+\begin{lemma}[Total number of involution pairs]
+    \label{lem:sum-r-eq-k-sq}
+    \lean{LeanEval.GroupTheory.sum_involutionPairCount}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{def:involution-set, def:k, def:r}
+    \leanok
+    The fibers of the product map cover all involution pairs:
+    \[
+        \sum_{x \in G} r(x) \;=\; k^2 .
+    \]
+\end{lemma}
+\begin{proof}
+    The product set $\mathcal{I} \times^{\mathrm s} \mathcal{I}$ has $k^2$
+    elements (\texttt{Finset.card\_product}), and the map $(a,b) \mapsto ab$
+    partitions it into the fibers counted by $r(x)$ over $x \in G$
+    (\texttt{Finset.card\_eq\_sum\_card\_fiberwise}). Hence
+    $\sum_{x \in G} r(x) = k^2$.
+\end{proof}
+
+\begin{lemma}[Counting involution pairs by their product]
+    \label{lem:sum-pairs}
+    \lean{LeanEval.GroupTheory.sum_involutionPairCount_erase_one}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{def:involution-set, def:k, def:r, lem:r-one-eq-k, lem:sum-r-eq-k-sq}
+    \leanok
+    The total number of ordered pairs of involutions is $k^2$, and exactly $k$ of
+    them have product $1$; hence
+    \[
+        \sum_{x \ne 1} r(x) \;=\; k^2 - k .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:r-one-eq-k, lem:sum-r-eq-k-sq}
+    By Lemma~\ref{lem:sum-r-eq-k-sq}, $\sum_{x \in G} r(x) = k^2$, and by
+    Lemma~\ref{lem:r-one-eq-k}, $r(1) = k$. Splitting off the $x = 1$ term
+    (\texttt{Finset.add\_sum\_erase}, with $1 \in G$) gives
+    $r(1) + \sum_{x \ne 1} r(x) = k^2$, i.e.
+    $\sum_{x \ne 1} r(x) = k^2 - k$.
+\end{proof}
+
+\begin{lemma}[An involution factor inverts the product]
+    \label{lem:inverts}
+    \lean{LeanEval.GroupTheory.inverts_of_mul_eq}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
+    Let $a, b \in G$ with $\operatorname{orderOf} a = \operatorname{orderOf} b = 2$
+    and $ab = x$. Then $a x a^{-1} = x^{-1}$, i.e. $a$ inverts $x$.
+\end{lemma}
+\begin{proof}
+    Since $a^2 = 1$, $a x a^{-1} = a (ab) a = (a a) b a = b a$. As $a, b$ are
+    involutions, $ba = b^{-1} a^{-1} = (ab)^{-1} = x^{-1}$. Hence
+    $a x a^{-1} = x^{-1}$.
+\end{proof}
+
+\begin{lemma}[Factorizations are indexed by their first factor]
+    \label{lem:r-eq-invert-card}
+    \lean{LeanEval.GroupTheory.involutionPairCount_eq_filter}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{def:involution-set, def:r, lem:involution-inv}
+    \leanok
+    For every $x \in G$,
+    \[
+        r(x) \;=\; \bigl|\{a \in \mathcal{I} : a x \in \mathcal{I}\}\bigr| .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:involution-inv}
+    A pair $(a,b)$ of involutions with $ab = x$ is determined by its first
+    coordinate $a$: indeed $b = a^{-1} x = a x$, using $a^{-1} = a$ from
+    Lemma~\ref{lem:involution-inv}. Thus the projection $\pi : (a,b) \mapsto a$ is
+    a bijection from the fiber defining $r(x)$ onto
+    $\{a \in \mathcal{I} : a x \in \mathcal{I}\}$
+    (\texttt{Finset.card\_bij}), which gives the stated equality of
+    cardinalities.
+\end{proof}
+
+\begin{lemma}[Common inverters differ by a centralizing element]
+    \label{lem:inv-mul-mem-centralizer}
+    \lean{LeanEval.GroupTheory.inv_mul_mem_centralizer}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
+    Let $x, a, a_0 \in G$ with $a x a^{-1} = x^{-1}$ and
+    $a_0 x a_0^{-1} = x^{-1}$. Then $a_0^{-1} a \in C_G(x)$.
+\end{lemma}
+\begin{proof}
+    Conjugating $x$ by $a_0^{-1} a$ and using the two hypotheses,
+    \[
+        (a_0^{-1} a)\, x\, (a_0^{-1} a)^{-1}
+        = a_0^{-1} (a x a^{-1}) a_0
+        = a_0^{-1} x^{-1} a_0
+        = (a_0 x a_0^{-1})^{-1}
+        = (x^{-1})^{-1} = x .
+    \]
+    Hence $a_0^{-1} a$ commutes with $x$, i.e.
+    $a_0^{-1} a \in C_G(x)$ (\texttt{Subgroup.mem\_centralizer\_iff}).
+\end{proof}
+
+\begin{lemma}[The inverter map injects into the centralizer]
+    \label{lem:inverter-map-injective}
+    \lean{LeanEval.GroupTheory.inverter_map_injOn_centralizer}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{lem:inv-mul-mem-centralizer}
+    \leanok
+    Let $x, a_0 \in G$ with $a_0 x a_0^{-1} = x^{-1}$, and let $S \subseteq G$ be
+    a set each element of which inverts $x$ (i.e. $a x a^{-1} = x^{-1}$ for all
+    $a \in S$). Then the map $\iota : a \mapsto a_0^{-1} a$ is injective on $S$
+    and sends $S$ into $C_G(x)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:inv-mul-mem-centralizer}
+    Injectivity: $\iota$ is the restriction of left multiplication by $a_0^{-1}$,
+    which is injective (\texttt{mul\_right\_injective}). Image: for $a \in S$,
+    both $a$ and $a_0$ invert $x$, so $a_0^{-1} a \in C_G(x)$ by
+    Lemma~\ref{lem:inv-mul-mem-centralizer}.
+\end{proof}
+
+\begin{lemma}[Few factorizations of a fixed product]
+    \label{lem:r-le-centralizer}
+    \lean{LeanEval.GroupTheory.involutionPairCount_le_centralizer}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{def:involution-set, def:r, lem:inverts, lem:r-eq-invert-card, lem:inverter-map-injective}
+    \leanok
+    For every $x \in G$, $r(x) \le |C_G(x)|$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:inverts, lem:r-eq-invert-card, lem:inverter-map-injective}
+    If $r(x) = 0$ the bound is trivial, so by Lemma~\ref{lem:r-eq-invert-card}
+    the set $S = \{a \in \mathcal{I} : a x \in \mathcal{I}\}$ is nonempty with
+    $|S| = r(x)$; fix $a_0 \in S$. Every $a \in S$ inverts $x$, i.e.
+    $a x a^{-1} = x^{-1}$ (Lemma~\ref{lem:inverts}, applied to $a$ and $b = ax$),
+    and so does $a_0$. By Lemma~\ref{lem:inverter-map-injective} the map
+    $a \mapsto a_0^{-1} a$ injects $S$ into $C_G(x)$, so
+    $r(x) = |S| \le |C_G(x)|$ (\texttt{Finset.card\_le\_card\_of\_injOn}).
+\end{proof}
+
+\begin{lemma}[Averaging over the non-identity elements]
+    \label{lem:averaging}
+    \lean{LeanEval.GroupTheory.exists_averaging}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{def:r}
+    \leanok
+    Let $G$ be nontrivial, so the set $G \setminus \{1\}$ of non-identity
+    elements is nonempty with cardinality $n - 1$. Then there exists $x \ne 1$
+    with
+    \[
+        (n - 1)\, r(x) \;\ge\; \sum_{x \ne 1} r(x) .
+    \]
+\end{lemma}
+\begin{proof}
+    The set $G \setminus \{1\}$ is a nonempty finite set, so $r$ attains a
+    maximum on it at some $x_0 \ne 1$ (\texttt{Finset.exists\_max\_image}). Each
+    of the $|G \setminus \{1\}| = n - 1$ summands is then at most $r(x_0)$, so
+    $\sum_{x \ne 1} r(x) \le (n-1)\, r(x_0)$
+    (\texttt{Finset.sum\_le\_card\_nsmul}).
+\end{proof}
+
+\begin{lemma}[Some element has a large centralizer]
+    \label{lem:big-centralizer}
+    \lean{LeanEval.GroupTheory.exists_big_centralizer}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{lem:sum-pairs, lem:r-le-centralizer, lem:averaging}
+    \leanok
+    There exists $x \in G$ with $x \ne 1$ and
+    \[
+        (n - 1)\, |C_G(x)| \;\ge\; k^2 - k .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:sum-pairs, lem:r-le-centralizer, lem:averaging}
+    By Lemma~\ref{lem:averaging} there is $x_0 \ne 1$ with
+    $(n-1)\, r(x_0) \ge \sum_{x \ne 1} r(x)$, and by Lemma~\ref{lem:sum-pairs}
+    the right-hand side equals $k^2 - k$. By Lemma~\ref{lem:r-le-centralizer},
+    $r(x_0) \le |C_G(x_0)|$, so
+    $(n-1)\,|C_G(x_0)| \ge (n-1)\, r(x_0) \ge k^2 - k$.
+\end{proof}
+
+\subsection{The bound}
+
+\begin{lemma}[Arithmetic of the index bound]
+    \label{lem:index-arith}
+    \lean{LeanEval.GroupTheory.index_arith}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \leanok
+    Let $n, k, c, d, m$ be natural numbers with $2 \le n$, $2 \le k$,
+    $1 \le d$, $n \le k c$, $k^2 \le (n-1)\, d + k$, and $m\, d = n$. Then
+    $m \le 2 c^2$.
+\end{lemma}
+\begin{proof}
+    To avoid ℕ truncated subtraction, cast the whole argument to $\mathbb{Z}$
+    (\texttt{Int.ofNat}/\texttt{push\_cast}); since $2 \le n$ and $2 \le k$ the
+    casts $(n-1 : \mathbb{Z}) = (n : \mathbb{Z}) - 1 \ge 1$ and
+    $(k^2 - k : \mathbb{Z}) = k(k-1) \ge 0$ agree with the ℕ values, and the
+    hypotheses become honest integer inequalities. Over $\mathbb{Z}$,
+    $k^2 \le (n-1)d + k$ gives $(n-1)d \ge k(k-1)$. From $k \ge 2$ we have
+    $2k(k-1) \ge k^2$, and $n \le kc$ gives $k^2 c^2 \ge n^2$; hence
+    \[
+        2 c^2 (n-1) d \;\ge\; 2 c^2 k(k-1) \;\ge\; c^2 k^2 \;\ge\; n^2 \;\ge\; n(n-1).
+    \]
+    Since $n - 1 \ge 1 > 0$ we may cancel it to obtain $2 c^2 d \ge n = m d$, and
+    as $d \ge 1$ this yields $m \le 2 c^2$. The integer chain is closed by
+    \texttt{nlinarith} (with $n - 1 \ge 1$, $d \ge 1$ supplied), after which the
+    ℕ conclusion follows by \texttt{Int.toNat}/cast monotonicity.
+\end{proof}
+
+\begin{proposition}[Explicit order bound]
+    \label{prop:order-bound}
+    \lean{LeanEval.GroupTheory.order_bound}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{lem:many-involutions, lem:two-le-k, lem:big-centralizer, lem:index-arith, lem:centralizer-proper, lem:card-le-index-factorial}
+    \leanok
+    Let $G$ be a finite nonabelian simple group and $t \in G$ an involution.
+    Then $n = |G| \le (2 c^2)!$ where $c = |C_G(t)|$.
+\end{proposition}
+\begin{proof}
+    By Lemma~\ref{lem:big-centralizer} there is $x \ne 1$ with
+    $(n-1)\,|C_G(x)| \ge k^2 - k$, i.e. $k^2 \le (n-1)\,d + k$ with
+    $d = |C_G(x)| \ge 1$. By Lemma~\ref{lem:many-involutions}, $n \le k c$, and by
+    Lemma~\ref{lem:two-le-k}, $k \ge 2$; also $n \ge 2$ since $G$ is nonabelian.
+    Let $m = [G : C_G(x)]$, so $m\, d = n$ (\texttt{Subgroup.index\_mul\_card}).
+    Lemma~\ref{lem:index-arith} gives $m \le 2 c^2$. By
+    Lemma~\ref{lem:centralizer-proper}, $C_G(x) < \top$ is proper, so
+    Lemma~\ref{lem:card-le-index-factorial} gives $n \le m!$. Finally
+    $m \le 2 c^2$ and monotonicity of the factorial
+    (\texttt{Nat.factorial\_le}) give $n \le m! \le (2 c^2)!$.
+\end{proof}
+
+\begin{theorem}[Brauer--Fowler]
+    \label{thm:brauer-fowler}
+    \lean{LeanEval.GroupTheory.brauer_fowler}
+    \leanfile{LeanEval/GroupTheory/BrauerFowler.lean}
+    \uses{prop:order-bound}
+    \leanok
+    There is a function $f : \mathbb{N} \to \mathbb{N}$ such that for every finite
+    nonabelian simple group $G$ and every involution $t \in G$,
+    \[
+        |G| \;\le\; f\bigl(|C_G(t)|\bigr).
+    \]
+\end{theorem}
+\begin{proof}
+    Take $f(c) = (2 c^2)!$. For any finite nonabelian simple $G$ and involution
+    $t$, Proposition~\ref{prop:order-bound} gives
+    $|G| \le (2 c^2)! = f(c)$ with $c = |C_G(t)|$.
+\end{proof}
+
+\end{document}
