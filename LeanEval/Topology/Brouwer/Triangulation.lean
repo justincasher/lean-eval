@@ -25,6 +25,14 @@ index `0` is the origin and index `i.succ` is the `i`-th basis vector. -/
 noncomputable def cornerVertex (n : ℕ) : Fin (n + 1) → EuclSp n :=
   Fin.cons 0 (fun i : Fin n => EuclideanSpace.single i (1 : ℝ))
 
+/-- **Corner affine basis.** The points `0, e_1, …, e_n` are affinely
+independent and affinely span `E_n`, so they form an
+`AffineBasis (Fin (n+1)) ℝ E_n` whose underlying family is `cornerVertex`. -/
+noncomputable def cornerBasis (n : ℕ) : AffineBasis (Fin (n + 1)) ℝ (EuclSp n) where
+  toFun := cornerVertex n
+  ind' := sorry
+  tot' := sorry
+
 /-- The standard corner simplex `S_n = convexHull {0, e_1, …, e_n} ⊆ E_n`. -/
 def cornerSimplex (n : ℕ) : Set (EuclSp n) :=
   convexHull ℝ (Set.range (cornerVertex n))
@@ -42,6 +50,12 @@ noncomputable def carrierSupp (n : ℕ) (p : EuclSp n) : Finset (Fin (n + 1)) :=
 vertices indexed by `carrierSupp p`. -/
 noncomputable def carrierFace (n : ℕ) (p : EuclSp n) : Set (EuclSp n) :=
   convexHull ℝ (cornerVertex n '' (carrierSupp n p : Set (Fin (n + 1))))
+
+/-- **Membership by coordinates.** A point lies in `S_n` iff all of its
+barycentric coordinates are nonnegative. -/
+theorem mem_cornerSimplex_iff (n : ℕ) (p : EuclSp n) :
+    p ∈ cornerSimplex n ↔ ∀ i, 0 ≤ baryCoord n p i := by
+  sorry
 
 /-- **Triangulation of the corner simplex `S_n`.** A finite set of affinely
 independent cells of dimension `≤ n`, closed under nonempty faces, meeting
@@ -242,8 +256,9 @@ theorem interior_facet_both_sides {n} (T : Triangulation n) {F : Finset (EuclSp 
   have h_card := (door_incidence T hF).1 hint
   -- h_card : Nat.card {C // C ∈ T.maximalCells ∧ F ⊆ C} = 2
   have h_filter_card_eq : (T.maximalCells.filter (fun C => F ⊆ C)).card =
-    Nat.card {C // C ∈ T.maximalCells ∧ F ⊆ C} := by
-    simp
+    Nat.card {C // C ∈ T.maximalCells ∧ F ⊆ C} :=
+    (Nat.subtype_card (T.maximalCells.filter (fun C => F ⊆ C)) (by
+      intro C; simp [Finset.mem_filter])).symm
   have h_cardS : (T.maximalCells.filter (fun C => F ⊆ C)).card = 2 := by
     rw [h_filter_card_eq, h_card]
   -- card = 2 gives two distinct cells

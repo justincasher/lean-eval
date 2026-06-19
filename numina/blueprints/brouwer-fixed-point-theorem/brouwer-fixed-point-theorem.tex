@@ -211,46 +211,96 @@
     each other.
 \end{proof}
 
+\section{The corner simplex and barycentric coordinates}
+
+% Foundations are pinned to Mathlib's affine-basis API so that nonnegativity,
+% the sum-to-one identity, continuity, and the convex-hull characterization are
+% library lemmas rather than hand-rolled.
+
+\begin{definition}[Corner affine basis]
+    \label{def:corner-basis}
+    \lean{LeanEval.Topology.cornerBasis}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    The points $0, e_1, \dots, e_n$ of $E_n = \mathrm{EuclideanSpace}\,\mathbb R\,
+    (\mathrm{Fin}\,n)$ are affinely independent and affinely span $E_n$, so they
+    form an \texttt{AffineBasis (Fin (n+1)) $\mathbb R$ $E_n$} -- index $0$ the
+    origin and index $i.\mathrm{succ}$ the basis vector $e_i$ -- built with
+    \texttt{AffineBasis.mk} from the affine-independence proof together with
+    $\mathrm{affineSpan}\,\mathbb R\,(\mathrm{range}\ \mathrm{cornerVertex}) = \top$.
+\end{definition}
+
+\begin{definition}[Barycentric coordinates]
+    \label{def:bary-coord}
+    \lean{LeanEval.Topology.baryCoord}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{def:corner-basis}
+    The $i$-th \emph{barycentric coordinate} of $p \in E_n$ is
+    $x_i(p) := (\mathrm{cornerBasis}.\mathrm{coord}\ i)\,p$, i.e.\ Mathlib's
+    barycentric coordinate map \texttt{AffineBasis.coord}. Each $x_i$ is an affine
+    functional $E_n \to \mathbb R$, hence continuous
+    (\texttt{continuous\_barycentric\_coord}), and for every $p$ one has
+    $\sum_i x_i(p) = 1$ (\texttt{AffineBasis.sum\_coord\_apply\_eq\_one}).
+\end{definition}
+
+\begin{definition}[Corner simplex]
+    \label{def:corner-simplex}
+    \lean{LeanEval.Topology.cornerSimplex}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{def:corner-basis}
+    The standard corner simplex is
+    $S_n := \mathrm{convexHull}\,\mathbb R\,(\mathrm{range}\ \mathrm{cornerBasis})
+    \subseteq E_n$, the convex hull of the corner affine basis.
+\end{definition}
+
+\begin{lemma}[Membership by coordinates]
+    \label{lem:mem-corner-simplex}
+    \lean{LeanEval.Topology.mem_cornerSimplex_iff}
+    \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
+    \uses{def:corner-simplex, def:bary-coord}
+    A point lies in $S_n$ iff all its barycentric coordinates are nonnegative:
+    $p \in S_n \iff \forall i,\ 0 \le x_i(p)$. In particular every $p \in S_n$
+    satisfies $x_i(p) \ge 0$ for all $i$ and $\sum_i x_i(p) = 1$.
+\end{lemma}
+\begin{proof}
+    \uses{def:corner-simplex, def:bary-coord}
+    The characterization is \texttt{AffineBasis.convexHull\_eq\_nonneg\_coord}
+    applied to \texttt{cornerBasis}; the sum identity is
+    \texttt{AffineBasis.sum\_coord\_apply\_eq\_one}.
+\end{proof}
+
 \section{Triangulations and their incidence model}
 
 \begin{definition}[Triangulation]
     \label{def:triangulation}
     \lean{LeanEval.Topology.Triangulation}
     \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
-    \leanok
-    A \emph{triangulation} of the corner simplex
-    $S_n = \mathrm{convexHull}\,\{0, e_1, \dots, e_n\}$ is a bespoke structure
-    -- richer than Mathlib's \texttt{Geometry.SimplicialComplex}, which records
-    faces and the face-to-face condition but neither purity, dimension, nor the
-    requirement that the underlying space be a prescribed set -- packaging the
-    following data and axioms:
+    \uses{def:corner-simplex}
+    A \emph{triangulation} of the corner simplex $S_n$ extends a finite geometric
+    simplicial complex \texttt{Geometry.SimplicialComplex $\mathbb R$ $E_n$} -- whose
+    faces are affinely independent \texttt{Finset}s of $E_n$ closed downward under
+    nonempty subsets (\texttt{SimplicialComplex.down\_closed}), with affine
+    independence (\texttt{SimplicialComplex.indep}) and the face-to-face condition
+    $\mathrm{conv}(C) \cap \mathrm{conv}(C') \subseteq \mathrm{conv}(C \cap C')$
+    (\texttt{SimplicialComplex.inter\_subset\_convexHull}) supplied by the library
+    -- with two further axioms:
     \begin{itemize}
-        \item a finite set of \emph{cells}, each cell a \texttt{Finset} of points
-            of $E_n$ that is affinely independent (so its convex hull is a
-            nondegenerate simplex), of dimension at most $n$;
-        \item \emph{closure under faces}: every nonempty subset of a cell is a
-            cell;
-        \item the \emph{face-to-face} condition: for cells $C, C'$ the
-            intersection $\mathrm{conv}(C) \cap \mathrm{conv}(C')$ is the convex
-            hull of $C \cap C'$ (a common face);
-        \item \emph{purity of dimension $n$}: every cell is a subset of a
-            \emph{maximal cell} with exactly $n+1$ vertices;
-        \item the \emph{covering} axiom: the union of the convex hulls of the
-            maximal cells equals $S_n$.
+        \item \emph{purity}: every face is contained in a \emph{maximal cell}
+            with exactly $n+1$ vertices;
+        \item \emph{covering}: the union of the convex hulls of the maximal cells
+            equals $S_n$.
     \end{itemize}
-    The \emph{maximal cells} are the cells with $n+1$ vertices and the
-    \emph{$(n-1)$-faces} (or \emph{facets}) are the cells with $n$ vertices. This
-    structure cannot be expressed by Mathlib's single-simplex constructors,
-    because the vertices of distinct cells are affinely independent only
-    cell-by-cell, not jointly; the bespoke API above is the shared foundational
-    layer used throughout this section.
+    The \emph{maximal cells} are the faces with $n+1$ vertices and the
+    \emph{facets} (or \emph{$(n-1)$-faces}) are the faces with $n$ vertices.
+    Basing the structure on \texttt{Geometry.SimplicialComplex} means affine
+    independence, downward closure, and the face-to-face property are inherited
+    Mathlib lemmas rather than re-proved obligations.
 \end{definition}
 
 \begin{definition}[Carrier face]
     \label{def:carrier-face}
     \lean{LeanEval.Topology.carrierFace}
     \leanfile{LeanEval/Topology/Brouwer/Triangulation.lean}
-    \uses{def:triangulation}
+    \uses{def:triangulation, def:bary-coord}
     \leanok
     Writing a point $x \in S_n$ in barycentric coordinates $(x_0, \dots, x_n)$
     relative to the corner vertices $0, e_1, \dots, e_n$ (so $x_i \ge 0$ and
@@ -746,7 +796,7 @@
     \label{def:induced-labeling}
     \lean{LeanEval.Topology.inducedLabeling}
     \leanfile{LeanEval/Topology/Brouwer/Simplex.lean}
-    \uses{def:triangulation, lem:label-pigeonhole}
+    \uses{def:triangulation, lem:label-pigeonhole, def:bary-coord}
     \leanok
     Let $g : S_n \to S_n$ be continuous, written in barycentric coordinates so
     that points of $S_n$ correspond to tuples $(x_0, \dots, x_n)$ with
@@ -816,7 +866,7 @@
     Let $\omega_g$ be the modulus of \Cref{lem:coordinate-modulus}. If a
     triangulation has mesh $< \varepsilon$ and $C$ is a rainbow cell for the
     induced labeling, then every $x \in C$ satisfies
-    $x_i(g(x)) \le x_i(x) + \omega_g(\varepsilon)$ for all $i$.
+    $x_i(g(x)) \le x_i(x) + 2\,\omega_g(\varepsilon)$ for all $i$.
 \end{lemma}
 \begin{proof}
     \uses{lem:rainbow-vertex-bound, lem:coordinate-modulus}
@@ -825,8 +875,9 @@
     $\lVert x - v_i \rVert < \varepsilon$, so \Cref{lem:coordinate-modulus} gives
     $x_i(g(x)) \le x_i(g(v_i)) + \omega_g(\varepsilon)$ and
     $x_i(v_i) \le x_i(x) + \omega_g(\varepsilon)$. Chaining the three inequalities
-    yields $x_i(g(x)) \le x_i(x) + 2\,\omega_g(\varepsilon)$; replacing $\omega_g$
-    by $2\,\omega_g$ (still a modulus tending to $0$) gives the stated bound.
+    $x_i(g(x)) \le x_i(g(v_i)) + \omega_g(\varepsilon)
+      \le x_i(v_i) + \omega_g(\varepsilon)
+      \le x_i(x) + 2\,\omega_g(\varepsilon)$ gives the stated bound.
 \end{proof}
 
 \begin{lemma}[A rainbow cell is approximately fixed]
@@ -836,20 +887,20 @@
     \uses{lem:rainbow-one-sided}
     In the setting of \Cref{lem:rainbow-one-sided}, every $x$ in a rainbow cell
     $C$ satisfies
-    $|x_i(g(x)) - x_i(x)| \le (n+1)\,\omega_g(\varepsilon)$ for all $i$; hence
-    $C$ contains a point within $(n+1)\,\omega_g(\varepsilon)$ of being fixed.
+    $|x_i(g(x)) - x_i(x)| \le 2(n+1)\,\omega_g(\varepsilon)$ for all $i$; hence
+    $C$ contains a point within $2(n+1)\,\omega_g(\varepsilon)$ of being fixed.
 \end{lemma}
 \begin{proof}
     \uses{lem:rainbow-one-sided}
-    By \Cref{lem:rainbow-one-sided}, $x_i(g(x)) - x_i(x) \le \omega_g(\varepsilon)$
+    By \Cref{lem:rainbow-one-sided}, $x_i(g(x)) - x_i(x) \le 2\,\omega_g(\varepsilon)$
     for every $i$. Since $\sum_i x_i(g(x)) = \sum_i x_i(x) = 1$, the displacements
     sum to zero, so for each fixed $i$,
     \[
         x_i(x) - x_i(g(x)) = \sum_{j \ne i}\bigl(x_j(g(x)) - x_j(x)\bigr)
-        \le n\,\omega_g(\varepsilon).
+        \le 2n\,\omega_g(\varepsilon).
     \]
     Combining the two one-sided estimates gives
-    $|x_i(g(x)) - x_i(x)| \le (n+1)\,\omega_g(\varepsilon)$.
+    $|x_i(g(x)) - x_i(x)| \le 2(n+1)\,\omega_g(\varepsilon)$.
 \end{proof}
 
 \begin{lemma}[Vanishing displacement yields a fixed point]
@@ -884,7 +935,7 @@
     triangulation of mesh $< 1/k$; its induced labeling is Sperner by
     \Cref{lem:induced-is-sperner}, so by \Cref{lem:sperner} it has a rainbow
     cell, and by \Cref{lem:rainbow-approx-fixed} a point $x_k$ with
-    $\lVert g(x_k) - x_k \rVert \le (n+1)\,\omega_g(1/k)$. Since
+    $\lVert g(x_k) - x_k \rVert \le 2(n+1)\,\omega_g(1/k)$. Since
     $\omega_g(1/k) \to 0$, \Cref{lem:approx-fixed-limit} applied to the compact
     $S_n$ produces a point $x$ with $g(x) = x$.
 \end{proof}
