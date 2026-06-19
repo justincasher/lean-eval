@@ -37,10 +37,12 @@ noncomputable def cornerBasis (n : ℕ) : AffineBasis (Fin (n + 1)) ℝ (EuclSp 
 def cornerSimplex (n : ℕ) : Set (EuclSp n) :=
   convexHull ℝ (Set.range (cornerVertex n))
 
-/-- The barycentric coordinates of a point `p` relative to the corner vertices:
-coordinate `0` is `1 - ∑ p i` and coordinate `i.succ` is `p i`. -/
+/-- The barycentric coordinates of a point `p` relative to the corner vertices,
+defined as Mathlib's affine-basis coordinate map: the `i`-th coordinate is
+`(cornerBasis n).coord i p` (`AffineBasis.coord`). Each coordinate is an affine
+functional `E_n → ℝ`, hence continuous, and they sum to `1`. -/
 noncomputable def baryCoord (n : ℕ) (p : EuclSp n) : Fin (n + 1) → ℝ :=
-  Fin.cons (1 - ∑ i, p i) (fun i => p i)
+  fun i => (cornerBasis n).coord i p
 
 /-- The support `{ i : x_i > 0 }` of the barycentric coordinates of `p`. -/
 noncomputable def carrierSupp (n : ℕ) (p : EuclSp n) : Finset (Fin (n + 1)) :=
