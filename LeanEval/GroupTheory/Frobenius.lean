@@ -1,5 +1,8 @@
 import Mathlib
 import EvalTools.Markers
+import LeanEval.GroupTheory.Frobenius.Basic
+import LeanEval.GroupTheory.Frobenius.Character
+import LeanEval.GroupTheory.Frobenius.Induction
 
 namespace LeanEval
 namespace GroupTheory
@@ -17,6 +20,11 @@ Frobenius's theorem (1901) states that the *Frobenius kernel*
 is a normal subgroup of `G`. The only known proof uses character theory
 (induction of characters from a point stabiliser to `G`); no purely
 group-theoretic proof has been found in over a century.
+
+The character-theoretic machinery is developed in the `Frobenius/` subfolder:
+`Frobenius.Basic` (group-theoretic preliminaries), `Frobenius.Character`
+(class functions and characters), and `Frobenius.Induction` (induced class
+functions, the lift, and the kernel).
 -/
 
 @[eval_problem]
