@@ -25,6 +25,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.feasible_eq_iInter}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program}
+    \leanok
     The feasible region equals the intersection
     \[
         \Big(\bigcap_{i} \{x \mid (A x)_i \le b_i\}\Big)
@@ -46,6 +47,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.mulVec_coord_isLinear_continuous}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program}
+    \leanok
     For each constraint row index $i$, the map $x \mapsto (A x)_i$ from
     $\mathbb{R}^m$ to $\mathbb{R}$ is a continuous linear map.
 \end{lemma}
@@ -64,6 +66,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.feasible_convex}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:feasible-as-inter, lem:Ax-coord-clm}
+    \leanok
     The feasible region of a linear program is a convex subset of $\mathbb{R}^m$.
 \end{lemma}
 \begin{proof}
@@ -81,6 +84,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.objective_concaveOn}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:feasible-convex}
+    \leanok
     The objective $x \mapsto c \cdot x$ is a concave function on the feasible
     region.
 \end{lemma}
@@ -95,6 +99,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.isMaxOn_of_isLocalMaxOn}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:feasible-convex, lem:objective-concave}
+    \leanok
     If $x$ is feasible and a local maximiser of the objective on the feasible
     region, then $x$ is a global maximiser of the objective on the feasible
     region.
@@ -110,6 +115,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.dotProduct_self_pos}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program}
+    \leanok
     Let $c \in \mathbb{R}^m$ with $c \ne 0$. Then $0 < c \cdot c$.
 \end{lemma}
 \begin{proof}
@@ -125,6 +131,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.dotProduct_lt_add_smul_self}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:dotProduct-self-pos}
+    \leanok
     Let $c \in \mathbb{R}^m$ with $c \ne 0$, let $x \in \mathbb{R}^m$, and let
     $t > 0$. Then $c \cdot (x + t \cdot c) > c \cdot x$.
 \end{lemma}
@@ -142,6 +149,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.add_smul_mem_feasible}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program}
+    \leanok
     Let $x \in \mathbb{R}^m$ and $\varepsilon > 0$ with
     $B(x, \varepsilon) \subseteq \mathrm{feasible}$, and let $t > 0$ satisfy
     $t \lVert c \rVert < \varepsilon$. Then $x + t \cdot c \in \mathrm{feasible}$.
@@ -159,6 +167,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.exists_mem_feasible_objective_lt}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:small-step-feasible, lem:dotProduct-ascent}
+    \leanok
     Let $x \in \mathbb{R}^m$ and $\varepsilon > 0$ with
     $B(x, \varepsilon) \subseteq \mathrm{feasible}$, and let $c \ne 0$. Then there
     exists $y \in \mathrm{feasible}$ with $c \cdot y > c \cdot x$.
@@ -177,6 +186,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.not_mem_interior_of_isMaxOn}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:ball-gives-better-point}
+    \leanok
     Let $x$ be a global maximiser of the objective on the feasible region. If
     $c \ne 0$, then $x$ does not lie in the topological interior of the feasible
     region.
@@ -194,6 +204,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.mem_frontier_of_isMaxOn}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:max-not-interior}
+    \leanok
     Let $x$ be feasible and a global maximiser of the objective on the feasible
     region. If $c \ne 0$, then $x$ lies on the topological frontier of the
     feasible region.
@@ -211,6 +222,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.lp_maximum_principle}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:local-max-global, lem:max-on-frontier}
+    \leanok
     Let $x$ be feasible and a local maximiser of the objective on the feasible
     region. Then $x$ is a global maximiser; and if $c \ne 0$, then $x$ lies on
     the topological frontier of the feasible region.
@@ -229,6 +241,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.feasible_isClosed}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:feasible-as-inter, lem:Ax-coord-clm}
+    \leanok
     The feasible region of a linear program is a closed subset of $\mathbb{R}^m$.
 \end{lemma}
 \begin{proof}
@@ -246,6 +259,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.feasible_isCompact}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:feasible-closed}
+    \leanok
     If the feasible region is bounded, then it is compact.
 \end{lemma}
 \begin{proof}
@@ -260,6 +274,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.objective_isLinear_continuous}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program}
+    \leanok
     The objective $x \mapsto c \cdot x$ is a continuous linear map from
     $\mathbb{R}^m$ to $\mathbb{R}$; in particular it is continuous.
 \end{lemma}
@@ -274,6 +289,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.maximizerSet_isExposed}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:dotProduct-clm}
+    \leanok
     The set $M = \{\, x \in \mathrm{feasible} \mid \forall y \in \mathrm{feasible},\ c \cdot y \le c \cdot x \,\}$
     of global maximisers of the objective is an exposed, hence extreme, subset of
     the feasible region.
@@ -291,6 +307,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.maximizerSet_isCompact}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:feasible-compact, lem:maximizer-set-exposed}
+    \leanok
     If the feasible region is bounded, then the maximiser set $M$ of
     Lemma~\ref{lem:maximizer-set-exposed} is compact.
 \end{lemma}
@@ -306,6 +323,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.LinearProgram.maximizerSet_nonempty}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:feasible-compact, lem:dotProduct-clm}
+    \leanok
     If the feasible region is nonempty and bounded, then the maximiser set $M$
     of Lemma~\ref{lem:maximizer-set-exposed} is nonempty.
 \end{lemma}
@@ -323,6 +341,7 @@ Mathematics}.
     \lean{LeanEval.ConvexGeometry.simplex_algorithm}
     \leanfile{LeanEval/ConvexGeometry/LinearProgramming.lean}
     \uses{def:linear-program, lem:maximizer-set-exposed, lem:maximizer-set-compact, lem:maximizer-set-nonempty}
+    \leanok
     Every linear program with a nonempty bounded feasible region admits a global
     maximiser of the objective that is an extreme point (vertex) of the feasible
     region.
