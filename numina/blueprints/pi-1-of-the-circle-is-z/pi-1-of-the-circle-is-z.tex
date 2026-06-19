@@ -3,6 +3,403 @@
 
 \begin{document}
 
-% Your blueprint will go here.
+\section{The Fundamental Group of the Circle}
+
+We compute the fundamental group of the complex unit circle
+\(\mathbb{S}^1 = \{z \in \mathbb{C} : |z| = 1\}\) (Mathlib's \texttt{Circle}) based at
+\(1\), proving it is the infinite cyclic group \(\mathbb{Z}\).
+
+The argument is the classical covering-space computation. The exponential map
+\[
+  \exp : \mathbb{R} \to \mathbb{S}^1, \qquad \exp(r) = e^{2\pi i r}
+\]
+(Mathlib's \texttt{Circle.exp}, normalized so that \(\exp(r) = 1\) iff
+\(r \in 2\pi\mathbb{Z}\)) is a covering map whose total space \(\mathbb{R}\) is
+contractible, hence simply connected. The \emph{monodromy} of this covering --- lifting
+a loop based at \(1\) to a path in \(\mathbb{R}\) starting at \(0\) and reading off the
+endpoint --- defines the \emph{winding number}, a group isomorphism from the fundamental
+group to \(\mathbb{Z}\).
+
+Throughout, \(p = \exp\), the basepoint of \(\mathbb{R}\) is \(0\) (which lies in the fibre
+since \(\exp(0) = 1\)), and the fibre over \(1\) is \(p^{-1}(\{1\}) = 2\pi\mathbb{Z}\).
+We freely use that \(p\) is a covering map (Mathlib: \texttt{Circle.isCoveringMap\_exp}) and
+the monodromy API \texttt{IsCoveringMap.monodromy} together with its compatibility law
+\texttt{monodromy\_trans\_apply} and the lift-projection law \texttt{monodromy\_map}. To pass
+between an element \(\gamma\) of the fundamental group and its homotopy class of paths we use
+the bridge \texttt{FundamentalGroup.toPath} / \texttt{FundamentalGroup.fromPath}; monodromy is
+always applied to \(\operatorname{toPath}\gamma\).
+
+\begin{lemma}[Cancelling the period]
+    \label{lem:two-pi-cancel}
+    \lean{LeanEval.Topology.two_pi_cancel}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    For integers \(n, m\), if \(n \cdot 2\pi = m \cdot 2\pi\) as real numbers, then \(n = m\).
+\end{lemma}
+\begin{proof}
+    Since \(2\pi \neq 0\) (\texttt{Real.two\_pi\_pos}, \texttt{Real.pi\_ne\_zero}), right
+    cancellation \texttt{mul\_right\_cancel\_0} gives \((n : \mathbb{R}) = (m : \mathbb{R})\), and
+    injectivity of the integer cast \texttt{Int.cast\_injective} yields \(n = m\).
+\end{proof}
+
+\begin{definition}[Integer parametrization of the fibre]
+    \label{def:fiber-equiv-int}
+    \lean{LeanEval.Topology.fiberEquivInt}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{lem:two-pi-cancel}
+    The fibre \(p^{-1}(\{1\}) = \{r \in \mathbb{R} : \exp(r) = 1\}\) is in bijection with
+    \(\mathbb{Z}\) via the map \(\langle r\rangle \mapsto n\), where \(n\) is the unique
+    integer with \(r = n \cdot 2\pi\); its inverse is \(n \mapsto \langle n \cdot 2\pi\rangle\).
+    Existence and uniqueness of \(n\) follow from the kernel description
+    \texttt{Circle.exp\_eq\_one} together with \(2\pi \neq 0\).
+\end{definition}
+
+\begin{lemma}[Fibre parametrization on integers]
+    \label{lem:fiber-equiv-int-symm}
+    \lean{LeanEval.Topology.fiberEquivInt_symm_apply}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{def:fiber-equiv-int}
+    For every integer \(n\), the fibre point assigned to \(n\) by the inverse of the parametrization
+    of Definition~\ref{def:fiber-equiv-int} has underlying real number \(n\cdot 2\pi\); that is,
+    \(\bigl(\mathrm{fiberEquivInt}^{-1}(n) : \mathbb{R}\bigr) = n\cdot(2\pi)\).
+\end{lemma}
+\begin{proof}
+    \uses{def:fiber-equiv-int}
+    By construction (Definition~\ref{def:fiber-equiv-int}) the inverse sends \(n\) to the fibre point
+    \(\langle n\cdot 2\pi\rangle\), whose underlying real number is \(n\cdot 2\pi\).
+\end{proof}
+
+\begin{lemma}[The translated lift is the lift]
+    \label{lem:translated-lift-is-lift}
+    \lean{LeanEval.Topology.translatedLift_eq_liftPath}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    Let \(\gamma_0\) be a path (loop) in \(\mathbb{S}^1\) based at \(1\), let \(a \in \mathbb{R}\)
+    satisfy \(\exp(a) = 1\), and let \(e\) be a point of the fibre over \(1\). Writing
+    \(\mathrm{liftPath}\,\gamma_0\,e\) (Mathlib's \texttt{IsCoveringMap.liftPath}) for the lift of the
+    \emph{path} \(\gamma_0\) starting at \(e\), the translated map
+    \(t \mapsto \mathrm{liftPath}\,\gamma_0\,e\,(t) + a\) equals \(\mathrm{liftPath}\,\gamma_0\,(e + a)\),
+    the lift of \(\gamma_0\) starting at \(e + a\).
+\end{lemma}
+\begin{proof}
+    The translated map is continuous, sends \(0\) to \(e + a\), and projects to \(\gamma_0\): on the
+    one hand \(\exp\circ\mathrm{liftPath}\,\gamma_0\,e = \gamma_0\) by
+    \texttt{IsCoveringMap.liftPath\_lifts}, and on the other
+    \(\exp(\mathrm{liftPath}\,\gamma_0\,e\,(t) + a) = \exp(\mathrm{liftPath}\,\gamma_0\,e\,(t))\cdot\exp(a)
+    = \exp(\mathrm{liftPath}\,\gamma_0\,e\,(t))\) by \texttt{Circle.exp\_add} and \(\exp(a) = 1\). By the
+    unique characterization of lifted paths (\texttt{IsCoveringMap.eq\_liftPath\_iff'}) it therefore
+    equals \(\mathrm{liftPath}\,\gamma_0\,(e + a)\).
+\end{proof}
+
+\begin{lemma}[Translation invariance of monodromy]
+    \label{lem:monodromy-translation}
+    \lean{LeanEval.Topology.monodromy_translation}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{lem:translated-lift-is-lift}
+    Let \(\gamma\) be a homotopy class of loops in \(\mathbb{S}^1\) based at \(1\), let
+    \(a \in \mathbb{R}\) satisfy \(\exp(a) = 1\), and let \(e\) be a point of the fibre over
+    \(1\) (so \(e + a\) is again in the fibre). Then, as real numbers,
+    \[
+      \operatorname{monodromy}(\operatorname{toPath}\gamma)(e + a)
+        = \operatorname{monodromy}(\operatorname{toPath}\gamma)(e) + a .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:translated-lift-is-lift}
+    Destructure the quotient: write \(\operatorname{toPath}\gamma = \llbracket\gamma_0\rrbracket\) for a
+    representative path \(\gamma_0\). By definition of monodromy,
+    \(\operatorname{monodromy}(\operatorname{toPath}\gamma)(e')\) is the endpoint
+    \((\mathrm{liftPath}\,\gamma_0\,e')(1)\) of the lift of \(\gamma_0\) starting at \(e'\). By
+    Lemma~\ref{lem:translated-lift-is-lift}, \(\mathrm{liftPath}\,\gamma_0\,(e + a) =
+    (t \mapsto \mathrm{liftPath}\,\gamma_0\,e\,(t) + a)\); evaluating at \(t = 1\) gives
+    \((\mathrm{liftPath}\,\gamma_0\,(e + a))(1) = (\mathrm{liftPath}\,\gamma_0\,e)(1) + a\), that is,
+    \(\operatorname{monodromy}(\operatorname{toPath}\gamma)(e + a) =
+    \operatorname{monodromy}(\operatorname{toPath}\gamma)(e) + a\).
+\end{proof}
+
+\begin{lemma}[Monodromy on a fibre point, in real coordinates]
+    \label{lem:monodromy-val-of-fibre}
+    \lean{LeanEval.Topology.monodromy_val_of_fibre}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{lem:monodromy-translation}
+    For a class \(\gamma\) in the fundamental group at \(1\) and any fibre point \(e\) over \(1\),
+    \[
+      \bigl(\operatorname{monodromy}(\operatorname{toPath}\gamma)(e)\bigr).\mathrm{val}
+        = \bigl(\operatorname{monodromy}(\operatorname{toPath}\gamma)(\langle 0\rangle)\bigr).\mathrm{val}
+          + (e : \mathbb{R}).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:monodromy-translation}
+    The fibre point \(e\) equals \(\langle 0\rangle + (e : \mathbb{R})\), since \(\langle 0\rangle\) has
+    underlying real number \(0\). Apply Lemma~\ref{lem:monodromy-translation} with base point
+    \(\langle 0\rangle\) and \(a = (e : \mathbb{R})\) (which satisfies \(\exp(a) = 1\) because \(e\) lies
+    in the fibre over \(1\)), then read off underlying real numbers.
+\end{proof}
+
+\begin{definition}[Winding number]
+    \label{def:wind}
+    \lean{LeanEval.Topology.wind}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{def:fiber-equiv-int}
+    For a class \(\gamma\) in the fundamental group of \(\mathbb{S}^1\) at \(1\), the
+    \emph{winding number} \(w(\gamma) \in \mathbb{Z}\) is the integer assigned by
+    Definition~\ref{def:fiber-equiv-int} to the fibre point
+    \(\operatorname{monodromy}(\operatorname{toPath}\gamma)(\langle 0\rangle)\); equivalently,
+    \(\operatorname{monodromy}(\operatorname{toPath}\gamma)(\langle 0\rangle) = w(\gamma)\cdot 2\pi\).
+    Here \(\langle 0\rangle\) is the chosen lift of the basepoint, valid since \(\exp(0) = 1\)
+    (\texttt{Circle.exp\_zero}), and \(\operatorname{toPath}\gamma\) is the path homotopy class of
+    \(\gamma\) (\texttt{FundamentalGroup.toPath}).
+\end{definition}
+
+\begin{lemma}[Winding number specification]
+    \label{lem:wind-spec}
+    \lean{LeanEval.Topology.wind_spec}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{def:wind, lem:fiber-equiv-int-symm}
+    For a class \(\gamma\) in the fundamental group at \(1\), the underlying real number of the
+    fibre point \(\operatorname{monodromy}(\operatorname{toPath}\gamma)(\langle 0\rangle)\) equals
+    \(w(\gamma)\cdot 2\pi\).
+\end{lemma}
+\begin{proof}
+    \uses{def:wind, lem:fiber-equiv-int-symm}
+    By Definition~\ref{def:wind}, \(\operatorname{monodromy}(\operatorname{toPath}\gamma)(\langle 0\rangle)
+      = \mathrm{fiberEquivInt}^{-1}(w(\gamma))\). Taking underlying real numbers and applying
+    Lemma~\ref{lem:fiber-equiv-int-symm} with \(n = w(\gamma)\) gives
+    \(\bigl(\operatorname{monodromy}(\operatorname{toPath}\gamma)(\langle 0\rangle) : \mathbb{R}\bigr)
+      = w(\gamma)\cdot 2\pi\).
+\end{proof}
+
+\begin{lemma}[Group law as path concatenation]
+    \label{lem:mul-eq-trans}
+    \lean{LeanEval.Topology.toPath_mul}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    For classes \(\gamma, \delta\) in the fundamental group at \(1\),
+    \[
+      \operatorname{toPath}(\gamma \cdot \delta)
+        = (\operatorname{toPath}\delta).\mathrm{trans}\,(\operatorname{toPath}\gamma).
+    \]
+\end{lemma}
+\begin{proof}
+    The fundamental group is the endomorphism monoid \(\operatorname{End}\) of the basepoint in the
+    fundamental groupoid, where multiplication is reverse composition,
+    \(\gamma \cdot \delta = \delta \mathbin{\gg} \gamma\) (\texttt{CategoryTheory.End.mul\_def}).
+    Composition in the fundamental groupoid is path concatenation
+    (\texttt{FundamentalGroupoid.comp\_eq}), so
+    \(\operatorname{toPath}(\delta \mathbin{\gg} \gamma)
+      = (\operatorname{toPath}\delta).\mathrm{trans}\,(\operatorname{toPath}\gamma)\).
+\end{proof}
+
+\begin{lemma}[Additivity of winding in real coordinates]
+    \label{lem:wind-mul-real}
+    \lean{LeanEval.Topology.wind_mul_real}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{def:wind, lem:wind-spec, lem:mul-eq-trans, lem:monodromy-val-of-fibre}
+    For all classes \(\gamma, \delta\) in the fundamental group at \(1\),
+    \[
+      w(\gamma\cdot\delta)\cdot 2\pi = w(\gamma)\cdot 2\pi + w(\delta)\cdot 2\pi .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:wind-spec, lem:mul-eq-trans, lem:monodromy-val-of-fibre}
+    By Lemma~\ref{lem:wind-spec} for \(\gamma\cdot\delta\), the left-hand side equals
+    \(\bigl(\operatorname{monodromy}(\operatorname{toPath}(\gamma\cdot\delta))(\langle 0\rangle)\bigr).\mathrm{val}\).
+    By Lemma~\ref{lem:mul-eq-trans}, \(\operatorname{toPath}(\gamma\cdot\delta)
+      = (\operatorname{toPath}\delta).\mathrm{trans}\,(\operatorname{toPath}\gamma)\), so
+    \texttt{IsCoveringMap.monodromy\_trans\_apply} (first factor \(\operatorname{toPath}\delta\), second
+    \(\operatorname{toPath}\gamma\)) gives
+    \[
+      \operatorname{monodromy}(\operatorname{toPath}(\gamma\cdot\delta))(\langle 0\rangle)
+        = \operatorname{monodromy}(\operatorname{toPath}\gamma)
+            \bigl(\operatorname{monodromy}(\operatorname{toPath}\delta)(\langle 0\rangle)\bigr).
+    \]
+    Applying Lemma~\ref{lem:monodromy-val-of-fibre} with fibre point
+    \(e = \operatorname{monodromy}(\operatorname{toPath}\delta)(\langle 0\rangle)\), then
+    Lemma~\ref{lem:wind-spec} for \(\gamma\) and for \(\delta\), yields
+    \(w(\gamma)\cdot 2\pi + w(\delta)\cdot 2\pi\).
+\end{proof}
+
+\begin{lemma}[Winding number is additive]
+    \label{lem:wind-mul}
+    \lean{LeanEval.Topology.wind_mul}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{lem:wind-mul-real, lem:two-pi-cancel}
+    For all classes \(\gamma, \delta\) in the fundamental group at \(1\),
+    \(w(\gamma \cdot \delta) = w(\gamma) + w(\delta)\).
+\end{lemma}
+\begin{proof}
+    \uses{lem:wind-mul-real, lem:two-pi-cancel}
+    By Lemma~\ref{lem:wind-mul-real},
+    \(w(\gamma\cdot\delta)\cdot 2\pi = w(\gamma)\cdot 2\pi + w(\delta)\cdot 2\pi
+      = (w(\gamma) + w(\delta))\cdot 2\pi\), so Lemma~\ref{lem:two-pi-cancel} yields
+    \(w(\gamma\cdot\delta) = w(\gamma) + w(\delta)\).
+\end{proof}
+
+\begin{lemma}[Path classes in \(\mathbb{R}\) are unique]
+    \label{lem:quotient-subsingleton}
+    \lean{LeanEval.Topology.quotient_subsingleton}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    For any \(c \in \mathbb{R}\), the type \(\operatorname{Path.Homotopic.Quotient}(0, c)\) of
+    homotopy classes (rel endpoints) of paths in \(\mathbb{R}\) from \(0\) to \(c\) is a
+    subsingleton.
+\end{lemma}
+\begin{proof}
+    \(\mathbb{R}\) is a real topological vector space, hence contractible
+    (\texttt{RealTopologicalVectorSpace.contractibleSpace}) and therefore simply connected
+    (\texttt{SimplyConnectedSpace.ofContractible}). In a simply connected space the quotient of
+    paths between two fixed points is a subsingleton
+    (\texttt{SimplyConnectedSpace.instSubsingletonQuotient}).
+\end{proof}
+
+\begin{definition}[Homotopy class of the lift]
+    \label{def:lift-class}
+    \lean{LeanEval.Topology.liftClass}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    For a class \(\gamma\) in the fundamental group at \(1\), \(\mathrm{liftClass}\,\gamma\) is the
+    homotopy class in \(\mathbb{R}\) (rel endpoints) of the lift of \(\operatorname{toPath}\gamma\)
+    starting at \(0\); it is a class of paths from \(0\) to
+    \(\operatorname{monodromy}(\operatorname{toPath}\gamma)(\langle 0\rangle).\mathrm{val}\).
+\end{definition}
+
+\begin{lemma}[Pushing the lift class forward recovers the loop]
+    \label{lem:loop-eq-exp-of-lift-class}
+    \lean{LeanEval.Topology.map_liftClass}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    For a class \(\gamma\) in the fundamental group at \(1\), let \(\mathrm{liftClass}\,\gamma\) denote
+    the homotopy class in \(\mathbb{R}\) (rel endpoints) of the lift of \(\operatorname{toPath}\gamma\)
+    starting at \(0\). Then the image of \(\mathrm{liftClass}\,\gamma\) under the map induced by \(\exp\)
+    equals \(\operatorname{toPath}\gamma\):
+    \[
+      (\mathrm{liftClass}\,\gamma).\mathrm{map}\,\langle\exp,\_\rangle = \operatorname{toPath}\gamma .
+    \]
+\end{lemma}
+\begin{proof}
+    Destructure the quotient: pick a representative path \(\gamma_0\) of \(\operatorname{toPath}\gamma\),
+    so \(\mathrm{liftClass}\,\gamma = \llbracket\mathrm{liftPath}\,\gamma_0\,\langle 0\rangle\rrbracket\).
+    Since the induced map on classes commutes with the quotient projection
+    (\texttt{Path.Homotopic.Quotient.mk\_map}), its image under \(\exp\) is the class of
+    \(\exp\circ\mathrm{liftPath}\,\gamma_0\,\langle 0\rangle\), which equals \(\gamma_0\) by
+    \texttt{IsCoveringMap.liftPath\_lifts}. Hence the image is
+    \(\llbracket\gamma_0\rrbracket = \operatorname{toPath}\gamma\).
+\end{proof}
+
+\begin{lemma}[Winding number is injective]
+    \label{lem:wind-injective}
+    \lean{LeanEval.Topology.wind_injective}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{def:wind, lem:wind-spec, lem:quotient-subsingleton, lem:loop-eq-exp-of-lift-class}
+    The winding number map \(w\) is injective.
+\end{lemma}
+\begin{proof}
+    \uses{lem:wind-spec, lem:quotient-subsingleton, lem:loop-eq-exp-of-lift-class}
+    Suppose \(w(\gamma) = w(\delta)\). By Lemma~\ref{lem:wind-spec} the lift classes
+    \(\mathrm{liftClass}\,\gamma\) and \(\mathrm{liftClass}\,\delta\) share the endpoints \(0\) and
+    \(c = w(\gamma)\cdot 2\pi\). By Lemma~\ref{lem:quotient-subsingleton} the type
+    \(\operatorname{Path.Homotopic.Quotient}(0, c)\) is a subsingleton, so
+    \(\mathrm{liftClass}\,\gamma = \mathrm{liftClass}\,\delta\). Applying the map induced by \(\exp\) and
+    Lemma~\ref{lem:loop-eq-exp-of-lift-class} on both sides gives
+    \(\operatorname{toPath}\gamma = \operatorname{toPath}\delta\), hence \(\gamma = \delta\) since
+    \texttt{FundamentalGroup.toPath} is injective.
+\end{proof}
+
+\begin{lemma}[Lift class projects to its loop class]
+    \label{lem:exp-comp-topath}
+    \lean{LeanEval.Topology.toPath_fromPath_exp}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    Let \(L\) be a path in \(\mathbb{R}\) from \(0\) to \(c\) with \(\exp(c) = 1\), so
+    \(\exp \circ L\) is a loop based at \(1\) and
+    \(\gamma := \operatorname{fromPath}\,\llbracket \exp\circ L\rrbracket\) is an element of the
+    fundamental group at \(1\). Then \(\operatorname{toPath}\gamma = \llbracket \exp\circ L\rrbracket\).
+\end{lemma}
+\begin{proof}
+    Immediate from the round trip \(\operatorname{toPath}(\operatorname{fromPath}\,q) = q\)
+    (\texttt{FundamentalGroup.toPath}, \texttt{FundamentalGroup.fromPath}) applied to
+    \(q = \llbracket \exp\circ L\rrbracket\).
+\end{proof}
+
+\begin{lemma}[Monodromy of an exponential loop class]
+    \label{lem:exp-comp-monodromy}
+    \lean{LeanEval.Topology.monodromy_exp_comp}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    Let \(L\) be a path in \(\mathbb{R}\) from \(0\) to \(c\). Then
+    \[
+      \operatorname{monodromy}(\llbracket \exp\circ L\rrbracket)(\langle 0\rangle) = \langle c\rangle .
+    \]
+\end{lemma}
+\begin{proof}
+    The class \(\llbracket \exp\circ L\rrbracket\) is the image of \(\llbracket L\rrbracket\) under the
+    map induced by \(\exp\) (\texttt{Path.Homotopic.Quotient.mk\_map}). Since \(L\) starts at \(0\) and
+    ends at \(c\), \texttt{IsCoveringMap.monodromy\_map} gives
+    \(\operatorname{monodromy}(\llbracket \exp\circ L\rrbracket)(\langle 0\rangle) = \langle c\rangle\).
+\end{proof}
+
+\begin{lemma}[Explicit loop and its lift]
+    \label{lem:explicit-loop-lift}
+    \lean{LeanEval.Topology.explicit_loop_lift}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{lem:exp-comp-topath, lem:exp-comp-monodromy}
+    Fix \(n \in \mathbb{Z}\) and let \(L\) be the straight-line path
+    \(t \mapsto t \cdot (n\cdot 2\pi)\) in \(\mathbb{R}\) (the \texttt{Path} built from the continuous map
+    \(t \mapsto (t : \mathbb{R}) \cdot (n\cdot 2\pi)\) with \(L(0) = 0\), \(L(1) = n\cdot 2\pi\)). Then
+    \(\exp(n\cdot 2\pi) = 1\), so \(\gamma_n := \operatorname{fromPath}\,\llbracket \exp\circ L\rrbracket\)
+    is a fundamental group element with \(\operatorname{toPath}\gamma_n = \llbracket\exp\circ L\rrbracket\)
+    and \(\operatorname{monodromy}(\operatorname{toPath}\gamma_n)(\langle 0\rangle) = \langle n\cdot 2\pi\rangle\).
+\end{lemma}
+\begin{proof}
+    \uses{lem:exp-comp-topath, lem:exp-comp-monodromy}
+    By \texttt{Circle.exp\_int\_mul\_two\_pi}, \(\exp(n\cdot 2\pi) = 1\). Lemma~\ref{lem:exp-comp-topath}
+    (with \(c = n\cdot 2\pi\)) gives \(\operatorname{toPath}\gamma_n = \llbracket\exp\circ L\rrbracket\),
+    and rewriting by it turns Lemma~\ref{lem:exp-comp-monodromy} (with \(c = n\cdot 2\pi\)) into
+    \(\operatorname{monodromy}(\operatorname{toPath}\gamma_n)(\langle 0\rangle) = \langle n\cdot 2\pi\rangle\).
+\end{proof}
+
+\begin{lemma}[Winding number is surjective]
+    \label{lem:wind-surjective}
+    \lean{LeanEval.Topology.wind_surjective}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{def:wind, lem:explicit-loop-lift, lem:wind-spec, lem:two-pi-cancel}
+    The winding number map \(w\) is surjective.
+\end{lemma}
+\begin{proof}
+    \uses{lem:explicit-loop-lift, lem:wind-spec, lem:two-pi-cancel}
+    Fix \(n \in \mathbb{Z}\) and take \(\gamma_n\) from Lemma~\ref{lem:explicit-loop-lift}, so
+    \(\operatorname{monodromy}(\operatorname{toPath}\gamma_n)(\langle 0\rangle) = \langle n\cdot 2\pi\rangle\).
+    By Lemma~\ref{lem:wind-spec} this fibre point also has underlying real number
+    \(w(\gamma_n)\cdot 2\pi\), so \(w(\gamma_n)\cdot 2\pi = n\cdot 2\pi\), and
+    Lemma~\ref{lem:two-pi-cancel} gives \(w(\gamma_n) = n\). Hence \(w\) is surjective.
+\end{proof}
+
+\begin{definition}[Winding-number isomorphism]
+    \label{def:wind-equiv}
+    \lean{LeanEval.Topology.windEquiv}
+    \leanfile{LeanEval/Topology/Pi1Circle.lean}
+    \uses{def:wind, lem:wind-mul, lem:wind-injective, lem:wind-surjective}
+    The winding number, regarded as a map to \(\operatorname{Multiplicative}\mathbb{Z}\) via
+    \(\gamma \mapsto \operatorname{ofAdd}(w(\gamma))\), is a group isomorphism
+    \[
+      \text{(fundamental group of } \mathbb{S}^1 \text{ at } 1) \;\cong\; \operatorname{Multiplicative}\mathbb{Z}.
+    \]
+    It is a homomorphism by Lemma~\ref{lem:wind-mul} and bijective by
+    Lemmas~\ref{lem:wind-injective} and~\ref{lem:wind-surjective}; one packages it with
+    \texttt{MulEquiv.ofBijective}.
+\end{definition}
+
+\begin{theorem}[Fundamental group of the circle]
+    \label{thm:pi1-circle}
+    \lean{LeanEval.Topology.pi1_circle_mulEquiv_int}
+    \leanfile{LeanEval/Topology/HomotopyGroups.lean}
+    \uses{def:wind-equiv}
+    The first homotopy group of the complex unit circle \(\mathbb{S}^1\) based at \(1\) is
+    isomorphic, as a group, to \(\operatorname{Multiplicative}\mathbb{Z}\):
+    \[
+      \pi_1(\mathbb{S}^1, 1) \;\cong\; \operatorname{Multiplicative}\mathbb{Z}.
+    \]
+\end{theorem}
+\begin{proof}
+    \uses{def:wind-equiv}
+    Mathlib's \texttt{HomotopyGroup.pi1MulEquivFundamentalGroup} gives a group isomorphism
+    between the first homotopy group \(\pi_1(\mathbb{S}^1, 1)\) and the fundamental group at
+    \(1\). Composing it with the winding-number isomorphism of
+    Definition~\ref{def:wind-equiv} produces the desired isomorphism, whence the carrier is
+    nonempty.
+\end{proof}
 
 \end{document}
