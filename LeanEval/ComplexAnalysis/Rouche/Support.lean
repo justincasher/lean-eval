@@ -368,7 +368,13 @@ theorem logDeriv_analytic_unit {R : ℝ} {U : ℂ → ℂ}
     (hUana : AnalyticOnNhd ℂ U (Metric.closedBall 0 R))
     (hU0 : ∀ z ∈ Metric.closedBall (0 : ℂ) R, U z ≠ 0) :
     AnalyticOnNhd ℂ (logDeriv U) (Metric.closedBall 0 R) := by
-  sorry
+  intro z hz
+  have hUz : AnalyticAt ℂ U z := hUana z hz
+  have hderivUz : AnalyticAt ℂ (deriv U) z := hUana.deriv z hz
+  have hUz_ne : U z ≠ 0 := hU0 z hz
+  have h_log_analytic : AnalyticAt ℂ (deriv U / U) z :=
+    hderivUz.div hUz hUz_ne
+  simpa [logDeriv_apply] using h_log_analytic
 
 /-- For `R > 0` the closed disk is preperfect. -/
 theorem closedBall_preperfect {R : ℝ} (hR : 0 < R) :
