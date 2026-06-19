@@ -122,6 +122,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.shiftedPartials_eq_fderiv}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:shifted-partials, lem:directional-deriv-eq-fderiv}
+    \leanok
     Let $L$ be $C^2$. For all $\varepsilon, t$ the shifted spatial and velocity
     partials along the configuration $x + \varepsilon h$ are the Fr\'echet
     derivative of $(t, y, z) \mapsto L(t, y, z)$ at the configuration applied to
@@ -374,6 +375,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.tube_bound}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{def:shifted-partials, lem:partial-deriv-contdiff}
+    \leanok
     Let $L, x$ be $C^2$ and $h$ smooth with compact support, and fix $r > 0$.
     Then $\partial_x L_\varepsilon(t)$ and $\partial_{x'} L_\varepsilon(t)$ are
     bounded by a single constant $M$ over the compact $\varepsilon$-tube
@@ -428,6 +430,7 @@ $\partial_x L - \frac{d}{dt}\partial_{x'} L$.
     \lean{LeanEval.Analysis.integrand_aestronglyMeasurable}
     \leanfile{LeanEval/Analysis/EulerLagrange.lean}
     \uses{lem:integrand-hasDerivAt}
+    \leanok
     Under the same hypotheses, for $\varepsilon$ near $0$ both the integrand
     $t \mapsto L(t, x(t) + \varepsilon h(t), x'(t) + \varepsilon h'(t))$ and its
     $\varepsilon$-derivative are a.e.-strongly-measurable on $(a,b)$.
