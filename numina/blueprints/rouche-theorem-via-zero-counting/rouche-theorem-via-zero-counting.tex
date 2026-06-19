@@ -126,6 +126,24 @@ the result.
     $\operatorname{divisor}(f+g,D)(z) = 0$.
 \end{proof}
 
+\begin{lemma}[The divisors are supported in the open disk]
+    \label{lem:divisor-support-open}
+    \lean{LeanEval.ComplexAnalysis.divisor_support_open}
+    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
+    \uses{lem:divisor-f-zero-sphere, lem:divisor-fg-zero-sphere}
+    \leanok
+    The divisors of $f$ and of $f+g$ on the closed disk $D$ are supported in the
+    open disk $B$: both $\operatorname{supp}\operatorname{divisor}(f,D)$ and
+    $\operatorname{supp}\operatorname{divisor}(f+g,D)$ are contained in $B$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:divisor-f-zero-sphere, lem:divisor-fg-zero-sphere}
+    A support point $z$ of either divisor lies in $D$. If $\|z\| = R$ then
+    $z \in S$, where the divisor vanishes by
+    Lemmas~\ref{lem:divisor-f-zero-sphere} and~\ref{lem:divisor-fg-zero-sphere},
+    contradicting $z$ being a support point. Hence $\|z\| < R$, i.e.\ $z \in B$.
+\end{proof}
+
 \subsection{The argument principle}
 
 \begin{lemma}[Logarithmic derivative of a single power factor]
