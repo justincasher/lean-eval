@@ -113,7 +113,8 @@ theorem face_to_face (T : Triangulation n) {C C' : Finset (EuclSp n)}
     convexHull ℝ (C : Set (EuclSp n)) ∩ convexHull ℝ (C' : Set (EuclSp n))
       = convexHull ℝ ((C ∩ C' : Finset (EuclSp n)) : Set (EuclSp n)) := by
   apply le_antisymm
-  · exact T.toSimplicialComplex.inter_subset_convexHull
+  · rw [Finset.coe_inter]
+    exact T.toSimplicialComplex.inter_subset_convexHull
       ((T.mem_cells C).mp hC) ((T.mem_cells C').mp hC')
   · exact Set.subset_inter
       (convexHull_mono (Finset.coe_subset.mpr Finset.inter_subset_left))
