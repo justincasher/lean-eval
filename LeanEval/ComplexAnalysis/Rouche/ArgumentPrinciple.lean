@@ -24,7 +24,7 @@ open MeromorphicOn
 
 /-- `logDeriv U` is circle-integrable for `U` analytic and nowhere zero on the
 closed disk. -/
-theorem circleIntegrable_logDeriv_unit {R : ℝ} {U : ℂ → ℂ}
+theorem circleIntegrable_logDeriv_unit {R : ℝ} {U : ℂ → ℂ} (hR : 0 < R)
     (hUana : AnalyticOnNhd ℂ U (Metric.closedBall 0 R))
     (hU0 : ∀ z ∈ Metric.closedBall (0 : ℂ) R, U z ≠ 0) :
     CircleIntegrable (logDeriv U) 0 R := by
@@ -32,7 +32,7 @@ theorem circleIntegrable_logDeriv_unit {R : ℝ} {U : ℂ → ℂ}
 
 /-- Contour integral of the logarithmic derivative of a unit (analytic and nowhere
 zero on the closed disk) vanishes. -/
-theorem circleIntegral_logDeriv_unit {R : ℝ} {U : ℂ → ℂ}
+theorem circleIntegral_logDeriv_unit {R : ℝ} {U : ℂ → ℂ} (hR : 0 < R)
     (hUana : AnalyticOnNhd ℂ U (Metric.closedBall 0 R))
     (hU0 : ∀ z ∈ Metric.closedBall (0 : ℂ) R, U z ≠ 0) :
     (∮ z in C(0, R), logDeriv U z) = 0 := by
@@ -42,7 +42,7 @@ theorem circleIntegral_logDeriv_unit {R : ℝ} {U : ℂ → ℂ}
 
 /-- The factorization `h = φ · U` holds on a punctured neighbourhood of each point
 of the circle. -/
-theorem factorization_eventuallyEq {h : ℂ → ℂ} {R : ℝ}
+theorem factorization_eventuallyEq {h : ℂ → ℂ} {R : ℝ} (hR : 0 < R)
     (hh : MeromorphicOn h Set.univ)
     (horder : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt h z = 0)
     {U : ℂ → ℂ} (hUana : AnalyticOnNhd ℂ U (Metric.closedBall 0 R))
@@ -55,7 +55,7 @@ theorem factorization_eventuallyEq {h : ℂ → ℂ} {R : ℝ}
   sorry
 
 /-- Factorization of the logarithmic derivative on the circle. -/
-theorem factorization_logDeriv {h : ℂ → ℂ} {R : ℝ}
+theorem factorization_logDeriv {h : ℂ → ℂ} {R : ℝ} (hR : 0 < R)
     (hh : MeromorphicOn h Set.univ)
     (horder : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt h z = 0)
     {U : ℂ → ℂ} (hUana : AnalyticOnNhd ℂ U (Metric.closedBall 0 R))
@@ -72,7 +72,7 @@ theorem factorization_logDeriv {h : ℂ → ℂ} {R : ℝ}
 
 /-- Splitting the contour integral of `logDeriv h` along the factorization
 `h = φ · U`. -/
-theorem argument_principle_integral_split {h : ℂ → ℂ} {R : ℝ}
+theorem argument_principle_integral_split {h : ℂ → ℂ} {R : ℝ} (hR : 0 < R)
     (hh : MeromorphicOn h Set.univ)
     (horder : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt h z = 0)
     {U : ℂ → ℂ} (hUana : AnalyticOnNhd ℂ U (Metric.closedBall 0 R))
@@ -86,7 +86,7 @@ theorem argument_principle_integral_split {h : ℂ → ℂ} {R : ℝ}
   sorry
 
 /-- Integral evaluation of the logarithmic derivative. -/
-theorem argument_principle_integral {h : ℂ → ℂ} {R : ℝ}
+theorem argument_principle_integral {h : ℂ → ℂ} {R : ℝ} (hR : 0 < R)
     (hh : MeromorphicOn h Set.univ)
     (hne : ∃ z, meromorphicOrderAt h z ≠ ⊤)
     (horder : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt h z = 0) :
@@ -116,9 +116,9 @@ theorem argument_principle_integral {h : ℂ → ℂ} {R : ℝ}
       rw [hzero] at hz
       exact hz rfl
   rcases factorization_existence hh hne horder with ⟨U, hUana, hU0, hfact⟩
-  have hsplit := argument_principle_integral_split hh horder hUana hU0 hfact
+  have hsplit := argument_principle_integral_split hR hh horder hUana hU0 hfact
   have hUint : (∮ z in C(0, R), logDeriv U z) = 0 :=
-    circleIntegral_logDeriv_unit hUana hU0
+    circleIntegral_logDeriv_unit hR hUana hU0
   have hφint : (∮ z in C(0, R),
       logDeriv (∏ᶠ u, (fun x => x - u) ^ (divisor h (Metric.closedBall 0 R)) u) z)
     = (∑ᶠ u, ((divisor h (Metric.closedBall 0 R)) u : ℂ)) * (2 * (Real.pi : ℂ) * Complex.I) :=
@@ -135,13 +135,13 @@ theorem argument_principle_integral {h : ℂ → ℂ} {R : ℝ}
 
 /-- Argument principle, zero-counting form: the signed mass of the divisor equals
 the normalized contour integral of the logarithmic derivative. -/
-theorem argument_principle {h : ℂ → ℂ} {R : ℝ}
+theorem argument_principle {h : ℂ → ℂ} {R : ℝ} (hR : 0 < R)
     (hh : MeromorphicOn h Set.univ)
     (hne : ∃ z, meromorphicOrderAt h z ≠ ⊤)
     (horder : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt h z = 0) :
     ((∑ᶠ z, (divisor h (Metric.closedBall 0 R)) z : ℤ) : ℂ)
       = (2 * (Real.pi : ℂ) * Complex.I)⁻¹ * (∮ z in C(0, R), logDeriv h z) := by
-  have hintegral := argument_principle_integral hh hne horder
+  have hintegral := argument_principle_integral hR hh hne horder
   have hfinite : Function.HasFiniteSupport (divisor h (Metric.closedBall 0 R)) :=
     Function.locallyFinsuppWithin.finiteSupport (divisor h (Metric.closedBall 0 R))
       (isCompact_closedBall 0 R)

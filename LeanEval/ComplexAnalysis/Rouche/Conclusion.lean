@@ -84,7 +84,7 @@ theorem negPart_eq {f g : ℂ → ℂ} {R : ℝ}
 
 /-- The argument principle applies to both `f` and `f + g`: each is meromorphic on
 `ℂ`, not identically zero, and has order `0` on the circle. -/
-theorem orderZero_bundle {f g : ℂ → ℂ} {R : ℝ}
+theorem orderZero_bundle {f g : ℂ → ℂ} {R : ℝ} (hR : 0 < R)
     (hf : MeromorphicNFOn f Set.univ)
     (hg : AnalyticOn ℂ g Set.univ)
     (hbound : ∀ z : ℂ, ‖z‖ = R → ‖g z‖ < ‖f z‖) :
