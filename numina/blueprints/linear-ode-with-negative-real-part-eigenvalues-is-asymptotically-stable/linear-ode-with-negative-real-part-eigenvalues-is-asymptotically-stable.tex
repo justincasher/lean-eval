@@ -1,0 +1,616 @@
+% Blueprint: Linear ODE with negative-real-part eigenvalues is asymptotically stable
+% Created by Numina
+
+\begin{document}
+
+\section{Linear ODE with negative-real-part eigenvalues is asymptotically stable}
+
+Let $A \in \mathbb{R}^{n \times n}$ and suppose every (complex) eigenvalue of $A$
+has strictly negative real part. We prove that every solution of $x' = Ax$ on
+$(0, \infty)$ decays to zero in norm: $\|x(t)\| \to 0$ as $t \to \infty$.
+
+The argument has four parts.
+\begin{enumerate}
+    \item \emph{Spectral radius of the exponential.} Working with the
+        complexification $B = A_{\mathbb{C}}$, Schur triangulation and the fact
+        that the spectrum of a triangular matrix is its diagonal show that every
+        element of $\sigma(e^{B})$ has the form $e^{\mu}$ with $\mu \in
+        \sigma(B)$. Since $|e^{\mu}| = e^{\operatorname{Re}\mu} < 1$, the
+        spectral radius $r(e^{B}) < 1$.
+    \item \emph{Power decay.} By Gelfand's formula, $r(a) < 1$ in a complex
+        Banach algebra implies $\|a^{m}\| \to 0$.
+    \item \emph{Continuous-time decay.} Writing $t = \lfloor t \rfloor + \{t\}$
+        and $e^{tB} = (e^{B})^{\lfloor t \rfloor} e^{\{t\}B}$, together with a
+        uniform bound of $\|e^{sB}\|$ on $[0,1]$, gives $\|e^{tB}\| \to 0$.
+    \item \emph{Solution representation.} By uniqueness of the linear initial
+        value problem, $x(t) = e^{(t - t_1)A} x(t_1)$ for $t, t_1 > 0$.
+        Complexifying and using $\|e^{(t-t_1)B}\| \to 0$ yields $\|x(t)\| \to 0$.
+\end{enumerate}
+
+Throughout, the norm on $\mathbb{R}^{n}$ and $\mathbb{C}^{n}$ is the supremum
+($\ell^\infty$) norm, and the matrix norm is the corresponding $\ell^\infty$
+operator norm, which makes $\mathbb{C}^{n \times n}$ a complex Banach algebra and
+satisfies $\|Mv\| \le \|M\|\,\|v\|$.
+
+\emph{Norm-instance note.} The matrix-norm statements below
+($\|e^{sB}\|$, the spectral radius $r(e^{B})$, and the operator bound
+$\|Mv\| \le \|M\|\,\|v\|$) must all be taken with respect to one and the same
+norm on $\mathbb{C}^{n \times n}$, namely the $\ell^\infty$ operator norm.
+Concretely the Lean development fixes this by working under the
+\texttt{Matrix.linftyOpNormedAddCommGroup} / \texttt{Matrix.linftyOpNormedSpace} /
+\texttt{Matrix.linftyOpNormedRing} (and the corresponding normed-algebra)
+instances, so that the spectral-radius/Gelfand machinery, the matrix exponential's
+norm, and \texttt{Matrix.linfty\_opNorm\_mulVec} all refer to the $\ell^\infty$
+operator norm rather than, e.g., the Frobenius or entrywise sup norm.
+
+\begin{definition}[Complexification of a real matrix]
+    \label{def:complexification}
+    \lean{LeanEval.Analysis.ODE.complexification}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    For a real matrix $A \in \mathbb{R}^{n \times n}$ we write $B := A_{\mathbb{C}}
+    := A.\mathrm{map}(\mathrm{algebraMap}\,\mathbb{R}\,\mathbb{C})$ for the complex
+    matrix obtained by applying the inclusion $\mathbb{R} \hookrightarrow
+    \mathbb{C}$ to every entry.
+\end{definition}
+
+\subsection{Spectral radius of the matrix exponential}
+
+\begin{lemma}[Spectrum of an upper-triangular matrix]
+    \label{lem:spectrum_upperTriangular}
+    \lean{LeanEval.Analysis.ODE.spectrum_upperTriangular}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
+    Let $T \in \mathbb{C}^{n \times n}$ be upper triangular (block triangular
+    with respect to the identity ordering). Then $\mu \in \sigma(T)$ if and only
+    if $\mu = T_{ii}$ for some index $i$.
+\end{lemma}
+\begin{proof}
+    The characteristic polynomial of an upper-triangular matrix factors as
+    $\chi_T(X) = \prod_i (X - T_{ii})$
+    (\texttt{Matrix.charpoly\_of\_upperTriangular}, or
+    \texttt{Matrix.BlockTriangular.charpoly} with the singleton blocks of the
+    identity ordering). By \texttt{Matrix.mem\_spectrum\_iff\_isRoot\_charpoly},
+    $\mu \in \sigma(T)$ iff $\chi_T(\mu) = 0$, and a product of linear factors
+    vanishes at $\mu$ iff one factor does, i.e.\ iff $\mu = T_{ii}$ for some $i$.
+\end{proof}
+
+\begin{lemma}[The exponential of an upper-triangular matrix is upper triangular]
+    \label{lem:exp_upperTriangular}
+    \lean{LeanEval.Analysis.ODE.exp_upperTriangular}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
+    If $T \in \mathbb{C}^{n \times n}$ is upper triangular (block triangular with
+    respect to the identity ordering), then so is $e^{T}$, and its diagonal is
+    $(e^{T})_{ii} = e^{T_{ii}}$.
+\end{lemma}
+\begin{proof}
+    Block triangularity of $e^{T}$ is \texttt{Matrix.BlockTriangular.exp}. The
+    diagonal formula $(e^{T})_{ii} = e^{T_{ii}}$ is
+    \texttt{Matrix.diag\_exp\_of\_blockTriangular\_id}.
+\end{proof}
+
+\begin{lemma}[Spectrum of the exponential of an upper-triangular matrix]
+    \label{lem:spectrum_exp_triangular}
+    \lean{LeanEval.Analysis.ODE.spectrum_exp_triangular}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:spectrum_upperTriangular, lem:exp_upperTriangular}
+    \leanok
+    Let $T \in \mathbb{C}^{n \times n}$ be upper triangular. Then every $z \in
+    \sigma(e^{T})$ equals $e^{T_{ii}}$ for some index $i$, and each $T_{ii} \in
+    \sigma(T)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:spectrum_upperTriangular, lem:exp_upperTriangular}
+    By \cref{lem:exp_upperTriangular}, $e^{T}$ is upper triangular with diagonal
+    $(e^{T})_{ii} = e^{T_{ii}}$. Applying \cref{lem:spectrum_upperTriangular} to
+    $e^{T}$, any $z \in \sigma(e^{T})$ equals $(e^{T})_{ii} = e^{T_{ii}}$ for
+    some $i$. Applying \cref{lem:spectrum_upperTriangular} to $T$ shows
+    $T_{ii} \in \sigma(T)$.
+\end{proof}
+
+\begin{lemma}[Schur conjugation preserves the spectra of $B$ and $e^{B}$]
+    \label{lem:spectrum_exp_eq_schur}
+    \lean{LeanEval.Analysis.ODE.spectrum_exp_eq_schur}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
+    For every $B \in \mathbb{C}^{n \times n}$, with $T = \mathrm{schurTriangulation}\,B$
+    the (upper-triangular) Schur form of $B$,
+    \[ \sigma(e^{B}) = \sigma(e^{T}) \qquad\text{and}\qquad \sigma(B) = \sigma(T). \]
+\end{lemma}
+\begin{proof}
+    By Schur triangulation (\texttt{Matrix.schur\_triangulation}) there is a
+    unitary $U = $ \texttt{schurTriangulationUnitary}\,$B$ (an element of the
+    unitary group) with $B = U\,T\,(\mathrm{star}\,U)$, matching the
+    $\mathrm{star}\,U$ form of the decomposition. The exponential commutes with
+    unitary conjugation, $e^{B} = U\,e^{T}\,(\mathrm{star}\,U)$
+    (\texttt{Matrix.exp\_unitary\_conj}), and the spectrum is invariant under
+    unitary conjugation in this star form,
+    $\sigma(U\,a\,(\mathrm{star}\,U)) = \sigma(a)$
+    (\texttt{Unitary.spectrum\_star\_right\_conjugate}). Applying the latter to
+    $a = e^{T}$ (using $e^{B} = U\,e^{T}\,(\mathrm{star}\,U)$) gives
+    $\sigma(e^{B}) = \sigma(e^{T})$, and to $a = T$ gives $\sigma(B) = \sigma(T)$.
+\end{proof}
+
+\begin{lemma}[Reverse spectral mapping for the exponential]
+    \label{lem:spectrum_exp_subset}
+    \lean{LeanEval.Analysis.ODE.spectrum_exp_subset}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:spectrum_exp_triangular, lem:spectrum_exp_eq_schur}
+    \leanok
+    For every $B \in \mathbb{C}^{n \times n}$ and every $z \in \sigma(e^{B})$
+    there exists $\mu \in \sigma(B)$ with $z = e^{\mu}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:spectrum_exp_triangular, lem:spectrum_exp_eq_schur}
+    Let $T = \mathrm{schurTriangulation}\,B$ be the upper-triangular Schur form.
+    By \cref{lem:spectrum_exp_eq_schur}, $\sigma(e^{B}) = \sigma(e^{T})$ and
+    $\sigma(B) = \sigma(T)$. Given $z \in \sigma(e^{B}) = \sigma(e^{T})$,
+    \cref{lem:spectrum_exp_triangular} provides an index $i$ with $z = e^{T_{ii}}$
+    and $T_{ii} \in \sigma(T) = \sigma(B)$. Take $\mu = T_{ii}$.
+\end{proof}
+
+\begin{lemma}[Spectral radius of the exponential is less than one]
+    \label{lem:spectralRadius_exp_lt_one}
+    \lean{LeanEval.Analysis.ODE.spectralRadius_exp_lt_one}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:spectrum_exp_subset}
+    \leanok
+    Let $B \in \mathbb{C}^{n \times n}$ and suppose every $\mu \in \sigma(B)$
+    satisfies $\operatorname{Re}\mu < 0$. Then the spectral radius of $e^{B}$
+    satisfies $r(e^{B}) < 1$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:spectrum_exp_subset}
+    By \texttt{spectrum.spectralRadius\_lt\_of\_forall\_lt} (with bound $r = 1$),
+    it suffices to show $\|z\| < 1$ for every $z \in \sigma(e^{B})$. By
+    \cref{lem:spectrum_exp_subset}, $z = e^{\mu}$ for some $\mu \in \sigma(B)$.
+    Then $\|z\| = |e^{\mu}| = e^{\operatorname{Re}\mu}$
+    (\texttt{Complex.norm\_exp}), and $\operatorname{Re}\mu < 0$ gives
+    $e^{\operatorname{Re}\mu} < 1$ (\texttt{Real.exp\_lt\_one\_iff}).
+\end{proof}
+
+\subsection{Decay of operator powers}
+
+\begin{lemma}[From the $1/m$-th root bound to the power bound]
+    \label{lem:enorm_pow_lt_of_root_lt}
+    \lean{LeanEval.Analysis.ODE.enorm_pow_lt_of_root_lt}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
+    Let $\mathcal{A}$ be a normed algebra, $a \in \mathcal{A}$, $\rho \in
+    \mathbb{R}_{>0}$, and $m \ge 1$. Working in $[0,\infty]$ with the extended
+    non-negative norm, if $\|a^{m}\|^{1/m} < \rho$ then $\|a^{m}\| < \rho^{m}$.
+\end{lemma}
+\begin{proof}
+    Raising to the $m$-th power is strictly monotone on $[0,\infty]$ for the
+    positive exponent $m \ge 1$ (\texttt{ENNReal.rpow\_lt\_rpow\_iff}), so
+    $\|a^{m}\|^{1/m} < \rho$ gives $(\|a^{m}\|^{1/m})^{m} < \rho^{m}$. Since $m
+    \ge 1$, $(\|a^{m}\|^{1/m})^{m} = \|a^{m}\|^{(1/m)\cdot m} = \|a^{m}\|$
+    (\texttt{ENNReal.rpow\_mul} together with $m \cdot (1/m) = 1$). Hence
+    $\|a^{m}\| < \rho^{m}$.
+\end{proof}
+
+\begin{lemma}[Gelfand bound on powers]
+    \label{lem:gelfand_eventually_le}
+    \lean{LeanEval.Analysis.ODE.gelfand_eventually_le}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:enorm_pow_lt_of_root_lt}
+    \leanok
+    Let $\mathcal{A}$ be a complex Banach algebra, $a \in \mathcal{A}$, and
+    $\rho \in \mathbb{R}_{>0}$ with $r(a) < \rho$ (spectral radius). Then
+    $\|a^{m}\| \le \rho^{m}$ for all sufficiently large $m$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:enorm_pow_lt_of_root_lt}
+    By Gelfand's formula
+    (\texttt{spectrum.pow\_nnnorm\_pow\_one\_div\_tendsto\_nhds\_spectralRadius}),
+    $\|a^{m}\|^{1/m} \to r(a)$ in $[0,\infty]$. Since $r(a) < \rho$, for all
+    sufficiently large $m$ (in particular $m \ge 1$) we have $\|a^{m}\|^{1/m} <
+    \rho$. For such $m$, \cref{lem:enorm_pow_lt_of_root_lt} gives $\|a^{m}\| <
+    \rho^{m}$, hence $\|a^{m}\| \le \rho^{m}$.
+\end{proof}
+
+\begin{lemma}[Spectral radius below one forces power decay]
+    \label{lem:tendsto_pow_norm_lt_one}
+    \lean{LeanEval.Analysis.ODE.tendsto_pow_norm_lt_one}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:gelfand_eventually_le}
+    \leanok
+    Let $\mathcal{A}$ be a complex Banach algebra and $a \in \mathcal{A}$ with
+    $r(a) < 1$. Then $\|a^{m}\| \to 0$ as $m \to \infty$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:gelfand_eventually_le}
+    Choose $\rho$ with $r(a) < \rho < 1$. By \cref{lem:gelfand_eventually_le},
+    $\|a^{m}\| \le \rho^{m}$ eventually. Since $0 \le \rho < 1$, $\rho^{m} \to 0$
+    (\texttt{tendsto\_pow\_atTop\_nhds\_zero\_of\_lt\_one}). As $0 \le \|a^{m}\|
+    \le \rho^{m}$ eventually, the squeeze theorem
+    (\texttt{squeeze\_zero} /
+    \texttt{tendsto\_of\_tendsto\_of\_tendsto\_of\_le\_of\_le}) gives
+    $\|a^{m}\| \to 0$.
+\end{proof}
+
+\subsection{Continuous-time decay of the matrix exponential}
+
+\begin{lemma}[Exponential of an integer multiple]
+    \label{lem:exp_smul_nat}
+    \lean{LeanEval.Analysis.ODE.exp_smul_nat}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
+    For $B \in \mathbb{C}^{n \times n}$ and $m \in \mathbb{N}$,
+    $e^{(m : \mathbb{R}) \cdot B} = (e^{B})^{m}$.
+\end{lemma}
+\begin{proof}
+    Since the real scalar $(m : \mathbb{R})$ acts as the $m$-fold sum,
+    $(m : \mathbb{R}) \cdot B = m \cdot B$ (\texttt{Nat.cast\_smul\_eq\_nsmul}).
+    Then $e^{m \cdot B} = (e^{B})^{m}$ by \texttt{NormedSpace.exp\_nsmul}.
+\end{proof}
+
+\begin{lemma}[Splitting the exponential at the integer part]
+    \label{lem:exp_smul_split}
+    \lean{LeanEval.Analysis.ODE.exp_smul_split}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:exp_smul_nat}
+    \leanok
+    For $B \in \mathbb{C}^{n \times n}$ and $t \ge 0$, with $m = \lfloor t
+    \rfloor$ the integer part,
+    \[ e^{t \cdot B} = (e^{B})^{m} \, e^{(t - m) \cdot B}. \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:exp_smul_nat}
+    Write $t = (m : \mathbb{R}) + (t - m)$ with $m = \lfloor t \rfloor$, so
+    $t \cdot B = (m : \mathbb{R}) \cdot B + (t - m) \cdot B$ (\texttt{add\_smul}).
+    The two summands commute, so $e^{t \cdot B} = e^{(m : \mathbb{R}) \cdot B}\,
+    e^{(t - m) \cdot B}$ (\texttt{NormedSpace.exp\_add\_of\_commute}). By
+    \cref{lem:exp_smul_nat}, $e^{(m : \mathbb{R}) \cdot B} = (e^{B})^{m}$.
+\end{proof}
+
+\begin{lemma}[Uniform bound on the exponential over the unit interval]
+    \label{lem:bddAbove_exp_smul_unit}
+    \lean{LeanEval.Analysis.ODE.bddAbove_exp_smul_unit}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
+    For $B \in \mathbb{C}^{n \times n}$ there exists $M \ge 0$ with
+    $\|e^{s \cdot B}\| \le M$ for every $s \in [0,1]$.
+\end{lemma}
+\begin{proof}
+    The map $s \mapsto e^{s \cdot B}$ is continuous (the exponential is
+    continuous, \texttt{NormedSpace.exp\_continuous}, precomposed with the
+    continuous map $s \mapsto s \cdot B$), hence so is $s \mapsto \|e^{s \cdot
+    B}\|$. A continuous real-valued function on the compact set $[0,1]$ is
+    bounded above (\texttt{IsCompact.exists\_bound\_of\_continuousOn} /
+    \texttt{IsCompact.bddAbove\_image}), which provides the constant $M$.
+\end{proof}
+
+\begin{lemma}[Bound on the exponential by its integer-power part]
+    \label{lem:norm_exp_smul_le}
+    \lean{LeanEval.Analysis.ODE.norm_exp_smul_le}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:exp_smul_split, lem:bddAbove_exp_smul_unit}
+    \leanok
+    Let $B \in \mathbb{C}^{n \times n}$. There exists $M \ge 0$ such that for
+    every $t \ge 0$, with $m = \lfloor t \rfloor$,
+    \[ \|e^{t \cdot B}\| \le \|(e^{B})^{m}\| \cdot M. \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:exp_smul_split, lem:bddAbove_exp_smul_unit}
+    Let $M$ be the bound of \cref{lem:bddAbove_exp_smul_unit}, so $\|e^{s \cdot
+    B}\| \le M$ for every $s \in [0,1]$. For $t \ge 0$ put $m = \lfloor t
+    \rfloor$; then $t - m \in [0,1]$, and by \cref{lem:exp_smul_split} and
+    submultiplicativity (\texttt{norm\_mul\_le}),
+    \[ \|e^{t \cdot B}\| \le \|(e^{B})^{m}\| \, \|e^{(t-m) \cdot B}\| \le
+       \|(e^{B})^{m}\| \cdot M. \]
+\end{proof}
+
+\begin{lemma}[Continuous-time decay of the exponential]
+    \label{lem:norm_exp_smul_tendsto_zero}
+    \lean{LeanEval.Analysis.ODE.norm_exp_smul_tendsto_zero}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:tendsto_pow_norm_lt_one, lem:norm_exp_smul_le}
+    \leanok
+    Let $B \in \mathbb{C}^{n \times n}$ with $r(e^{B}) < 1$. Then $\|e^{t \cdot
+    B}\| \to 0$ as $t \to \infty$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:tendsto_pow_norm_lt_one, lem:norm_exp_smul_le}
+    Take $M$ from \cref{lem:norm_exp_smul_le}, so $\|e^{t \cdot B}\| \le
+    \|(e^{B})^{\lfloor t \rfloor}\| \cdot M$ for all $t \ge 0$. By
+    \cref{lem:tendsto_pow_norm_lt_one}, $\|(e^{B})^{m}\| \to 0$ as $m \to
+    \infty$; composing with $\lfloor \cdot \rfloor \colon \mathbb{R} \to
+    \mathbb{N}$, which tends to infinity (\texttt{tendsto\_nat\_floor\_atTop}),
+    the upper bound tends to $0 \cdot M = 0$. Since $0 \le \|e^{t \cdot B}\|$, the
+    squeeze theorem gives $\|e^{t \cdot B}\| \to 0$.
+\end{proof}
+
+\subsection{Solution representation by the matrix exponential}
+
+\begin{lemma}[Multiplying a matrix by a fixed vector is continuous linear]
+    \label{lem:mulVec_right_clm}
+    \lean{LeanEval.Analysis.ODE.mulVec_right_clm}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
+    For $v \in \mathbb{R}^{n}$ the map $M \mapsto M v$ from $\mathbb{R}^{n \times
+    n}$ to $\mathbb{R}^{n}$ ($\mathrm{mulVec}$ against the fixed vector $v$) is a
+    continuous linear map.
+\end{lemma}
+\begin{proof}
+    The map is additive in $M$ (\texttt{Matrix.add\_mulVec}) and commutes with
+    scalars (\texttt{Matrix.smul\_mulVec}), hence is linear; being a linear
+    map out of the finite-dimensional space $\mathbb{R}^{n \times n}$ it is
+    continuous (\texttt{LinearMap.toContinuousLinearMap}), so it is a continuous
+    linear map.
+\end{proof}
+
+\begin{lemma}[Derivative of $\tau \mapsto e^{(\tau - t_1)A}$]
+    \label{lem:exp_smul_hasDerivAt}
+    \lean{LeanEval.Analysis.ODE.exp_smul_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
+    For $A \in \mathbb{R}^{n \times n}$, $t_1 \in \mathbb{R}$ and any $t \in
+    \mathbb{R}$, the matrix-valued function $\tau \mapsto e^{(\tau - t_1) A}$ has
+    derivative $A\, e^{(t - t_1)A}$ at $t$.
+\end{lemma}
+\begin{proof}
+    The function $u \mapsto e^{u A}$ has derivative $A\, e^{u_0 A}$ at $u_0$
+    (\texttt{hasDerivAt\_exp\_smul\_const'}). Precomposing with $\tau \mapsto
+    \tau - t_1$, which has derivative $1$ (\texttt{hasDerivAt\_id} minus the
+    constant $t_1$, \texttt{HasDerivAt.sub\_const}), the chain rule
+    (\texttt{HasDerivAt.comp}) gives that $\tau \mapsto e^{(\tau - t_1)A}$ has
+    derivative $A\, e^{(t-t_1)A} \cdot 1 = A\, e^{(t-t_1)A}$ at $t$.
+\end{proof}
+
+\begin{lemma}[Derivative of $\tau \mapsto e^{(\tau - t_1)A} v$]
+    \label{lem:exp_smul_mulVec_hasDerivAt}
+    \lean{LeanEval.Analysis.ODE.exp_smul_mulVec_hasDerivAt}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:exp_smul_hasDerivAt, lem:mulVec_right_clm}
+    \leanok
+    For $A \in \mathbb{R}^{n \times n}$, $v \in \mathbb{R}^{n}$, $t_1 \in
+    \mathbb{R}$ and any $t \in \mathbb{R}$, the function $\tau \mapsto
+    e^{(\tau - t_1) A} v$ has derivative $A \bigl(e^{(t - t_1)A} v\bigr)$ at $t$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:exp_smul_hasDerivAt, lem:mulVec_right_clm}
+    By \cref{lem:exp_smul_hasDerivAt}, $\tau \mapsto e^{(\tau - t_1)A}$ has
+    derivative $A\, e^{(t-t_1)A}$ at $t$. By \cref{lem:mulVec_right_clm} the map
+    $M \mapsto Mv$ is continuous linear, so it preserves the derivative
+    (\texttt{ContinuousLinearMap.comp\_hasDerivAt}); the resulting derivative is
+    $(A\, e^{(t-t_1)A})\,v = A\bigl(e^{(t-t_1)A}\,v\bigr)$ by associativity of
+    matrix--vector multiplication
+    (\texttt{Matrix.mulVec\_mulVec} / \texttt{Matrix.mul\_mulVec}).
+\end{proof}
+
+\begin{lemma}[The linear vector field is Lipschitz]
+    \label{lem:vectorField_lipschitz}
+    \lean{LeanEval.Analysis.ODE.vectorField_lipschitz}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
+    For $A \in \mathbb{R}^{n \times n}$ there is a constant $K$ such that the map
+    $z \mapsto A z$ on $\mathbb{R}^{n}$ is $K$-Lipschitz.
+\end{lemma}
+\begin{proof}
+    The map $z \mapsto A z$ ($\mathrm{mulVec}$, i.e.\ \texttt{Matrix.mulVecLin})
+    is linear, and a linear map on a finite-dimensional normed space is
+    continuous, hence a bounded (continuous) linear map
+    (\texttt{LinearMap.toContinuousLinearMap}); every continuous linear map is
+    Lipschitz with constant its operator norm
+    (\texttt{ContinuousLinearMap.lipschitz}).
+\end{proof}
+
+\begin{lemma}[The exponential propagator is a solution]
+    \label{lem:exp_smul_isSolution}
+    \lean{LeanEval.Analysis.ODE.exp_smul_isSolution}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:exp_smul_mulVec_hasDerivAt}
+    \leanok
+    Let $A \in \mathbb{R}^{n \times n}$, $w \in \mathbb{R}^{n}$, $t_1 \in
+    \mathbb{R}$, and define $y(\tau) = e^{(\tau - t_1)A}\, w$. Then for every
+    $\tau$, $y$ has derivative $A\,y(\tau)$ at $\tau$ and $y(\tau) \in
+    \mathrm{Set.univ}$; moreover $y(t_1) = w$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:exp_smul_mulVec_hasDerivAt}
+    The derivative $y'(\tau) = A\,\bigl(e^{(\tau-t_1)A} w\bigr) = A\,y(\tau)$ is
+    \cref{lem:exp_smul_mulVec_hasDerivAt}. Membership in the whole state space is
+    trivial (\texttt{Set.mem\_univ}). Finally $y(t_1) = e^{0}\, w = w$ by
+    \texttt{NormedSpace.exp\_zero} and \texttt{Matrix.one\_mulVec}.
+\end{proof}
+
+\begin{lemma}[Uniqueness of linear ODE solutions on an open interval]
+    \label{lem:ODE_solution_unique_univ}
+    \lean{LeanEval.Analysis.ODE.ODE_solution_unique_univ}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:vectorField_lipschitz}
+    \leanok
+    Let $A \in \mathbb{R}^{n \times n}$ and $a < b$. Suppose $f, g \colon
+    \mathbb{R} \to \mathbb{R}^{n}$ satisfy $f'(\tau) = A\,f(\tau)$ and $g'(\tau) =
+    A\,g(\tau)$ for every $\tau \in (a,b)$, and $f(t_0) = g(t_0)$ for some $t_0
+    \in (a,b)$. Then $f = g$ on $(a,b)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:vectorField_lipschitz}
+    Apply \texttt{ODE\_solution\_unique\_of\_mem\_Ioo} with the time-independent
+    vector field $v(\tau) = (z \mapsto A z)$ and the constant state sets
+    $s(\tau) = \mathrm{Set.univ}$. The Lipschitz hypothesis on each slice of
+    $(a,b)$ holds because $z \mapsto A z$ is globally $K$-Lipschitz
+    (\cref{lem:vectorField_lipschitz}, restricted via
+    \texttt{LipschitzWith.lipschitzOnWith}); the derivative-and-membership
+    hypotheses for $f$ and $g$ are the assumed ODE identities together with the
+    trivial membership $f(\tau), g(\tau) \in \mathrm{univ}$
+    (\texttt{Set.mem\_univ}); and $f(t_0) = g(t_0)$ is the assumed agreement. The
+    conclusion is $f = g$ on $(a,b)$.
+\end{proof}
+
+\begin{lemma}[Agreement of a solution and the propagator on $(0,b)$]
+    \label{lem:solution_eqOn_exp_smul}
+    \lean{LeanEval.Analysis.ODE.solution_eqOn_exp_smul}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:exp_smul_isSolution, lem:ODE_solution_unique_univ}
+    \leanok
+    Let $A \in \mathbb{R}^{n \times n}$ and $x \colon \mathbb{R} \to \mathbb{R}^{n}$
+    satisfy $x'(\tau) = A\,x(\tau)$ for every $\tau \in (0,b)$. Then for every
+    $t_1 \in (0,b)$, writing $y(\tau) = e^{(\tau - t_1)A}\, x(t_1)$, we have
+    $x = y$ on $(0,b)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:exp_smul_isSolution, lem:ODE_solution_unique_univ}
+    By \cref{lem:exp_smul_isSolution}, $y'(\tau) = A\,y(\tau)$ for every $\tau$
+    and $y(t_1) = x(t_1)$. On $(0,b)$ both $x$ (by hypothesis) and $y$ satisfy
+    the linear ODE with derivative $A(\cdot)$, and $x(t_1) = y(t_1)$ at the base
+    point $t_1 \in (0,b)$. By \cref{lem:ODE_solution_unique_univ} (with interval
+    $(0,b)$ and base point $t_1$), $x = y$ on $(0,b)$.
+\end{proof}
+
+\begin{lemma}[Solutions are matrix exponentials of the initial value]
+    \label{lem:solution_eq_exp_smul}
+    \lean{LeanEval.Analysis.ODE.solution_eq_exp_smul}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{lem:solution_eqOn_exp_smul}
+    \leanok
+    Let $A \in \mathbb{R}^{n \times n}$ and $x \colon \mathbb{R} \to \mathbb{R}^{n}$
+    satisfy $x'(t) = A\,x(t)$ for every $t > 0$. Then for every $t_1 > 0$ and
+    every $t > 0$,
+    \[ x(t) = e^{(t - t_1)A}\, x(t_1). \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:solution_eqOn_exp_smul}
+    Fix $t_1 > 0$ and $t > 0$, and choose $b > \max(t, t_1)$; then $t_1, t \in
+    (0, b)$, and $x'(\tau) = A\,x(\tau)$ holds for every $\tau \in (0,b) \subseteq
+    (0,\infty)$. By \cref{lem:solution_eqOn_exp_smul} applied on $(0,b)$ with base
+    point $t_1$, $x = y$ on $(0,b)$ where $y(\tau) = e^{(\tau - t_1)A}\, x(t_1)$;
+    evaluating at $t \in (0,b)$ gives $x(t) = y(t) = e^{(t - t_1)A}\, x(t_1)$.
+\end{proof}
+
+\subsection{Complexification and the main theorem}
+
+\begin{lemma}[Eigenvalue hypothesis as a spectral condition]
+    \label{lem:eigenvalue_re_neg_spectrum}
+    \lean{LeanEval.Analysis.ODE.eigenvalue_re_neg_spectrum}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{def:complexification}
+    \leanok
+    Let $A \in \mathbb{R}^{n \times n}$ and $B = A_{\mathbb{C}}$. If every
+    eigenvalue $\mu$ of the linear map $\mathrm{toLin}'(B)$ satisfies
+    $\operatorname{Re}\mu < 0$, then every $\mu \in \sigma(B)$ satisfies
+    $\operatorname{Re}\mu < 0$.
+\end{lemma}
+\begin{proof}
+    For a finite-dimensional endomorphism, $\mu$ is an eigenvalue iff $\mu$ lies
+    in its spectrum (\texttt{Module.End.hasEigenvalue\_iff\_mem\_spectrum}).
+    Matrix-to-endomorphism conversion $\mathrm{toLin}'$ is an algebra
+    isomorphism (\texttt{Matrix.toLinAlgEquiv'}), and algebra isomorphisms
+    preserve the spectrum (\texttt{AlgEquiv.spectrum\_eq}), so $\sigma(B) =
+    \sigma(\mathrm{toLin}'(B))$. Hence $\mu \in \sigma(B)$ implies $\mu$ is an
+    eigenvalue of $\mathrm{toLin}'(B)$, and the hypothesis gives
+    $\operatorname{Re}\mu < 0$.
+\end{proof}
+
+\begin{lemma}[Complexification is norm-preserving on vectors]
+    \label{lem:norm_complexify_vec}
+    \lean{LeanEval.Analysis.ODE.norm_complexify_vec}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
+    For $w \in \mathbb{R}^{n}$, the complexified vector $w_{\mathbb{C}} = (i
+    \mapsto (w_i : \mathbb{C}))$ satisfies $\|w_{\mathbb{C}}\| = \|w\|$.
+\end{lemma}
+\begin{proof}
+    Both norms are suprema over coordinates of the entrywise norms, and
+    $\|(w_i : \mathbb{C})\| = |w_i|$ (\texttt{Complex.norm\_real} /
+    \texttt{Complex.norm\_ofReal}). Hence the two suprema agree.
+\end{proof}
+
+\begin{lemma}[Matrix exponential commutes with entrywise complexification]
+    \label{lem:exp_map_complexify}
+    \lean{LeanEval.Analysis.ODE.exp_map_complexify}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{def:complexification}
+    \leanok
+    For $M \in \mathbb{R}^{n \times n}$,
+    \[ (e^{M})_{\mathbb{C}} = e^{M_{\mathbb{C}}}, \qquad\text{i.e.}\qquad
+       (e^{M}).\mathrm{map}(\mathrm{algebraMap}\,\mathbb{R}\,\mathbb{C})
+       = e^{M.\mathrm{map}(\mathrm{algebraMap}\,\mathbb{R}\,\mathbb{C})}. \]
+\end{lemma}
+\begin{proof}
+    Entrywise inclusion on matrices is the ring homomorphism
+    $\mathrm{RingHom.mapMatrix}\,(\mathrm{algebraMap}\,\mathbb{R}\,\mathbb{C})$,
+    and it is continuous: it acts coordinatewise through
+    $\mathrm{algebraMap}\,\mathbb{R}\,\mathbb{C} = (\cdot : \mathbb{R} \to
+    \mathbb{C})$, which is continuous (\texttt{RCLike.continuous\_ofReal} /
+    \texttt{Complex.continuous\_ofReal}), and a map between finite matrix spaces
+    is continuous iff each entry is (\texttt{continuous\_matrix}). Any continuous
+    ring homomorphism commutes with the exponential
+    (\texttt{NormedSpace.map\_exp}), applied to this homomorphism, gives
+    $(e^{M})_{\mathbb{C}} = e^{M_{\mathbb{C}}}$.
+\end{proof}
+
+\begin{lemma}[Complexification commutes with $e^{sA}\,v$]
+    \label{lem:complexify_exp_mulVec}
+    \lean{LeanEval.Analysis.ODE.complexify_exp_mulVec}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{def:complexification, lem:exp_map_complexify}
+    \leanok
+    For $A \in \mathbb{R}^{n \times n}$, $B = A_{\mathbb{C}}$, $w \in \mathbb{R}^{n}$
+    and $s \in \mathbb{R}$,
+    \[ \bigl(e^{sA}\,w\bigr)_{\mathbb{C}} = e^{sB}\, w_{\mathbb{C}}, \]
+    where $(\cdot)_{\mathbb{C}}$ denotes entrywise application of $\mathbb{R}
+    \hookrightarrow \mathbb{C}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:exp_map_complexify}
+    The entrywise inclusion is a ring homomorphism, so it commutes with
+    matrix--vector multiplication (\texttt{RingHom.map\_mulVec}):
+    $(e^{sA}\,w)_{\mathbb{C}} = (e^{sA})_{\mathbb{C}}\, w_{\mathbb{C}}$. By
+    \cref{lem:exp_map_complexify}, $(e^{sA})_{\mathbb{C}} = e^{(sA)_{\mathbb{C}}}$,
+    and $(sA)_{\mathbb{C}} = s\,A_{\mathbb{C}} = sB$ since the real scalar passes
+    through the entrywise inclusion (\texttt{Matrix.map\_smul}). Combining,
+    $(e^{sA}\,w)_{\mathbb{C}} = e^{sB}\, w_{\mathbb{C}}$.
+\end{proof}
+
+\begin{lemma}[Pointwise bound on the solution]
+    \label{lem:norm_solution_le}
+    \lean{LeanEval.Analysis.ODE.norm_solution_le}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{def:complexification, lem:solution_eq_exp_smul, lem:norm_complexify_vec, lem:complexify_exp_mulVec}
+    \leanok
+    Let $A \in \mathbb{R}^{n \times n}$, $B = A_{\mathbb{C}}$, and $x \colon
+    \mathbb{R} \to \mathbb{R}^{n}$ satisfy $x'(t) = A\,x(t)$ for every $t > 0$.
+    Then for every $t > 0$,
+    \[ \|x(t)\| \le \|e^{(t-1) \cdot B}\| \cdot \|x(1)\|. \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:solution_eq_exp_smul, lem:norm_complexify_vec, lem:complexify_exp_mulVec}
+    By \cref{lem:solution_eq_exp_smul} with $t_1 = 1 > 0$, $x(t) = e^{(t - 1)A}\,
+    x(1)$ for every $t > 0$. Complexifying coordinatewise and using
+    \cref{lem:norm_complexify_vec}, \cref{lem:complexify_exp_mulVec} and the
+    operator-norm bound $\|Mv\| \le \|M\|\,\|v\|$
+    (\texttt{Matrix.linfty\_opNorm\_mulVec}),
+    \[ \|x(t)\| = \bigl\|(e^{(t-1)A} x(1))_{\mathbb{C}}\bigr\|
+       = \bigl\|e^{(t-1)B}\, x(1)_{\mathbb{C}}\bigr\|
+       \le \|e^{(t-1)B}\| \cdot \|x(1)_{\mathbb{C}}\|
+       = \|e^{(t-1)B}\| \cdot \|x(1)\|. \]
+\end{proof}
+
+\begin{theorem}[Asymptotic stability of $x' = Ax$]
+    \label{thm:linear_ode_asymptotic_stability}
+    \lean{LeanEval.Analysis.ODE.linear_ode_asymptotic_stability}
+    \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \uses{def:complexification, lem:spectralRadius_exp_lt_one, lem:norm_exp_smul_tendsto_zero, lem:eigenvalue_re_neg_spectrum, lem:norm_solution_le}
+    \leanok
+    Let $A \in \mathbb{R}^{n \times n}$ be such that every eigenvalue $\mu$ of the
+    complexification $\mathrm{toLin}'(A_{\mathbb{C}})$ has $\operatorname{Re}\mu <
+    0$. Let $x \colon \mathbb{R} \to \mathbb{R}^{n}$ satisfy $x'(t) = A\,x(t)$ for
+    every $t > 0$. Then $\|x(t)\| \to 0$ as $t \to \infty$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:spectralRadius_exp_lt_one, lem:norm_exp_smul_tendsto_zero, lem:eigenvalue_re_neg_spectrum, lem:norm_solution_le}
+    Let $B = A_{\mathbb{C}}$. By \cref{lem:eigenvalue_re_neg_spectrum}, every
+    $\mu \in \sigma(B)$ has $\operatorname{Re}\mu < 0$, so by
+    \cref{lem:spectralRadius_exp_lt_one}, $r(e^{B}) < 1$, and by
+    \cref{lem:norm_exp_smul_tendsto_zero}, $\|e^{sB}\| \to 0$ as $s \to \infty$.
+
+    By \cref{lem:norm_solution_le}, $\|x(t)\| \le \|e^{(t-1)B}\| \cdot \|x(1)\|$
+    for every $t > 0$. As $t \to \infty$, $t - 1 \to \infty$, so $\|e^{(t-1)B}\|
+    \to 0$ and the right-hand side tends to $0 \cdot \|x(1)\| = 0$. Since $0 \le
+    \|x(t)\|$, the squeeze theorem gives $\|x(t)\| \to 0$.
+\end{proof}
+
+\end{document}
