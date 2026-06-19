@@ -170,11 +170,32 @@ lemma collapse [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
     exact hker_ne_top hN_top'
 
 /-- **Generator membership in the extended closure is r.e.** -/
+set_option maxHeartbeats 1000000 in
 lemma re_generator_mem (R : List (Word n)) (i : Fin n) :
     REPred (fun w : Word n =>
       FreeGroup.of i ∈
         Subgroup.normalClosure (relatorSet R ∪ {FreeGroup.mk w})) := by
-  sorry
+  classical
+  -- `p ↦ R ++ [p.1]` is computable
+  have hlist : Computable (fun p : Word n × Certificate n => R ++ [p.1]) :=
+    Computable₂.comp Primrec.list_append.to_comp (Computable.const R)
+      (Computable₂.comp Computable.list_cons Computable.fst
+        (Computable.const ([] : Word n)))
+  -- the relator list / target word / certificate repackaging is computable
+  have hg : Computable (fun p : Word n × Certificate n =>
+      ((R ++ [p.1], ([(i, true)] : Word n), p.2) :
+        List (Word n) × Word n × Certificate n)) :=
+    Computable.pair hlist
+      (Computable.pair (Computable.const ([(i, true)] : Word n)) Computable.snd)
+  -- the reduce-check for the input-dependent relator list is a computable predicate
+  have hQ : ComputablePred (fun p : Word n × Certificate n =>
+      FreeGroup.reduce (evalCert (R ++ [p.1]) p.2) =
+        FreeGroup.reduce ([(i, true)] : Word n)) :=
+    Computable.computablePred ((ComputablePred.decide eval_computable).comp hg)
+  -- assemble via the existential-projection lemma and the membership equivalence
+  refine REPred.of_eq (re_projection hQ) (fun w => ?_)
+  rw [← relatorSet_append, of_eq_mk_singleton, mem_normalClosure_cert]
+  exact exists_congr (fun c => (mk_eq_iff_reduce _ _).symm)
 
 /-- **Negation as a universal over generators.** With `S = relatorSet R` and
 `normalClosure S = ker φ`, `φ (mk w) ≠ 1` iff every generator lies in the
@@ -186,7 +207,8 @@ lemma neg_iff_forall_gen [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
     ¬ wordProblemPred φ w ↔
       ∀ i : Fin n, FreeGroup.of i ∈
         Subgroup.normalClosure (relatorSet R ∪ {FreeGroup.mk w}) := by
-  sorry
+  refine Iff.trans ?_ (top_iff_generators _)
+  exact collapse φ hsurj R hR w
 
 /-- **Negative side is r.e.**  The complement `w ↦ φ (mk w) ≠ 1` is recursively
 enumerable. -/
