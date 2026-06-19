@@ -84,7 +84,16 @@
     $n+1$ labels from $\{0, \dots, n\}$ and to each facet a multiset of $n$
     labels from $\{0, \dots, n\}$, subject to the compatibility axiom that
     whenever $\mathrm{Inc}(C, F)$ the facet multiset of $F$ is obtained from the
-    cell multiset of $C$ by deleting one label. A facet is a \emph{door} if its
+    cell multiset of $C$ by deleting one label, together with the
+    \emph{per-label multiplicity axiom}: for every cell $C$ and label $a$, the
+    number of facets $F$ incident to $C$ whose facet multiset equals the cell
+    multiset of $C$ with one $a$ deleted equals the multiplicity of $a$ in the cell
+    multiset of $C$. Equivalently, the facets incident to a cell biject with its
+    vertices, each vertex deletion giving one incident facet, so a repeated label
+    contributes one incident facet per occurrence. (This is exactly what forces a
+    non-rainbow cell to have an \emph{even} number of doors; without it the bare
+    compatibility axiom admits spurious one-door models.)
+    A facet is a \emph{door} if its
     label multiset is exactly $\{0, \dots, n-1\}$ (each label once); a cell is
     \emph{rainbow} if its label multiset is exactly $\{0, \dots, n\}$ (each label
     once). A door is an \emph{interior door} if $\neg\partial$ holds of it and a

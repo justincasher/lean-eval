@@ -57,19 +57,27 @@ theorem mem_cornerSimplex_iff (n : ℕ) (p : EuclSp n) :
     p ∈ cornerSimplex n ↔ ∀ i, 0 ≤ baryCoord n p i := by
   sorry
 
-/-- **Triangulation of the corner simplex `S_n`.** A finite set of affinely
-independent cells of dimension `≤ n`, closed under nonempty faces, meeting
-face-to-face, pure of dimension `n`, whose maximal cells cover `S_n`. -/
-structure Triangulation (n : ℕ) where
-  /-- The cells of the triangulation. -/
+/-- **Triangulation of the corner simplex `S_n`.** A *finite* geometric simplicial
+complex (extending `Geometry.SimplicialComplex ℝ (EuclSp n)`, which already
+supplies affine independence of faces, downward closure, and the face-to-face
+property `conv C ∩ conv C' ⊆ conv (C ∩ C')`), together with two further axioms:
+*purity* — every face is contained in a maximal cell with `n + 1` vertices — and
+*covering* — the convex hulls of the maximal cells cover `S_n`.
+
+The field `cells` is the finite `Finset` of faces (`mem_cells` records that it
+coincides with the underlying complex's `faces` set). Maximal cells are the faces
+with `n + 1` vertices and facets the faces with `n` vertices. Affine independence,
+downward closure (`face_closed`), the dimension bound (`dim_le`), and the
+face-to-face equality (`face_to_face`) are now *derived* lemmas rather than
+re-rolled axioms. -/
+structure Triangulation (n : ℕ) extends Geometry.SimplicialComplex ℝ (EuclSp n) where
+  /-- The cells of the triangulation, as a finite set. -/
   cells : Finset (Finset (EuclSp n))
-  indep : ∀ C ∈ cells, AffineIndependent ℝ ((↑) : C → EuclSp n)
-  dim_le : ∀ C ∈ cells, C.card ≤ n + 1
-  face_closed : ∀ C ∈ cells, ∀ D : Finset (EuclSp n), D.Nonempty → D ⊆ C → D ∈ cells
-  face_to_face : ∀ C ∈ cells, ∀ C' ∈ cells,
-    convexHull ℝ (C : Set (EuclSp n)) ∩ convexHull ℝ (C' : Set (EuclSp n))
-      = convexHull ℝ ((C ∩ C' : Finset (EuclSp n)) : Set (EuclSp n))
+  /-- `cells` is exactly the face set of the underlying simplicial complex. -/
+  mem_cells : ∀ C, C ∈ cells ↔ C ∈ toSimplicialComplex.faces
+  /-- **Purity.** Every cell is contained in a maximal cell with `n + 1` vertices. -/
   purity : ∀ C ∈ cells, ∃ M ∈ cells, C ⊆ M ∧ M.card = n + 1
+  /-- **Covering.** The maximal cells cover `S_n`. -/
   covering :
     (⋃ C ∈ cells.filter (fun C => C.card = n + 1), convexHull ℝ (C : Set (EuclSp n)))
       = cornerSimplex n
@@ -77,6 +85,39 @@ structure Triangulation (n : ℕ) where
 namespace Triangulation
 
 variable {n : ℕ}
+
+/-- The vertices of every cell are affinely independent (inherited from the
+underlying simplicial complex). -/
+theorem cell_indep (T : Triangulation n) {C : Finset (EuclSp n)} (hC : C ∈ T.cells) :
+    AffineIndependent ℝ ((↑) : C → EuclSp n) :=
+  T.toSimplicialComplex.indep ((T.mem_cells C).mp hC)
+
+/-- **Downward closure.** Every nonempty subset of a cell is a cell (inherited
+`Geometry.SimplicialComplex.down_closed`). -/
+theorem face_closed (T : Triangulation n) {C : Finset (EuclSp n)} (hC : C ∈ T.cells)
+    {D : Finset (EuclSp n)} (hD : D.Nonempty) (hDC : D ⊆ C) : D ∈ T.cells := by
+  rw [T.mem_cells] at hC ⊢
+  exact T.toSimplicialComplex.down_closed hC hDC hD
+
+/-- **Dimension bound.** Every cell has at most `n + 1` vertices (a consequence of
+purity). -/
+theorem dim_le (T : Triangulation n) {C : Finset (EuclSp n)} (hC : C ∈ T.cells) :
+    C.card ≤ n + 1 := by
+  obtain ⟨M, _, hCM, hcard⟩ := T.purity C hC
+  exact hcard ▸ Finset.card_le_card hCM
+
+/-- **Face-to-face.** Two cells meet exactly along the convex hull of their common
+vertices (the `⊆` inclusion is inherited, the `⊇` inclusion is monotonicity). -/
+theorem face_to_face (T : Triangulation n) {C C' : Finset (EuclSp n)}
+    (hC : C ∈ T.cells) (hC' : C' ∈ T.cells) :
+    convexHull ℝ (C : Set (EuclSp n)) ∩ convexHull ℝ (C' : Set (EuclSp n))
+      = convexHull ℝ ((C ∩ C' : Finset (EuclSp n)) : Set (EuclSp n)) := by
+  apply le_antisymm
+  · exact T.toSimplicialComplex.inter_subset_convexHull
+      ((T.mem_cells C).mp hC) ((T.mem_cells C').mp hC')
+  · exact Set.subset_inter
+      (convexHull_mono (Finset.coe_subset.mpr Finset.inter_subset_left))
+      (convexHull_mono (Finset.coe_subset.mpr Finset.inter_subset_right))
 
 /-- The **maximal cells** of `T` (those with `n+1` vertices). -/
 def maximalCells (T : Triangulation n) : Finset (Finset (EuclSp n)) :=
@@ -199,6 +240,13 @@ noncomputable def triangulationModel {n} (T : Triangulation n) (ℓ : EuclSp n �
         rw [Multiset.erase_add_right_pos _ (by simp : ℓ v ∈ ({ℓ v} : Multiset (Fin (n + 1))))]
       _ = (((C : Finset (EuclSp n)).val).map ℓ).erase (ℓ v) := by
         rw [hcell_map]
+  mult C a := by
+    -- The facets incident to a maximal cell `C` biject with its vertices: each
+    -- vertex `v ∈ C` gives the facet `C \ {v}`, whose label multiset is
+    -- `(cellLabel C).erase (ℓ v)`. Hence the facets with label `(cellLabel C).erase a`
+    -- are those obtained by deleting a vertex labeled `a`, and their number is the
+    -- multiplicity `(cellLabel C).count a` of `a` among the vertex labels of `C`.
+    sorry
 
 /-- **A facet spans an affine hyperplane.** The affine span of an `(n-1)`-face
 `F` is the zero set of a surjective (hence nonconstant) affine functional; its

@@ -34,6 +34,15 @@ structure IncidenceModel (n : ℕ) where
   cellLabel_card : ∀ C, (cellLabel C).card = n + 1
   facetLabel_card : ∀ F, (facetLabel F).card = n
   compat : ∀ C F, Inc C F → ∃ a, facetLabel F = (cellLabel C).erase a
+  /-- **Per-label multiplicity axiom.** For each cell `C` and label `a`, the
+  number of facets incident to `C` whose label multiset is `(cellLabel C).erase a`
+  equals the multiplicity of `a` among the labels of `C`. Equivalently, the facets
+  incident to a cell biject with its vertices — each vertex deletion yields exactly
+  one incident facet — so a repeated label contributes one incident facet per
+  occurrence. This is what makes a non-rainbow cell have an *even* (0 or 2) number
+  of doors. -/
+  mult : ∀ (C : Cell) (a : Fin (n + 1)),
+    Nat.card {F // Inc C F ∧ facetLabel F = (cellLabel C).erase a} = (cellLabel C).count a
 
 attribute [instance] IncidenceModel.cellFintype IncidenceModel.facetFintype
 
@@ -108,15 +117,12 @@ theorem cell_door_nonrainbow {n} (M : IncidenceModel n) (C : M.Cell) (h : ¬ M.I
     -- Since |S| = n+1 and S contains n distinct labels {0,...,n-1}, S has one extra element.
     -- If that extra is Fin.last n (= n), S would be {0,...,n} = rainbow → contradiction.
     -- So the extra is some a ∈ {0,...,n-1}, giving S with two copies of a and no copy of n.
-    -- Then S.erase a = T, so a is the only label whose deletion yields the door multiset.
-    --
-    -- In a geometric model (simplicial complex), each occurrence of the duplicated label
-    -- gives a distinct door facet, for a total of 2 doors (one per copy), which is Even.
-    -- However, the abstract IncidenceModel axioms do not enforce that each cell has
-    -- exactly one facet per label, so the number of doors is not provably even from
-    -- these axioms alone. A counterexample: Cell = Unit, Facet = Unit, Inc = True,
-    -- cellLabel C = {0,0,1} (two 0s, no 2), facetLabel F = {0,1} (= T).
-    -- This satisfies all axioms, C is not rainbow, and there is exactly 1 door → odd.
+    -- Then S.erase a = T, and a is the *only* label whose deletion yields the door
+    -- multiset T (deleting any other label b ≠ a leaves a still doubled, so the result
+    -- is not T). Hence the doors incident to C are exactly the facets F with
+    -- `facetLabel F = S.erase a`, whose number is `S.count a = 2` by `M.mult C a`.
+    -- Two doors → Even. (The `mult` axiom is precisely what rules out the spurious
+    -- "one door" models that the bare compatibility axiom would otherwise admit.)
     sorry
 
 /-- **Per-cell door parity.** The number of doors incident to a cell is odd iff
