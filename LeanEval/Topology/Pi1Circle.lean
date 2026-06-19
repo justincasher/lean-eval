@@ -333,9 +333,41 @@ theorem map_liftClass (γ : FundamentalGroup Circle 1) :
     _ = Path.Homotopic.Quotient.mk p0 := by rw [h_path_eq]
     _ = FundamentalGroup.toPath γ := h_mk_p0
 
+/-- Monodromy's underlying value is invariant under retyping the path-class endpoints
+(`Path.Homotopic.Quotient.cast`) and replacing the fibre basepoint by one with the same
+underlying real value. -/
+theorem monodromy_cast_val {x y x' y' : Circle}
+    (γ : Path.Homotopic.Quotient x y) (hx : x' = x) (hy : y' = y)
+    (e : ↥(Circle.exp ⁻¹' {x'})) (e₂ : ↥(Circle.exp ⁻¹' {x}))
+    (he : (e : ℝ) = (e₂ : ℝ)) :
+    (Circle.isCoveringMap_exp.monodromy (γ.cast hx hy) e).val
+      = (Circle.isCoveringMap_exp.monodromy γ e₂).val := by
+  induction γ using Quotient.inductionOn with
+  | h P =>
+    obtain ⟨ev, ep⟩ := e
+    obtain ⟨e2v, e2p⟩ := e₂
+    have he' : ev = e2v := he
+    subst he'
+    rfl
+
 /-- **Winding number is injective.** -/
 theorem wind_injective : Function.Injective wind := by
-  sorry
+  have toPath_inj : ∀ a b : FundamentalGroup Circle 1,
+      FundamentalGroup.toPath a = FundamentalGroup.toPath b → a = b := by
+    intro a b hab
+    calc a = FundamentalGroup.fromPath (FundamentalGroup.toPath a) := rfl
+      _ = FundamentalGroup.fromPath (FundamentalGroup.toPath b) := by rw [hab]
+      _ = b := rfl
+  intro γ δ h
+  apply toPath_inj
+  have he : (Circle.isCoveringMap_exp.monodromy (FundamentalGroup.toPath δ) fiberBasePt).val
+      = (Circle.isCoveringMap_exp.monodromy (FundamentalGroup.toPath γ) fiberBasePt).val := by
+    rw [wind_spec δ, wind_spec γ, h]
+  have hlc : (liftClass δ).cast rfl he.symm = liftClass γ := Subsingleton.elim _ _
+  rw [← map_liftClass γ, ← map_liftClass δ, ← hlc]
+  generalize liftClass δ = q
+  induction q using Quotient.inductionOn with
+  | h P => rfl
 
 /-- **Lift class projects to its loop class.** For a path `L : Path 0 c` with `exp c = 1`,
 `toPath (fromPath ⟦exp ∘ L⟧) = ⟦exp ∘ L⟧`. -/
@@ -376,7 +408,17 @@ def gammaN (n : ℤ) : FundamentalGroup Circle 1 :=
 theorem explicit_loop_lift (n : ℤ) :
     Circle.isCoveringMap_exp.monodromy (FundamentalGroup.toPath (gammaN n)) fiberBasePt
       = ⟨(n : ℝ) * (2 * Real.pi), mem_exp_preimage_one.mpr (Circle.exp_int_mul_two_pi n)⟩ := by
-  sorry
+  apply Subtype.ext
+  have hc : Circle.exp ((n : ℝ) * (2 * Real.pi)) = 1 := Circle.exp_int_mul_two_pi n
+  have hstep : FundamentalGroup.toPath (gammaN n)
+      = ((Path.Homotopic.Quotient.mk (linePath ((n : ℝ) * (2 * Real.pi)))).map
+          Circle.exp).cast Circle.exp_zero.symm hc.symm := by
+    show expLoopClass n = _
+    unfold expLoopClass
+    rw [Path.Homotopic.Quotient.mk_cast, Path.Homotopic.Quotient.mk_map]
+  rw [hstep,
+    monodromy_cast_val _ Circle.exp_zero.symm hc.symm fiberBasePt ⟨0, rfl⟩ rfl,
+    monodromy_exp_comp (linePath ((n : ℝ) * (2 * Real.pi)))]
 
 /-- **Winding number is surjective.** -/
 theorem wind_surjective : Function.Surjective wind := by

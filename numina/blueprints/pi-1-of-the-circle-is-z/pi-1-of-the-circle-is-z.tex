@@ -300,6 +300,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \lean{LeanEval.Topology.wind_injective}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
     \uses{def:wind, lem:wind-spec, lem:quotient-subsingleton, lem:loop-eq-exp-of-lift-class}
+    \leanok
     The winding number map \(w\) is injective.
 \end{lemma}
 \begin{proof}
@@ -352,6 +353,7 @@ always applied to \(\operatorname{toPath}\gamma\).
     \lean{LeanEval.Topology.explicit_loop_lift}
     \leanfile{LeanEval/Topology/Pi1Circle.lean}
     \uses{lem:exp-comp-topath, lem:exp-comp-monodromy}
+    \leanok
     Fix \(n \in \mathbb{Z}\) and let \(L\) be the straight-line path
     \(t \mapsto t \cdot (n\cdot 2\pi)\) in \(\mathbb{R}\) (the \texttt{Path} built from the continuous map
     \(t \mapsto (t : \mathbb{R}) \cdot (n\cdot 2\pi)\) with \(L(0) = 0\), \(L(1) = n\cdot 2\pi\)). Then
