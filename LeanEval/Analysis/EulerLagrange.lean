@@ -458,62 +458,6 @@ theorem dominating_bound
       _ = 0 := abs_zero
       _ ≤ g t := hg_nonneg t
 
-private lemma lagrangianPartialXShifted_eq_fderiv (L : ℝ → ℝ → ℝ → ℝ) (x h : ℝ → ℝ) (ε t : ℝ) :
-    lagrangianPartialXShifted L x h ε t = fderiv ℝ (fun (p : ℝ × ℝ × ℝ) => L p.1 p.2.1 p.2.2)
-      (t, x t + ε * h t, deriv x t + ε * deriv h t) (0, 1, 0) := by
-  dsimp [lagrangianPartialXShifted]
-  set F := (fun (p : ℝ × ℝ × ℝ) => L p.1 p.2.1 p.2.2) with hF
-  set p₀ := (t, x t + ε * h t, deriv x t + ε * deriv h t) with hp₀
-  have h_pt : DifferentiableAt ℝ F p₀ :=
-    hL.differentiable (by
-      have h2 : (2 : ℕ∞ω) ≠ 0 := by decide
-      exact h2) p₀
-  have h_eq1 : deriv (fun (y : ℝ) => L t y (deriv x t + ε * deriv h t)) (x t + ε * h t) =
-      deriv (fun (ε' : ℝ) => L t ((x t + ε * h t) + ε') (deriv x t + ε * deriv h t)) 0 := by
-    calc
-      deriv (fun (y : ℝ) => L t y (deriv x t + ε * deriv h t)) (x t + ε * h t)
-          = deriv ((fun y : ℝ => L t y (deriv x t + ε * deriv h t)) ∘ (fun (ε' : ℝ) => (x t + ε * h t) + ε')) 0 := by
-        refine (deriv_comp_const_add (fun y : ℝ => L t y (deriv x t + ε * deriv h t)) (x t + ε * h t) 0).symm
-      _ = deriv (fun (ε' : ℝ) => L t ((x t + ε * h t) + ε') (deriv x t + ε * deriv h t)) 0 := rfl
-  have h_eq2 : deriv (fun (ε' : ℝ) => L t ((x t + ε * h t) + ε') (deriv x t + ε * deriv h t)) 0 =
-      deriv (fun (ε' : ℝ) => F (p₀ + ε' • (0, 1, 0))) 0 := by
-    congr; ext ε'; simp [F, p₀]
-  calc
-    deriv (fun (y : ℝ) => L t y (deriv x t + ε * deriv h t)) (x t + ε * h t)
-        = deriv (fun (ε' : ℝ) => F (p₀ + ε' • (0, 1, 0))) 0 := by
-      rw [h_eq1, h_eq2]
-    _ = fderiv ℝ F p₀ (0, 1, 0) := by
-      rw [← directional_deriv_eq_fderiv F p₀ (0, 1, 0) h_pt]
-      rfl
-
-private lemma lagrangianPartialVShifted_eq_fderiv (L : ℝ → ℝ → ℝ → ℝ) (x h : ℝ → ℝ) (ε t : ℝ) :
-    lagrangianPartialVShifted L x h ε t = fderiv ℝ (fun (p : ℝ × ℝ × ℝ) => L p.1 p.2.1 p.2.2)
-      (t, x t + ε * h t, deriv x t + ε * deriv h t) (0, 0, 1) := by
-  dsimp [lagrangianPartialVShifted]
-  set F := (fun (p : ℝ × ℝ × ℝ) => L p.1 p.2.1 p.2.2) with hF
-  set p₀ := (t, x t + ε * h t, deriv x t + ε * deriv h t) with hp₀
-  have h_pt : DifferentiableAt ℝ F p₀ :=
-    hL.differentiable (by
-      have h2 : (2 : ℕ∞ω) ≠ 0 := by decide
-      exact h2) p₀
-  have h_eq1 : deriv (fun (z : ℝ) => L t (x t + ε * h t) z) (deriv x t + ε * deriv h t) =
-      deriv (fun (ε' : ℝ) => L t (x t + ε * h t) ((deriv x t + ε * deriv h t) + ε')) 0 := by
-    calc
-      deriv (fun (z : ℝ) => L t (x t + ε * h t) z) (deriv x t + ε * deriv h t)
-          = deriv ((fun z : ℝ => L t (x t + ε * h t) z) ∘ (fun (ε' : ℝ) => (deriv x t + ε * deriv h t) + ε')) 0 := by
-        refine (deriv_comp_const_add (fun z : ℝ => L t (x t + ε * h t) z) (deriv x t + ε * deriv h t) 0).symm
-      _ = deriv (fun (ε' : ℝ) => L t (x t + ε * h t) ((deriv x t + ε * deriv h t) + ε')) 0 := rfl
-  have h_eq2 : deriv (fun (ε' : ℝ) => L t (x t + ε * h t) ((deriv x t + ε * deriv h t) + ε')) 0 =
-      deriv (fun (ε' : ℝ) => F (p₀ + ε' • (0, 0, 1))) 0 := by
-    congr; ext ε'; simp [F, p₀]
-  calc
-    deriv (fun (z : ℝ) => L t (x t + ε * h t) z) (deriv x t + ε * deriv h t)
-        = deriv (fun (ε' : ℝ) => F (p₀ + ε' • (0, 0, 1))) 0 := by
-      rw [h_eq1, h_eq2]
-    _ = fderiv ℝ F p₀ (0, 0, 1) := by
-      rw [← directional_deriv_eq_fderiv F p₀ (0, 0, 1) h_pt]
-      rfl
-
 /-- **A.e.-measurability of the integrand family.** For every `ε` both the
 integrand and its `ε`-derivative are a.e.-strongly-measurable on `(a, b)`. -/
 theorem integrand_aestronglyMeasurable
@@ -527,56 +471,7 @@ theorem integrand_aestronglyMeasurable
         (fun t => lagrangianPartialXShifted L x h ε t * h t
             + lagrangianPartialVShifted L x h ε t * deriv h t)
         (volume.restrict (Set.Ioo a b))) := by
-  have hx_cont : Continuous x := hx.continuous
-  have hh_cont : Continuous h := hh.continuous
-  have h_deriv_x_cont : Continuous (deriv x) := hx.continuous_deriv (show (1 : ℕ∞ω) ≤ (2 : ℕ∞ω) from by decide)
-  have h_deriv_h_cont : Continuous (deriv h) := hh.continuous_deriv (by
-    have : (1 : ℕ∞ω) ≤ (∞ : ℕ∞ω) := by decide
-    exact this)
-  have hL_cont : Continuous (fun (p : ℝ × ℝ × ℝ) => L p.1 p.2.1 p.2.2) := hL.continuous
-  have h_cont_fderiv_x : Continuous (fun (p : ℝ × ℝ × ℝ) => fderiv ℝ (fun (p' : ℝ × ℝ × ℝ) => L p'.1 p'.2.1 p'.2.2) p (0, 1, 0)) :=
-    (partialDeriv_contDiff (fun (p : ℝ × ℝ × ℝ) => L p.1 p.2.1 p.2.2) hL (0, 1, 0)).continuous
-  have h_cont_fderiv_v : Continuous (fun (p : ℝ × ℝ × ℝ) => fderiv ℝ (fun (p' : ℝ × ℝ × ℝ) => L p'.1 p'.2.1 p'.2.2) p (0, 0, 1)) :=
-    (partialDeriv_contDiff (fun (p : ℝ × ℝ × ℝ) => L p.1 p.2.1 p.2.2) hL (0, 0, 1)).continuous
-  constructor
-  · intro ε
-    -- The map t ↦ (t, x t + ε*h t, deriv x t + ε*deriv h t) is continuous
-    have h_curve_cont : Continuous (fun (t : ℝ) => (t, x t + ε * h t, deriv x t + ε * deriv h t)) := by
-      refine Continuous.prodMk continuous_id ?_
-      refine Continuous.prodMk (hx_cont.add (hh_cont.const_smul ε)) ?_
-      exact h_deriv_x_cont.add (h_deriv_h_cont.const_smul ε)
-    -- Compose with continuous L
-    have h_cont_integrand : Continuous (fun t : ℝ => L t (x t + ε * h t) (deriv x t + ε * deriv h t)) :=
-      hL_cont.comp h_curve_cont
-    exact h_cont_integrand.aestronglyMeasurable
-  · intro ε
-    -- The curve is continuous (same as above)
-    have h_curve_cont : Continuous (fun (t : ℝ) => (t, x t + ε * h t, deriv x t + ε * deriv h t)) := by
-      refine Continuous.prodMk continuous_id ?_
-      refine Continuous.prodMk (hx_cont.add (hh_cont.const_smul ε)) ?_
-      exact h_deriv_x_cont.add (h_deriv_h_cont.const_smul ε)
-    -- The shifted partials composed with the curve are continuous
-    have h_shiftX_cont : Continuous (fun t : ℝ => lagrangianPartialXShifted L x h ε t) := by
-      have h_eq : (fun t : ℝ => lagrangianPartialXShifted L x h ε t) =
-          (fun t : ℝ => fderiv ℝ (fun (p : ℝ × ℝ × ℝ) => L p.1 p.2.1 p.2.2)
-            (t, x t + ε * h t, deriv x t + ε * deriv h t) (0, 1, 0)) := by
-        ext t; exact lagrangianPartialXShifted_eq_fderiv L x h ε t
-      rw [h_eq]
-      exact h_cont_fderiv_x.comp h_curve_cont
-    have h_shiftV_cont : Continuous (fun t : ℝ => lagrangianPartialVShifted L x h ε t) := by
-      have h_eq : (fun t : ℝ => lagrangianPartialVShifted L x h ε t) =
-          (fun t : ℝ => fderiv ℝ (fun (p : ℝ × ℝ × ℝ) => L p.1 p.2.1 p.2.2)
-            (t, x t + ε * h t, deriv x t + ε * deriv h t) (0, 0, 1)) := by
-        ext t; exact lagrangianPartialVShifted_eq_fderiv L x h ε t
-      rw [h_eq]
-      exact h_cont_fderiv_v.comp h_curve_cont
-    -- Products and sums of continuous functions are continuous
-    have h_cont_expr : Continuous (fun t : ℝ => lagrangianPartialXShifted L x h ε t * h t
-        + lagrangianPartialVShifted L x h ε t * deriv h t) := by
-      refine Continuous.add ?_ ?_
-      · exact (h_shiftX_cont.mul hh_cont)
-      · exact (h_shiftV_cont.mul h_deriv_h_cont)
-    exact h_cont_expr.aestronglyMeasurable
+  sorry
 
 /-- **Integrability of the base integrand.** For `a < b` and `L, x` `C²`, the
 `ε = 0` integrand `t ↦ L(t, x t, x' t)` is integrable on `(a, b)`. -/
