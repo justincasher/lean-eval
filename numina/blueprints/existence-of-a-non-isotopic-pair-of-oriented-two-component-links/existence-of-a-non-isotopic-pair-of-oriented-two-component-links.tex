@@ -80,7 +80,6 @@ declaration below does reduce to Mathlib results.
     \label{lem:components-nonzero}
     \lean{LeanEval.KnotTheory.TwoLink.components_nonzero}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \leanok
     Let $L$ be a two-component link with components $\gamma_K,\gamma_L$. Then for
     all $s,t\in\mathbb{R}$ we have $\gamma_K(s) - \gamma_L(t) \neq 0$.
 \end{lemma}
@@ -208,7 +207,6 @@ declaration below does reduce to Mathlib results.
     \label{lem:knot-deriv-continuous}
     \lean{LeanEval.KnotTheory.Knot.continuous_deriv}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
-    \leanok
     For a knot $\gamma$, the derivative $\gamma' : \mathbb{R}\to\mathbb{R}^3$ is
     continuous.
 \end{lemma}
@@ -1274,7 +1272,6 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.coordinateCircle_periodic}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:coordinate-circle}
-    \leanok
     For all $t$, $c_{p_0,i,j}(t + 2\pi) = c_{p_0,i,j}(t)$.
 \end{lemma}
 \begin{proof}
@@ -1302,7 +1299,6 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.coordinateCircle_immersion}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:coordinate-circle, lem:cc-deriv}
-    \leanok
     For all $t$, the derivative $c_{p_0,i,j}'(t) = -\sin t\, e_i + \cos t\, e_j$
     is nonzero.
 \end{lemma}
@@ -1319,7 +1315,6 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.coordinateCircle_injOn}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:coordinate-circle}
-    \leanok
     The curve $c_{p_0,i,j}$ is injective on $[0,2\pi)$.
 \end{lemma}
 \begin{proof}
@@ -1351,7 +1346,6 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.unlink_disjoint}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:coordinate-circle}
-    \leanok
     The images of $c_{0,0,1}$ (the circle in the plane $z=0$) and $c_{2e_2,0,1}$
     (the circle in the plane $z=2$) are disjoint.
 \end{lemma}
@@ -1377,7 +1371,6 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.hopf_common_point_coords}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:coordinate-circle}
-    \leanok
     Suppose $c_{0,0,1}(s) = c_{e_0,0,2}(t)$ for some $s,t$, and write the common
     point as $(x,y,z)$. Then $y = 0$ and $z = 0$, and moreover $x^2 = 1$ (from the
     first circle) and $(x-1)^2 = 1$ (from the second circle).
@@ -1396,7 +1389,6 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.hopf_disjoint}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:coordinate-circle, lem:hopf-common-point-coords}
-    \leanok
     The images of $c_{0,0,1}$ (unit circle in the $xy$-plane) and $c_{e_0,0,2}$
     (unit circle in the $xz$-plane centred at $(1,0,0)$) are disjoint.
 \end{lemma}
@@ -1578,7 +1570,6 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.hopf_denom_pos}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{lem:hopf-integrand}
-    \leanok
     For all $s,t$, $D(s,t)=3+2\cos t-2(1+\cos t)\cos s\ \ge\ 1$; in particular
     $D(s,t)>0$.
 \end{lemma}
@@ -1753,7 +1744,6 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.linking_hopf_nonzero}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:hopf-link, def:linking-number, lem:hopf-linking-value}
-    \leanok
     $\mathrm{lk}(L_2) \neq 0$.
 \end{lemma}
 \begin{proof}
@@ -1768,7 +1758,6 @@ then absorbed by a one-dimensional change of variables.
     \lean{LeanEval.KnotTheory.exists_nonisotopic_link}
     \leanfile{LeanEval/KnotTheory/Linking.lean}
     \uses{def:unlink, def:hopf-link, thm:linking-isotopy-invariant, lem:linking-unlink-zero, lem:linking-hopf-nonzero}
-    \leanok
     There exist two oriented smooth two-component links $L_1, L_2$ in
     $\mathbb{R}^3$ that are not ambient-isotopic:
     $\exists\, L_1\, L_2 : \texttt{TwoLink},\ \neg\, L_1 \cong L_2$.
