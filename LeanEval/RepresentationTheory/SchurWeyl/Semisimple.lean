@@ -27,7 +27,35 @@ theorem isUnit_card_perm [Invertible (k.factorial : R)] :
 /-- Small scalars are distinct: the natural-number cast `ℕ → R` is injective on `{0, …, k}`. -/
 theorem natCast_injOn_Iic [Invertible (k.factorial : R)] :
     Set.InjOn (fun n : ℕ => (n : R)) (Set.Iic k) := by
-  sorry
+  -- Let p be the ring characteristic
+  haveI : CharP R (ringChar R) := ringChar.charP R
+  have hfact_inv : IsUnit (k.factorial : R) := isUnit_of_invertible _
+  have hfact_ne_zero : (k.factorial : R) ≠ 0 := hfact_inv.ne_zero
+  by_cases hp_zero : ringChar R = 0
+  · -- Characteristic 0: the natural cast is fully injective
+    have hchar0 : CharP R 0 := by
+      simpa [hp_zero] using (by infer_instance : CharP R (ringChar R))
+    haveI : CharP R 0 := hchar0
+    haveI : CharZero R := CharP.charP_to_charZero R
+    exact Set.injOn_of_injective (Nat.cast_injective (R := R)) (s := Set.Iic k)
+  · -- p > 0: so p is prime, and p > k (otherwise p ∣ k! → (k! : R) = 0, contradiction)
+    have hp_nonzero : ringChar R ≠ 0 := hp_zero
+    have hp_prime : Nat.Prime (ringChar R) :=
+      CharP.char_prime_of_ne_zero (R := R) (p := ringChar R) hp_nonzero
+    have hp_pos : 0 < ringChar R := Nat.Prime.pos hp_prime
+    have hpk : k < ringChar R := by
+      by_contra! hle
+      -- p ≤ k → p ∣ k! → (k! : R) = 0, contradicting invertibility
+      have hp_dvd : ringChar R ∣ k.factorial := Nat.dvd_factorial hp_pos hle
+      have hzero : (k.factorial : R) = 0 :=
+        ((CharP.cast_eq_zero_iff R (ringChar R) (k.factorial)).mpr hp_dvd)
+      exact hfact_ne_zero hzero
+    -- Iic k ⊆ Iio p, so injectivity on Iio p restricts
+    have hsubset : Set.Iic k ⊆ Set.Iio (ringChar R) := by
+      intro x hx
+      rw [Set.mem_Iic] at hx
+      exact Set.mem_Iio.mpr (Nat.lt_of_le_of_lt hx hpk)
+    exact Set.InjOn.mono hsubset (CharP.natCast_injOn_Iio (R := R) (p := ringChar R))
 
 /-- Maschke: the group algebra `R[S_k]` is a semisimple ring. -/
 theorem isSemisimpleRing_monoidAlgebra [Invertible (k.factorial : R)] :

@@ -100,7 +100,102 @@ noncomputable def endTensorEquiv (R M : Type*) [Field R] [AddCommGroup M] [Modul
 theorem endTensorHom_intertwine (σ : Equiv.Perm (Fin k)) (x : ⨂[R]^k (Module.End R M)) :
     endTensorHom R M k (symAction R (Module.End R M) k σ x) =
       symAction R M k σ * endTensorHom R M k x * symAction R M k σ⁻¹ := by
-  sorry
+  -- Lemma: endTensorHom on a pure tensor equals PiTensorProduct.map
+  have h_tprod (m : Fin k → Module.End R M) : endTensorHom R M k (PiTensorProduct.tprod R m) =
+      PiTensorProduct.map (fun i : Fin k => (m i : M →ₗ[R] M)) := by
+    unfold endTensorHom
+    simp [PiTensorProduct.lift.tprod, PiTensorProduct.mapMultilinear_apply]
+  -- Lemma: on a pure tensor, the intertwining identity holds
+  have h_tprod_intertwine (σ : Equiv.Perm (Fin k)) (m : Fin k → Module.End R M) :
+      endTensorHom R M k (symAction R (Module.End R M) k σ (PiTensorProduct.tprod R m)) =
+        symAction R M k σ * endTensorHom R M k (PiTensorProduct.tprod R m) * symAction R M k σ⁻¹ := by
+    calc
+      endTensorHom R M k (symAction R (Module.End R M) k σ (PiTensorProduct.tprod R m))
+          = endTensorHom R M k (PiTensorProduct.tprod R (fun i => m (σ.symm i))) := by
+            simp [symAction, PiTensorProduct.reindex_tprod]
+      _ = PiTensorProduct.map (fun i : Fin k => (m (σ.symm i) : M →ₗ[R] M)) := by
+        rw [h_tprod]
+      _ = (PiTensorProduct.reindex R (fun _ : Fin k => M) σ).toLinearMap
+          * PiTensorProduct.map (fun i : Fin k => (m i : M →ₗ[R] M))
+          * (PiTensorProduct.reindex R (fun _ : Fin k => M) (σ⁻¹)).toLinearMap := by
+        calc
+          PiTensorProduct.map (fun i : Fin k => (m (σ.symm i) : M →ₗ[R] M))
+              = PiTensorProduct.map (fun i : Fin k => (m (σ.symm i) : M →ₗ[R] M)) ∘ₗ .id := by
+                simp
+          _ = PiTensorProduct.map (fun i : Fin k => (m (σ.symm i) : M →ₗ[R] M))
+              ∘ₗ ((PiTensorProduct.reindex R (fun _ : Fin k => M) σ).toLinearMap
+                ∘ₗ (PiTensorProduct.reindex R (fun _ : Fin k => M) (σ⁻¹)).toLinearMap) := by
+            have h_comp_id : (PiTensorProduct.reindex R (fun _ : Fin k => M) σ).toLinearMap
+                ∘ₗ (PiTensorProduct.reindex R (fun _ : Fin k => M) (σ⁻¹)).toLinearMap = .id := by
+              have h_symm : (PiTensorProduct.reindex R (fun _ : Fin k => M) (σ⁻¹)).toLinearMap =
+                  (PiTensorProduct.reindex R (fun _ : Fin k => M) σ).symm.toLinearMap := by
+                calc
+                  (PiTensorProduct.reindex R (fun _ : Fin k => M) (σ⁻¹)).toLinearMap
+                      = (PiTensorProduct.reindex R (fun _ : Fin k => M) (σ.symm)).toLinearMap := rfl
+                  _ = ((PiTensorProduct.reindex R (fun _ : Fin k => M) σ).symm).toLinearMap := by
+                    simp [PiTensorProduct.reindex_symm]
+              rw [h_symm]
+              simp
+            rw [h_comp_id]
+          _ = ((PiTensorProduct.map (fun i : Fin k => (m (σ.symm i) : M →ₗ[R] M)))
+              ∘ₗ (PiTensorProduct.reindex R (fun _ : Fin k => M) σ).toLinearMap)
+              ∘ₗ (PiTensorProduct.reindex R (fun _ : Fin k => M) (σ⁻¹)).toLinearMap := by
+            simp [LinearMap.comp_assoc]
+          _ = ((PiTensorProduct.reindex R (fun _ : Fin k => M) σ).toLinearMap
+              ∘ₗ PiTensorProduct.map (fun i : Fin k => (m i : M →ₗ[R] M)))
+              ∘ₗ (PiTensorProduct.reindex R (fun _ : Fin k => M) (σ⁻¹)).toLinearMap := by
+            rw [PiTensorProduct.map_comp_reindex_eq (fun i : Fin k => (m i : M →ₗ[R] M)) σ]
+          _ = (PiTensorProduct.reindex R (fun _ : Fin k => M) σ).toLinearMap
+              ∘ₗ PiTensorProduct.map (fun i : Fin k => (m i : M →ₗ[R] M))
+              ∘ₗ (PiTensorProduct.reindex R (fun _ : Fin k => M) (σ⁻¹)).toLinearMap := by
+            simp [LinearMap.comp_assoc]
+      _ = symAction R M k σ * PiTensorProduct.map (fun i : Fin k => (m i : M →ₗ[R] M))
+          * symAction R M k σ⁻¹ := by
+        simp [symAction]
+      _ = symAction R M k σ * endTensorHom R M k (PiTensorProduct.tprod R m)
+          * symAction R M k σ⁻¹ := by rw [h_tprod]
+  -- Prove the full statement using induction on x
+  refine PiTensorProduct.induction_on x ?_ ?_
+  · intro r m
+    calc
+      endTensorHom R M k (symAction R (Module.End R M) k σ (r • PiTensorProduct.tprod R m))
+          = endTensorHom R M k (r • symAction R (Module.End R M) k σ (PiTensorProduct.tprod R m)) := by
+            rw [LinearMap.map_smul (symAction R (Module.End R M) k σ)]
+      _ = r • endTensorHom R M k (symAction R (Module.End R M) k σ (PiTensorProduct.tprod R m)) := by
+        rw [map_smul]
+      _ = r • (symAction R M k σ * endTensorHom R M k (PiTensorProduct.tprod R m)
+                * symAction R M k σ⁻¹) := by
+        rw [h_tprod_intertwine σ m]
+      _ = symAction R M k σ * (r • endTensorHom R M k (PiTensorProduct.tprod R m))
+          * symAction R M k σ⁻¹ := by
+        simp
+      _ = symAction R M k σ * endTensorHom R M k (r • PiTensorProduct.tprod R m)
+          * symAction R M k σ⁻¹ := by
+        rw [← map_smul (endTensorHom R M k)]
+  · intro x y hx hy
+    calc
+      endTensorHom R M k (symAction R (Module.End R M) k σ (x + y))
+          = endTensorHom R M k (symAction R (Module.End R M) k σ x
+              + symAction R (Module.End R M) k σ y) := by
+            rw [LinearMap.map_add (symAction R (Module.End R M) k σ)]
+      _ = endTensorHom R M k (symAction R (Module.End R M) k σ x)
+          + endTensorHom R M k (symAction R (Module.End R M) k σ y) := by
+        rw [map_add]
+      _ = (symAction R M k σ * endTensorHom R M k x * symAction R M k σ⁻¹)
+          + (symAction R M k σ * endTensorHom R M k y * symAction R M k σ⁻¹) := by
+        rw [hx, hy]
+      _ = symAction R M k σ * (endTensorHom R M k x + endTensorHom R M k y)
+          * symAction R M k σ⁻¹ := by
+        calc
+          (symAction R M k σ * endTensorHom R M k x * symAction R M k σ⁻¹)
+              + (symAction R M k σ * endTensorHom R M k y * symAction R M k σ⁻¹)
+              = (symAction R M k σ * endTensorHom R M k x
+                + symAction R M k σ * endTensorHom R M k y) * symAction R M k σ⁻¹ := by
+                rw [add_mul]
+          _ = (symAction R M k σ * (endTensorHom R M k x + endTensorHom R M k y))
+              * symAction R M k σ⁻¹ := by rw [mul_add]
+      _ = symAction R M k σ * endTensorHom R M k (x + y) * symAction R M k σ⁻¹ := by
+        rw [map_add]
 
 /-- Generic shifts are invertible: for `m ∈ End_R V`, the endomorphism `m + t·id` fails to be
 invertible for only finitely many `t`, at most `dim V` of them. -/

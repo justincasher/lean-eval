@@ -150,7 +150,44 @@ theorem range_symmetriser_eq_span [Invertible (k.factorial : R)] :
 /-- Pure powers are symmetric: `m^⊗k` lies in `range e` for every `m ∈ End_R V`. -/
 theorem tprod_const_mem_range_symmetriser [Invertible (k.factorial : R)] (m : Module.End R M) :
     PiTensorProduct.tprod R (fun _ : Fin k => m) ∈ LinearMap.range (symmetriser R M k) := by
-  sorry
+  -- Each permutation fixes the constant pure tensor
+  have h_sym_fix (σ : Equiv.Perm (Fin k)) : symAction R (Module.End R M) k σ (PiTensorProduct.tprod R (fun _ : Fin k => m)) =
+      PiTensorProduct.tprod R (fun _ : Fin k => m) := by
+    simp [symAction, PiTensorProduct.reindex_tprod]
+  -- Sum of symAction σ applied to constant tprod is (k! : R) • tprod (since each term is tprod)
+  have h_sum_eq : (∑ σ : Equiv.Perm (Fin k), symAction R (Module.End R M) k σ (PiTensorProduct.tprod R (fun _ : Fin k => m))) =
+      ((k.factorial : R) • PiTensorProduct.tprod R (fun _ : Fin k => m)) := by
+    calc
+      (∑ σ : Equiv.Perm (Fin k), symAction R (Module.End R M) k σ (PiTensorProduct.tprod R (fun _ : Fin k => m)))
+          = (∑ σ : Equiv.Perm (Fin k), PiTensorProduct.tprod R (fun _ : Fin k => m)) := by
+        refine Finset.sum_congr rfl fun σ _ => ?_
+        rw [h_sym_fix σ]
+      _ = (Fintype.card (Equiv.Perm (Fin k))) • (PiTensorProduct.tprod R (fun _ : Fin k => m)) := by
+        simp
+      _ = ((Fintype.card (Equiv.Perm (Fin k)) : R) • PiTensorProduct.tprod R (fun _ : Fin k => m)) := by
+        rw [Nat.cast_smul_eq_nsmul]
+      _ = ((k.factorial : R) • PiTensorProduct.tprod R (fun _ : Fin k => m)) := by
+        simp [Fintype.card_perm, Fintype.card_fin]
+  -- Compute symmetriser applied to constant tprod
+  have h_sym_eq : symmetriser R M k (PiTensorProduct.tprod R (fun _ : Fin k => m)) =
+      PiTensorProduct.tprod R (fun _ : Fin k => m) := by
+    calc
+      symmetriser R M k (PiTensorProduct.tprod R (fun _ : Fin k => m)) =
+          (⅟(k.factorial : R) • ∑ σ : Equiv.Perm (Fin k), symAction R (Module.End R M) k σ)
+            (PiTensorProduct.tprod R (fun _ : Fin k => m)) := rfl
+      _ = (⅟(k.factorial : R)) • (∑ σ : Equiv.Perm (Fin k),
+          symAction R (Module.End R M) k σ (PiTensorProduct.tprod R (fun _ : Fin k => m))) := by
+        simp
+      _ = (⅟(k.factorial : R)) • ((k.factorial : R) • PiTensorProduct.tprod R (fun _ : Fin k => m)) := by
+        rw [h_sum_eq]
+      _ = ((⅟(k.factorial : R)) * (k.factorial : R)) • PiTensorProduct.tprod R (fun _ : Fin k => m) := by
+        rw [smul_smul]
+      _ = (1 : R) • PiTensorProduct.tprod R (fun _ : Fin k => m) := by
+        simp
+      _ = PiTensorProduct.tprod R (fun _ : Fin k => m) := by simp
+  -- Therefore tprod = symmetriser(tprod) ∈ range symmetriser
+  refine ⟨PiTensorProduct.tprod R (fun _ : Fin k => m), ?_⟩
+  rw [h_sym_eq]
 
 /-- Multilinear component of a power: the symmetrisation of `m₁ ⊗ ⋯ ⊗ m_k`, i.e.
 `∑_{σ ∈ S_k} m_{σ 0} ⊗ ⋯ ⊗ m_{σ (k-1)} = k! · e (m₁ ⊗ ⋯ ⊗ m_k)`. -/
