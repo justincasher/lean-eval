@@ -24,6 +24,9 @@ take a point in their (Baire-residual) intersection.
 
 \begin{lemma}[Hales--Jewett]
     \label{lem:hales-jewett}
+    \lean{Combinatorics.Line.exists_mono_in_high_dimension}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/VdW.lean}
+    \leanok
     For every finite alphabet $A$ and every number of colours $r$ there is a
     dimension $N$ such that every $r$-colouring of $A^N$ contains a
     monochromatic combinatorial line.
@@ -35,6 +38,8 @@ take a point in their (Baire-residual) intersection.
 
 \begin{lemma}[Line-sum identity]
     \label{lem:line-sum-identity}
+    \lean{LeanEval.Dynamics.line_sum_identity}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/VdW.lean}
     Let $\ell$ be a combinatorial line in $A^N$ over the alphabet
     $A = \{0, 1, \dots, L-1\}$, with nonempty set $I$ of moving coordinates and
     fixed values $a_i$ for $i \notin I$. For every $t \in A$ the $t$-th point
@@ -53,7 +58,9 @@ take a point in their (Baire-residual) intersection.
 
 \begin{lemma}[From a combinatorial line to an arithmetic progression]
     \label{lem:line-to-progression}
-    \uses{lem:hales-jewett, lem:line-sum-identity}
+    \lean{LeanEval.Dynamics.line_to_progression}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/VdW.lean}
+    \uses{lem:line-sum-identity}
     Fix $L \ge 1$ and a finite colouring $\chi$ of $\mathbb{N}$. With alphabet
     $A = \{0, 1, \dots, L-1\}$, colour $A^N$ by assigning to
     $v = (v_1, \dots, v_N)$ the colour $\chi(v_1 + \dots + v_N)$. A monochromatic
@@ -73,6 +80,8 @@ take a point in their (Baire-residual) intersection.
 
 \begin{theorem}[van der Waerden]
     \label{thm:van-der-waerden}
+    \lean{LeanEval.Dynamics.van_der_waerden}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/VdW.lean}
     \uses{lem:hales-jewett, lem:line-to-progression}
     For every finite colouring of $\mathbb{N}$ and every length $L \ge 1$ there
     is a monochromatic arithmetic progression of length $L$ with common
@@ -91,6 +100,8 @@ take a point in their (Baire-residual) intersection.
 
 \begin{lemma}[Finite $\varepsilon$-cover of a compact space]
     \label{lem:finite-eps-cover}
+    \lean{LeanEval.Dynamics.finite_eps_cover}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
     For every $\varepsilon > 0$ there are finitely many points
     $c_1, \dots, c_r \in X$ such that the open balls $B(c_i, \varepsilon)$ cover
     $X$.
@@ -102,6 +113,8 @@ take a point in their (Baire-residual) intersection.
 
 \begin{lemma}[Orbit colouring by an $\varepsilon$-net]
     \label{lem:orbit-colouring}
+    \lean{LeanEval.Dynamics.orbit_colouring}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
     \uses{lem:finite-eps-cover}
     Fix $\varepsilon > 0$ and a base point $z \in X$. With centres
     $c_1, \dots, c_r$ whose balls $B(c_k, \varepsilon/2)$ cover $X$
@@ -118,6 +131,8 @@ take a point in their (Baire-residual) intersection.
 
 \begin{lemma}[A common ball bounds the distance]
     \label{lem:common-ball-dist}
+    \lean{LeanEval.Dynamics.common_ball_dist}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
     If $a, b \in B(c, \varepsilon/2)$ for a common centre $c$, then
     $\mathrm{dist}(a, b) < \varepsilon$.
 \end{lemma}
@@ -129,6 +144,8 @@ take a point in their (Baire-residual) intersection.
 
 \begin{lemma}[Approximate multiple recurrence]
     \label{lem:eps-multiple-recurrence}
+    \lean{LeanEval.Dynamics.eps_multiple_recurrence}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
     \uses{thm:van-der-waerden, lem:orbit-colouring, lem:common-ball-dist}
     For every $\varepsilon > 0$ and every $d \ge 1$ there are a point $x \in X$
     and an integer $n \ge 1$ such that
@@ -159,25 +176,62 @@ invariance and minimality statements below use this single convention; we phrase
 recurrence through forward iterates $T^{[k]}$ but never invoke a one-sided
 \texttt{MulAction}/\texttt{IsMinimal} notion that would clash with it.
 
-\begin{lemma}[Chains of subsystems have a subsystem lower bound]
-    \label{lem:chain-inter-invariant}
-    Let $\mathcal{C}$ be a nonempty chain (totally ordered by inclusion) of
-    nonempty closed invariant subsets of $X$. Then $\bigcap \mathcal{C}$ is again
-    nonempty, closed, and invariant.
+\begin{definition}[The iteration system of $T$]
+    \label{def:iteration-system}
+    \lean{LeanEval.Dynamics.restrict}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
+    \leanok
+    The homeomorphism $T$ generates a discrete dynamical system via its iterates
+    $n \mapsto T^{[n]}$ (the $\mathbb{Z}$-action of $T$, with
+    $T^{[0]} = \mathrm{id}$ and $T^{[m+n]} = T^{[m]} \circ T^{[n]}$). For any
+    invariant set $M$ ($T(M) = M$) one has $x \in M \iff T(x) \in M$, so $T$
+    restricts to a self-homeomorphism $T|_M : M \simeq M$ of the compact
+    subspace $M$, given on representatives by $(T|_M)(x) = T(x)$
+    (\texttt{Homeomorph.subtype}). The dynamics lemmas below build on this
+    system and its restrictions rather than re-deriving invariance or
+    restriction inline.
+\end{definition}
+
+\begin{lemma}[Directed intersections of compact sets are nonempty]
+    \label{lem:directed-inter-nonempty}
+    \lean{LeanEval.Dynamics.directed_inter_nonempty}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
+    Let $\mathcal{C}$ be a nonempty family of nonempty closed subsets of the
+    compact space $X$ that is downward directed by inclusion. Then
+    $\bigcap \mathcal{C} \neq \emptyset$.
 \end{lemma}
 \begin{proof}
-    Each member is closed in the compact space $X$, hence compact, and the chain
-    is downward directed, so the intersection is nonempty by Cantor's
-    intersection theorem for directed families
-    (\texttt{IsCompact.nonempty\_iInter\_of\_directed\_nonempty\_isCompact\_isClosed}).
-    An intersection of closed sets is closed. Finally $T$, being a bijection,
-    commutes with intersections, so
+    Each member is closed in the compact $X$, hence compact, and the family is
+    directed, so Cantor's intersection theorem for directed families
+    (\texttt{IsCompact.nonempty\_iInter\_of\_directed\_nonempty\_isCompact\_isClosed})
+    produces a point in $\bigcap \mathcal{C}$.
+\end{proof}
+
+\begin{lemma}[Chains of subsystems have a subsystem lower bound]
+    \label{lem:chain-inter-invariant}
+    \lean{LeanEval.Dynamics.chain_inter_invariant}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
+    \uses{def:iteration-system, lem:directed-inter-nonempty}
+    Let $\mathcal{C}$ be a nonempty chain (totally ordered by inclusion) of
+    nonempty closed invariant subsets of $X$. Then $\bigcap \mathcal{C}$ is again
+    nonempty, closed, and invariant ($T(\bigcap \mathcal{C}) = \bigcap
+    \mathcal{C}$).
+\end{lemma}
+\begin{proof}
+    \uses{def:iteration-system, lem:directed-inter-nonempty}
+    A chain is downward directed, so $\bigcap \mathcal{C}$ is nonempty by
+    Lemma~\ref{lem:directed-inter-nonempty}, and it is closed as an intersection
+    of closed sets. Since $T$ is injective it commutes with intersections
+    (\texttt{Set.InjOn.image\_iInter\_eq}), so using $T(S) = S$ for each
+    $S \in \mathcal{C}$,
     $T\bigl(\bigcap \mathcal{C}\bigr) = \bigcap_{S \in \mathcal{C}} T(S)
     = \bigcap \mathcal{C}$.
 \end{proof}
 
 \begin{lemma}[Existence of a minimal subsystem]
     \label{lem:exists-minimal-subsystem}
+    \lean{LeanEval.Dynamics.exists_minimal_subsystem}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
     \uses{lem:chain-inter-invariant}
     There is a minimal subsystem $M \subseteq X$: a nonempty closed set with
     $T(M) = M$ having no proper nonempty closed invariant subset.
@@ -190,29 +244,88 @@ recurrence through forward iterates $T^{[k]}$ but never invoke a one-sided
     $M$.
 \end{proof}
 
-\begin{lemma}[$\omega$-limit sets are subsystems]
-    \label{lem:omega-limit-properties}
-    For every $x \in X$ the $\omega$-limit set
-    $\omega(x) = \bigcap_{N} \overline{\{T^{[k]}(x) : k \ge N\}}$ is nonempty,
-    closed, and invariant.
+Throughout, $\omega(x) = \bigcap_{N} \overline{\{T^{[k]}(x) : k \ge N\}}$ denotes
+the $\omega$-limit set of the forward orbit of $x$.
+
+\begin{lemma}[$\omega$-limit sets are nonempty]
+    \label{lem:omega-nonempty}
+    \lean{LeanEval.Dynamics.omega_nonempty}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
+    For every $x \in X$ the set $\omega(x)$ is nonempty.
 \end{lemma}
 \begin{proof}
-    The whole space $X$ is compact and absorbs the forward orbit, so $\omega(x)$
-    is nonempty by \texttt{nonempty\_omegaLimit\_of\_isCompact\_absorbing}. It is
-    an intersection of closures, hence closed
-    (\texttt{isClosed\_omegaLimit}), and invariant under $T$ via the
-    \texttt{omegaLimit} mapping API (\texttt{mapsTo\_omegaLimit} /
-    \texttt{Flow.isInvariant\_omegaLimit}).
+    The compact space $X$ absorbs the forward orbit, so
+    \texttt{nonempty\_omegaLimit\_of\_isCompact\_absorbing} applies.
+\end{proof}
+
+\begin{lemma}[$\omega$-limit sets are closed]
+    \label{lem:omega-closed}
+    \lean{LeanEval.Dynamics.omega_closed}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
+    For every $x \in X$ the set $\omega(x)$ is closed.
+\end{lemma}
+\begin{proof}
+    It is an intersection of closures, hence closed
+    (\texttt{isClosed\_omegaLimit}).
+\end{proof}
+
+\begin{lemma}[$\omega$-limit sets are forward invariant]
+    \label{lem:omega-forward-invariant}
+    \lean{LeanEval.Dynamics.omega_forward_invariant}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
+    \uses{def:iteration-system}
+    For every $x \in X$ one has $T(\omega(x)) \subseteq \omega(x)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:iteration-system}
+    The iteration $\phi_t = T^{[t]}$ satisfies $T \circ \phi_t = \phi_t \circ T$
+    and $T$ is continuous, so \texttt{mapsTo\_omegaLimit} gives
+    $T(\omega(x)) \subseteq \omega(x)$.
+\end{proof}
+
+\begin{lemma}[$\omega$-limit sets are invariant]
+    \label{lem:omega-two-sided-invariant}
+    \lean{LeanEval.Dynamics.omega_two_sided_invariant}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
+    \uses{def:iteration-system, lem:omega-forward-invariant}
+    For every $x \in X$ one has $T(\omega(x)) = \omega(x)$.
+\end{lemma}
+\begin{proof}
+    \uses{def:iteration-system, lem:omega-forward-invariant}
+    Lemma~\ref{lem:omega-forward-invariant} gives
+    $T(\omega(x)) \subseteq \omega(x)$. For the reverse inclusion take
+    $y \in \omega(x)$, a limit $y = \lim_i T^{[k_i]}(x)$ along $k_i \to \infty$.
+    Since $T^{-1}$ is continuous, $T^{[k_i - 1]}(x) = T^{-1}(T^{[k_i]}(x))$
+    converges to $T^{-1}(y)$; these lie in arbitrarily late orbit tails, so
+    $T^{-1}(y) \in \omega(x)$ and hence
+    $y = T(T^{-1}(y)) \in T(\omega(x))$. Thus $\omega(x) \subseteq T(\omega(x))$,
+    giving equality.
+\end{proof}
+
+\begin{lemma}[$\omega$-limit sets are subsystems]
+    \label{lem:omega-limit-properties}
+    \lean{LeanEval.Dynamics.omega_limit_properties}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
+    \uses{lem:omega-nonempty, lem:omega-closed, lem:omega-two-sided-invariant}
+    For every $x \in X$ the set $\omega(x)$ is a subsystem: nonempty, closed, and
+    invariant ($T(\omega(x)) = \omega(x)$).
+\end{lemma}
+\begin{proof}
+    \uses{lem:omega-nonempty, lem:omega-closed, lem:omega-two-sided-invariant}
+    Combine Lemmas~\ref{lem:omega-nonempty}, \ref{lem:omega-closed},
+    and~\ref{lem:omega-two-sided-invariant}.
 \end{proof}
 
 \begin{lemma}[Forward orbits are dense in a minimal system]
     \label{lem:minimal-forward-dense}
-    \uses{lem:exists-minimal-subsystem, lem:omega-limit-properties}
+    \lean{LeanEval.Dynamics.minimal_forward_dense}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
+    \uses{lem:omega-limit-properties}
     Let $M$ be a minimal subsystem. For every $x \in M$ the forward orbit
     $\{T^{[k]}(x) : k \ge 0\}$ is dense in $M$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:exists-minimal-subsystem, lem:omega-limit-properties}
+    \uses{lem:omega-limit-properties}
     By Lemma~\ref{lem:omega-limit-properties} $\omega(x)$ is a nonempty closed
     invariant subset of $M$, so minimality forces $\omega(x) = M$. As $\omega(x)$
     is contained in the closure of the forward orbit, that closure is all of $M$,
@@ -229,6 +342,8 @@ For $d \ge 1$ and $\varepsilon > 0$ set
 
 \begin{lemma}[The recurrence sets are open]
     \label{lem:Aset-open}
+    \lean{LeanEval.Dynamics.recurrenceSet_open}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
     For all $d \ge 1$ and $\varepsilon > 0$ the set $A_{d,\varepsilon}$ is open.
 \end{lemma}
 \begin{proof}
@@ -240,35 +355,74 @@ For $d \ge 1$ and $\varepsilon > 0$ set
     is a union of finite intersections of open sets.
 \end{proof}
 
+\begin{lemma}[Orbit preimages cover a minimal system]
+    \label{lem:orbit-preimage-cover}
+    \lean{LeanEval.Dynamics.orbit_preimage_cover}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
+    \uses{lem:minimal-forward-dense}
+    Let $M$ be a minimal subsystem and $U \subseteq M$ nonempty open. Then
+    $M = \bigcup_{k \ge 0} T^{-k}(U)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:minimal-forward-dense}
+    By Lemma~\ref{lem:minimal-forward-dense} the forward orbit of each $x \in M$
+    is dense, hence meets the nonempty open set $U$: some $T^{[k]}(x) \in U$ with
+    $k \ge 0$, i.e.\ $x \in T^{-k}(U)$.
+\end{proof}
+
 \begin{lemma}[Finite cover by orbit preimages]
     \label{lem:cover-by-preimages}
-    \uses{lem:minimal-forward-dense}
+    \lean{LeanEval.Dynamics.cover_by_preimages}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
+    \uses{lem:orbit-preimage-cover}
     Let $M$ be a minimal subsystem and $U \subseteq M$ nonempty open. Then there
     is $K$ with $M = \bigcup_{k=0}^{K} T^{-k}(U)$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:minimal-forward-dense}
-    By Lemma~\ref{lem:minimal-forward-dense} every point of $M$ has a forward
-    iterate in $U$, so $M = \bigcup_{k \ge 0} T^{-k}(U)$. Each $T^{-k}(U)$ is
-    open and $M$ is compact, so finitely many of them already cover $M$; take $K$
-    to be the largest index used.
+    \uses{lem:orbit-preimage-cover}
+    By Lemma~\ref{lem:orbit-preimage-cover} the open sets $T^{-k}(U)$
+    ($k \ge 0$) cover the compact $M$, so finitely many already cover it; take
+    $K$ to be the largest index used.
+\end{proof}
+
+\begin{lemma}[Positive minimum over a finite family of moduli]
+    \label{lem:finite-min-pos}
+    \lean{LeanEval.Dynamics.finite_min_pos}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
+    For any $K \in \mathbb{N}$ and any family $(\delta_k)_{0 \le k \le K}$ of
+    strictly positive reals, $\delta = \min_{0 \le k \le K} \delta_k$ is strictly
+    positive and satisfies $\delta \le \delta_k$ for every $k$.
+\end{lemma}
+\begin{proof}
+    The index set $\{0, \dots, K\}$ is finite and nonempty, so the minimum is
+    attained; it is positive iff every $\delta_k > 0$
+    (\texttt{Finset.lt\_inf'\_iff}), and is a lower bound by definition of
+    minimum.
 \end{proof}
 
 \begin{lemma}[Uniform modulus for finitely many iterates]
     \label{lem:uniform-modulus}
+    \lean{LeanEval.Dynamics.uniform_modulus}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
+    \uses{lem:finite-min-pos}
     Let $M$ be compact and $K \in \mathbb{N}$. For every $\varepsilon > 0$ there
     is $\delta > 0$ such that $\mathrm{dist}(a,b) < \delta$ implies
     $\mathrm{dist}(T^{[k]}(a), T^{[k]}(b)) < \varepsilon$ for all
     $0 \le k \le K$.
 \end{lemma}
 \begin{proof}
+    \uses{lem:finite-min-pos}
     Each $T^{[k]}$ is uniformly continuous on the compact space $M$, giving a
-    modulus $\delta_k > 0$ for $\varepsilon$. Take
-    $\delta = \min_{0 \le k \le K} \delta_k > 0$, a minimum over a finite set.
+    modulus $\delta_k > 0$ for $\varepsilon$. Let
+    $\delta = \min_{0 \le k \le K} \delta_k$; by Lemma~\ref{lem:finite-min-pos}
+    $\delta > 0$ and $\delta \le \delta_k$, so $\mathrm{dist}(a,b) < \delta$
+    yields $\mathrm{dist}(T^{[k]}(a), T^{[k]}(b)) < \varepsilon$ for every $k$.
 \end{proof}
 
 \begin{lemma}[The recurrence sets are dense]
     \label{lem:Aset-dense}
+    \lean{LeanEval.Dynamics.recurrenceSet_dense}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
     \uses{lem:eps-multiple-recurrence, lem:cover-by-preimages, lem:uniform-modulus}
     For all $d \ge 1$ and $\varepsilon > 0$ the set $A_{d,\varepsilon}$ is dense
     in $M$.
@@ -292,6 +446,8 @@ For $d \ge 1$ and $\varepsilon > 0$ set
 
 \begin{lemma}[A residual point exists]
     \label{lem:recurrence-residual-nonempty}
+    \lean{LeanEval.Dynamics.recurrence_residual_dense}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
     \uses{lem:Aset-open, lem:Aset-dense}
     The countable intersection $R = \bigcap_{d, m \ge 1} A_{d, 1/m}$ is dense in
     $M$, and in particular nonempty.
@@ -307,6 +463,8 @@ For $d \ge 1$ and $\varepsilon > 0$ set
 
 \begin{lemma}[A point recurrent at every order]
     \label{lem:residual-recurrent}
+    \lean{LeanEval.Dynamics.residual_recurrent}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Recurrence.lean}
     \uses{lem:recurrence-residual-nonempty}
     In the minimal subsystem $M$ there is a point $x \in M$ such that for every
     $d \ge 1$ and every $\varepsilon > 0$ there is an integer $n \ge 1$ with
@@ -329,6 +487,8 @@ gap at time $n$. The qualitative hypothesis says $g(n)$ is arbitrarily small.
 
 \begin{lemma}[Subsequence extraction from frequent small returns]
     \label{lem:recurrence-subseq}
+    \lean{LeanEval.Dynamics.recurrence_subseq}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Sequence.lean}
     Fix $x \in X$ and $d \ge 1$. If for every $N$ and every $\varepsilon > 0$
     there is $n > N$ with $g(n) < \varepsilon$, then there is a strictly
     increasing $n : \mathbb{N} \to \mathbb{N}$ with $T^{[j n_k]}(x) \to x$ as
@@ -341,8 +501,44 @@ gap at time $n$. The qualitative hypothesis says $g(n)$ is arbitrarily small.
     $T^{[j n_k]}(x) \to x$.
 \end{proof}
 
+\begin{lemma}[A return time recurs across all scales]
+    \label{lem:pigeonhole-fixed-return}
+    \lean{LeanEval.Dynamics.pigeonhole_fixed_return}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Sequence.lean}
+    Fix $x \in X$ and $d \ge 1$. Suppose for every $\varepsilon > 0$ there is
+    $n \ge 1$ with $g(n) < \varepsilon$, and that some $\varepsilon_0 > 0$ and
+    $N_0$ admit no $n > N_0$ with $g(n) < \varepsilon_0$. Then there is a fixed
+    $n^\ast \in \{1, \dots, N_0\}$ with $g(n^\ast) < 1/m$ for infinitely many
+    $m \ge 1$.
+\end{lemma}
+\begin{proof}
+    For each $m$ pick $n_m \ge 1$ with $g(n_m) < \min(\varepsilon_0, 1/m)$; then
+    $g(n_m) < \varepsilon_0$ forces $n_m \le N_0$, so $m \mapsto n_m$ sends the
+    infinite set $\mathbb{N}$ into the finite set $\{1, \dots, N_0\}$. By the
+    infinite pigeonhole principle (\texttt{Finite.exists\_infinite\_fiber}) some
+    value $n^\ast$ is taken for infinitely many $m$, and for those
+    $g(n^\ast) = g(n_m) < 1/m$.
+\end{proof}
+
+\begin{lemma}[A gap below every scale is zero]
+    \label{lem:small-inf-implies-zero}
+    \lean{LeanEval.Dynamics.small_inf_implies_zero}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Sequence.lean}
+    Let $a \ge 0$ be a real with $a < 1/m$ for infinitely many $m \ge 1$. Then
+    $a = 0$.
+\end{lemma}
+\begin{proof}
+    The values $1/m$ tend to $0$
+    (\texttt{tendsto\_one\_div\_atTop\_nhds\_zero\_nat}), so along the infinite
+    set of witnesses $a < 1/m \to 0$ forces $a \le 0$; with $a \ge 0$ this gives
+    $a = 0$.
+\end{proof}
+
 \begin{lemma}[Bounded return times force a periodic point]
     \label{lem:recurrence-periodic}
+    \lean{LeanEval.Dynamics.recurrence_periodic}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Sequence.lean}
+    \uses{lem:pigeonhole-fixed-return, lem:small-inf-implies-zero}
     Fix $x \in X$ and $d \ge 1$, and suppose that for every $\varepsilon > 0$
     there is $n \ge 1$ with $g(n) < \varepsilon$. If the small returns are
     \emph{not} arbitrarily large -- some $\varepsilon_0 > 0$ and $N_0$ admit no
@@ -350,15 +546,18 @@ gap at time $n$. The qualitative hypothesis says $g(n)$ is arbitrarily small.
     $T^{[j n^\ast]}(x) = x$ for all $1 \le j \le d$.
 \end{lemma}
 \begin{proof}
-    Every $n$ with $g(n) < \varepsilon_0$ lies in the finite set
-    $\{1, \dots, N_0\}$. The hypothesis supplies such an $n$ for each scale
-    $1/m$, so by pigeonhole one fixed $n^\ast \le N_0$ has $g(n^\ast) < 1/m$ for
-    infinitely many $m$, whence $g(n^\ast) = 0$, i.e.\ $T^{[j n^\ast]}(x) = x$
-    for all $1 \le j \le d$.
+    \uses{lem:pigeonhole-fixed-return, lem:small-inf-implies-zero}
+    Lemma~\ref{lem:pigeonhole-fixed-return} gives $n^\ast \in \{1, \dots, N_0\}$
+    with $g(n^\ast) < 1/m$ for infinitely many $m$. Since $g(n^\ast) \ge 0$,
+    Lemma~\ref{lem:small-inf-implies-zero} yields $g(n^\ast) = 0$, i.e.\
+    $\mathrm{dist}(T^{[j n^\ast]}(x), x) = 0$ and so $T^{[j n^\ast]}(x) = x$ for
+    all $1 \le j \le d$.
 \end{proof}
 
 \begin{lemma}[Qualitative recurrence yields a recurrence sequence]
     \label{lem:recurrence-sequential}
+    \lean{LeanEval.Dynamics.recurrence_sequential}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Sequence.lean}
     \uses{lem:recurrence-subseq, lem:recurrence-periodic}
     Fix $x \in X$ and $d \ge 1$, and suppose that for every $\varepsilon > 0$
     there is $n \ge 1$ with $\mathrm{dist}(T^{[j n]}(x), x) < \varepsilon$ for all
@@ -378,28 +577,46 @@ gap at time $n$. The qualitative hypothesis says $g(n)$ is arbitrarily small.
 
 \subsection{Main theorem}
 
-\begin{lemma}[Transfer from a minimal subsystem to the ambient space]
-    \label{lem:minimal-transfer}
-    \uses{lem:exists-minimal-subsystem}
-    Let $M \subseteq X$ be a subsystem ($M$ nonempty closed with $T(M) = M$).
-    With the subspace metric, $M$ is a nonempty compact metric space and $T$
-    restricts to a homeomorphism $T|_M : M \simeq M$ whose iterates and distances
-    agree with those of $T$ on points of $M$. Consequently, if $x \in M$ is
-    multiply recurrent for $T|_M$, then $x$ is multiply recurrent for $T$ in $X$.
+\begin{lemma}[Restricted iterates agree with ambient iterates]
+    \label{lem:restricted-iterate-agreement}
+    \lean{LeanEval.Dynamics.restricted_iterate_agreement}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological.lean}
+    \uses{def:iteration-system}
+    Let $M \subseteq X$ be a subsystem with restricted homeomorphism
+    $T|_M : M \simeq M$ (Definition~\ref{def:iteration-system}). For every
+    $x \in M$ and $k \ge 0$, the iterate $(T|_M)^{[k]}(x)$, viewed in $X$, equals
+    $T^{[k]}(x)$, and the subspace distance on $M$ equals the ambient distance.
 \end{lemma}
 \begin{proof}
-    \uses{lem:exists-minimal-subsystem}
-    A closed subset of a compact metric space is compact metric, and $M$ is
-    nonempty by assumption. As $T(M) = M$, the map $T$ sends $M$ bijectively and
-    continuously to itself with continuous inverse $T^{-1}|_M$, so $T|_M$ is a
-    homeomorphism. The inclusion $M \hookrightarrow X$ is an isometry that
-    intertwines $T|_M$ with $T$, so $T|_M^{[k]}(x) = T^{[k]}(x)$ and distances
-    coincide for $x \in M$. Hence each convergence statement
-    $T|_M^{[j n_k]}(x) \to x$ in $M$ is the identical statement in $X$.
+    \uses{def:iteration-system}
+    Since $(T|_M)(x) = T(x)$ on representatives, induction on $k$ gives
+    $(T|_M)^{[k]}(x) = T^{[k]}(x)$ in $X$. The inclusion $M \hookrightarrow X$ is
+    an isometric embedding, so distances between points of $M$ are the same
+    computed in $M$ or in $X$.
+\end{proof}
+
+\begin{lemma}[Transfer from a minimal subsystem to the ambient space]
+    \label{lem:minimal-transfer}
+    \lean{LeanEval.Dynamics.minimal_transfer}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological.lean}
+    \uses{def:iteration-system, lem:restricted-iterate-agreement}
+    Let $M \subseteq X$ be a subsystem ($M$ nonempty closed with $T(M) = M$). If
+    $x \in M$ is multiply recurrent for $T|_M$ -- for every $d$ there is a
+    strictly increasing $n_k$ with $(T|_M)^{[j n_k]}(x) \to x$ in $M$ for
+    $1 \le j \le d$ -- then $x$ is multiply recurrent for $T$ in $X$.
+\end{lemma}
+\begin{proof}
+    \uses{def:iteration-system, lem:restricted-iterate-agreement}
+    By Lemma~\ref{lem:restricted-iterate-agreement} the iterates and distances of
+    $T|_M$ on points of $M$ coincide with those of $T$. Hence each convergence
+    $(T|_M)^{[j n_k]}(x) \to x$ in $M$ is, through the isometric inclusion
+    $M \hookrightarrow X$, the identical statement $T^{[j n_k]}(x) \to x$ in $X$.
 \end{proof}
 
 \begin{theorem}[Furstenberg--Weiss topological multiple recurrence]
     \label{thm:furstenberg-topological-recurrence}
+    \lean{LeanEval.Dynamics.furstenberg_topological_recurrence}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological.lean}
     \uses{lem:exists-minimal-subsystem, lem:minimal-transfer, lem:residual-recurrent, lem:recurrence-sequential}
     Every homeomorphism $T$ of a nonempty compact metric space $X$ has a
     multiply recurrent point: there exists $x \in X$ such that for every

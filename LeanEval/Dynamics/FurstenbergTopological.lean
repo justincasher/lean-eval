@@ -1,5 +1,7 @@
 import Mathlib
 import EvalTools.Markers
+import LeanEval.Dynamics.FurstenbergTopological.Recurrence
+import LeanEval.Dynamics.FurstenbergTopological.Sequence
 
 namespace LeanEval
 namespace Dynamics
@@ -37,6 +39,24 @@ def IsMultiplyRecurrent {X : Type*} [TopologicalSpace X]
     ∃ n : ℕ → ℕ, StrictMono n ∧
       ∀ j : ℕ, 1 ≤ j → j ≤ d →
         Tendsto (fun k : ℕ => T^[j * n k] x) atTop (𝓝 x)
+
+/-- **Restricted iterates agree with ambient iterates.** For a subsystem `M`
+(`∀ x, x ∈ M ↔ T x ∈ M`), the iterate `(T|_M)^[k] x`, viewed in `X`, equals
+`T^[k] x`. (The inclusion `M ↪ X` is moreover an isometric embedding, so subspace
+and ambient distances coincide, by `isometry_subtype_coe`.) -/
+theorem restricted_iterate_agreement {X : Type*} [MetricSpace X]
+    (T : X ≃ₜ X) (M : Set X) (hM : ∀ x, x ∈ M ↔ T x ∈ M) (x : M) (k : ℕ) :
+    (↑(((restrict T M hM : M → M))^[k] x) : X) = (T : X → X)^[k] (x : X) := by
+  sorry
+
+/-- **Transfer from a minimal subsystem to the ambient space.** If `x ∈ M` is
+multiply recurrent for the restricted homeomorphism `T|_M`, then it is multiply
+recurrent for `T` in `X`. -/
+theorem minimal_transfer {X : Type*} [MetricSpace X]
+    (T : X ≃ₜ X) (M : Set X) (hM : ∀ x, x ∈ M ↔ T x ∈ M) (x : M)
+    (hx : IsMultiplyRecurrent (restrict T M hM : M → M) x) :
+    IsMultiplyRecurrent (T : X → X) (x : X) := by
+  sorry
 
 /-- **Furstenberg–Weiss topological multiple recurrence** (single-
 transformation form). Every homeomorphism `T` of a nonempty compact
