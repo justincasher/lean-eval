@@ -59,6 +59,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \label{lem:spectrum_upperTriangular}
     \lean{LeanEval.Analysis.ODE.spectrum_upperTriangular}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
     Let $T \in \mathbb{C}^{n \times n}$ be upper triangular (block triangular
     with respect to the identity ordering). Then $\mu \in \sigma(T)$ if and only
     if $\mu = T_{ii}$ for some index $i$.
@@ -92,6 +93,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.spectrum_exp_triangular}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:spectrum_upperTriangular, lem:exp_upperTriangular}
+    \leanok
     Let $T \in \mathbb{C}^{n \times n}$ be upper triangular. Then every $z \in
     \sigma(e^{T})$ equals $e^{T_{ii}}$ for some index $i$, and each $T_{ii} \in
     \sigma(T)$.
@@ -132,6 +134,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.spectrum_exp_subset}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:spectrum_exp_triangular, lem:spectrum_exp_eq_schur}
+    \leanok
     For every $B \in \mathbb{C}^{n \times n}$ and every $z \in \sigma(e^{B})$
     there exists $\mu \in \sigma(B)$ with $z = e^{\mu}$.
 \end{lemma}
@@ -149,6 +152,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.spectralRadius_exp_lt_one}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:spectrum_exp_subset}
+    \leanok
     Let $B \in \mathbb{C}^{n \times n}$ and suppose every $\mu \in \sigma(B)$
     satisfies $\operatorname{Re}\mu < 0$. Then the spectral radius of $e^{B}$
     satisfies $r(e^{B}) < 1$.
@@ -169,6 +173,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \label{lem:enorm_pow_lt_of_root_lt}
     \lean{LeanEval.Analysis.ODE.enorm_pow_lt_of_root_lt}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
     Let $\mathcal{A}$ be a normed algebra, $a \in \mathcal{A}$, $\rho \in
     \mathbb{R}_{>0}$, and $m \ge 1$. Working in $[0,\infty]$ with the extended
     non-negative norm, if $\|a^{m}\|^{1/m} < \rho$ then $\|a^{m}\| < \rho^{m}$.
@@ -187,6 +192,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.gelfand_eventually_le}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:enorm_pow_lt_of_root_lt}
+    \leanok
     Let $\mathcal{A}$ be a complex Banach algebra, $a \in \mathcal{A}$, and
     $\rho \in \mathbb{R}_{>0}$ with $r(a) < \rho$ (spectral radius). Then
     $\|a^{m}\| \le \rho^{m}$ for all sufficiently large $m$.
@@ -206,6 +212,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.tendsto_pow_norm_lt_one}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:gelfand_eventually_le}
+    \leanok
     Let $\mathcal{A}$ be a complex Banach algebra and $a \in \mathcal{A}$ with
     $r(a) < 1$. Then $\|a^{m}\| \to 0$ as $m \to \infty$.
 \end{lemma}
@@ -226,6 +233,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \label{lem:exp_smul_nat}
     \lean{LeanEval.Analysis.ODE.exp_smul_nat}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
     For $B \in \mathbb{C}^{n \times n}$ and $m \in \mathbb{N}$,
     $e^{(m : \mathbb{R}) \cdot B} = (e^{B})^{m}$.
 \end{lemma}
@@ -240,6 +248,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.exp_smul_split}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:exp_smul_nat}
+    \leanok
     For $B \in \mathbb{C}^{n \times n}$ and $t \ge 0$, with $m = \lfloor t
     \rfloor$ the integer part,
     \[ e^{t \cdot B} = (e^{B})^{m} \, e^{(t - m) \cdot B}. \]
@@ -257,6 +266,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \label{lem:bddAbove_exp_smul_unit}
     \lean{LeanEval.Analysis.ODE.bddAbove_exp_smul_unit}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
     For $B \in \mathbb{C}^{n \times n}$ there exists $M \ge 0$ with
     $\|e^{s \cdot B}\| \le M$ for every $s \in [0,1]$.
 \end{lemma}
@@ -293,6 +303,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.norm_exp_smul_tendsto_zero}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:tendsto_pow_norm_lt_one, lem:norm_exp_smul_le}
+    \leanok
     Let $B \in \mathbb{C}^{n \times n}$ with $r(e^{B}) < 1$. Then $\|e^{t \cdot
     B}\| \to 0$ as $t \to \infty$.
 \end{lemma}
@@ -313,6 +324,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \label{lem:mulVec_right_clm}
     \lean{LeanEval.Analysis.ODE.mulVec_right_clm}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
     For $v \in \mathbb{R}^{n}$ the map $M \mapsto M v$ from $\mathbb{R}^{n \times
     n}$ to $\mathbb{R}^{n}$ ($\mathrm{mulVec}$ against the fixed vector $v$) is a
     continuous linear map.
@@ -329,6 +341,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \label{lem:exp_smul_hasDerivAt}
     \lean{LeanEval.Analysis.ODE.exp_smul_hasDerivAt}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
     For $A \in \mathbb{R}^{n \times n}$, $t_1 \in \mathbb{R}$ and any $t \in
     \mathbb{R}$, the matrix-valued function $\tau \mapsto e^{(\tau - t_1) A}$ has
     derivative $A\, e^{(t - t_1)A}$ at $t$.
@@ -347,6 +360,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.exp_smul_mulVec_hasDerivAt}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:exp_smul_hasDerivAt, lem:mulVec_right_clm}
+    \leanok
     For $A \in \mathbb{R}^{n \times n}$, $v \in \mathbb{R}^{n}$, $t_1 \in
     \mathbb{R}$ and any $t \in \mathbb{R}$, the function $\tau \mapsto
     e^{(\tau - t_1) A} v$ has derivative $A \bigl(e^{(t - t_1)A} v\bigr)$ at $t$.
@@ -366,6 +380,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \label{lem:vectorField_lipschitz}
     \lean{LeanEval.Analysis.ODE.vectorField_lipschitz}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
     For $A \in \mathbb{R}^{n \times n}$ there is a constant $K$ such that the map
     $z \mapsto A z$ on $\mathbb{R}^{n}$ is $K$-Lipschitz.
 \end{lemma}
@@ -383,6 +398,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.exp_smul_isSolution}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:exp_smul_mulVec_hasDerivAt}
+    \leanok
     Let $A \in \mathbb{R}^{n \times n}$, $w \in \mathbb{R}^{n}$, $t_1 \in
     \mathbb{R}$, and define $y(\tau) = e^{(\tau - t_1)A}\, w$. Then for every
     $\tau$, $y$ has derivative $A\,y(\tau)$ at $\tau$ and $y(\tau) \in
@@ -401,6 +417,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.ODE_solution_unique_univ}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:vectorField_lipschitz}
+    \leanok
     Let $A \in \mathbb{R}^{n \times n}$ and $a < b$. Suppose $f, g \colon
     \mathbb{R} \to \mathbb{R}^{n}$ satisfy $f'(\tau) = A\,f(\tau)$ and $g'(\tau) =
     A\,g(\tau)$ for every $\tau \in (a,b)$, and $f(t_0) = g(t_0)$ for some $t_0
@@ -425,6 +442,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.solution_eqOn_exp_smul}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:exp_smul_isSolution, lem:ODE_solution_unique_univ}
+    \leanok
     Let $A \in \mathbb{R}^{n \times n}$ and $x \colon \mathbb{R} \to \mathbb{R}^{n}$
     satisfy $x'(\tau) = A\,x(\tau)$ for every $\tau \in (0,b)$. Then for every
     $t_1 \in (0,b)$, writing $y(\tau) = e^{(\tau - t_1)A}\, x(t_1)$, we have
@@ -444,6 +462,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.solution_eq_exp_smul}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{lem:solution_eqOn_exp_smul}
+    \leanok
     Let $A \in \mathbb{R}^{n \times n}$ and $x \colon \mathbb{R} \to \mathbb{R}^{n}$
     satisfy $x'(t) = A\,x(t)$ for every $t > 0$. Then for every $t_1 > 0$ and
     every $t > 0$,
@@ -465,6 +484,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.eigenvalue_re_neg_spectrum}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{def:complexification}
+    \leanok
     Let $A \in \mathbb{R}^{n \times n}$ and $B = A_{\mathbb{C}}$. If every
     eigenvalue $\mu$ of the linear map $\mathrm{toLin}'(B)$ satisfies
     $\operatorname{Re}\mu < 0$, then every $\mu \in \sigma(B)$ satisfies
@@ -485,6 +505,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \label{lem:norm_complexify_vec}
     \lean{LeanEval.Analysis.ODE.norm_complexify_vec}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
+    \leanok
     For $w \in \mathbb{R}^{n}$, the complexified vector $w_{\mathbb{C}} = (i
     \mapsto (w_i : \mathbb{C}))$ satisfies $\|w_{\mathbb{C}}\| = \|w\|$.
 \end{lemma}
@@ -499,6 +520,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.exp_map_complexify}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{def:complexification}
+    \leanok
     For $M \in \mathbb{R}^{n \times n}$,
     \[ (e^{M})_{\mathbb{C}} = e^{M_{\mathbb{C}}}, \qquad\text{i.e.}\qquad
        (e^{M}).\mathrm{map}(\mathrm{algebraMap}\,\mathbb{R}\,\mathbb{C})
@@ -522,6 +544,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.complexify_exp_mulVec}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{def:complexification, lem:exp_map_complexify}
+    \leanok
     For $A \in \mathbb{R}^{n \times n}$, $B = A_{\mathbb{C}}$, $w \in \mathbb{R}^{n}$
     and $s \in \mathbb{R}$,
     \[ \bigl(e^{sA}\,w\bigr)_{\mathbb{C}} = e^{sB}\, w_{\mathbb{C}}, \]
@@ -544,6 +567,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.norm_solution_le}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{def:complexification, lem:solution_eq_exp_smul, lem:norm_complexify_vec, lem:complexify_exp_mulVec}
+    \leanok
     Let $A \in \mathbb{R}^{n \times n}$, $B = A_{\mathbb{C}}$, and $x \colon
     \mathbb{R} \to \mathbb{R}^{n}$ satisfy $x'(t) = A\,x(t)$ for every $t > 0$.
     Then for every $t > 0$,
@@ -567,6 +591,7 @@ operator norm rather than, e.g., the Frobenius or entrywise sup norm.
     \lean{LeanEval.Analysis.ODE.linear_ode_asymptotic_stability}
     \leanfile{LeanEval/Analysis/ODE/LinearStability.lean}
     \uses{def:complexification, lem:spectralRadius_exp_lt_one, lem:norm_exp_smul_tendsto_zero, lem:eigenvalue_re_neg_spectrum, lem:norm_solution_le}
+    \leanok
     Let $A \in \mathbb{R}^{n \times n}$ be such that every eigenvalue $\mu$ of the
     complexification $\mathrm{toLin}'(A_{\mathbb{C}})$ has $\operatorname{Re}\mu <
     0$. Let $x \colon \mathbb{R} \to \mathbb{R}^{n}$ satisfy $x'(t) = A\,x(t)$ for
