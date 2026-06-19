@@ -15,4 +15,5 @@ import LeanEval.NumberTheory.Lagarias
 import LeanEval.NumberTheory.SmallHouse
 import LeanEval.Topology.CerfGammaFour
 import LeanEval.Topology.HomotopyGroups
+import LeanEval.Topology.Pi1Circle
 import LeanEval.Topology.SmaleConjecture

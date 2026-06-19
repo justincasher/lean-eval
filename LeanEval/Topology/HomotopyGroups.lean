@@ -3,6 +3,7 @@ import Mathlib.Data.ZMod.Basic
 import Mathlib.Geometry.Manifold.Instances.Sphere
 import Mathlib.Topology.Homotopy.HomotopyGroup
 import EvalTools.Markers
+import LeanEval.Topology.Pi1Circle
 
 namespace LeanEval
 namespace Topology
@@ -18,7 +19,7 @@ where homotopy groups are based.
 @[eval_problem]
 theorem pi1_circle_mulEquiv_int :
     Nonempty (HomotopyGroup.Pi 1 Circle (1 : Circle) ≃* Multiplicative ℤ) := by
-  sorry
+  refine ⟨(HomotopyGroup.pi1MulEquivFundamentalGroup (X := Circle) (x := (1 : Circle))).trans windEquiv⟩
 
 /-- The third homotopy group of the 2-sphere is infinite cyclic. -/
 @[eval_problem]
