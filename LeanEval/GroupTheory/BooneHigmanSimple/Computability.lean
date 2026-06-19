@@ -52,7 +52,11 @@ the cancellation test `a = (b.1, ¬ b.2)` are primitive-recursive relations. -/
 lemma primrec_eq_letter {n : ℕ} :
     PrimrecRel (fun a b : Fin n × Bool => a = b) ∧
       PrimrecRel (fun a b : Fin n × Bool => a = (b.1, !b.2)) := by
-  sorry
+  refine ⟨?_, ?_⟩
+  · exact Primrec.eq
+  · refine PrimrecRel.comp₂ Primrec.eq ?_ ?_
+    · exact Primrec.fst
+    · exact Primrec.pair (Primrec.fst.comp Primrec.snd) (Primrec.not.comp (Primrec.snd.comp Primrec.snd))
 
 /-- **The reduction step is primitive recursive.** -/
 lemma primrec_reduceStep {n : ℕ} :
@@ -66,23 +70,91 @@ lemma primrec_reduce {n : ℕ} :
 
 /-- **Reduction is computable.** -/
 lemma reduce_computable {n : ℕ} :
-    Computable (fun w : Word n => FreeGroup.reduce w) := by
-  sorry
+    Computable (fun w : Word n => FreeGroup.reduce w) :=
+  primrec_reduce.to_comp
 
 /-- **Formal inversion is primitive recursive.** -/
 lemma primrec_invRev {n : ℕ} :
     Primrec (fun u : Word n => FreeGroup.invRev u) := by
-  sorry
+  have h_flip : Primrec (fun (g : Fin n × Bool) => (g.1, !g.2)) :=
+    Primrec.pair Primrec.fst (Primrec.not.comp Primrec.snd)
+  have h_flip₂ : Primrec₂ (fun (_ : Word n) (b : Fin n × Bool) => (b.1, !b.2)) :=
+    Primrec.comp₂ h_flip Primrec₂.right
+  have h_map : Primrec (fun (u : Word n) => List.map (fun g => (g.1, !g.2)) u) :=
+    Primrec.list_map Primrec.id h_flip₂
+  exact (Primrec.list_reverse.comp h_map).of_eq (by
+    intro u
+    simp [FreeGroup.invRev])
 
 /-- **A conjugacy term is primitive recursive** in `(R, (g, ε, k))`. -/
 lemma primrec_conjTerm {n : ℕ} :
     Primrec₂ (@conjTerm n) := by
-  sorry
+  unfold Primrec₂
+  -- projections from the input pair (R, (g, ε, k))
+  have hR : Primrec (fun (p : List (Word n) × (Word n × Bool × ℕ)) => p.1) :=
+    Primrec.fst
+  have hg : Primrec (fun (p : List (Word n) × (Word n × Bool × ℕ)) => p.2.1) :=
+    Primrec.fst.comp Primrec.snd
+  have hε : Primrec (fun (p : List (Word n) × (Word n × Bool × ℕ)) => p.2.2.1) :=
+    Primrec.fst.comp (Primrec.snd.comp Primrec.snd)
+  have hk : Primrec (fun (p : List (Word n) × (Word n × Bool × ℕ)) => p.2.2.2) :=
+    Primrec.snd.comp (Primrec.snd.comp Primrec.snd)
+
+  -- R.getD k []  (using Primrec₂.comp since list_getD is a Primrec₂)
+  have h_getD : Primrec (fun (p : List (Word n) × (Word n × Bool × ℕ)) =>
+    (p.1).getD (p.2.2.2) []) :=
+    (Primrec.list_getD ([] : Word n)).comp hR hk
+
+  -- invRev (R.getD k [])
+  have h_invRev_getD : Primrec (fun (p : List (Word n) × (Word n × Bool × ℕ)) =>
+    FreeGroup.invRev ((p.1).getD (p.2.2.2) [])) :=
+    primrec_invRev.comp h_getD
+
+  -- signedRelator R ε k (using conditional on ε)
+  have h_signedRelator : Primrec (fun (p : List (Word n) × (Word n × Bool × ℕ)) =>
+    signedRelator p.1 p.2.2.1 p.2.2.2) :=
+    Primrec.cond hε h_getD h_invRev_getD
+
+  -- g ++ signedRelator R ε k
+  have h_g_sr : Primrec (fun (p : List (Word n) × (Word n × Bool × ℕ)) =>
+    p.2.1 ++ signedRelator p.1 p.2.2.1 p.2.2.2) := by
+    have h_append : Primrec₂ ((· ++ ·) : List (Fin n × Bool) → List (Fin n × Bool) → List (Fin n × Bool)) :=
+      Primrec.list_append (α := Fin n × Bool)
+    have h := Primrec₂.comp h_append hg h_signedRelator
+    simpa using h
+
+  -- invRev g
+  have h_invRev_g : Primrec (fun (p : List (Word n) × (Word n × Bool × ℕ)) =>
+    FreeGroup.invRev (p.2.1)) :=
+    primrec_invRev.comp hg
+
+  -- (g ++ signedRelator R ε k) ++ invRev g = conjTerm R (g, ε, k)
+  have h_append' : Primrec₂ ((· ++ ·) : List (Fin n × Bool) → List (Fin n × Bool) → List (Fin n × Bool)) :=
+    Primrec.list_append (α := Fin n × Bool)
+  refine (Primrec₂.comp h_append' h_g_sr h_invRev_g).of_eq ?_
+  intro p
+  rfl
 
 /-- **Certificate evaluation is primitive recursive** in `(R, c)`. -/
 lemma primrec_eval {n : ℕ} :
     Primrec₂ (@evalCert n) := by
-  sorry
+  unfold evalCert
+  -- We need Primrec (fun (p : (List (Word n) × Certificate n)) => (p.2.map (conjTerm p.1)).flatten)
+  have h_map : Primrec (fun (p : List (Word n) × Certificate n) => p.2.map (conjTerm p.1)) :=
+    Primrec.list_map (hf := Primrec.snd) (hg := by
+      -- Need Primrec₂ (fun (p : List (Word n) × Certificate n) (t : Word n × Bool × ℕ) => conjTerm p.1 t)
+      -- which is Primrec (fun ((p,t) : (List (Word n) × Certificate n) × (Word n × Bool × ℕ)) => conjTerm p.1 t)
+      have hproj : Primrec (fun (p : (List (Word n) × Certificate n) × (Word n × Bool × ℕ)) =>
+        ((p.1.1 : List (Word n)), p.2)) :=
+        Primrec.pair (Primrec.fst.comp Primrec.fst) Primrec.snd
+      have h' : Primrec (fun (p : (List (Word n) × Certificate n) × (Word n × Bool × ℕ)) =>
+        conjTerm p.1.1 p.2) :=
+        (show Primrec (fun (p' : (List (Word n) × (Word n × Bool × ℕ))) => conjTerm p'.1 p'.2) from
+          primrec_conjTerm).comp hproj
+      exact h')
+  refine (Primrec.list_flatten.comp h_map).of_eq ?_
+  intro p
+  rfl
 
 /-- **Certificate evaluation is computable.** The relation
 `reduce (evalCert R c) = reduce w` is a computable (hence pointwise-decidable)
@@ -91,7 +163,19 @@ lemma eval_computable {n : ℕ} :
     ComputablePred
       (fun p : List (Word n) × Word n × Certificate n =>
         FreeGroup.reduce (evalCert p.1 p.2.2) = FreeGroup.reduce p.2.1) := by
-  sorry
+  apply PrimrecPred.computablePred
+  refine PrimrecRel.comp (Primrec.eq (α := Word n)) ?_ ?_
+  · -- f(p) = FreeGroup.reduce (evalCert p.1 p.2.2)
+    have h_eval_proj : Primrec (fun (p : List (Word n) × Word n × Certificate n) => evalCert p.1 p.2.2) := by
+      have h1 : Primrec (Function.uncurry (@evalCert n)) := Primrec₂.uncurry.mpr primrec_eval
+      have h2 : Primrec (fun (p : List (Word n) × Word n × Certificate n) => (p.1, p.2.2)) :=
+        Primrec.pair Primrec.fst (Primrec.snd.comp Primrec.snd)
+      exact (h1.comp h2).of_eq (by intro p; rfl)
+    exact Primrec.comp primrec_reduce h_eval_proj
+  · -- g(p) = FreeGroup.reduce p.2.1
+    have h_w_proj : Primrec (fun (p : List (Word n) × Word n × Certificate n) => p.2.1) :=
+      Primrec.fst.comp Primrec.snd
+    exact Primrec.comp primrec_reduce h_w_proj
 
 /-- **Recursive enumerability of an existential over a computable relation.**
 If `Q : α → β → Prop` is computable (as a predicate on `α × β`), then
@@ -105,12 +189,36 @@ lemma re_projection {α β : Type*} [Primcodable α] [Primcodable β]
 lemma re_and {α : Type*} [Primcodable α] {p q : α → Prop}
     (hp : REPred p) (hq : REPred q) :
     REPred (fun a => p a ∧ q a) := by
-  sorry
+  unfold REPred at hp hq ⊢
+  have h_bind : Partrec (fun a : α =>
+    (Part.assert (p a) (fun _ => Part.some ())).bind (fun _ : Unit =>
+      Part.assert (q a) (fun _ => Part.some ()))) :=
+    Partrec.bind hp (hq.comp (Primrec.fst (α := α) (β := Unit)).to_comp)
+  refine h_bind.of_eq fun a => ?_
+  ext x
+  simp [Part.mem_bind_iff, Part.mem_assert_iff]
 
 /-- **Finite conjunction over generators is r.e.** -/
 lemma re_forall_fin {α : Type*} [Primcodable α] {n : ℕ} {p : Fin n → α → Prop}
     (hp : ∀ i, REPred (p i)) :
     REPred (fun a => ∀ i : Fin n, p i a) := by
-  sorry
+  induction' n with n ih
+  · -- n = 0: the universal statement is vacuously true, thus decidable,
+    -- and every decidable (hence computable) predicate is r.e.
+    have h_true_comp : ComputablePred (fun _ : α => True) := by
+      refine ⟨fun a => isTrue trivial, ?_⟩
+      have : Computable (fun (_ : α) => true) := (Primrec.const true).to_comp
+      exact this
+    have h_eq : (fun a : α => ∀ i : Fin 0, p i a) = fun _ : α => True := by
+      ext a; simp
+    rw [h_eq]
+    exact ComputablePred.to_re h_true_comp
+  · -- n = n.succ: use Fin.forall_fin_succ to rewrite as conjunction,
+    -- then apply re_and and the induction hypothesis
+    have h0 : REPred (p 0) := hp 0
+    have hrest : REPred (fun a : α => ∀ i : Fin n, p i.succ a) := ih fun i => hp i.succ
+    have hand : REPred (fun a : α => p 0 a ∧ ∀ i : Fin n, p i.succ a) := re_and h0 hrest
+    refine REPred.of_eq hand fun a => ?_
+    rw [Fin.forall_fin_succ]
 
 end LeanEval.GroupTheory.BooneHigmanSimpleProblem

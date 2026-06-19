@@ -40,6 +40,7 @@ complement is computable (Post's theorem, \texttt{ComputablePred.computable\_iff
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.pred_iff_mem_ker}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
     \uses{def:word-pred}
+    \leanok
     For every word $w$, $P(w)$ holds iff
     $\mathrm{FreeGroup.mk}\,w \in \ker\varphi$.
 \end{lemma}
@@ -80,6 +81,7 @@ for by an unbounded search.
     \label{lem:primrec-eq-letter}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_eq_letter}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \leanok
     Equality of signed letters $a, b : \mathrm{Fin}\,n \times \mathrm{Bool}$, and
     the cancellation test $a = (b.1, \lnot\, b.2)$ deciding whether $a$ cancels
     against $b$, are primitive-recursive relations.
@@ -134,6 +136,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.reduce_computable}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
     \uses{lem:primrec-reduce}
+    \leanok
     The map $w \mapsto \mathrm{FreeGroup.reduce}\,w$ on words is a computable
     function, and word equality after reduction is decidable.
 \end{lemma}
@@ -148,6 +151,7 @@ for by an unbounded search.
     \label{lem:primrec-invRev}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_invRev}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \leanok
     The formal word inverse $u \mapsto \mathrm{FreeGroup.invRev}\,u$, which
     reverses a word and flips the sign of each letter, is primitive recursive.
 \end{lemma}
@@ -164,6 +168,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_conjTerm}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
     \uses{def:certificate, lem:primrec-invRev}
+    \leanok
     Taking the relator list $R$ as an argument, the map sending a triple
     $(g, \varepsilon, k)$ to the word $g\,(R_k)^{\varepsilon}\,g^{-1}$ is a
     primitive-recursive function of $(R, (g,\varepsilon,k))$.
@@ -183,6 +188,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.primrec_eval}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
     \uses{def:certificate, lem:primrec-conjTerm}
+    \leanok
     Taking the relator list $R$ as an argument, the map
     $(R, c) \mapsto \mathrm{eval}_R(c)$ is primitive recursive.
 \end{lemma}
@@ -224,6 +230,7 @@ for by an unbounded search.
     \label{lem:prod-conjugates-subgroup}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.prodConjugatesSubgroup}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \leanok
     Let $S$ be a set in a group $G$. The set
     \[
         H_S := \bigl\{\, x \in G : x \text{ is a finite product of terms }
@@ -248,6 +255,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.conjugates_subset_prod}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
     \uses{lem:prod-conjugates-subgroup}
+    \leanok
     With $H_S$ as in Lemma~\ref{lem:prod-conjugates-subgroup},
     $\mathrm{conjugatesOfSet}\,S \subseteq H_S$.
 \end{lemma}
@@ -263,6 +271,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.closure_prod_conjugates}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
     \uses{lem:prod-conjugates-subgroup, lem:conjugates-subset-prod}
+    \leanok
     Let $S$ be a set in a group. Every element of
     $\mathrm{normalClosure}\,S = \mathrm{closure}(\mathrm{conjugatesOfSet}\,S)$ is
     a finite product of terms of the form $g\,s^{\pm 1}\,g^{-1}$ with $s \in S$.
@@ -284,6 +293,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mk_conjTerm}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
     \uses{def:certificate}
+    \leanok
     Let $\mathrm{conjTerm}_R(g, \varepsilon, k) := g \mathbin{+\!\!+}
     (R_k)^{\varepsilon} \mathbin{+\!\!+} \mathrm{FreeGroup.invRev}\,g$ be the word
     formed by Lemma~\ref{lem:primrec-conjTerm}, where $(R_k)^{+} = R_k$ and
@@ -313,6 +323,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mk_eval_eq_prod}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
     \uses{def:certificate, lem:mk-conjTerm}
+    \leanok
     For a certificate $c = ((g_j, \varepsilon_j, k_j))_j$ over a relator list $R$,
     \[
         \mathrm{FreeGroup.mk}(\mathrm{eval}_R(c)) =
@@ -339,6 +350,7 @@ for by an unbounded search.
     \label{lem:relator-index}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.relator_index}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \leanok
     Let $S := \{\mathrm{FreeGroup.mk}\,r : r \in R\}$. For every $s \in S$ there is
     an index $k$ into $R$ with $\mathrm{FreeGroup.mk}\,R_k = s$.
 \end{lemma}
@@ -395,6 +407,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mem_normalClosure_cert}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
     \uses{def:certificate, lem:closure-prod-conjugates, lem:cert-of-prod, lem:mem-of-cert}
+    \leanok
     Let $S := \{\mathrm{FreeGroup.mk}\,r : r \in R\}$ be the (finite) set of
     relator elements. For every word $w$,
     \[
@@ -457,6 +470,7 @@ for by an unbounded search.
     \label{lem:finset-to-word-list}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.finset_to_word_list}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \leanok
     For every finite set $T \subseteq \mathrm{FreeGroup}(\mathrm{Fin}\,n)$ there
     is a finite list of words $R$ with
     $\{\mathrm{FreeGroup.mk}\,r : r \in R\} = T$.
@@ -474,6 +488,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.ker_eq_normalClosure}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
     \uses{lem:finset-to-word-list}
+    \leanok
     There is a finite relator list $R$ such that
     $\ker\varphi = \mathrm{normalClosure}\,\{\mathrm{FreeGroup.mk}\,r : r \in R\}$.
 \end{lemma}
@@ -492,6 +507,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_positive}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
     \uses{def:word-pred, lem:pred-iff-mem-ker, lem:ker-eq-normalClosure, lem:re-mem-normalClosure}
+    \leanok
     The word problem predicate $P$ is recursively enumerable.
 \end{lemma}
 \begin{proof}
@@ -510,6 +526,7 @@ for by an unbounded search.
     \label{lem:normalClosure-singleton-top}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.normalClosure_singleton_top}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \leanok
     If $g \in G$ and $g \neq 1$, then $\mathrm{normalClosure}\,\{g\} = \top$.
 \end{lemma}
 \begin{proof}
@@ -526,6 +543,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.ker_ne_top}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
     \uses{lem:ker-eq-normalClosure}
+    \leanok
     $\ker\varphi \neq \top$.
 \end{lemma}
 \begin{proof}
@@ -540,6 +558,7 @@ for by an unbounded search.
     \label{lem:top-iff-generators}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.top_iff_generators}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \leanok
     For a subgroup $N \le \mathrm{FreeGroup}(\mathrm{Fin}\,n)$,
     \[
         N = \top \iff \forall i : \mathrm{Fin}\,n,\; \mathrm{FreeGroup.of}\,i \in N .
@@ -557,6 +576,7 @@ for by an unbounded search.
     \label{lem:top-iff-map-top}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.top_iff_map_top}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \leanok
     Let $\varphi : G \to H$ be a surjective homomorphism and $N \le G$ a subgroup
     with $\ker\varphi \le N$. Then
     $N = \top \iff \mathrm{map}\,\varphi\,N = \top$.
@@ -574,6 +594,7 @@ for by an unbounded search.
     \label{lem:map-normalClosure-insert}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.map_normalClosure_insert}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \leanok
     Let $\varphi : G \to H$ be a surjective homomorphism, $S$ a set with
     $\mathrm{normalClosure}\,S = \ker\varphi$, and $x \in G$. Then
     \[
@@ -631,6 +652,7 @@ for by an unbounded search.
     \label{lem:re-and}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_and}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \leanok
     If $p$ and $q$ are recursively enumerable predicates on the same encodable
     type, then $a \mapsto p(a) \wedge q(a)$ is recursively enumerable.
 \end{lemma}
@@ -647,6 +669,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_forall_fin}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
     \uses{lem:re-and}
+    \leanok
     If for each $i : \mathrm{Fin}\,n$ the predicate $p_i$ is recursively
     enumerable, then $a \mapsto \forall i : \mathrm{Fin}\,n,\; p_i(a)$ is
     recursively enumerable.

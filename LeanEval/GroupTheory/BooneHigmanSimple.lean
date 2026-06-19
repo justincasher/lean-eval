@@ -43,7 +43,7 @@ def WordProblemSolvable (φ : FreeGroup (Fin n) →* G) : Prop :=
 /-- **Word problem via the kernel.** `P w` holds iff `FreeGroup.mk w ∈ ker φ`. -/
 lemma pred_iff_mem_ker (φ : FreeGroup (Fin n) →* G) (w : List (Fin n × Bool)) :
     wordProblemPred φ w ↔ FreeGroup.mk w ∈ MonoidHom.ker φ := by
-  sorry
+  rw [MonoidHom.mem_ker, wordProblemPred]
 
 /-- **The kernel is a normal closure of relators.** There is a finite relator
 list `R` with `ker φ = normalClosure (relatorSet R)`. -/
@@ -51,7 +51,12 @@ lemma ker_eq_normalClosure (φ : FreeGroup (Fin n) →* G)
     (hker : (MonoidHom.ker φ).IsNormalClosureFG) :
     ∃ R : List (Word n),
       MonoidHom.ker φ = Subgroup.normalClosure (relatorSet R) := by
-  sorry
+  rcases hker with ⟨T, hT_fin, hT⟩
+  rcases finset_to_word_list hT_fin with ⟨R, hR⟩
+  refine ⟨R, ?_⟩
+  calc
+    MonoidHom.ker φ = Subgroup.normalClosure T := by rw [← hT]
+    _ = Subgroup.normalClosure (relatorSet R) := by rw [hR]
 
 /-- **Normal-closure membership is r.e.** -/
 lemma re_mem_normalClosure (R : List (Word n)) :
@@ -64,13 +69,28 @@ enumerable. -/
 lemma re_positive (φ : FreeGroup (Fin n) →* G)
     (hker : (MonoidHom.ker φ).IsNormalClosureFG) :
     REPred (wordProblemPred φ) := by
-  sorry
+  rcases ker_eq_normalClosure φ hker with ⟨R, hR⟩
+  refine REPred.of_eq (re_mem_normalClosure R) (fun w => ?_)
+  simpa [hR] using (pred_iff_mem_ker φ w).symm
 
 /-- **The kernel is not everything.** -/
 lemma ker_ne_top [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
     (hsurj : Function.Surjective φ) :
     MonoidHom.ker φ ≠ ⊤ := by
-  sorry
+  intro h
+  have hφ1 : φ = 1 := (MonoidHom.ker_eq_top_iff.mp h)
+  have htriv : ∀ g : G, g = 1 := by
+    intro g
+    obtain ⟨x, hx⟩ := hsurj g
+    calc
+      g = φ x := by symm; exact hx
+      _ = (1 : FreeGroup (Fin n) →* G) x := by rw [hφ1]
+      _ = 1 := by simp
+  obtain ⟨x, y, hne⟩ := exists_pair_ne G
+  exact hne (by
+    calc
+      x = 1 := htriv x
+      _ = y := by symm; exact htriv y)
 
 /-- **Collapse criterion.** With `S = relatorSet R` and
 `normalClosure S = ker φ`, for every word `w`,
