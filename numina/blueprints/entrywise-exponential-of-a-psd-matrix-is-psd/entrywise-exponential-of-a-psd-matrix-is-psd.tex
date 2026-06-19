@@ -17,6 +17,7 @@ positive semidefinite whenever $A$ is.
     \label{lem:const-one-psd}
     \lean{LeanEval.LinearAlgebra.posSemidef_const_one}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
     The matrix $J \in \mathbb{R}^{n \times n}$ all of whose entries equal $1$ is
     positive semidefinite.
 \end{lemma}
@@ -31,6 +32,7 @@ positive semidefinite whenever $A$ is.
     \label{lem:hadamard-pow-succ}
     \lean{LeanEval.LinearAlgebra.map_pow_succ}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
     For every matrix $A \in \mathbb{R}^{n \times n}$ and every $k \in \mathbb{N}$,
     \[
         A^{\odot (k+1)} \;=\; A \odot A^{\odot k},
@@ -48,6 +50,7 @@ positive semidefinite whenever $A$ is.
     \lean{LeanEval.LinearAlgebra.posSemidef_map_pow}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
     \uses{lem:const-one-psd, lem:hadamard-pow-succ}
+    \leanok
     If $A$ is positive semidefinite, then for every $k \in \mathbb{N}$ the
     entrywise power $A^{\odot k}$ (the matrix with entries $(a_{ij})^k$) is
     positive semidefinite.
@@ -67,6 +70,7 @@ positive semidefinite whenever $A$ is.
     \label{lem:exp-hermitian}
     \lean{LeanEval.LinearAlgebra.isHermitian_map_exp}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
     If $A$ is positive semidefinite (in particular Hermitian), then the
     entrywise exponential $\exp_{\odot}(A)$ is Hermitian.
 \end{lemma}
@@ -82,6 +86,7 @@ positive semidefinite whenever $A$ is.
     \label{lem:quadform-map-double-sum}
     \lean{LeanEval.LinearAlgebra.quadForm_map_eq_double_sum}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
     For any function $f : \mathbb{R} \to \mathbb{R}$, any matrix
     $A \in \mathbb{R}^{n \times n}$, and any vector $x \in \mathbb{R}^n$,
     \[
@@ -100,6 +105,7 @@ positive semidefinite whenever $A$ is.
     \label{lem:quadform-summable-entry}
     \lean{LeanEval.LinearAlgebra.summable_quadForm_entry}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
     For fixed $i, j$ and $x \in \mathbb{R}^n$, the series
     \[
         k \;\longmapsto\; x_i\,\Bigl(\frac{(a_{ij})^k}{k!}\Bigr)\, x_j
@@ -117,6 +123,7 @@ positive semidefinite whenever $A$ is.
     \label{lem:exp-entry-tsum}
     \lean{LeanEval.LinearAlgebra.exp_entry_eq_tsum}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
     For fixed $i, j$ and $x \in \mathbb{R}^n$,
     \[
         x_i\, \exp(a_{ij})\, x_j \;=\; \sum_{k=0}^{\infty} x_i\,\Bigl(\frac{(a_{ij})^k}{k!}\Bigr)\, x_j .
@@ -133,6 +140,7 @@ positive semidefinite whenever $A$ is.
     \label{lem:single-sum-tsum-interchange}
     \lean{LeanEval.LinearAlgebra.finsetSum_tsum_interchange}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
+    \leanok
     Let $s$ be a finite index set and $g_a : \mathbb{N} \to \mathbb{R}$ a family
     indexed by $a \in s$ with each $g_a$ summable. Then
     \[
@@ -152,6 +160,7 @@ positive semidefinite whenever $A$ is.
     \lean{LeanEval.LinearAlgebra.double_sum_tsum_interchange}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
     \uses{lem:quadform-summable-entry, lem:single-sum-tsum-interchange}
+    \leanok
     For $x \in \mathbb{R}^n$,
     \[
         \sum_{i}\sum_{j} \;\sum_{k=0}^{\infty} x_i\,\Bigl(\frac{(a_{ij})^k}{k!}\Bigr)\, x_j
@@ -172,6 +181,7 @@ positive semidefinite whenever $A$ is.
     \lean{LeanEval.LinearAlgebra.power_term_eq_quadForm}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
     \uses{lem:quadform-map-double-sum}
+    \leanok
     For every $k \in \mathbb{N}$ and every vector $x \in \mathbb{R}^n$,
     \[
         \sum_{i}\sum_{j} x_i\,\Bigl(\frac{(a_{ij})^k}{k!}\Bigr)\, x_j
@@ -194,6 +204,7 @@ positive semidefinite whenever $A$ is.
     \lean{LeanEval.LinearAlgebra.quadForm_map_exp_eq_tsum}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
     \uses{lem:quadform-map-double-sum, lem:exp-entry-tsum, lem:quadform-double-sum-tsum-interchange, lem:power-term-quadform}
+    \leanok
     For every vector $x \in \mathbb{R}^n$,
     \[
         x^{*} \, \exp_{\odot}(A) \, x
@@ -218,6 +229,7 @@ positive semidefinite whenever $A$ is.
     \lean{LeanEval.LinearAlgebra.posSemidef_map_exp}
     \leanfile{LeanEval/LinearAlgebra/EntrywiseExpPSD.lean}
     \uses{lem:hadamard-pow-psd, lem:exp-hermitian, lem:quadform-series}
+    \leanok
     If $A \in \mathbb{R}^{n \times n}$ is positive semidefinite, then its
     entrywise exponential $\exp_{\odot}(A)$ (the matrix with entries
     $\exp(a_{ij})$) is positive semidefinite.
