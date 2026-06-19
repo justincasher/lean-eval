@@ -163,46 +163,11 @@ the result.
     $\operatorname{logDeriv}\big((\cdot-u)^{n}\big)(z) = n\,(z-u)^{-1}$.
 \end{proof}
 
-\begin{lemma}[A single power factor is differentiable and nonzero off its base point]
-    \label{lem:zpow-shift-differentiable-ne}
-    \lean{LeanEval.ComplexAnalysis.zpow_shift_differentiable_ne}
-    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \leanok
-    For $u \in \mathbb{C}$, an integer $n$, and $z \neq u$, the function
-    $(\cdot - u)^{n}$ is differentiable at $z$ and its value
-    $(z-u)^{n}$ at $z$ is nonzero.
-\end{lemma}
-\begin{proof}
-    The affine map $z \mapsto z - u$ is differentiable
-    (\texttt{AffineMap.differentiableAt}) and, since $z \neq u$, nonzero at $z$;
-    hence its integer power $(\cdot-u)^{n}$ is differentiable at $z$
-    (\texttt{DifferentiableAt.zpow}) and $(z-u)^{n} \neq 0$
-    (\texttt{zpow\_ne\_zero}).
-\end{proof}
-
-\begin{lemma}[Factorized rational as a Finset product over its support]
-    \label{lem:factorizedRational-eq-finsetProd}
-    \lean{LeanEval.ComplexAnalysis.factorizedRational_eq_finsetProd}
-    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \leanok
-    Let $d$ be an integer-valued divisor with finite support $T$, and put
-    $\varphi = \operatorname*{{\textstyle\prod}^{\mathrm f}}_{u}(\cdot - u)^{d(u)}$,
-    the finite product (\texttt{finprod}) over all $u$. Then $\varphi$ equals the
-    \texttt{Finset} product $\prod_{u \in T}(\cdot - u)^{d(u)}$.
-\end{lemma}
-\begin{proof}
-    A factor $(\cdot-u)^{d(u)}$ equals the constant $1$ whenever $u \notin T$
-    (i.e.\ $d(u) = 0$), so the multiplicative support of $u \mapsto
-    (\cdot-u)^{d(u)}$ is contained in the finite set $T$. Hence
-    \texttt{finprod\_eq\_finset\_prod\_of\_mulSupport\_subset} rewrites the
-    \texttt{finprod} as the \texttt{Finset} product over $T$.
-\end{proof}
-
 \begin{lemma}[Logarithmic derivative of a factorized rational function]
     \label{lem:logDeriv-factorizedRational}
     \lean{LeanEval.ComplexAnalysis.logDeriv_factorizedRational}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \uses{lem:factorizedRational-eq-finsetProd, lem:logDeriv-zpow-shift, lem:zpow-shift-differentiable-ne}
+    \uses{lem:logDeriv-zpow-shift}
     \leanok
     Let $d$ be an integer-valued divisor with finite support $T$, and put
     $\varphi = \operatorname*{{\textstyle\prod}^{\mathrm f}}_{u}(\cdot - u)^{d(u)}$,
@@ -216,15 +181,15 @@ the result.
     the finite sum (\texttt{finsum}) over the support $T$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:factorizedRational-eq-finsetProd, lem:logDeriv-zpow-shift, lem:zpow-shift-differentiable-ne}
-    By Lemma~\ref{lem:factorizedRational-eq-finsetProd}, $\varphi$ is the
-    \texttt{Finset} product $\prod_{u\in T}(\cdot-u)^{d(u)}$. Since $z \notin T$,
-    each factor $(\cdot-u)^{d(u)}$ ($u \in T$) is differentiable and nonzero at
-    $z$ by Lemma~\ref{lem:zpow-shift-differentiable-ne}, so \texttt{logDeriv\_prod}
-    distributes the logarithmic derivative of the Finset product as the sum over
-    $T$ of the factors' logarithmic derivatives. Each summand equals
-    $d(u)(z-u)^{-1}$ by Lemma~\ref{lem:logDeriv-zpow-shift}, and the resulting
-    Finset sum is the \texttt{finsum} over $T$.
+    \uses{lem:logDeriv-zpow-shift}
+    Rewriting the \texttt{finprod} as the \texttt{Finset} product
+    $\prod_{u\in T}(\cdot-u)^{d(u)}$ over the support and noting that, for
+    $z \notin T$, each factor $(\cdot-u)^{d(u)}$ ($u \in T$) is differentiable and
+    nonzero at $z$, \texttt{logDeriv\_prod} distributes the logarithmic derivative
+    of the product as the sum over $T$ of the factors' logarithmic derivatives.
+    Each summand equals $d(u)(z-u)^{-1}$ by
+    Lemma~\ref{lem:logDeriv-zpow-shift}, and the resulting Finset sum is the
+    \texttt{finsum} over $T$.
 \end{proof}
 
 \begin{lemma}[Each simple pole is circle-integrable]
@@ -255,45 +220,11 @@ the result.
     $\oint_{C(0,R)} (z-u)^{-1}\,dz = 2\pi i$.
 \end{proof}
 
-\begin{lemma}[Cauchy integral of a scaled simple pole]
-    \label{lem:circleIntegral-smul-inv}
-    \lean{LeanEval.ComplexAnalysis.circleIntegral_smul_inv}
-    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \uses{lem:circleIntegral-sub-inv}
-    \leanok
-    For $u \in B$ and a constant $c \in \mathbb{C}$,
-    \[
-        \oint_{C(0,R)} c\,(z-u)^{-1}\,dz = c\,(2\pi i).
-    \]
-\end{lemma}
-\begin{proof}
-    \uses{lem:circleIntegral-sub-inv}
-    By \texttt{circleIntegral.integral\_const\_mul} the constant $c$ pulls out of
-    the circle integral, and Lemma~\ref{lem:circleIntegral-sub-inv} evaluates the
-    remaining integral $\oint_{C(0,R)}(z-u)^{-1}\,dz = 2\pi i$.
-\end{proof}
-
-\begin{lemma}[Each scaled simple pole is circle-integrable]
-    \label{lem:circleIntegrable-smul-sub-inv}
-    \lean{LeanEval.ComplexAnalysis.circleIntegrable_smul_sub_inv}
-    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \uses{lem:circleIntegrable-sub-inv}
-    \leanok
-    For $u \in B$ and a constant $c \in \mathbb{C}$, the function
-    $z \mapsto c\,(z-u)^{-1}$ is circle-integrable on $C(0,R)$.
-\end{lemma}
-\begin{proof}
-    \uses{lem:circleIntegrable-sub-inv}
-    By Lemma~\ref{lem:circleIntegrable-sub-inv} the function $z \mapsto (z-u)^{-1}$
-    is circle-integrable on $C(0,R)$, and scaling by the constant $c$ preserves
-    circle-integrability (\texttt{CircleIntegrable.const\_smul}).
-\end{proof}
-
 \begin{lemma}[Contour integral of a sum of simple poles]
     \label{lem:circleIntegral-sum-inv}
     \lean{LeanEval.ComplexAnalysis.circleIntegral_sum_inv}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \uses{lem:circleIntegrable-smul-sub-inv, lem:circleIntegral-smul-inv}
+    \uses{lem:circleIntegrable-sub-inv, lem:circleIntegral-sub-inv}
     \leanok
     Let $d$ be an integer-valued divisor with finite support $T \subseteq B$.
     Then
@@ -306,14 +237,13 @@ the result.
     both finite sums (\texttt{finsum}) being over the support $T$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:circleIntegrable-smul-sub-inv, lem:circleIntegral-smul-inv}
-    Each summand $z \mapsto d(u)(z-u)^{-1}$ ($u \in T \subseteq B$) is
-    circle-integrable by Lemma~\ref{lem:circleIntegrable-smul-sub-inv}, so the
-    circle integral of the finite sum is the sum of the integrals
-    (\texttt{circleIntegral.integral\_fun\_sum} over the finite support $T$). Each term equals $d(u)(2\pi i)$ by
-    Lemma~\ref{lem:circleIntegral-smul-inv}, and resumming pulls the common factor
-    $2\pi i$ out of the finite sum to give
-    $\big(\sum_{u}^{\mathrm f} d(u)\big)2\pi i$.
+    \uses{lem:circleIntegrable-sub-inv, lem:circleIntegral-sub-inv}
+    Each summand $z \mapsto (z-u)^{-1}$ ($u \in T \subseteq B$) is
+    circle-integrable by Lemma~\ref{lem:circleIntegrable-sub-inv}, so by linearity
+    the circle integral of the finite sum is the sum of the integrals and the
+    constants $d(u)$ pull out. For each $u$, Lemma~\ref{lem:circleIntegral-sub-inv}
+    gives $\oint_{C(0,R)} (z-u)^{-1}\,dz = 2\pi i$. Summing over $T$ yields the
+    claim.
 \end{proof}
 
 \begin{lemma}[Logarithmic derivative of a unit is analytic on the disk]
@@ -442,86 +372,11 @@ the result.
     minimality.
 \end{proof}
 
-\begin{lemma}[The divisor support on a compact disk is finite]
-    \label{lem:divisor-support-finite-on-compact}
-    \lean{LeanEval.ComplexAnalysis.divisor_support_finite_on_compact}
-    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \leanok
-    Let $h$ be meromorphic on $\mathbb{C}$. For any $\rho > 0$ the support of
-    $\operatorname{divisor}(h, \overline{B}(0,\rho))$ is finite.
-\end{lemma}
-\begin{proof}
-    The closed disk $\overline{B}(0,\rho)$ is compact and $h$ is meromorphic on
-    it, so by \texttt{MeromorphicOn.divisor\_support\_finite\_of\_subset} the
-    divisor of $h$ on the disk has finite support.
-\end{proof}
-
-\begin{lemma}[Support points of modulus at least $R$ have modulus greater than $R$]
-    \label{lem:annulus-radii-gt}
-    \lean{LeanEval.ComplexAnalysis.annulus_radii_gt}
-    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \uses{lem:divisor-eq-zero-of-orderZero}
-    \leanok
-    Let $h$ be meromorphic on $\mathbb{C}$ with $\operatorname{order}(h) = 0$ on
-    $S$, and let $z$ be a support point of $\operatorname{divisor}(h, \cdot)$ with
-    $\|z\| \ge R$. Then $\|z\| > R$.
-\end{lemma}
-\begin{proof}
-    \uses{lem:divisor-eq-zero-of-orderZero}
-    If $\|z\| = R$ then $z \in S$, where the order of $h$ is $0$ by hypothesis, so
-    $\operatorname{divisor}(h,\cdot)(z) = 0$ by
-    Lemma~\ref{lem:divisor-eq-zero-of-orderZero}, contradicting $z$ being a
-    support point. Hence $\|z\| \neq R$, and with $\|z\| \ge R$ this gives
-    $\|z\| > R$.
-\end{proof}
-
-\begin{lemma}[A radius above all nearby support moduli]
-    \label{lem:exists-radius-gt-of-orderZero-sphere}
-    \lean{LeanEval.ComplexAnalysis.exists_radius_gt_of_orderZero_sphere}
-    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \uses{lem:divisor-support-finite-on-compact, lem:annulus-radii-gt, lem:exists-lt-of-finite}
-    \leanok
-    Let $h$ be meromorphic on $\mathbb{C}$ with $\operatorname{order}(h) = 0$ on
-    $S$. Then there is $R'$ with $R < R' \le R+1$ such that no support point $z$
-    of $\operatorname{divisor}(h, \overline{B}(0,R+1))$ satisfies
-    $R \le \|z\| < R'$.
-\end{lemma}
-\begin{proof}
-    \uses{lem:divisor-support-finite-on-compact, lem:annulus-radii-gt, lem:exists-lt-of-finite}
-    On the compact closed disk $\overline{B}(0, R+1)$ the support of the divisor
-    of $h$ is finite by Lemma~\ref{lem:divisor-support-finite-on-compact}; let $A$
-    be the finite set of moduli of its support points of modulus $\ge R$. By
-    Lemma~\ref{lem:annulus-radii-gt} every element of $A$ exceeds $R$, so
-    Lemma~\ref{lem:exists-lt-of-finite} yields $R'_0 > R$ with $R'_0 \le a$ for all
-    $a \in A$. Put $R' = \min(R'_0, R+1)$, so $R < R' \le R+1$. If a support point
-    $z$ had $R \le \|z\| < R'$ then $\|z\| \in A$, forcing $\|z\| \ge R'_0 \ge R'$,
-    a contradiction.
-\end{proof}
-
-\begin{lemma}[A pole/zero-free annulus confines the divisor support]
-    \label{lem:divisor-supported-in-ball-of-radius}
-    \lean{LeanEval.ComplexAnalysis.divisor_supported_in_ball_of_radius}
-    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \leanok
-    Let $h$ be meromorphic on $\mathbb{C}$ and let $R < R' \le R+1$ be such that
-    no support point $z$ of $\operatorname{divisor}(h, \overline{B}(0,R+1))$
-    satisfies $R \le \|z\| < R'$. Then $\operatorname{divisor}(h, B(0,R'))$ is
-    supported in the open disk $B = B(0,R)$.
-\end{lemma}
-\begin{proof}
-    Since $B(0,R') \subseteq \overline{B}(0,R+1)$, the divisor
-    $\operatorname{divisor}(h, B(0,R'))$ is the restriction to $B(0,R')$ of
-    $\operatorname{divisor}(h, \overline{B}(0,R+1))$
-    (\texttt{MeromorphicOn.divisor\_restrict}), so each of its support points is a
-    support point of the latter with $\|z\| < R'$. By hypothesis no such point has
-    $R \le \|z\| < R'$, hence $\|z\| < R$, i.e.\ $z \in B$.
-\end{proof}
-
 \begin{lemma}[A zero/pole-free annulus outside the circle]
     \label{lem:annulus-zero-free}
     \lean{LeanEval.ComplexAnalysis.annulus_zero_free}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \uses{lem:exists-radius-gt-of-orderZero-sphere, lem:divisor-supported-in-ball-of-radius}
+    \uses{lem:divisor-eq-zero-of-orderZero, lem:exists-lt-of-finite}
     \leanok
     Let $h$ be meromorphic on $\mathbb{C}$ with $\operatorname{order}(h) = 0$ on
     $S$. Then there is $R' > R$ such that $\operatorname{divisor}(h, B(0,R'))$ is
@@ -529,14 +384,17 @@ the result.
     every $z$ with $R \le \|z\| < R'$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:exists-radius-gt-of-orderZero-sphere, lem:divisor-supported-in-ball-of-radius}
-    By Lemma~\ref{lem:exists-radius-gt-of-orderZero-sphere} there is $R'$ with
-    $R < R' \le R+1$ such that no support point of
-    $\operatorname{divisor}(h, \overline{B}(0,R+1))$ lies in the annulus
-    $R \le \|z\| < R'$. By
-    Lemma~\ref{lem:divisor-supported-in-ball-of-radius} this $R'$ satisfies
-    $\operatorname{divisor}(h, B(0,R'))$ supported in $B$; equivalently, $h$ has
-    order $0$ at every $z$ with $R \le \|z\| < R'$.
+    \uses{lem:divisor-eq-zero-of-orderZero, lem:exists-lt-of-finite}
+    On the compact closed disk $\overline{B}(0,R+1)$ the divisor of $h$ has finite
+    support. Any support point $z$ with $\|z\| \ge R$ in fact has $\|z\| > R$:
+    were $\|z\| = R$ then $z \in S$ and the order of $h$ at $z$ is $0$, so
+    Lemma~\ref{lem:divisor-eq-zero-of-orderZero} gives
+    $\operatorname{divisor}(h,\cdot)(z) = 0$, contradicting $z$ being in the
+    support. The moduli of these finitely many support points all exceed $R$, so
+    Lemma~\ref{lem:exists-lt-of-finite} produces $R'$ with $R < R' \le R+1$ below
+    all of them; then no support point lies in the annulus $R \le \|z\| < R'$.
+    Restricting (\texttt{MeromorphicOn.divisor\_restrict}) shows
+    $\operatorname{divisor}(h, B(0,R'))$ is supported in $B$.
 \end{proof}
 
 \begin{lemma}[A nonzero meromorphic function has finite order everywhere]
@@ -581,43 +439,11 @@ the result.
     $(\cdot-u)^{\bullet(u)}$) coincide.
 \end{proof}
 
-\begin{lemma}[A codiscrete equality restricts to a subset]
-    \label{lem:codiscreteWithin-restrict}
-    \lean{LeanEval.ComplexAnalysis.codiscreteWithin_restrict}
-    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \leanok
-    Let $V \subseteq W$ and suppose two functions agree off a set codiscrete in
-    $W$ (i.e.\ the equality holds eventually with respect to
-    $\operatorname{codiscreteWithin} W$). Then they also agree off a set
-    codiscrete in $V$.
-\end{lemma}
-\begin{proof}
-    Since $V \subseteq W$, the filter $\operatorname{codiscreteWithin} V$ is
-    coarser than $\operatorname{codiscreteWithin} W$
-    (\texttt{Filter.codiscreteWithin\_mono}), so an equality holding eventually
-    along the latter holds eventually along the former
-    (\texttt{Filter.Eventually.filter\_mono}).
-\end{proof}
-
-\begin{lemma}[Restricting the extracted unit to the disk]
-    \label{lem:analyticOnNhd-nowhereZero-restrict}
-    \lean{LeanEval.ComplexAnalysis.analyticOnNhd_nowhereZero_restrict}
-    \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \leanok
-    Let $g$ be analytic and nowhere zero on the open disk $B' = B(0,R')$, and
-    suppose $D \subseteq B'$. Then $g$ is analytic and nowhere zero on $D$.
-\end{lemma}
-\begin{proof}
-    Analyticity on $B'$ restricts to the subset $D \subseteq B'$
-    (\texttt{AnalyticOnNhd.mono}), and the nonvanishing of $g$ at every point of
-    $B'$ holds in particular at every point of $D$.
-\end{proof}
-
 \begin{lemma}[Existence of the factorization $h = \varphi\cdot U$]
     \label{lem:factorization-existence}
     \lean{LeanEval.ComplexAnalysis.factorization_existence}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \uses{lem:annulus-zero-free, lem:order-ne-top, lem:factorizedRational-restrict, lem:codiscreteWithin-restrict, lem:analyticOnNhd-nowhereZero-restrict}
+    \uses{lem:annulus-zero-free, lem:order-ne-top, lem:factorizedRational-restrict}
     \leanok
     Let $h$ be meromorphic on $\mathbb{C}$, not identically zero, with
     $\operatorname{order}(h) = 0$ on $S$. Write
@@ -628,7 +454,7 @@ the result.
     $h = \varphi\cdot U$ off a codiscrete set of $D$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:annulus-zero-free, lem:order-ne-top, lem:factorizedRational-restrict, lem:codiscreteWithin-restrict, lem:analyticOnNhd-nowhereZero-restrict}
+    \uses{lem:annulus-zero-free, lem:order-ne-top, lem:factorizedRational-restrict}
     Choose $R' > R$ as in Lemma~\ref{lem:annulus-zero-free}, so the open disk
     $B' = B(0,R')$ contains $D$ and $\operatorname{divisor}(h, B')$ is supported
     in $B$. By Lemma~\ref{lem:order-ne-top} the order of $h$ is finite at every
@@ -638,33 +464,32 @@ the result.
     $h = \big(\operatorname*{{\textstyle\prod}^{\mathrm f}}_{u}
     (\cdot-u)^{\operatorname{divisor}(h,B')(u)}\big)\cdot g$ off a set codiscrete
     in $B'$. By Lemma~\ref{lem:factorizedRational-restrict} that factorized
-    rational equals $\varphi$. Set $U = g$; by
-    Lemma~\ref{lem:analyticOnNhd-nowhereZero-restrict} it is analytic and nowhere
-    zero on $D \subseteq B'$, and by Lemma~\ref{lem:codiscreteWithin-restrict} the
-    codiscrete equality on $B'$ restricts to one on $D$.
+    rational equals $\varphi$. Take $U = g$ restricted to $D$: it is analytic and
+    nowhere zero on $D \subseteq B'$ (\texttt{AnalyticOnNhd.mono}), and the
+    codiscrete equality on $B'$ restricts to one on $D$
+    (\texttt{Filter.codiscreteWithin\_mono}).
 \end{proof}
 
 \begin{lemma}[$\operatorname{logDeriv}\varphi$ is circle-integrable]
     \label{lem:circleIntegrable-logDeriv-factorizedRational}
     \lean{LeanEval.ComplexAnalysis.circleIntegrable_logDeriv_factorizedRational}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
-    \uses{lem:logDeriv-factorizedRational, lem:circleIntegrable-smul-sub-inv}
-    \leanok
+    \uses{lem:logDeriv-factorizedRational, lem:circleIntegrable-sub-inv}
     Let $\varphi = \operatorname*{{\textstyle\prod}^{\mathrm f}}_{u}
       (\cdot-u)^{\operatorname{divisor}(h,D)(u)}$ be the factorized rational of
     $\operatorname{divisor}(h,D)$, whose finite support $T$ lies in $B$. Then
     $\operatorname{logDeriv}\varphi$ is circle-integrable on $C(0,R)$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:logDeriv-factorizedRational, lem:circleIntegrable-smul-sub-inv}
+    \uses{lem:logDeriv-factorizedRational, lem:circleIntegrable-sub-inv}
     For $z \in S$ we have $z \notin T$ (as $T \subseteq B$), so by
     Lemma~\ref{lem:logDeriv-factorizedRational} the function
     $\operatorname{logDeriv}\varphi$ agrees on the circle with the finite sum
     $\sum_{u}^{\mathrm f}\operatorname{divisor}(h,D)(u)(z-u)^{-1}$. Each summand is
-    circle-integrable by Lemma~\ref{lem:circleIntegrable-smul-sub-inv} (every
-    $u \in T \subseteq B$), so the finite sum is circle-integrable
-    (\texttt{CircleIntegrable.finsum}), and circle-integrability transfers across
-    the pointwise equality on the circle (\texttt{crcleIntegrable\_congr}).
+    a constant multiple of $z \mapsto (z-u)^{-1}$, circle-integrable by
+    Lemma~\ref{lem:circleIntegrable-sub-inv} (every $u \in T \subseteq B$), so the
+    finite sum is circle-integrable, and circle-integrability transfers across the
+    pointwise equality on the circle (\texttt{circleIntegrable\_congr}).
 \end{proof}
 
 \begin{lemma}[$\operatorname{logDeriv} U$ is circle-integrable]
@@ -672,7 +497,6 @@ the result.
     \lean{LeanEval.ComplexAnalysis.circleIntegrable_logDeriv_unit}
     \leanfile{LeanEval/ComplexAnalysis/Rouche/Support.lean}
     \uses{lem:logDeriv-analytic-unit}
-    \leanok
     Let $U$ be analytic and nowhere zero on the closed disk $D$. Then
     $\operatorname{logDeriv} U$ is circle-integrable on $C(0,R)$.
 \end{lemma}
