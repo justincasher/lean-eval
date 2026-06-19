@@ -22,12 +22,30 @@ def relatorSet (R : List (Word n)) : Set (FreeGroup (Fin n)) :=
 adjoins `FreeGroup.mk w` to the relator set. -/
 lemma relatorSet_append (R : List (Word n)) (w : Word n) :
     relatorSet (R ++ [w]) = relatorSet R ∪ {FreeGroup.mk w} := by
-  sorry
+  ext x
+  constructor
+  · intro hx
+    dsimp [relatorSet] at hx
+    rcases hx with ⟨r, hr, hx⟩
+    rcases List.mem_append.mp hr with (hrR | hrw)
+    · apply Or.inl
+      exact ⟨r, hrR, hx⟩
+    · rw [List.mem_singleton.mp hrw] at hx
+      apply Or.inr
+      exact hx.symm
+  · intro hx
+    rcases hx with (hxR | hxw)
+    · rcases hxR with ⟨r, hr, hx⟩
+      refine ⟨r, ?_, hx⟩
+      exact List.mem_append_left [w] hr
+    · rw [Set.mem_singleton_iff.mp hxw]
+      refine ⟨w, ?_, rfl⟩
+      simp
 
 /-- **A generator as a one-letter word.** -/
 lemma of_eq_mk_singleton (i : Fin n) :
-    FreeGroup.of i = FreeGroup.mk [(i, true)] := by
-  sorry
+    FreeGroup.of i = FreeGroup.mk [(i, true)] :=
+  rfl
 
 variable {G : Type*} [Group G]
 

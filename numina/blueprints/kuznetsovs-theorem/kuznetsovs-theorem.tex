@@ -541,6 +541,7 @@ for by an unbounded search.
     \label{lem:computablePred-decide}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.computablePred_decide}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \leanok
     Let $\alpha, \beta$ be encodable types and $Q : \alpha \to \beta \to
     \mathrm{Prop}$ a computable, pointwise decidable relation. Then the boolean
     function $p \mapsto \mathrm{decide}\,Q(p.1, p.2)$ on $\alpha \times \beta$ is
@@ -558,6 +559,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.rproj_kernel}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
     \uses{lem:computablePred-decide}
+    \leanok
     With $Q$ as above and $\beta$ encodable, the option-valued function
     \[
         k(a, m) := (\mathrm{decode}\,m : \mathrm{Option}\,\beta)\ \mathbf{bind}\
@@ -583,6 +585,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.rproj_search}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
     \uses{lem:rproj-kernel}
+    \leanok
     With $k$ as in Lemma~\ref{lem:rproj-kernel}, the partial function
     $a \mapsto \mathrm{Nat.rfindOpt}\,(\lambda m.\ k(a,m))$ is partial recursive
     (\texttt{Partrec}).
@@ -598,6 +601,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.rproj_dom}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
     \uses{lem:rproj-kernel}
+    \leanok
     With $k$ as in Lemma~\ref{lem:rproj-kernel}, for every $a$,
     \[
         \bigl(\mathrm{Nat.rfindOpt}\,(\lambda m.\ k(a,m))\bigr).\mathrm{Dom}
@@ -639,6 +643,7 @@ for by an unbounded search.
     \label{lem:mk-eq-iff-reduce}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.mk_eq_iff_reduce}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/Computability.lean}
+    \leanok
     For words $u, v$,
     \[
         \mathrm{FreeGroup.mk}\,u = \mathrm{FreeGroup.mk}\,v
@@ -943,6 +948,7 @@ for by an unbounded search.
     \label{lem:relatorSet-append}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.relatorSet_append}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \leanok
     For a relator list $R$ and a word $w$, writing
     $S_R := \{\mathrm{FreeGroup.mk}\,r : r \in R\}$,
     \[
@@ -962,6 +968,7 @@ for by an unbounded search.
     \label{lem:of-eq-mk-singleton}
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.of_eq_mk_singleton}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple/NormalClosure.lean}
+    \leanok
     For $i : \mathrm{Fin}\,n$,
     $\mathrm{FreeGroup.of}\,i = \mathrm{FreeGroup.mk}\,[(i, \mathrm{true})]$.
 \end{lemma}
@@ -1026,6 +1033,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.re_negative}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
     \uses{def:word-pred, lem:neg-iff-forall-gen, lem:collapse, lem:top-iff-generators, lem:re-forall-fin, lem:re-generator-mem, lem:ker-eq-normalClosure}
+    \leanok
     The complement predicate $w \mapsto \neg P(w)$, i.e.
     $\varphi(\mathrm{FreeGroup.mk}\,w) \neq 1$, is recursively enumerable.
 \end{lemma}
@@ -1053,6 +1061,7 @@ for by an unbounded search.
     \lean{LeanEval.GroupTheory.BooneHigmanSimpleProblem.post_re_compl}
     \leanfile{LeanEval/GroupTheory/BooneHigmanSimple.lean}
     \uses{def:word-pred}
+    \leanok
     Let $P$ be the word problem predicate, equipped with a classical decidability
     instance. If $P$ is recursively enumerable and the complement
     $w \mapsto \neg P(w)$ is recursively enumerable, then

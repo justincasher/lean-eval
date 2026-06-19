@@ -62,7 +62,26 @@ lemma ker_eq_normalClosure (φ : FreeGroup (Fin n) →* G)
 lemma re_mem_normalClosure (R : List (Word n)) :
     REPred (fun w : Word n =>
       FreeGroup.mk w ∈ Subgroup.normalClosure (relatorSet R)) := by
-  sorry
+  have h_mem_eqv : ∀ w, (FreeGroup.mk w ∈ Subgroup.normalClosure (relatorSet R)) ↔
+      ∃ c : Certificate n, FreeGroup.reduce (evalCert R c) = FreeGroup.reduce w := by
+    intro w
+    rw [mem_normalClosure_cert R w]
+    constructor
+    · rintro ⟨c, hc⟩
+      refine ⟨c, ?_⟩
+      rw [← mk_eq_iff_reduce]
+      exact hc
+    · rintro ⟨c, hc⟩
+      refine ⟨c, ?_⟩
+      rw [mk_eq_iff_reduce]
+      exact hc
+  have h_repred : REPred (fun w : Word n => ∃ c : Certificate n,
+      FreeGroup.reduce (evalCert R c) = FreeGroup.reduce w) := by
+    have hQ : ComputablePred fun (p : Word n × Certificate n) =>
+      FreeGroup.reduce (evalCert R p.2) = FreeGroup.reduce p.1 :=
+      check_computablePred R
+    exact re_projection hQ
+  exact REPred.of_eq h_repred (fun w => (h_mem_eqv w).symm)
 
 /-- **Positive side is r.e.**  The word problem predicate `P` is recursively
 enumerable. -/
@@ -175,7 +194,15 @@ lemma re_negative [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
     (hsurj : Function.Surjective φ)
     (hker : (MonoidHom.ker φ).IsNormalClosureFG) :
     REPred (fun w : Word n => ¬ wordProblemPred φ w) := by
-  sorry
+  rcases ker_eq_normalClosure φ hker with ⟨R, hR⟩
+  have hR_symm : Subgroup.normalClosure (relatorSet R) = MonoidHom.ker φ := hR.symm
+  have h_forall_re : REPred (fun w : Word n =>
+      ∀ i : Fin n, FreeGroup.of i ∈ Subgroup.normalClosure (relatorSet R ∪ {FreeGroup.mk w})) := by
+    refine re_forall_fin ?_
+    intro i
+    exact re_generator_mem R i
+  refine REPred.of_eq h_forall_re fun w => ?_
+  rw [neg_iff_forall_gen φ hsurj R hR_symm w]
 
 /-- **Post's theorem packaged for the word problem.** If `wordProblemPred φ` is
 r.e. and its complement is r.e., then it is a `ComputablePred`. -/
@@ -184,7 +211,8 @@ lemma post_re_compl (φ : FreeGroup (Fin n) →* G)
     (hpos : REPred (wordProblemPred φ))
     (hneg : REPred (fun w : Word n => ¬ wordProblemPred φ w)) :
     ComputablePred (wordProblemPred φ) := by
-  sorry
+  rw [ComputablePred.computable_iff_re_compl_re]
+  exact ⟨hpos, hneg⟩
 
 /-- **Kuznetsov's theorem** (A.V. Kuznetsov, 1958). A finitely presented simple
 group has a solvable word problem. -/
