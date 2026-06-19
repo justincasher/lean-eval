@@ -398,7 +398,24 @@ theorem factorization_meromorphicAt {h : ℂ → ℂ} {R : ℝ}
     MeromorphicAt h z ∧
       MeromorphicAt
         ((∏ᶠ u, (fun x => x - u) ^ (divisor h (Metric.closedBall 0 R)) u) • U) z := by
-  sorry
+  have hz_univ : z ∈ Set.univ := Set.mem_univ z
+  have hmerm_h : MeromorphicAt h z := hh z hz_univ
+  have hU_analytic : AnalyticAt ℂ U z := hUana z hz
+  have hmerm_U : MeromorphicAt U z := hU_analytic.meromorphicAt
+  have hmerm_factor : MeromorphicAt (∏ᶠ u, (fun x => x - u) ^ (divisor h (Metric.closedBall 0 R)) u) z := by
+    refine MeromorphicAt.finprod ?_
+    intro u
+    have h_id_merm : MeromorphicAt (fun x : ℂ => x) z :=
+      (analyticAt_id (z := z)).meromorphicAt
+    have h_const_merm : MeromorphicAt (fun _ : ℂ => u) z :=
+      (analyticAt_const (v := u) (x := z)).meromorphicAt
+    have h_affine_merm : MeromorphicAt (fun x : ℂ => x - u) z :=
+      h_id_merm.sub h_const_merm
+    exact h_affine_merm.zpow ((divisor h (Metric.closedBall 0 R)) u)
+  have hmerm_smul : MeromorphicAt
+    ((∏ᶠ u, (fun x => x - u) ^ (divisor h (Metric.closedBall 0 R)) u) • U) z :=
+    hmerm_factor.smul hmerm_U
+  exact ⟨hmerm_h, hmerm_smul⟩
 
 /-- `logDeriv φ` is circle-integrable, where `φ` is the factorized rational of
 `divisor h D` supported in the open disk. -/
