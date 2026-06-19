@@ -23,6 +23,7 @@ quantum information theory (density matrices).
 
 variable {n : Type*} [Fintype n] [DecidableEq n] {A : Matrix n n ℝ}
 
+omit [DecidableEq n] in
 /-- **All-ones matrix is PSD.** The matrix `J ∈ ℝ^{n × n}` all of whose entries equal `1`
 is positive semidefinite, being the outer product `𝟙 𝟙ᵀ` of the all-ones vector with itself. -/
 theorem posSemidef_const_one :
@@ -33,6 +34,7 @@ theorem posSemidef_const_one :
   rw [h_vec]
   exact Matrix.posSemidef_vecMulVec_self_star (fun _ : n => (1 : ℝ))
 
+omit [Fintype n] [DecidableEq n] in
 /-- **Entrywise power successor as a Hadamard product.** For every matrix `A` and every `k`,
 `A^{⊙(k+1)} = A ⊙ A^{⊙k}`, i.e. `A.map (· ^ (k+1)) = A ⊙ A.map (· ^ k)`. -/
 theorem map_pow_succ (A : Matrix n n ℝ) (k : ℕ) :
@@ -40,6 +42,7 @@ theorem map_pow_succ (A : Matrix n n ℝ) (k : ℕ) :
   ext i j
   simp [Matrix.hadamard, pow_succ, mul_comm]
 
+omit [DecidableEq n] in
 /-- **Entrywise powers are PSD.** If `A` is positive semidefinite, then for every `k` the
 entrywise power `A^{⊙k}` (the matrix with entries `(a_{ij})^k`) is positive semidefinite. -/
 theorem posSemidef_map_pow (hA : A.PosSemidef) (k : ℕ) :
@@ -54,6 +57,7 @@ theorem posSemidef_map_pow (hA : A.PosSemidef) (k : ℕ) :
     rw [map_pow_succ A k]
     exact hA.hadamard ih
 
+omit [Fintype n] [DecidableEq n] in
 /-- **Entrywise exponential is Hermitian.** If `A` is positive semidefinite (in particular
 Hermitian), then the entrywise exponential `exp_⊙(A)` is Hermitian. -/
 theorem isHermitian_map_exp (hA : A.PosSemidef) :
@@ -64,12 +68,14 @@ theorem isHermitian_map_exp (hA : A.PosSemidef) :
     simp
   exact hA_herm.map Real.exp h_semiconj
 
+omit [DecidableEq n] in
 /-- **Quadratic form of an entrywise map as a double sum.** For any `f : ℝ → ℝ`, matrix `A`,
 and vector `x`, the quadratic form `x* (A.map f) x` equals `∑ i ∑ j x_i f(a_{ij}) x_j`. -/
 theorem quadForm_map_eq_double_sum (f : ℝ → ℝ) (A : Matrix n n ℝ) (x : n → ℝ) :
     star x ⬝ᵥ ((A.map f) *ᵥ x) = ∑ i, ∑ j, x i * f (A i j) * x j := by
   simp [dotProduct, Matrix.mulVec, Matrix.map_apply, Finset.mul_sum, mul_assoc, star_trivial]
 
+omit [Fintype n] [DecidableEq n] in
 /-- **Per-entry summability of the scaled exponential series.** For fixed `i, j` and `x`,
 the series `k ↦ x_i ((a_{ij})^k / k!) x_j` is summable over `k ∈ ℕ`. -/
 theorem summable_quadForm_entry (A : Matrix n n ℝ) (x : n → ℝ) (i j : n) :
@@ -77,6 +83,7 @@ theorem summable_quadForm_entry (A : Matrix n n ℝ) (x : n → ℝ) (i j : n) :
   have h := Real.summable_pow_div_factorial (A i j)
   exact h.mul_left (x i) |>.mul_right (x j)
 
+omit [Fintype n] [DecidableEq n] in
 /-- **Per-entry exponential as a tsum.** For fixed `i, j` and `x`,
 `x_i exp(a_{ij}) x_j = ∑_{k=0}^∞ x_i ((a_{ij})^k / k!) x_j`. -/
 theorem exp_entry_eq_tsum (A : Matrix n n ℝ) (x : n → ℝ) (i j : n) :
@@ -98,6 +105,7 @@ theorem finsetSum_tsum_interchange {ι : Type*} (s : Finset ι) (g : ι → ℕ 
     ∑ a ∈ s, ∑' k : ℕ, g a k = ∑' k : ℕ, ∑ a ∈ s, g a k :=
   (Summable.tsum_finsetSum hg).symm
 
+omit [DecidableEq n] in
 /-- **Interchange of the finite double sum and the tsum.** For `x ∈ ℝ^n`,
 `∑ i ∑ j ∑_k x_i ((a_{ij})^k / k!) x_j = ∑_k ∑ i ∑ j x_i ((a_{ij})^k / k!) x_j`. -/
 theorem double_sum_tsum_interchange (A : Matrix n n ℝ) (x : n → ℝ) :
@@ -131,6 +139,7 @@ theorem double_sum_tsum_interchange (A : Matrix n n ℝ) (x : n → ℝ) :
             exact h_summable_i i)
         _ = ∑' k : ℕ, ∑ i : n, ∑ j : n, x i * (A i j ^ k / (k.factorial : ℝ)) * x j := rfl
 
+omit [DecidableEq n] in
 /-- **Power term as a scaled power quadratic form.** For every `k` and vector `x`,
 `∑ i ∑ j x_i ((a_{ij})^k / k!) x_j = (1 / k!) (x* A^{⊙k} x)`. -/
 theorem power_term_eq_quadForm (A : Matrix n n ℝ) (x : n → ℝ) (k : ℕ) :
@@ -150,6 +159,7 @@ theorem power_term_eq_quadForm (A : Matrix n n ℝ) (x : n → ℝ) (k : ℕ) :
     _ = (1 / (k.factorial : ℝ)) * (star x ⬝ᵥ ((A.map (· ^ k)) *ᵥ x)) := by
       rw [quadForm_map_eq_double_sum (· ^ k) A x]
 
+omit [DecidableEq n] in
 /-- **Quadratic form as a series of power quadratic forms.** For every vector `x`,
 `x* exp_⊙(A) x = ∑_{k=0}^∞ (1 / k!) (x* A^{⊙k} x)`, where the series converges. -/
 theorem quadForm_map_exp_eq_tsum (A : Matrix n n ℝ) (x : n → ℝ) :
@@ -166,6 +176,7 @@ theorem quadForm_map_exp_eq_tsum (A : Matrix n n ℝ) (x : n → ℝ) :
       refine tsum_congr (fun k => ?_)
       rw [power_term_eq_quadForm A x k]
 
+omit [DecidableEq n] in
 /-- **Entrywise exponential of a PSD matrix is PSD.** If `A ∈ ℝ^{n × n}` is positive
 semidefinite, then its entrywise exponential `exp_⊙(A)` (with entries `exp(a_{ij})`) is
 positive semidefinite. -/
