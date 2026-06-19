@@ -362,6 +362,46 @@ theorem circleIntegral_sum_inv {R : ℝ} {d : ℂ → ℤ} (hd : Function.HasFin
     _ = (∑ᶠ u, (d u : ℂ)) * (2 * (Real.pi : ℂ) * Complex.I) := by
       rw [h_finsum2]
 
+/-- The logarithmic derivative of a unit (analytic and nowhere zero on the closed
+disk) is analytic on the closed disk. -/
+theorem logDeriv_analytic_unit {R : ℝ} {U : ℂ → ℂ}
+    (hUana : AnalyticOnNhd ℂ U (Metric.closedBall 0 R))
+    (hU0 : ∀ z ∈ Metric.closedBall (0 : ℂ) R, U z ≠ 0) :
+    AnalyticOnNhd ℂ (logDeriv U) (Metric.closedBall 0 R) := by
+  sorry
+
+/-- For `R > 0` the closed disk is preperfect. -/
+theorem closedBall_preperfect {R : ℝ} (hR : 0 < R) :
+    Preperfect (Metric.closedBall (0 : ℂ) R) := by
+  sorry
+
+/-- Both sides of the factorization `h = φ · U` are meromorphic at each point of the
+closed disk. -/
+theorem factorization_meromorphicAt {h : ℂ → ℂ} {R : ℝ}
+    (hh : MeromorphicOn h Set.univ)
+    {U : ℂ → ℂ} (hUana : AnalyticOnNhd ℂ U (Metric.closedBall 0 R))
+    {z : ℂ} (hz : z ∈ Metric.closedBall (0 : ℂ) R) :
+    MeromorphicAt h z ∧
+      MeromorphicAt
+        ((∏ᶠ u, (fun x => x - u) ^ (divisor h (Metric.closedBall 0 R)) u) • U) z := by
+  sorry
+
+/-- `logDeriv φ` is circle-integrable, where `φ` is the factorized rational of
+`divisor h D` supported in the open disk. -/
+theorem circleIntegrable_logDeriv_factorizedRational {h : ℂ → ℂ} {R : ℝ}
+    (hsupp : (divisor h (Metric.closedBall 0 R)).support ⊆ Metric.ball 0 R) :
+    CircleIntegrable
+      (logDeriv (∏ᶠ u, (fun x => x - u) ^ (divisor h (Metric.closedBall 0 R)) u)) 0 R := by
+  sorry
+
+/-- `logDeriv U` is circle-integrable for `U` analytic and nowhere zero on the
+closed disk. -/
+theorem circleIntegrable_logDeriv_unit {R : ℝ} {U : ℂ → ℂ}
+    (hUana : AnalyticOnNhd ℂ U (Metric.closedBall 0 R))
+    (hU0 : ∀ z ∈ Metric.closedBall (0 : ℂ) R, U z ≠ 0) :
+    CircleIntegrable (logDeriv U) 0 R := by
+  sorry
+
 /-- Contour integral of the logarithmic derivative of a unit (analytic and nowhere
 zero on the closed disk) vanishes. -/
 theorem circleIntegral_logDeriv_unit {R : ℝ} {U : ℂ → ℂ}
