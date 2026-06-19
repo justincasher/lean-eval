@@ -90,7 +90,6 @@ theorem induced_is_sperner {n} (g : EuclSp n → EuclSp n)
     (hmaps : Set.MapsTo g (cornerSimplex n) (cornerSimplex n)) (T : Triangulation n) :
     IsSpernerLabeling T (inducedLabeling g) := by
   intro v hv
-  dsimp [IsSpernerLabeling]
   have hv_corner : v ∈ cornerSimplex n := by
     rcases T.purity ({v} : Finset (EuclSp n)) hv with ⟨M, hM, hsub, hcard⟩
     have hM_max : M ∈ T.maximalCells := Finset.mem_filter.mpr ⟨hM, hcard⟩
