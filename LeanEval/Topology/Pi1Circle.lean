@@ -108,12 +108,66 @@ theorem translatedLift_eq_liftPath
 /-- **Translation invariance of monodromy.** For a class `γ`, `a` with `exp a = 1`, and a fibre
 point `e`, monodromy at `e + a` is monodromy at `e` shifted by `a`. -/
 theorem monodromy_translation (γ : FundamentalGroup Circle 1)
-    {a : ℝ} (ha : Circle.exp a = 1) (e : ↥(Circle.exp ⁻¹' {1})) :
+    {a : ℝ} (ha : Circle.exp a = 1) (e : ↥(Circle.exp⁻¹' {1})) :
     (Circle.isCoveringMap_exp.monodromy (FundamentalGroup.toPath γ)
         ⟨e.val + a, mem_exp_preimage_one.mpr
           (by rw [Circle.exp_add, mem_exp_preimage_one.mp e.2, ha, one_mul])⟩).val
       = (Circle.isCoveringMap_exp.monodromy (FundamentalGroup.toPath γ) e).val + a := by
-  sorry
+  refine Quotient.inductionOn (FundamentalGroup.toPath γ) ?_
+  intro γ₀
+  have he : Circle.exp e.val = 1 := mem_exp_preimage_one.mp e.2
+  have hea_symm : (1 : Circle) = Circle.exp (e.val + a) := by
+    rw [Circle.exp_add, he, ha, one_mul]
+  have htrans : (fun t => Circle.isCoveringMap_exp.liftPath γ₀ e.val (γ₀.source.trans he.symm) t + a) =
+      Circle.isCoveringMap_exp.liftPath γ₀ (e.val + a) (γ₀.source.trans hea_symm) :=
+    translatedLift_eq_liftPath γ₀ ha he
+  have h_at_1 : (Circle.isCoveringMap_exp.liftPath γ₀ e.val (γ₀.source.trans he.symm)) 1 + a =
+      (Circle.isCoveringMap_exp.liftPath γ₀ (e.val + a) (γ₀.source.trans hea_symm)) 1 := by
+    calc
+      (Circle.isCoveringMap_exp.liftPath γ₀ e.val (γ₀.source.trans he.symm)) 1 + a
+          = ((fun t => Circle.isCoveringMap_exp.liftPath γ₀ e.val (γ₀.source.trans he.symm) t + a) 1) := by
+            simp
+      _ = (Circle.isCoveringMap_exp.liftPath γ₀ (e.val + a) (γ₀.source.trans hea_symm)) 1 := by
+        rw [htrans]
+  have hmon_e_add : (Circle.isCoveringMap_exp.monodromy (⟦γ₀⟧ : Path.Homotopic.Quotient (1 : Circle) 1)
+        ⟨e.val + a, mem_exp_preimage_one.mpr (by rw [Circle.exp_add, he, ha, one_mul])⟩).val
+      = (Circle.isCoveringMap_exp.liftPath γ₀ (e.val + a) (γ₀.source.trans hea_symm)) 1 := by
+    dsimp [IsCoveringMap.monodromy]
+    let f : Path (1 : Circle) 1 → ↥(Circle.exp⁻¹' {1}) := fun γ' =>
+      ⟨Circle.isCoveringMap_exp.liftPath γ' (e.val + a) (γ'.source.trans hea_symm) 1,
+        (congr_fun (Circle.isCoveringMap_exp.liftPath_lifts γ' (e.val + a) (γ'.source.trans hea_symm)) 1).trans γ'.target⟩
+    have h_lift : Quotient.lift f (fun γ₁ γ₂ h => Subtype.ext
+        (Circle.isCoveringMap_exp.liftPath_apply_one_eq_of_homotopicRel h (e.val + a) (γ₁.source.trans hea_symm) (γ₂.source.trans hea_symm))) (⟦γ₀⟧) = f γ₀ :=
+      Quotient.lift_mk (s := Homotopic.setoid (1 : Circle) 1) f (fun γ₁ γ₂ h => Subtype.ext
+        (Circle.isCoveringMap_exp.liftPath_apply_one_eq_of_homotopicRel h (e.val + a) (γ₁.source.trans hea_symm) (γ₂.source.trans hea_symm))) γ₀
+    calc
+      Subtype.val (Quotient.lift f (fun γ₁ γ₂ h => Subtype.ext
+          (Circle.isCoveringMap_exp.liftPath_apply_one_eq_of_homotopicRel h (e.val + a) (γ₁.source.trans hea_symm) (γ₂.source.trans hea_symm))) (⟦γ₀⟧))
+          = Subtype.val (f γ₀) := by rw [h_lift]
+      _ = (Circle.isCoveringMap_exp.liftPath γ₀ (e.val + a) (γ₀.source.trans hea_symm)) 1 := rfl
+  have hmon_e : (Circle.isCoveringMap_exp.monodromy (⟦γ₀⟧ : Path.Homotopic.Quotient (1 : Circle) 1) e).val
+      = (Circle.isCoveringMap_exp.liftPath γ₀ e.val (γ₀.source.trans he.symm)) 1 := by
+    dsimp [IsCoveringMap.monodromy]
+    let f : Path (1 : Circle) 1 → ↥(Circle.exp⁻¹' {1}) := fun γ' =>
+      ⟨Circle.isCoveringMap_exp.liftPath γ' e.val (γ'.source.trans e.2.symm) 1,
+        (congr_fun (Circle.isCoveringMap_exp.liftPath_lifts γ' e.val (γ'.source.trans e.2.symm)) 1).trans γ'.target⟩
+    have h_lift : Quotient.lift f (fun γ₁ γ₂ h => Subtype.ext
+        (Circle.isCoveringMap_exp.liftPath_apply_one_eq_of_homotopicRel h e.val (γ₁.source.trans e.2.symm) (γ₂.source.trans e.2.symm))) (⟦γ₀⟧) = f γ₀ :=
+      Quotient.lift_mk (s := Homotopic.setoid (1 : Circle) 1) f (fun γ₁ γ₂ h => Subtype.ext
+        (Circle.isCoveringMap_exp.liftPath_apply_one_eq_of_homotopicRel h e.val (γ₁.source.trans e.2.symm) (γ₂.source.trans e.2.symm))) γ₀
+    calc
+      Subtype.val (Quotient.lift f (fun γ₁ γ₂ h => Subtype.ext
+          (Circle.isCoveringMap_exp.liftPath_apply_one_eq_of_homotopicRel h e.val (γ₁.source.trans e.2.symm) (γ₂.source.trans e.2.symm))) (⟦γ₀⟧))
+          = Subtype.val (f γ₀) := by rw [h_lift]
+      _ = (Circle.isCoveringMap_exp.liftPath γ₀ e.val (γ₀.source.trans he.symm)) 1 := rfl
+  calc
+    (Circle.isCoveringMap_exp.monodromy (⟦γ₀⟧ : Path.Homotopic.Quotient (1 : Circle) 1)
+        ⟨e.val + a, mem_exp_preimage_one.mpr (by rw [Circle.exp_add, he, ha, one_mul])⟩).val
+        = (Circle.isCoveringMap_exp.liftPath γ₀ (e.val + a) (γ₀.source.trans hea_symm)) 1 := hmon_e_add
+    _ = (Circle.isCoveringMap_exp.liftPath γ₀ e.val (γ₀.source.trans he.symm)) 1 + a := by
+      symm; exact h_at_1
+    _ = (Circle.isCoveringMap_exp.monodromy (⟦γ₀⟧ : Path.Homotopic.Quotient (1 : Circle) 1) e).val + a := by
+      rw [hmon_e]
 
 /-- **Monodromy on a fibre point, in real coordinates.** For a class `γ` and any fibre point `e`,
 the monodromy value at `e` is the value at `⟨0⟩` shifted by `(e : ℝ)`. -/
