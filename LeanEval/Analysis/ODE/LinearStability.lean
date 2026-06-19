@@ -56,7 +56,44 @@ lemma exp_upperTriangular {n : ℕ} {T : Matrix (Fin n) (Fin n) ℂ}
     (hT : T.BlockTriangular id) :
     (NormedSpace.exp T).BlockTriangular id ∧
       ∀ i, (NormedSpace.exp T) i i = NormedSpace.exp (T i i) := by
-  sorry
+  refine ⟨Matrix.BlockTriangular.exp hT, ?_⟩
+  intro i
+  -- The diagonal entries of powers of a triangular matrix are powers of the diagonal entry.
+  have hpow : ∀ k : ℕ, (T ^ k) i i = (T i i) ^ k := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+        rw [pow_succ, pow_succ, Matrix.mul_apply, Finset.sum_eq_single i]
+        · rw [ih]
+        · intro j _ hji
+          rcases lt_or_gt_of_ne hji with h | h
+          · rw [(Matrix.BlockTriangular.pow hT k) h, zero_mul]
+          · rw [hT h, mul_zero]
+        · intro hi
+          exact absurd (Finset.mem_univ i) hi
+  -- Evaluation at the `(i, i)` entry is a continuous linear map; push it through the series.
+  let φ : Matrix (Fin n) (Fin n) ℂ →ₗ[ℂ] ℂ :=
+    { toFun := fun M => M i i
+      map_add' := fun M N => rfl
+      map_smul' := fun c M => rfl }
+  have hcont : Continuous (fun M : Matrix (Fin n) (Fin n) ℂ => M i i) :=
+    φ.continuous_of_finiteDimensional
+  let φL : Matrix (Fin n) (Fin n) ℂ →L[ℂ] ℂ := ⟨φ, hcont⟩
+  have hsumT : HasSum (fun k : ℕ => ((k.factorial : ℂ)⁻¹) • T ^ k) (NormedSpace.exp T) :=
+    NormedSpace.exp_series_hasSum_exp' (𝕂 := ℂ) T
+  have hterm : ∀ k : ℕ,
+      φL ((( k.factorial : ℂ)⁻¹) • T ^ k) = ((k.factorial : ℂ)⁻¹) • (T i i) ^ k := by
+    intro k
+    show (((k.factorial : ℂ)⁻¹) • T ^ k) i i = ((k.factorial : ℂ)⁻¹) • (T i i) ^ k
+    rw [Matrix.smul_apply, hpow k]
+  have h1 : HasSum (fun k : ℕ => ((k.factorial : ℂ)⁻¹) • (T i i) ^ k) ((NormedSpace.exp T) i i) := by
+    have hmap := hsumT.mapL φL
+    rw [funext hterm] at hmap
+    exact hmap
+  have h2 : HasSum (fun k : ℕ => ((k.factorial : ℂ)⁻¹) • (T i i) ^ k) (NormedSpace.exp (T i i)) :=
+    NormedSpace.exp_series_hasSum_exp' (𝕂 := ℂ) (T i i)
+  exact h1.unique h2
 
 /-- **Spectrum of the exponential of an upper-triangular matrix.** Every `z ∈ σ(e^T)`
 equals `e^{T i i}` for some index `i`, with `T i i ∈ σ(T)`. -/
@@ -282,7 +319,22 @@ every `t ≥ 0`, with `m = ⌊t⌋`, `‖e^{t • B}‖ ≤ ‖(e^{B})^m‖ · M
 lemma norm_exp_smul_le {n : ℕ} (B : Matrix (Fin n) (Fin n) ℂ) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ t : ℝ, 0 ≤ t →
       ‖NormedSpace.exp (t • B)‖ ≤ ‖(NormedSpace.exp B) ^ (⌊t⌋₊)‖ * M := by
-  sorry
+  obtain ⟨M, hM_nonneg, hM⟩ := bddAbove_exp_smul_unit B
+  refine ⟨M, hM_nonneg, ?_⟩
+  intro t ht
+  have hfrac_mem : (t - (⌊t⌋₊ : ℝ)) ∈ Set.Icc (0 : ℝ) 1 := by
+    refine ⟨?_, ?_⟩
+    · have := Nat.floor_le ht
+      linarith
+    · have := Nat.lt_floor_add_one t
+      linarith
+  rw [exp_smul_split B ht]
+  calc
+    ‖(NormedSpace.exp B) ^ (⌊t⌋₊) * NormedSpace.exp ((t - (⌊t⌋₊ : ℝ)) • B)‖
+        ≤ ‖(NormedSpace.exp B) ^ (⌊t⌋₊)‖ * ‖NormedSpace.exp ((t - (⌊t⌋₊ : ℝ)) • B)‖ :=
+          norm_mul_le _ _
+    _ ≤ ‖(NormedSpace.exp B) ^ (⌊t⌋₊)‖ * M :=
+          mul_le_mul_of_nonneg_left (hM _ hfrac_mem) (norm_nonneg _)
 
 /-- **Continuous-time decay of the exponential.** If `r(e^{B}) < 1` then
 `‖e^{t • B}‖ → 0` as `t → ∞`. -/
