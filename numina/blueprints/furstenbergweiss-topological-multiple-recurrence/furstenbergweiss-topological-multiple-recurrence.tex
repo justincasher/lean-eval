@@ -3,6 +3,420 @@
 
 \begin{document}
 
-% Your blueprint will go here.
+\section{Furstenberg--Weiss topological multiple recurrence}
+
+We fix a nonempty compact metric space $X$ and a homeomorphism
+$T : X \simeq X$. Write $T^{[m]}$ for the $m$-fold iterate of $T$. The goal is
+to produce a single point that is simultaneously recurrent for all of the maps
+$T, T^2, \dots, T^d$, for every $d \ge 1$, along a common return-time sequence.
+This is the single-transformation form of the Furstenberg--Weiss topological
+multiple recurrence theorem (Knill \S56).
+
+The proof has three parts. First, the combinatorial core: van der Waerden's
+theorem, obtained from the Hales--Jewett theorem already in Mathlib. Second, an
+\emph{approximate} multiple recurrence, obtained by colouring the orbit of a
+point with a finite $\varepsilon$-net and applying van der Waerden. Third, the
+upgrade to a single point recurrent at every order: we pass to a minimal
+subsystem, show the approximate-recurrence sets are open and dense there, and
+take a point in their (Baire-residual) intersection.
+
+\subsection{Combinatorial core: van der Waerden via Hales--Jewett}
+
+\begin{lemma}[Hales--Jewett]
+    \label{lem:hales-jewett}
+    For every finite alphabet $A$ and every number of colours $r$ there is a
+    dimension $N$ such that every $r$-colouring of $A^N$ contains a
+    monochromatic combinatorial line.
+\end{lemma}
+\begin{proof}
+    This is the Hales--Jewett theorem, available in Mathlib as
+    \texttt{Combinatorics.Line.exists\_mono\_in\_high\_dimension}.
+\end{proof}
+
+\begin{lemma}[Line-sum identity]
+    \label{lem:line-sum-identity}
+    Let $\ell$ be a combinatorial line in $A^N$ over the alphabet
+    $A = \{0, 1, \dots, L-1\}$, with nonempty set $I$ of moving coordinates and
+    fixed values $a_i$ for $i \notin I$. For every $t \in A$ the $t$-th point
+    $\ell(t)$ (all moving coordinates equal to $t$, the others equal to $a_i$)
+    satisfies
+    \[
+        \sum_{i=1}^{N} \ell(t)_i \;=\; s + |I| \cdot t,
+        \qquad s = \sum_{i \notin I} a_i .
+    \]
+\end{lemma}
+\begin{proof}
+    Split the sum over the moving coordinates $I$ and the fixed coordinates
+    $I^{c}$. On $I$ each entry equals $t$, contributing $|I| \cdot t$; on $I^{c}$
+    the entries are the constants $a_i$, contributing $\sum_{i \notin I} a_i = s$.
+\end{proof}
+
+\begin{lemma}[From a combinatorial line to an arithmetic progression]
+    \label{lem:line-to-progression}
+    \uses{lem:hales-jewett, lem:line-sum-identity}
+    Fix $L \ge 1$ and a finite colouring $\chi$ of $\mathbb{N}$. With alphabet
+    $A = \{0, 1, \dots, L-1\}$, colour $A^N$ by assigning to
+    $v = (v_1, \dots, v_N)$ the colour $\chi(v_1 + \dots + v_N)$. A monochromatic
+    combinatorial line of this colouring yields a $\chi$-monochromatic
+    arithmetic progression $s, s + m, \dots, s + (L-1)m$ of length $L$ with
+    common difference $m \ge 1$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:line-sum-identity}
+    Let the line have moving set $I \neq \emptyset$ and fixed values $a_i$. By
+    Lemma~\ref{lem:line-sum-identity} the coordinate sum of its $t$-th point is
+    $s + m t$ with $s = \sum_{i \notin I} a_i$ and $m = |I| \ge 1$, so the
+    colouring sends the $t$-th point to $\chi(s + m t)$. The line being
+    monochromatic means $\chi$ is constant on $\{s + m t : 0 \le t \le L-1\}$,
+    the desired progression.
+\end{proof}
+
+\begin{theorem}[van der Waerden]
+    \label{thm:van-der-waerden}
+    \uses{lem:hales-jewett, lem:line-to-progression}
+    For every finite colouring of $\mathbb{N}$ and every length $L \ge 1$ there
+    is a monochromatic arithmetic progression of length $L$ with common
+    difference $m \ge 1$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:hales-jewett, lem:line-to-progression}
+    Let $r$ be the number of colours. Apply Lemma~\ref{lem:hales-jewett} with
+    alphabet $A = \{0, \dots, L-1\}$ and $r$ colours to get a dimension $N$,
+    then colour $A^N$ by $v \mapsto \chi(v_1 + \dots + v_N)$. Hales--Jewett gives
+    a monochromatic combinatorial line, which
+    Lemma~\ref{lem:line-to-progression} converts into the required progression.
+\end{proof}
+
+\subsection{The approximate multiple recurrence}
+
+\begin{lemma}[Finite $\varepsilon$-cover of a compact space]
+    \label{lem:finite-eps-cover}
+    For every $\varepsilon > 0$ there are finitely many points
+    $c_1, \dots, c_r \in X$ such that the open balls $B(c_i, \varepsilon)$ cover
+    $X$.
+\end{lemma}
+\begin{proof}
+    A compact metric space is totally bounded; this is Mathlib's
+    \texttt{IsCompact.finite\_cover\_balls} applied to the whole compact space.
+\end{proof}
+
+\begin{lemma}[Orbit colouring by an $\varepsilon$-net]
+    \label{lem:orbit-colouring}
+    \uses{lem:finite-eps-cover}
+    Fix $\varepsilon > 0$ and a base point $z \in X$. With centres
+    $c_1, \dots, c_r$ whose balls $B(c_k, \varepsilon/2)$ cover $X$
+    (Lemma~\ref{lem:finite-eps-cover}), there is a colouring
+    $c : \mathbb{N} \to \{1, \dots, r\}$ of the orbit times such that
+    $T^{[i]}(z) \in B\bigl(c_{c(i)}, \varepsilon/2\bigr)$ for every $i$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:finite-eps-cover}
+    For each $i$ the point $T^{[i]}(z)$ lies in some cover ball; let $c(i)$ be
+    the index of one such ball (a choice over a finite index set). Then
+    $T^{[i]}(z) \in B(c_{c(i)}, \varepsilon/2)$ by construction.
+\end{proof}
+
+\begin{lemma}[A common ball bounds the distance]
+    \label{lem:common-ball-dist}
+    If $a, b \in B(c, \varepsilon/2)$ for a common centre $c$, then
+    $\mathrm{dist}(a, b) < \varepsilon$.
+\end{lemma}
+\begin{proof}
+    By the triangle inequality
+    $\mathrm{dist}(a, b) \le \mathrm{dist}(a, c) + \mathrm{dist}(c, b)
+    < \varepsilon/2 + \varepsilon/2 = \varepsilon$.
+\end{proof}
+
+\begin{lemma}[Approximate multiple recurrence]
+    \label{lem:eps-multiple-recurrence}
+    \uses{thm:van-der-waerden, lem:orbit-colouring, lem:common-ball-dist}
+    For every $\varepsilon > 0$ and every $d \ge 1$ there are a point $x \in X$
+    and an integer $n \ge 1$ such that
+    $\mathrm{dist}\bigl(T^{[j n]}(x), x\bigr) < \varepsilon$ for all $j$ with
+    $1 \le j \le d$.
+\end{lemma}
+\begin{proof}
+    \uses{thm:van-der-waerden, lem:orbit-colouring, lem:common-ball-dist}
+    Fix a base point $z$ and the orbit colouring $c$ of
+    Lemma~\ref{lem:orbit-colouring}. Apply Theorem~\ref{thm:van-der-waerden} to
+    $c$ with length $L = d + 1$ to get $s \ge 0$ and $m \ge 1$ on which $c$ is
+    constant, so $T^{[s]}(z), T^{[s+m]}(z), \dots, T^{[s+dm]}(z)$ all lie in a
+    common ball of radius $\varepsilon/2$. Put $x = T^{[s]}(z)$ and $n = m$. For
+    $1 \le j \le d$ the points $x$ (case $t = 0$) and
+    $T^{[j n]}(x) = T^{[s + j m]}(z)$ (case $t = j$) lie in that ball, so
+    $\mathrm{dist}(T^{[j n]}(x), x) < \varepsilon$ by
+    Lemma~\ref{lem:common-ball-dist}.
+\end{proof}
+
+\subsection{Minimal subsystems}
+
+Throughout the remainder we fix one action convention. Since $T$ is a
+homeomorphism, a set $S \subseteq X$ is called \emph{invariant} when
+$T(S) = S$ (two-sided invariance, i.e.\ the $\mathbb{Z}$-action of $T$), and a
+nonempty closed invariant set is a \emph{subsystem}. A subsystem is
+\emph{minimal} when it has no proper nonempty closed invariant subset. All
+invariance and minimality statements below use this single convention; we phrase
+recurrence through forward iterates $T^{[k]}$ but never invoke a one-sided
+\texttt{MulAction}/\texttt{IsMinimal} notion that would clash with it.
+
+\begin{lemma}[Chains of subsystems have a subsystem lower bound]
+    \label{lem:chain-inter-invariant}
+    Let $\mathcal{C}$ be a nonempty chain (totally ordered by inclusion) of
+    nonempty closed invariant subsets of $X$. Then $\bigcap \mathcal{C}$ is again
+    nonempty, closed, and invariant.
+\end{lemma}
+\begin{proof}
+    Each member is closed in the compact space $X$, hence compact, and the chain
+    is downward directed, so the intersection is nonempty by Cantor's
+    intersection theorem for directed families
+    (\texttt{IsCompact.nonempty\_iInter\_of\_directed\_nonempty\_isCompact\_isClosed}).
+    An intersection of closed sets is closed. Finally $T$, being a bijection,
+    commutes with intersections, so
+    $T\bigl(\bigcap \mathcal{C}\bigr) = \bigcap_{S \in \mathcal{C}} T(S)
+    = \bigcap \mathcal{C}$.
+\end{proof}
+
+\begin{lemma}[Existence of a minimal subsystem]
+    \label{lem:exists-minimal-subsystem}
+    \uses{lem:chain-inter-invariant}
+    There is a minimal subsystem $M \subseteq X$: a nonempty closed set with
+    $T(M) = M$ having no proper nonempty closed invariant subset.
+\end{lemma}
+\begin{proof}
+    \uses{lem:chain-inter-invariant}
+    Order the subsystems of $X$ by reverse inclusion; $X$ itself is one. By
+    Lemma~\ref{lem:chain-inter-invariant} every chain has its intersection as a
+    subsystem lower bound, so \texttt{zorn\_superset} yields a minimal element
+    $M$.
+\end{proof}
+
+\begin{lemma}[$\omega$-limit sets are subsystems]
+    \label{lem:omega-limit-properties}
+    For every $x \in X$ the $\omega$-limit set
+    $\omega(x) = \bigcap_{N} \overline{\{T^{[k]}(x) : k \ge N\}}$ is nonempty,
+    closed, and invariant.
+\end{lemma}
+\begin{proof}
+    The whole space $X$ is compact and absorbs the forward orbit, so $\omega(x)$
+    is nonempty by \texttt{nonempty\_omegaLimit\_of\_isCompact\_absorbing}. It is
+    an intersection of closures, hence closed
+    (\texttt{isClosed\_omegaLimit}), and invariant under $T$ via the
+    \texttt{omegaLimit} mapping API (\texttt{mapsTo\_omegaLimit} /
+    \texttt{Flow.isInvariant\_omegaLimit}).
+\end{proof}
+
+\begin{lemma}[Forward orbits are dense in a minimal system]
+    \label{lem:minimal-forward-dense}
+    \uses{lem:exists-minimal-subsystem, lem:omega-limit-properties}
+    Let $M$ be a minimal subsystem. For every $x \in M$ the forward orbit
+    $\{T^{[k]}(x) : k \ge 0\}$ is dense in $M$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:exists-minimal-subsystem, lem:omega-limit-properties}
+    By Lemma~\ref{lem:omega-limit-properties} $\omega(x)$ is a nonempty closed
+    invariant subset of $M$, so minimality forces $\omega(x) = M$. As $\omega(x)$
+    is contained in the closure of the forward orbit, that closure is all of $M$,
+    i.e.\ the forward orbit is dense.
+\end{proof}
+
+\subsection{Density of the recurrence sets and a Baire argument}
+
+For $d \ge 1$ and $\varepsilon > 0$ set
+\[
+    A_{d,\varepsilon} \;=\; \bigl\{\, x \in M : \exists\, n \ge 1,\ \forall j \in
+    \{1, \dots, d\},\ \mathrm{dist}(T^{[j n]}(x), x) < \varepsilon \,\bigr\}.
+\]
+
+\begin{lemma}[The recurrence sets are open]
+    \label{lem:Aset-open}
+    For all $d \ge 1$ and $\varepsilon > 0$ the set $A_{d,\varepsilon}$ is open.
+\end{lemma}
+\begin{proof}
+    For fixed $n$ and $j$ the map $x \mapsto \mathrm{dist}(T^{[j n]}(x), x)$ is
+    continuous, so $\{x : \mathrm{dist}(T^{[j n]}(x), x) < \varepsilon\}$ is open.
+    Then
+    $A_{d,\varepsilon} = \bigcup_{n \ge 1} \bigcap_{j=1}^{d}
+    \{x : \mathrm{dist}(T^{[j n]}(x), x) < \varepsilon\}$
+    is a union of finite intersections of open sets.
+\end{proof}
+
+\begin{lemma}[Finite cover by orbit preimages]
+    \label{lem:cover-by-preimages}
+    \uses{lem:minimal-forward-dense}
+    Let $M$ be a minimal subsystem and $U \subseteq M$ nonempty open. Then there
+    is $K$ with $M = \bigcup_{k=0}^{K} T^{-k}(U)$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:minimal-forward-dense}
+    By Lemma~\ref{lem:minimal-forward-dense} every point of $M$ has a forward
+    iterate in $U$, so $M = \bigcup_{k \ge 0} T^{-k}(U)$. Each $T^{-k}(U)$ is
+    open and $M$ is compact, so finitely many of them already cover $M$; take $K$
+    to be the largest index used.
+\end{proof}
+
+\begin{lemma}[Uniform modulus for finitely many iterates]
+    \label{lem:uniform-modulus}
+    Let $M$ be compact and $K \in \mathbb{N}$. For every $\varepsilon > 0$ there
+    is $\delta > 0$ such that $\mathrm{dist}(a,b) < \delta$ implies
+    $\mathrm{dist}(T^{[k]}(a), T^{[k]}(b)) < \varepsilon$ for all
+    $0 \le k \le K$.
+\end{lemma}
+\begin{proof}
+    Each $T^{[k]}$ is uniformly continuous on the compact space $M$, giving a
+    modulus $\delta_k > 0$ for $\varepsilon$. Take
+    $\delta = \min_{0 \le k \le K} \delta_k > 0$, a minimum over a finite set.
+\end{proof}
+
+\begin{lemma}[The recurrence sets are dense]
+    \label{lem:Aset-dense}
+    \uses{lem:eps-multiple-recurrence, lem:cover-by-preimages, lem:uniform-modulus}
+    For all $d \ge 1$ and $\varepsilon > 0$ the set $A_{d,\varepsilon}$ is dense
+    in $M$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:eps-multiple-recurrence, lem:cover-by-preimages, lem:uniform-modulus}
+    Let $U \subseteq M$ be nonempty open. Lemma~\ref{lem:cover-by-preimages}
+    gives $K$ with $M = \bigcup_{k=0}^{K} T^{-k}(U)$, and
+    Lemma~\ref{lem:uniform-modulus} a modulus $\delta > 0$ for $\varepsilon$ over
+    $T^{[0]}, \dots, T^{[K]}$. Apply Lemma~\ref{lem:eps-multiple-recurrence}
+    inside $M$ with $\delta$ to get $x \in M$ and $n \ge 1$ with
+    $\mathrm{dist}(T^{[j n]}(x), x) < \delta$ for $1 \le j \le d$, and pick
+    $k \le K$ with $T^{[k]}(x) \in U$. Since $T^{[j n]}$ commutes with $T^{[k]}$,
+    \[
+        \mathrm{dist}\bigl(T^{[j n]}(T^{[k]}x), T^{[k]}x\bigr)
+        = \mathrm{dist}\bigl(T^{[k]}(T^{[j n]}x), T^{[k]}x\bigr)
+        < \varepsilon ,
+    \]
+    so $T^{[k]}(x) \in A_{d,\varepsilon} \cap U$.
+\end{proof}
+
+\begin{lemma}[A residual point exists]
+    \label{lem:recurrence-residual-nonempty}
+    \uses{lem:Aset-open, lem:Aset-dense}
+    The countable intersection $R = \bigcap_{d, m \ge 1} A_{d, 1/m}$ is dense in
+    $M$, and in particular nonempty.
+\end{lemma}
+\begin{proof}
+    \uses{lem:Aset-open, lem:Aset-dense}
+    The space $M$ is compact metric, hence a Baire space. By
+    Lemma~\ref{lem:Aset-open} and Lemma~\ref{lem:Aset-dense} each $A_{d, 1/m}$
+    (with $d, m \ge 1$) is open and dense, and the family is countable, so the
+    Baire category theorem (\texttt{dense\_sInter\_of\_isOpen}) makes $R$ dense.
+    Since $M$ is nonempty, $R$ is nonempty.
+\end{proof}
+
+\begin{lemma}[A point recurrent at every order]
+    \label{lem:residual-recurrent}
+    \uses{lem:recurrence-residual-nonempty}
+    In the minimal subsystem $M$ there is a point $x \in M$ such that for every
+    $d \ge 1$ and every $\varepsilon > 0$ there is an integer $n \ge 1$ with
+    $\mathrm{dist}(T^{[j n]}(x), x) < \varepsilon$ for all $1 \le j \le d$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:recurrence-residual-nonempty}
+    Take $x \in R$ from Lemma~\ref{lem:recurrence-residual-nonempty}. Given $d$
+    and $\varepsilon$, choose $m$ with $1/m \le \varepsilon$; then membership
+    $x \in A_{d, 1/m}$ supplies $n \ge 1$ with
+    $\mathrm{dist}(T^{[j n]}(x), x) < 1/m \le \varepsilon$ for all
+    $1 \le j \le d$.
+\end{proof}
+
+\subsection{From qualitative recurrence to a return-time sequence}
+
+For $x \in X$ and $d \ge 1$ write
+$g(n) = \max_{1 \le j \le d} \mathrm{dist}(T^{[j n]}(x), x)$ for the worst return
+gap at time $n$. The qualitative hypothesis says $g(n)$ is arbitrarily small.
+
+\begin{lemma}[Subsequence extraction from frequent small returns]
+    \label{lem:recurrence-subseq}
+    Fix $x \in X$ and $d \ge 1$. If for every $N$ and every $\varepsilon > 0$
+    there is $n > N$ with $g(n) < \varepsilon$, then there is a strictly
+    increasing $n : \mathbb{N} \to \mathbb{N}$ with $T^{[j n_k]}(x) \to x$ as
+    $k \to \infty$ for every $1 \le j \le d$.
+\end{lemma}
+\begin{proof}
+    Recursively choose $n_{k+1} > n_k$ with $g(n_{k+1}) < 1/(k+1)$, possible by
+    hypothesis; this gives a strictly increasing sequence with $g(n_k) \to 0$.
+    Since $\mathrm{dist}(T^{[j n_k]}(x), x) \le g(n_k)$ for each $j$, we get
+    $T^{[j n_k]}(x) \to x$.
+\end{proof}
+
+\begin{lemma}[Bounded return times force a periodic point]
+    \label{lem:recurrence-periodic}
+    Fix $x \in X$ and $d \ge 1$, and suppose that for every $\varepsilon > 0$
+    there is $n \ge 1$ with $g(n) < \varepsilon$. If the small returns are
+    \emph{not} arbitrarily large -- some $\varepsilon_0 > 0$ and $N_0$ admit no
+    $n > N_0$ with $g(n) < \varepsilon_0$ -- then there is $n^\ast \ge 1$ with
+    $T^{[j n^\ast]}(x) = x$ for all $1 \le j \le d$.
+\end{lemma}
+\begin{proof}
+    Every $n$ with $g(n) < \varepsilon_0$ lies in the finite set
+    $\{1, \dots, N_0\}$. The hypothesis supplies such an $n$ for each scale
+    $1/m$, so by pigeonhole one fixed $n^\ast \le N_0$ has $g(n^\ast) < 1/m$ for
+    infinitely many $m$, whence $g(n^\ast) = 0$, i.e.\ $T^{[j n^\ast]}(x) = x$
+    for all $1 \le j \le d$.
+\end{proof}
+
+\begin{lemma}[Qualitative recurrence yields a recurrence sequence]
+    \label{lem:recurrence-sequential}
+    \uses{lem:recurrence-subseq, lem:recurrence-periodic}
+    Fix $x \in X$ and $d \ge 1$, and suppose that for every $\varepsilon > 0$
+    there is $n \ge 1$ with $\mathrm{dist}(T^{[j n]}(x), x) < \varepsilon$ for all
+    $1 \le j \le d$. Then there is a strictly increasing
+    $n : \mathbb{N} \to \mathbb{N}$ with $T^{[j n_k]}(x) \to x$ as $k \to \infty$
+    for every $1 \le j \le d$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:recurrence-subseq, lem:recurrence-periodic}
+    Either the small returns are arbitrarily large, and
+    Lemma~\ref{lem:recurrence-subseq} produces the sequence directly; or they are
+    not, and Lemma~\ref{lem:recurrence-periodic} gives $n^\ast \ge 1$ with
+    $T^{[j n^\ast]}(x) = x$ for all $j$. In the latter case
+    $n_k = (k+1)\, n^\ast$ is strictly increasing with $T^{[j n_k]}(x) = x$,
+    which converges to $x$.
+\end{proof}
+
+\subsection{Main theorem}
+
+\begin{lemma}[Transfer from a minimal subsystem to the ambient space]
+    \label{lem:minimal-transfer}
+    \uses{lem:exists-minimal-subsystem}
+    Let $M \subseteq X$ be a subsystem ($M$ nonempty closed with $T(M) = M$).
+    With the subspace metric, $M$ is a nonempty compact metric space and $T$
+    restricts to a homeomorphism $T|_M : M \simeq M$ whose iterates and distances
+    agree with those of $T$ on points of $M$. Consequently, if $x \in M$ is
+    multiply recurrent for $T|_M$, then $x$ is multiply recurrent for $T$ in $X$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:exists-minimal-subsystem}
+    A closed subset of a compact metric space is compact metric, and $M$ is
+    nonempty by assumption. As $T(M) = M$, the map $T$ sends $M$ bijectively and
+    continuously to itself with continuous inverse $T^{-1}|_M$, so $T|_M$ is a
+    homeomorphism. The inclusion $M \hookrightarrow X$ is an isometry that
+    intertwines $T|_M$ with $T$, so $T|_M^{[k]}(x) = T^{[k]}(x)$ and distances
+    coincide for $x \in M$. Hence each convergence statement
+    $T|_M^{[j n_k]}(x) \to x$ in $M$ is the identical statement in $X$.
+\end{proof}
+
+\begin{theorem}[Furstenberg--Weiss topological multiple recurrence]
+    \label{thm:furstenberg-topological-recurrence}
+    \uses{lem:exists-minimal-subsystem, lem:minimal-transfer, lem:residual-recurrent, lem:recurrence-sequential}
+    Every homeomorphism $T$ of a nonempty compact metric space $X$ has a
+    multiply recurrent point: there exists $x \in X$ such that for every
+    $d \ge 1$ there is a strictly increasing $n : \mathbb{N} \to \mathbb{N}$ with
+    $T^{[j n_k]}(x) \to x$ for all $1 \le j \le d$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:exists-minimal-subsystem, lem:minimal-transfer, lem:residual-recurrent, lem:recurrence-sequential}
+    Take a minimal subsystem $M$ (Lemma~\ref{lem:exists-minimal-subsystem}),
+    a nonempty compact metric system under $T|_M$
+    (Lemma~\ref{lem:minimal-transfer}).
+    Lemma~\ref{lem:residual-recurrent} gives $x \in M$ with qualitative
+    recurrence at every order, and for each fixed $d$
+    Lemma~\ref{lem:recurrence-sequential} turns this into a strictly increasing
+    $n_k$ with $T|_M^{[j n_k]}(x) \to x$ for $1 \le j \le d$. By
+    Lemma~\ref{lem:minimal-transfer} the same convergence holds for $T$ in $X$,
+    so $x$ is multiply recurrent.
+\end{proof}
 
 \end{document}
