@@ -5,6 +5,7 @@ import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Analysis.Calculus.ContDiff.Deriv
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 import Mathlib.Analysis.InnerProductSpace.Calculus
+import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 import EvalTools.Markers
 
 namespace LeanEval
@@ -317,7 +318,62 @@ theorem recip_norm_cube_deriv {u : ℝ → R3} {u' : R3} {v : ℝ}
     (hu : HasDerivAt u u' v) (hne : u v ≠ 0) :
     HasDerivAt (fun v => (‖u v‖ ^ 3)⁻¹)
       (-3 * (‖u v‖ ^ 5)⁻¹ * ⟪u v, u'⟫) v := by
-  sorry
+  set φ := fun v' : ℝ => ⟪u v', u v'⟫ with hφ_def
+  have hφpos : φ v > 0 := by
+    dsimp [φ]
+    rw [real_inner_self_eq_norm_sq]
+    have h_norm_pos : 0 < ‖u v‖ := (norm_pos_iff.mpr hne)
+    positivity
+  have hφ_deriv : HasDerivAt φ (2 * ⟪u v, u'⟫) v := by
+    dsimp [φ]
+    have hinner := HasDerivAt.inner (𝕜 := ℝ) hu hu
+    have hcomm : ⟪u v, u'⟫ + ⟪u', u v⟫ = 2 * ⟪u v, u'⟫ := by
+      rw [real_inner_comm (u v) u']
+      ring
+    simpa [hcomm] using hinner
+  have hp_deriv : HasDerivAt (fun x : ℝ => x ^ (-(3/2 : ℝ)))
+      ((-(3/2 : ℝ)) * (φ v) ^ (-(3/2 : ℝ) - 1)) (φ v) :=
+    Real.hasDerivAt_rpow_const (Or.inl (ne_of_gt hφpos))
+  have hcomp := HasDerivAt.comp v hp_deriv hφ_deriv
+  have h_simplify : (-(3/2 : ℝ)) * (φ v) ^ (-(3/2 : ℝ) - 1) * (2 * ⟪u v, u'⟫)
+      = -3 * (‖u v‖ ^ 5)⁻¹ * ⟪u v, u'⟫ := by
+    calc
+      (-(3/2 : ℝ)) * (φ v) ^ (-(3/2 : ℝ) - 1) * (2 * ⟪u v, u'⟫)
+          = ((-(3/2 : ℝ)) * 2) * ((φ v) ^ (-(5/2 : ℝ))) * ⟪u v, u'⟫ := by
+        ring_nf
+      _ = (-3 : ℝ) * ((φ v) ^ (-(5/2 : ℝ))) * ⟪u v, u'⟫ := by ring
+      _ = -3 * (((φ v) ^ (-(5/2 : ℝ)))) * ⟪u v, u'⟫ := by ring
+      _ = -3 * (((‖u v‖ ^ 2) : ℝ) ^ (-(5/2 : ℝ))) * ⟪u v, u'⟫ := by
+        dsimp [φ]
+        rw [real_inner_self_eq_norm_sq]
+      _ = -3 * (‖u v‖ ^ ((2 : ℝ) * (-(5/2 : ℝ)))) * ⟪u v, u'⟫ := by
+        calc
+          -3 * (((‖u v‖ ^ 2) : ℝ) ^ (-(5/2 : ℝ))) * ⟪u v, u'⟫
+              = -3 * ((‖u v‖ ^ (2 : ℝ)) ^ (-(5/2 : ℝ))) * ⟪u v, u'⟫ := by norm_num
+          _ = -3 * (‖u v‖ ^ ((2 : ℝ) * (-(5/2 : ℝ)))) * ⟪u v, u'⟫ := by
+            rw [← Real.rpow_mul (norm_nonneg (u v)) (2 : ℝ) (-(5/2 : ℝ))]
+      _ = -3 * (‖u v‖ ^ (-5 : ℝ)) * ⟪u v, u'⟫ := by ring_nf
+      _ = -3 * ((‖u v‖ ^ (5 : ℝ))⁻¹) * ⟪u v, u'⟫ := by
+        rw [Real.rpow_neg (norm_nonneg (u v))]
+      _ = -3 * (‖u v‖ ^ 5)⁻¹ * ⟪u v, u'⟫ := by norm_num
+  have h_target : HasDerivAt (fun v' : ℝ => (φ v') ^ (-(3/2 : ℝ)))
+      (-3 * (‖u v‖ ^ 5)⁻¹ * ⟪u v, u'⟫) v :=
+    hcomp.congr_deriv h_simplify
+  have h_eq : (fun v' : ℝ => (‖u v'‖ ^ 3)⁻¹) = (fun v' : ℝ => (φ v') ^ (-(3/2 : ℝ))) := by
+    ext v'
+    calc
+      (‖u v'‖ ^ 3)⁻¹ = (‖u v'‖ ^ (3 : ℝ))⁻¹ := by norm_num
+      _ = ‖u v'‖ ^ (-(3 : ℝ)) := by
+        rw [Real.rpow_neg (norm_nonneg (u v'))]
+      _ = ‖u v'‖ ^ ((2 : ℝ) * (-(3/2 : ℝ))) := by ring_nf
+      _ = (‖u v'‖ ^ (2 : ℝ)) ^ (-(3/2 : ℝ)) := by
+        rw [Real.rpow_mul (norm_nonneg (u v')) (2 : ℝ) (-(3/2 : ℝ))]
+      _ = ((‖u v'‖ ^ 2) : ℝ) ^ (-(3/2 : ℝ)) := by norm_num
+      _ = (φ v') ^ (-(3/2 : ℝ)) := by
+        dsimp [φ]
+        rw [real_inner_self_eq_norm_sq]
+  rw [h_eq]
+  exact h_target
 
 /-- **Product rule for the scalar triple product.** If `p, q, w` are
 differentiable at `v`, then so is `v ↦ det(p v, q v, w v)`, with derivative
@@ -388,7 +444,15 @@ theorem deformedLinking_deriv_zero (Lk : TwoLink) (Φ : AmbientIsotopy) (r : ℝ
 /-- **Chain rule for a reparametrized knot.** `(γ ∘ σ)'(s) = σ'(s) • γ'(σ(s))`. -/
 theorem reparam_chain_deriv (γ : Knot) {σ : ℝ → ℝ} (hσ : ContDiff ℝ (⊤ : ℕ∞) σ) (s : ℝ) :
     deriv (fun x => γ.curve (σ x)) s = deriv σ s • deriv γ.curve (σ s) := by
-  sorry
+  have hg : HasDerivAt σ (deriv σ s) s :=
+    (hσ.differentiable (by
+      decide : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ ((0 : ℕ∞) : WithTop ℕ∞))).differentiableAt.hasDerivAt
+  have hf : HasDerivAt γ.curve (deriv γ.curve (σ s)) (σ s) :=
+    (γ.smooth.differentiable (by
+      decide : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ ((0 : ℕ∞) : WithTop ℕ∞))).differentiableAt.hasDerivAt
+  have hcomp : HasDerivAt (fun x => γ.curve (σ x)) (deriv σ s • deriv γ.curve (σ s)) s :=
+    hf.scomp s hg
+  exact hcomp.deriv
 
 /-- **Integrand scaling under reparametrization.** -/
 theorem reparam_integrand_scaling (Lk : TwoLink) (σ τ : CircleReparam) (s t : ℝ) :
