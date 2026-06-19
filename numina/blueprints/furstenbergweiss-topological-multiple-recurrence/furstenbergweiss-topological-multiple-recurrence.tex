@@ -296,23 +296,42 @@ the $\omega$-limit set of the forward orbit of $x$.
     $T(\omega(x)) \subseteq \omega(x)$.
 \end{proof}
 
+\begin{lemma}[$\omega$-limit sets are shift-invariant]
+    \label{lem:omega-shift-invariant}
+    \lean{LeanEval.Dynamics.omega_shift_eq}
+    \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
+    \uses{def:iteration-system}
+    For every $x \in X$ one has $\omega(T x) = \omega(x)$: the $\omega$-limit set
+    is unchanged by advancing the base point one step along the orbit.
+\end{lemma}
+\begin{proof}
+    \uses{def:iteration-system}
+    The forward orbit of $Tx$ is the forward orbit of $x$ shifted by one step,
+    so the two orbits are eventually equal and have the same set of cluster
+    points. Concretely the $\omega$-limit depends only on the tail of the orbit:
+    $\omega(Tx) = \bigcap_N \overline{\{T^{[k+1]}(x) : k \ge N\}}
+    = \bigcap_N \overline{\{T^{[k]}(x) : k \ge N\}} = \omega(x)$, since dropping
+    the single point $x$ from the front of the orbit leaves the nested
+    intersection of closed orbit tails unchanged.
+\end{proof}
+
 \begin{lemma}[$\omega$-limit sets are invariant]
     \label{lem:omega-two-sided-invariant}
     \lean{LeanEval.Dynamics.omega_two_sided_invariant}
     \leanfile{LeanEval/Dynamics/FurstenbergTopological/Minimal.lean}
-    \uses{def:iteration-system, lem:omega-forward-invariant}
+    \uses{def:iteration-system, lem:omega-forward-invariant, lem:omega-shift-invariant}
     For every $x \in X$ one has $T(\omega(x)) = \omega(x)$.
 \end{lemma}
 \begin{proof}
-    \uses{def:iteration-system, lem:omega-forward-invariant}
-    Lemma~\ref{lem:omega-forward-invariant} gives
-    $T(\omega(x)) \subseteq \omega(x)$. For the reverse inclusion take
-    $y \in \omega(x)$, a limit $y = \lim_i T^{[k_i]}(x)$ along $k_i \to \infty$.
-    Since $T^{-1}$ is continuous, $T^{[k_i - 1]}(x) = T^{-1}(T^{[k_i]}(x))$
-    converges to $T^{-1}(y)$; these lie in arbitrarily late orbit tails, so
-    $T^{-1}(y) \in \omega(x)$ and hence
-    $y = T(T^{-1}(y)) \in T(\omega(x))$. Thus $\omega(x) \subseteq T(\omega(x))$,
-    giving equality.
+    \uses{def:iteration-system, lem:omega-forward-invariant, lem:omega-shift-invariant}
+    Lemma~\ref{lem:omega-forward-invariant} gives the inclusion
+    $T(\omega(x)) \subseteq \omega(x)$. For the reverse inclusion, apply
+    \texttt{mapsTo\_omegaLimit} to the continuous map $T^{-1}$ (which commutes
+    with every iterate $T^{[t]}$) to obtain
+    $T^{-1}(\omega(Tx)) \subseteq \omega(T^{-1}(Tx)) = \omega(x)$, hence
+    $\omega(Tx) \subseteq T(\omega(x))$. By
+    Lemma~\ref{lem:omega-shift-invariant} $\omega(Tx) = \omega(x)$, so
+    $\omega(x) \subseteq T(\omega(x))$ and equality follows.
 \end{proof}
 
 \begin{lemma}[$\omega$-limit sets are subsystems]

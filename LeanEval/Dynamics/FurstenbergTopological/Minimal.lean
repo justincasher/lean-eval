@@ -184,6 +184,13 @@ theorem omega_forward_invariant (x : X) :
     h_mapsTo_Tx.image_subset
   exact Set.Subset.trans h_image_subset h_subset
 
+/-- **`ω`-limit sets are shift-invariant**: `ω(T x) = ω(x)`. The forward orbit of
+`T x` is the forward orbit of `x` shifted by one step, so the two `ω`-limit sets
+agree (the `ω`-limit depends only on the tail of the orbit). -/
+theorem omega_shift_eq (x : X) :
+    omegaFwd (T : X → X) (T x) = omegaFwd (T : X → X) x := by
+  sorry
+
 /-- **`ω`-limit sets are invariant**: `T (ω(x)) = ω(x)`. -/
 theorem omega_two_sided_invariant (x : X) :
     (T : X → X) '' omegaFwd (T : X → X) x = omegaFwd (T : X → X) x := by
