@@ -53,13 +53,23 @@ noncomputable def TwoLink.gaussMap (Lk : TwoLink) (s t : ℝ) : R3 :=
 theorem crossProduct_contDiff {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {f g : E → (Fin 3 → ℝ)} (hf : ContDiff ℝ (⊤ : ℕ∞) f) (hg : ContDiff ℝ (⊤ : ℕ∞) g) :
     ContDiff ℝ (⊤ : ℕ∞) (fun x => crossProduct (f x) (g x)) := by
-  sorry
+  have h_proj (i : Fin 3) : ContDiff ℝ (⊤ : ℕ∞) (fun (x : E) => (f x) i) :=
+    ((ContinuousLinearMap.proj i : (Fin 3 → ℝ) →L[ℝ] ℝ).contDiff.comp hf)
+  have h_proj_g (i : Fin 3) : ContDiff ℝ (⊤ : ℕ∞) (fun (x : E) => (g x) i) :=
+    ((ContinuousLinearMap.proj i : (Fin 3 → ℝ) →L[ℝ] ℝ).contDiff.comp hg)
+  -- Each coordinate of the cross product is a ± combination of products f_i * g_j
+  have h_cross (i : Fin 3) : ContDiff ℝ (⊤ : ℕ∞) (fun x : E => (crossProduct (f x) (g x)) i) := by
+    fin_cases i
+    · simpa [cross_apply] using ((h_proj 1).mul (h_proj_g 2)).sub ((h_proj 2).mul (h_proj_g 1))
+    · simpa [cross_apply] using ((h_proj 2).mul (h_proj_g 0)).sub ((h_proj 0).mul (h_proj_g 2))
+    · simpa [cross_apply] using ((h_proj 0).mul (h_proj_g 1)).sub ((h_proj 1).mul (h_proj_g 0))
+  exact contDiff_pi.mpr h_cross
 
 /-- **The inner product of smooth maps is smooth.** -/
 theorem inner_contDiff {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {f g : E → R3} (hf : ContDiff ℝ (⊤ : ℕ∞) f) (hg : ContDiff ℝ (⊤ : ℕ∞) g) :
     ContDiff ℝ (⊤ : ℕ∞) (fun x => ⟪f x, g x⟫) := by
-  sorry
+  exact contDiff_inner.comp (hf.prodMk hg)
 
 /-- **The difference map is jointly smooth.** -/
 theorem TwoLink.jointDiff_smooth (Lk : TwoLink) :
