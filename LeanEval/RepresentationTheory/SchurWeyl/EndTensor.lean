@@ -310,6 +310,71 @@ theorem span_range_glAction_eq_span_map [Infinite R] [FiniteDimensional R M]
         PiTensorProduct.map (fun _ : Fin k => m)) := by
   sorry
 
+/-- For `x ∈ End_R(V^⊗k)`, `x` commutes with all `symAction(σ)` iff `(Φ^~)⁻¹(x)` is
+`ρ`-invariant, where `ρ` is `symAction` on the tensor power of `End`. -/
+private lemma commute_symAction_iff_invariant [FiniteDimensional R M]
+    (x : Module.End R (⨂[R]^k M)) :
+    x ∈ Subalgebra.centralizer R (Set.range (symAction R M k)) ↔
+    (endTensorEquiv R M k).symm x ∈ Representation.invariants (symAction R (Module.End R M) k) := by
+  let Φ := endTensorEquiv R M k
+  let ρ := symAction R (Module.End R M) k
+  let σAct := symAction R M k
+  have hΦ_inj : Function.Injective Φ := AlgEquiv.injective Φ
+  have hΦ_symm_apply (y) : Φ (Φ.symm y) = y := by simp
+  have hΦ_symm_eq (y) : Φ.symm (Φ y) = y := by simp
+  constructor
+  · intro hx
+    rw [Subalgebra.mem_centralizer_iff] at hx
+    have hx_all (σ : Equiv.Perm (Fin k)) : σAct σ * x = x * σAct σ :=
+      hx (σAct σ) (Set.mem_range_self σ)
+    have hx_all' (σ : Equiv.Perm (Fin k)) : σAct σ * x * σAct (σ⁻¹) = x := by
+      calc
+        σAct σ * x * σAct (σ⁻¹) = (x * σAct σ) * σAct (σ⁻¹) := by rw [hx_all σ]
+        _ = x * (σAct σ * σAct (σ⁻¹)) := by ring
+        _ = x * σAct (σ * σ⁻¹) := by rw [MonoidHom.map_mul (σAct : _ →* _)]
+        _ = x * σAct 1 := by simp
+        _ = x := by simp
+    set ξ := Φ.symm x with hξ_def
+    have hx_eq : x = Φ ξ := by dsimp [ξ]; simp
+    intro σ
+    calc
+      ρ σ ξ = Φ.symm (Φ (ρ σ ξ)) := by simp
+      _ = Φ.symm (endTensorHom R M k (ρ σ ξ)) := rfl
+      _ = Φ.symm (σAct σ * endTensorHom R M k ξ * σAct (σ⁻¹)) := by
+        rw [endTensorHom_intertwine σ ξ]
+      _ = Φ.symm (σAct σ * Φ ξ * σAct (σ⁻¹)) := rfl
+      _ = Φ.symm (σAct σ * x * σAct (σ⁻¹)) := by
+        dsimp [ξ]; simp
+      _ = Φ.symm x := by
+        rw [hx_all' σ]
+      _ = ξ := by dsimp [ξ]
+  · intro hξ
+    have hξ_all : ∀ σ : Equiv.Perm (Fin k), ρ σ (Φ.symm x) = Φ.symm x := by
+      rw [Representation.mem_invariants] at hξ
+      exact hξ
+    rw [Subalgebra.mem_centralizer_iff]
+    intro y hy
+    rcases hy with ⟨σ, rfl⟩
+    have hξ_σ : ρ σ (Φ.symm x) = Φ.symm x := hξ_all σ
+    calc
+      σAct σ * x = σAct σ * Φ (Φ.symm x) := by simp
+      _ = σAct σ * endTensorHom R M k (Φ.symm x) := rfl
+      _ = (σAct σ * endTensorHom R M k (Φ.symm x) * σAct (σ⁻¹)) * σAct σ := by
+        calc
+          σAct σ * endTensorHom R M k (Φ.symm x)
+              = (σAct σ * endTensorHom R M k (Φ.symm x) * σAct (σ⁻¹)) * σAct σ := by
+            calc
+              σAct σ * endTensorHom R M k (Φ.symm x)
+                  = (σAct σ * endTensorHom R M k (Φ.symm x) * 1) := by simp
+              _ = (σAct σ * endTensorHom R M k (Φ.symm x) * (σAct (σ⁻¹) * σAct σ)) := by simp
+              _ = (σAct σ * endTensorHom R M k (Φ.symm x) * σAct (σ⁻¹)) * σAct σ := by ring
+          _ = (σAct σ * endTensorHom R M k (Φ.symm x) * σAct (σ⁻¹)) * σAct σ := rfl
+      _ = endTensorHom R M k (ρ σ (Φ.symm x)) * σAct σ := by
+        rw [← endTensorHom_intertwine σ (Φ.symm x)]
+      _ = endTensorHom R M k (Φ.symm x) * σAct σ := by rw [hξ_σ]
+      _ = Φ (Φ.symm x) * σAct σ := rfl
+      _ = x * σAct σ := by simp
+
 /-- The centralizer of `range symAction` equals (as a set) the span of the diagonal maps
 `{ map (fun i => m) : m ∈ End_R V }`, i.e. the symmetric tensors transported by `Φ^~`. -/
 theorem centralizer_range_symAction_eq_span_map [FiniteDimensional R M]
@@ -318,7 +383,98 @@ theorem centralizer_range_symAction_eq_span_map [FiniteDimensional R M]
         Set (Module.End R (⨂[R]^k M))) =
       (Submodule.span R (Set.range fun m : Module.End R M =>
         PiTensorProduct.map (fun _ : Fin k => m)) : Set (Module.End R (⨂[R]^k M))) := by
-  sorry
+  let Φ := endTensorEquiv R M k
+  have h_tprod_map (m : Module.End R M) :
+      Φ (PiTensorProduct.tprod R (fun _ : Fin k => m)) =
+      PiTensorProduct.map (fun _ : Fin k => m) := by
+    calc
+      Φ (PiTensorProduct.tprod R (fun _ : Fin k => m)) =
+          endTensorHom R M k (PiTensorProduct.tprod R (fun _ : Fin k => m)) := rfl
+      _ = PiTensorProduct.map (fun _ : Fin k => (m : M →ₗ[R] M)) := by
+        unfold endTensorHom
+        simp [PiTensorProduct.lift.tprod, PiTensorProduct.mapMultilinear_apply]
+      _ = PiTensorProduct.map (fun _ : Fin k => m) := by simp
+  ext x
+  constructor
+  · intro hx
+    have hξ : Φ.symm x ∈ Representation.invariants (symAction R (Module.End R M) k) :=
+      (commute_symAction_iff_invariant x).mp hx
+    have hξ_range : Φ.symm x ∈ LinearMap.range (symmetriser R M k) := by
+      rw [symmetriser_idempotent.2]
+      exact hξ
+    have hξ_span : Φ.symm x ∈ Submodule.span R (Set.range fun m : Module.End R M =>
+        PiTensorProduct.tprod R (fun _ : Fin k => m)) := by
+      rw [span_tprod_const_eq_range_symmetriser]
+      exact hξ_range
+    let Φₗ : (⨂[R]^k (Module.End R M)) →ₗ[R] Module.End R (⨂[R]^k M) := Φ.toLinearMap
+    have hx_mem : x ∈ Submodule.map Φₗ
+        (Submodule.span R (Set.range fun m : Module.End R M =>
+          PiTensorProduct.tprod R (fun _ : Fin k => m))) := by
+      refine Submodule.mem_map.mpr ⟨Φ.symm x, hξ_span, ?_⟩
+      simp [Φₗ]
+    have hmap_span_eq : Submodule.map Φₗ
+        (Submodule.span R (Set.range fun m : Module.End R M =>
+          PiTensorProduct.tprod R (fun _ : Fin k => m))) =
+      Submodule.span R (Set.range fun m : Module.End R M =>
+        PiTensorProduct.map (fun _ : Fin k => m)) := by
+      calc
+        Submodule.map Φₗ (Submodule.span R (Set.range fun m : Module.End R M =>
+          PiTensorProduct.tprod R (fun _ : Fin k => m))) =
+          Submodule.span R (Φₗ '' (Set.range fun m : Module.End R M =>
+            PiTensorProduct.tprod R (fun _ : Fin k => m))) := by
+          rw [Submodule.map_span]
+        _ = Submodule.span R (Set.range (Φₗ ∘ fun m : Module.End R M =>
+            PiTensorProduct.tprod R (fun _ : Fin k => m))) := by
+          have h_image_range : Φₗ '' (Set.range fun m : Module.End R M =>
+              PiTensorProduct.tprod R (fun _ : Fin k => m)) =
+            Set.range (Φₗ ∘ fun m : Module.End R M =>
+              PiTensorProduct.tprod R (fun _ : Fin k => m)) := by
+            ext y; simp
+          rw [h_image_range]
+        _ = Submodule.span R (Set.range fun m : Module.End R M =>
+            PiTensorProduct.map (fun _ : Fin k => m)) := by
+          apply Submodule.span_eq_span
+          · rintro _ ⟨m, rfl⟩
+            refine Submodule.subset_span ⟨m, ?_⟩
+            simp [h_tprod_map m, Φₗ]
+          · rintro _ ⟨m, rfl⟩
+            refine Submodule.subset_span ⟨m, ?_⟩
+            simp [h_tprod_map m, Φₗ]
+    rw [hmap_span_eq] at hx_mem
+    exact hx_mem
+  · intro hx
+    have h_gen (m : Module.End R M) : PiTensorProduct.map (fun _ : Fin k => m) ∈
+        Subalgebra.centralizer R (Set.range (symAction R M k)) := by
+      have hmem : PiTensorProduct.tprod R (fun _ : Fin k => m) ∈
+          Representation.invariants (symAction R (Module.End R M) k) := by
+        have hrange : PiTensorProduct.tprod R (fun _ : Fin k => m) ∈
+            LinearMap.range (symmetriser R M k) :=
+          tprod_const_mem_range_symmetriser m
+        rw [← symmetriser_idempotent.2]
+        exact hrange
+      have hΦ_symm_map : Φ.symm (PiTensorProduct.map (fun _ : Fin k => m)) =
+          PiTensorProduct.tprod R (fun _ : Fin k => m) := by
+        calc
+          Φ.symm (PiTensorProduct.map (fun _ : Fin k => m)) =
+              Φ.symm (Φ (PiTensorProduct.tprod R (fun _ : Fin k => m))) := by
+            rw [h_tprod_map m]
+          _ = PiTensorProduct.tprod R (fun _ : Fin k => m) := by simp
+      have hcomm := (commute_symAction_iff_invariant
+        (PiTensorProduct.map (fun _ : Fin k => m))).mpr (by
+          rw [hΦ_symm_map]
+          exact hmem)
+      exact hcomm
+    have h_submodule_span_le : Submodule.span R (Set.range fun m : Module.End R M =>
+        PiTensorProduct.map (fun _ : Fin k => m)) ≤
+      Subalgebra.toSubmodule (Subalgebra.centralizer R (Set.range (symAction R M k))) := by
+      apply Submodule.span_le.mpr
+      rintro y ⟨m, rfl⟩
+      exact h_gen m
+    have hx' : x ∈ Submodule.span R (Set.range fun m : Module.End R M =>
+        PiTensorProduct.map (fun _ : Fin k => m)) := hx
+    have hx_centralizer : x ∈ Subalgebra.toSubmodule (Subalgebra.centralizer R
+        (Set.range (symAction R M k))) := h_submodule_span_le hx'
+    exact hx_centralizer
 
 /-- The centralizer of a set equals the centralizer of its `R`-linear span. -/
 theorem centralizer_eq_centralizer_span (S : Set (Module.End R (⨂[R]^k M))) :
