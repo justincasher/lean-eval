@@ -5,10 +5,13 @@
 
 \section{Schur--Weyl duality: the $S_k$-image is the centralizer of the $GL(V)$-image}
 
-Throughout, $R$ is a field, $V = M$ is a finite-dimensional $R$-vector space, and
-$k \in \mathbb{N}$ with $k!$ invertible in $R$. We work inside
-$\operatorname{End}_R(V^{\otimes k})$, where $V^{\otimes k} = \bigotimes^k_R V$ is the
-$k$-fold tensor power.
+Throughout, $R$ is an \emph{infinite} field (\texttt{[Infinite R]}), $V = M$ is a
+finite-dimensional $R$-vector space, and $k \in \mathbb{N}$ with $k!$ invertible in $R$. We
+work inside $\operatorname{End}_R(V^{\otimes k})$, where $V^{\otimes k} = \bigotimes^k_R V$ is
+the $k$-fold tensor power. The infiniteness assumption is what guarantees, for any finite
+``bad'' set of scalars, that arbitrarily many distinct scalars survive outside it
+(Lemma~\ref{lem:exists-distinct-invertible-shifts}); it could be weakened to the explicit
+bound $k + \dim_R V < |R|$, but \texttt{[Infinite R]} is the cleanest hypothesis to carry.
 
 Two commuting actions are given (already defined in Lean):
 
@@ -97,22 +100,39 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
     invertible by hypothesis.
 \end{proof}
 
+\begin{lemma}[$k$ lies below the characteristic]
+    \label{lem:k-lt-ringChar}
+    \uses{lem:perm-card-invertible}
+    If $k!$ is invertible in the field $R$, then either $\operatorname{ringChar} R = 0$ or
+    $k < \operatorname{ringChar} R$. (Concretely: every prime dividing $k!$ is excluded as the
+    characteristic, so the characteristic, if positive, exceeds $k$.)
+\end{lemma}
+\begin{proof}
+    \uses{lem:perm-card-invertible}
+    Let $p := \operatorname{ringChar} R$ and suppose $p \ne 0$. As $R$ is a field, $p$ is prime
+    (\texttt{CharP.char\_is\_prime\_of\_pos} / the field instance). If $p \le k$ then $p \mid k!$ by
+    \texttt{Nat.dvd\_factorial} (using $0 < p \le k$), and therefore $(k! : R) = 0$ by
+    \texttt{CharP.cast\_eq\_zero\_iff} with characteristic $p$. This contradicts the invertibility of
+    $(k! : R)$ from Lemma~\ref{lem:perm-card-invertible}. Hence $k < p$.
+\end{proof}
+
 \begin{lemma}[Small scalars are distinct]
     \label{lem:cast-distinct}
     \lean{LeanEval.RepresentationTheory.natCast_injOn_Iic}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
-    \uses{lem:perm-card-invertible}
+    \uses{lem:k-lt-ringChar}
     \leanok
     The natural-number cast $\mathbb{N} \to R$ is injective on $\{0, 1, \ldots, k\}$; in particular
     the scalars $0, 1, \ldots, k$ are pairwise distinct in $R$, so $R$ has at least $k+1$ elements.
 \end{lemma}
 \begin{proof}
-    \uses{lem:perm-card-invertible}
-    Since $k!$ is invertible in the field $R$ (Lemma~\ref{lem:perm-card-invertible}), $R$ either has
-    characteristic $0$ or characteristic $p$ with $p \nmid k!$, which forces $p > k$. In either case
-    every natural number $\le k$ lies below the characteristic, so \texttt{CharP.natCast\_injOn\_Iio}
-    gives injectivity of the cast on $\{0, \ldots, k\}$; distinct $i, j \le k$ therefore satisfy
-    $(i : R) \ne (j : R)$.
+    \uses{lem:k-lt-ringChar}
+    By Lemma~\ref{lem:k-lt-ringChar} either $\operatorname{ringChar} R = 0$ or $k < \operatorname{ringChar} R$;
+    in both cases every natural number $\le k$ is strictly below $\operatorname{ringChar} R$. Hence
+    \texttt{CharP.natCast\_injOn\_Iio} (instantiated with characteristic $\operatorname{ringChar} R$ via
+    the \texttt{ringChar} \texttt{CharP} instance) gives injectivity of the cast on
+    $\{0, \ldots, k\} \subseteq \{n : n < \operatorname{ringChar} R\}$; distinct $i, j \le k$ therefore
+    satisfy $(i : R) \ne (j : R)$, so $R$ has at least $k+1$ elements.
 \end{proof}
 
 \begin{lemma}[Maschke: $R[S_k]$ is semisimple]
@@ -126,37 +146,69 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
 \end{lemma}
 \begin{proof}
     \uses{lem:perm-card-invertible}
-    $S_k$ is a finite group and its order $k!$ is invertible in the field $R$
-    (Lemma~\ref{lem:perm-card-invertible}). This is exactly Maschke's condition, so the
-    Mathlib instance making \texttt{MonoidAlgebra}$\,R\,G$ a semisimple ring for a finite group
-    $G$ of invertible order applies.
+    The Mathlib instance making \texttt{MonoidAlgebra}$\,R\,G$ semisimple for a finite group $G$
+    is stated under \texttt{NeZero (Nat.card G : R)} (equivalently an \texttt{Invertible} witness),
+    not under a bare \texttt{IsUnit}, so we make the bridge explicit. By
+    Lemma~\ref{lem:perm-card-invertible}, $(|S_k| : R) = (k! : R)$ is a unit; a unit in a nonzero
+    ring is nonzero (\texttt{IsUnit.ne\_zero}), which supplies the \texttt{NeZero (|S_k| : R)}
+    instance (and, via \texttt{IsUnit.invertible}, an \texttt{Invertible} term if needed). With that
+    instance in scope, $S_k$ being a finite group of order invertible in $R$ is exactly Maschke's
+    condition, and the Mathlib semisimplicity instance for $\texttt{MonoidAlgebra}\,R\,(\operatorname{Perm}(\mathrm{Fin}\,k))$ applies.
+\end{proof}
+
+Throughout this subsection write $\widetilde{\mathrm{symAction}} : R[S_k] \to_{A}
+\operatorname{End}_R(V^{\otimes k})$ for the $R$-algebra homomorphism obtained from the monoid
+homomorphism $\mathrm{symAction}$ by \texttt{MonoidAlgebra.lift}.
+
+\begin{lemma}[Range of the lift is contained in the adjoin]
+    \label{lem:lift-range-le-adjoin}
+    \uses{def:symAction}
+    $\operatorname{range}\widetilde{\mathrm{symAction}}
+      \subseteq \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})$.
+\end{lemma}
+\begin{proof}
+    \uses{def:symAction}
+    Every element of $R[S_k]$ is a finite $R$-linear combination of monomials
+    $\mathrm{single}\,\sigma\,1$; this is the statement that the monomials span the monoid algebra
+    (\texttt{MonoidAlgebra.induction\_on} / \texttt{Finsupp.sum} representation). Since
+    $\widetilde{\mathrm{symAction}}$ is $R$-linear and
+    $\widetilde{\mathrm{symAction}}(\mathrm{single}\,\sigma\,1) = \mathrm{symAction}(\sigma)$
+    (\texttt{MonoidAlgebra.lift\_single}), the image of any element is an $R$-linear combination of the
+    generators $\mathrm{symAction}(\sigma) \in \operatorname{range}\mathrm{symAction}$, which lies in the
+    subalgebra $\operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})$ by
+    \texttt{Subalgebra.sum\_mem} and \texttt{Subalgebra.smul\_mem}.
+\end{proof}
+
+\begin{lemma}[Adjoin is contained in the range of the lift]
+    \label{lem:adjoin-le-lift-range}
+    \uses{def:symAction}
+    $\operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})
+      \subseteq \operatorname{range}\widetilde{\mathrm{symAction}}$.
+\end{lemma}
+\begin{proof}
+    \uses{def:symAction}
+    The range $\operatorname{range}\widetilde{\mathrm{symAction}}$ is a subalgebra
+    (\texttt{AlgHom.range}) containing every generator $\mathrm{symAction}(\sigma) =
+    \widetilde{\mathrm{symAction}}(\mathrm{single}\,\sigma\,1)$
+    (\texttt{MonoidAlgebra.lift\_single}), i.e.\ $\operatorname{range}\mathrm{symAction}
+      \subseteq \operatorname{range}\widetilde{\mathrm{symAction}}$. As the adjoin is the smallest
+    subalgebra containing the generators, \texttt{Algebra.adjoin\_le} gives the inclusion.
 \end{proof}
 
 \begin{lemma}[Adjoin of $\mathrm{symAction}$ is the range of the algebra lift]
     \label{lem:symAlg-eq-lift-range}
     \lean{LeanEval.RepresentationTheory.adjoin_symAction_eq_lift_range}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
-    \uses{def:symAction}
+    \uses{def:symAction, lem:lift-range-le-adjoin, lem:adjoin-le-lift-range}
     \leanok
-    Let $\widetilde{\mathrm{symAction}} : R[S_k] \to_{A} \operatorname{End}_R(V^{\otimes k})$ be the
-    $R$-algebra homomorphism obtained from the monoid homomorphism $\mathrm{symAction}$ by
-    \texttt{MonoidAlgebra.lift}. Then
     $\operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})
       = \operatorname{range}\widetilde{\mathrm{symAction}}$ as subalgebras.
 \end{lemma}
 \begin{proof}
-    This is the identity $\operatorname{adjoin}_R(\operatorname{range} f) =
-    \operatorname{range}(\texttt{MonoidAlgebra.lift}\,f)$ for a monoid homomorphism $f$, which is not
-    Mathlib's \texttt{Algebra.adjoin\_range\_eq\_range\_aeval} (that concerns \texttt{aeval} on a
-    polynomial algebra, a different universal object); we prove it directly by double inclusion.
-    ($\supseteq$) The range $\operatorname{range}\widetilde{\mathrm{symAction}}$ is a subalgebra
-    (\texttt{AlgHom.range}) containing every $\mathrm{symAction}(\sigma) =
-    \widetilde{\mathrm{symAction}}(\mathrm{single}\,\sigma\,1)$, hence contains
-    $\operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})$ by \texttt{Algebra.adjoin\_le}.
-    ($\subseteq$) Every element of $R[S_k]$ is a finite $R$-linear combination of monomials
-    $\mathrm{single}\,\sigma\,1$ (\texttt{MonoidAlgebra.lift} is linear and the group elements span),
-    so its image under $\widetilde{\mathrm{symAction}}$ is an $R$-linear combination of the
-    $\mathrm{symAction}(\sigma)$ and therefore lies in the adjoin.
+    \uses{lem:lift-range-le-adjoin, lem:adjoin-le-lift-range}
+    Antisymmetry of subalgebra inclusion (\texttt{le\_antisymm}) applied to
+    Lemma~\ref{lem:adjoin-le-lift-range} ($\subseteq$) and Lemma~\ref{lem:lift-range-le-adjoin}
+    ($\supseteq$).
 \end{proof}
 
 \begin{lemma}[The image of $R[S_k]$ is semisimple]
@@ -194,66 +246,131 @@ where $\mathcal{C}(S) = $ \texttt{Subalgebra.centralizer}$_R(S)$.
 
 \subsection{The double centralizer theorem}
 
-\begin{lemma}[Centralizer is the module endomorphism ring]
-    \label{lem:centralizer-eq-module-end}
+\begin{lemma}[Centralizer membership is module-linearity]
+    \label{lem:mem-centralizer-iff-linear}
     \lean{LeanEval.RepresentationTheory.mem_centralizer_adjoin_symAction_iff}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
-    \uses{lem:symAlg-semisimple}
     \leanok
-    Let $A = \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})
-      \subseteq \operatorname{End}_R(V^{\otimes k})$, and regard $V^{\otimes k}$ as an $A$-module via the
-    inclusion. Then an $R$-endomorphism $f$ lies in $\mathcal{C}(A)$ iff it is $A$-linear, i.e.\
-    $\mathcal{C}(A) = \operatorname{End}_A(V^{\otimes k})$; likewise, writing $B = \mathcal{C}(A)$,
-    $\mathcal{C}(B) = \operatorname{End}_B(V^{\otimes k})$.
+    Let $S \subseteq \operatorname{End}_R(V^{\otimes k})$ be a subalgebra, and regard $V^{\otimes k}$ as
+    an $S$-module via the inclusion $S \hookrightarrow \operatorname{End}_R(V^{\otimes k})$, i.e.\
+    $s \cdot x = s(x)$. For every $f \in \operatorname{End}_R(V^{\otimes k})$, $f \in \mathcal{C}(S)$ iff
+    the underlying map $f$ is $S$-linear, i.e.\ $f(s \cdot x) = s \cdot f(x)$ for all $s \in S$,
+    $x \in V^{\otimes k}$.
 \end{lemma}
 \begin{proof}
-    By \texttt{Subalgebra.mem\_centralizer\_iff}, $f \in \mathcal{C}(A)$ means $f$ commutes with every
-    $a \in A$, i.e.\ $f(a \cdot x) = a \cdot f(x)$ for all $x$, which is exactly $A$-linearity of $f$
-    as a map $V^{\otimes k} \to V^{\otimes k}$. The same equivalence with $B$ in place of $A$ gives
-    $\mathcal{C}(B) = \operatorname{End}_B(V^{\otimes k})$.
+    By \texttt{Subalgebra.mem\_centralizer\_iff}, $f \in \mathcal{C}(S)$ means $f \circ s = s \circ f$ for
+    every $s \in S$; evaluating at $x$ this is $f(s(x)) = s(f(x))$, i.e.\ $f(s \cdot x) = s \cdot f(x)$ for
+    the module structure $s \cdot x = s(x)$. Since $f$ is already additive and $R$-linear, this single
+    extra condition is exactly $S$-linearity (\texttt{LinearMap.ext}).
+\end{proof}
+
+\begin{definition}[The centralizer-as-$S$-endomorphisms equivalence]
+    \label{def:centralizer-end-equiv}
+    \uses{lem:mem-centralizer-iff-linear}
+    For a subalgebra $S \subseteq \operatorname{End}_R(V^{\otimes k})$, regard $V^{\otimes k}$ as an
+    $S$-module by $s \cdot x = s(x)$. Define a map $\Psi_S : \mathcal{C}(S) \to
+    \operatorname{End}_S(V^{\otimes k})$ sending $f \in \mathcal{C}(S)$ to the $S$-linear endomorphism with
+    the same underlying additive map $f$; this is well-defined by
+    Lemma~\ref{lem:mem-centralizer-iff-linear} (membership in $\mathcal{C}(S)$ is precisely the
+    $S$-linearity needed to package $f$ as an element of $\operatorname{End}_S(V^{\otimes k})$). Its
+    candidate inverse sends an $S$-linear endomorphism to its restriction of scalars
+    (\texttt{LinearMap.restrictScalars}$\,R$) viewed as an element of $\mathcal{C}(S)$, again via
+    Lemma~\ref{lem:mem-centralizer-iff-linear}.
+\end{definition}
+
+\begin{lemma}[$\Psi_S$ is a ring isomorphism $\mathcal{C}(S) \cong \operatorname{End}_S(V^{\otimes k})$]
+    \label{lem:centralizer-end-equiv-ring}
+    \uses{def:centralizer-end-equiv, lem:mem-centralizer-iff-linear}
+    The map $\Psi_S$ of Definition~\ref{def:centralizer-end-equiv} is a \texttt{RingEquiv}
+    $\mathcal{C}(S) \xrightarrow{\sim} \operatorname{End}_S(V^{\otimes k})$. This is a membership-level
+    isomorphism, \emph{not} a type-level equality of the \texttt{Subalgebra} $\mathcal{C}(S)$ with the
+    type $\operatorname{End}_S(V^{\otimes k})$. Instantiating at $S = A :=
+    \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})$ gives $\mathcal{C}(A) \cong
+    \operatorname{End}_A(V^{\otimes k})$, and at $S = B := \mathcal{C}(A)$ gives $\mathcal{C}(B) \cong
+    \operatorname{End}_B(V^{\otimes k})$.
+\end{lemma}
+\begin{proof}
+    \uses{def:centralizer-end-equiv, lem:mem-centralizer-iff-linear}
+    The forgetful map $\operatorname{End}_S(V^{\otimes k}) \to \operatorname{End}_R(V^{\otimes k})$,
+    $g \mapsto g.\mathrm{toLinearMap}$ (restriction of scalars), is an injective ring homomorphism: it
+    preserves $+$, $\circ$, $0$, $1$ because these are computed on the underlying $R$-linear map, and it is
+    injective because a map is determined by its underlying function. By
+    Lemma~\ref{lem:mem-centralizer-iff-linear} its image is exactly $\mathcal{C}(S)$, so corestricting to
+    the image yields a \texttt{RingEquiv} $\operatorname{End}_S(V^{\otimes k}) \cong \mathcal{C}(S)$ whose
+    inverse is $\Psi_S$. Instantiate at $S = A$ and $S = B$.
+\end{proof}
+
+\begin{lemma}[$V^{\otimes k}$ is module-finite over the centralizer]
+    \label{lem:tensor-power-finite-over-centralizer}
+    With $A = \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})$, $B = \mathcal{C}(A)$ and
+    $V^{\otimes k}$ finite-dimensional over the field $R$, the module $V^{\otimes k}$ is finite over $B$:
+    $\texttt{Module.Finite}\,B\,V^{\otimes k}$.
+\end{lemma}
+\begin{proof}
+    $V^{\otimes k}$ is finite-dimensional over the field $R$, hence $\texttt{Module.Finite}\,R\,V^{\otimes k}$.
+    As $B$ is an $R$-subalgebra of $\operatorname{End}_R(V^{\otimes k})$ and the $B$-action on
+    $V^{\otimes k}$ restricts the $R$-action, $R \to B \to \operatorname{End}_R(V^{\otimes k})$ is a scalar
+    tower (\texttt{IsScalarTower R B}\,$V^{\otimes k}$). A module finite over the smaller ring $R$ is finite
+    over the larger ring $B$ (\texttt{Module.Finite.of\_restrictScalars\_finite}\,$R\,B\,V^{\otimes k}$),
+    giving $\texttt{Module.Finite}\,B\,V^{\otimes k}$.
+\end{proof}
+
+\begin{lemma}[$V^{\otimes k}$ is module-finite over $\operatorname{End}_A$]
+    \label{lem:end-A-finite}
+    \uses{lem:centralizer-end-equiv-ring, lem:tensor-power-finite-over-centralizer}
+    With $A = \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})$ and $V^{\otimes k}$
+    finite-dimensional, $V^{\otimes k}$ is finite as a module over $\operatorname{End}_A(V^{\otimes k})$:
+    $\texttt{Module.Finite}\,(\operatorname{End}_A V^{\otimes k})\,V^{\otimes k}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:centralizer-end-equiv-ring, lem:tensor-power-finite-over-centralizer}
+    By Lemma~\ref{lem:tensor-power-finite-over-centralizer}, $V^{\otimes k}$ is finite over $B =
+    \mathcal{C}(A)$. The ring isomorphism $\Psi_A : B \cong \operatorname{End}_A(V^{\otimes k})$
+    (Lemma~\ref{lem:centralizer-end-equiv-ring}) is compatible with the actions on $V^{\otimes k}$ (both act
+    by the same underlying $R$-endomorphism), so transporting the finiteness along $\Psi_A$
+    (\texttt{Module.Finite.equiv}/scalar-restriction along a ring equiv) gives
+    $\texttt{Module.Finite}\,(\operatorname{End}_A V^{\otimes k})\,V^{\otimes k}$.
 \end{proof}
 
 \begin{lemma}[Jacobson density on a spanning set]
     \label{lem:jacobson-density-span}
     \lean{LeanEval.RepresentationTheory.mem_adjoin_symAction_of_commute_centralizer}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
-    \uses{lem:module-semisimple, lem:centralizer-eq-module-end}
+    \uses{lem:module-semisimple, lem:end-A-finite, lem:centralizer-end-equiv-ring}
     With $A$, $B = \mathcal{C}(A)$ as above and $V^{\otimes k}$ finite-dimensional, every
     $T \in \operatorname{End}_B(V^{\otimes k})$ lies in $A$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:module-semisimple, lem:centralizer-eq-module-end}
-    Apply the Jacobson density theorem for finitely generated modules,
-    \texttt{Module.Finite.toModuleEnd\_moduleEnd\_surjective}, with base ring $A$ (instantiating its
-    ambient ring $R := A$ and module $M := V^{\otimes k}$, regarded as an $A$-module). The lemma requires
-    $V^{\otimes k}$ to be a semisimple $A$-module (Lemma~\ref{lem:module-semisimple}) together with the
-    finiteness hypothesis $\texttt{Module.Finite}\,(\operatorname{End}_A V^{\otimes k})\,V^{\otimes k}$,
-    i.e.\ $\texttt{Module.Finite}\,B\,V^{\otimes k}$ for
-    $B = \operatorname{End}_A(V^{\otimes k}) = \mathcal{C}(A)$ (Lemma~\ref{lem:centralizer-eq-module-end});
-    this holds because $V^{\otimes k}$ is finite-dimensional over the field $R$, hence finitely generated
-    over the larger ring $B$. Its conclusion is that the natural action map
-    $\texttt{Module.toModuleEnd}\,(\operatorname{End}_A V^{\otimes k})\,V^{\otimes k} :
-    A \to \operatorname{End}_B(V^{\otimes k})$ is surjective. Hence the given
-    $T \in \operatorname{End}_B(V^{\otimes k})$ is the action of some $a \in A$, and $T = a \in A$.
+    \uses{lem:module-semisimple, lem:end-A-finite, lem:centralizer-end-equiv-ring}
+    Apply the Jacobson density theorem \texttt{Module.Finite.toModuleEnd\_moduleEnd\_surjective} with base
+    ring $A$ and module $V^{\otimes k}$: its hypotheses are that $V^{\otimes k}$ is a semisimple $A$-module
+    (Lemma~\ref{lem:module-semisimple}) and $\texttt{Module.Finite}\,(\operatorname{End}_A V^{\otimes k})\,
+    V^{\otimes k}$ (Lemma~\ref{lem:end-A-finite}). The conclusion is that
+    $\texttt{Module.toModuleEnd}\,A\,V^{\otimes k} : A \to \operatorname{End}_{\operatorname{End}_A
+    V^{\otimes k}}(V^{\otimes k})$ is surjective. Via the ring isomorphism $\Psi_A : B \cong
+    \operatorname{End}_A(V^{\otimes k})$ (Lemma~\ref{lem:centralizer-end-equiv-ring}) the given
+    $T \in \operatorname{End}_B(V^{\otimes k})$ is $\operatorname{End}_A$-linear with the same underlying
+    map, so it is the action of some $a \in A$; thus $T = a \in A$.
 \end{proof}
 
 \begin{lemma}[Double centralizer for semisimple subalgebras]
     \label{lem:double-commutant}
     \lean{LeanEval.RepresentationTheory.centralizer_centralizer_adjoin_symAction}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Semisimple.lean}
-    \uses{lem:centralizer-eq-module-end, lem:jacobson-density-span}
+    \uses{lem:centralizer-end-equiv-ring, lem:jacobson-density-span}
     \leanok
     Let $A = \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})
       \subseteq \operatorname{End}_R(V^{\otimes k})$ with $V^{\otimes k}$ finite-dimensional and $A$
     semisimple. Then $\mathcal{C}(\mathcal{C}(A)) = A$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:centralizer-eq-module-end, lem:jacobson-density-span}
+    \uses{lem:centralizer-end-equiv-ring, lem:jacobson-density-span}
     The inclusion $A \subseteq \mathcal{C}(\mathcal{C}(A))$ is
     \texttt{Subalgebra.le\_centralizer\_centralizer}. For the reverse inclusion, by
-    Lemma~\ref{lem:centralizer-eq-module-end} we have $\mathcal{C}(\mathcal{C}(A)) =
-    \operatorname{End}_B(V^{\otimes k})$ with $B = \mathcal{C}(A)$, and every such endomorphism lies in
-    $A$ by Lemma~\ref{lem:jacobson-density-span}. Hence $\mathcal{C}(\mathcal{C}(A)) = A$.
+    Lemma~\ref{lem:centralizer-end-equiv-ring} (with $S = B := \mathcal{C}(A)$) every
+    $f \in \mathcal{C}(\mathcal{C}(A)) = \mathcal{C}(B)$ corresponds to an element of
+    $\operatorname{End}_B(V^{\otimes k})$, which lies in $A$ by Lemma~\ref{lem:jacobson-density-span}.
+    Hence $\mathcal{C}(\mathcal{C}(A)) = A$.
 \end{proof}
 
 \subsection{Polarization: the $GL(V)$-orbit spans the symmetric tensors}
@@ -268,54 +385,121 @@ permuting the $k$ tensor legs.
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/EndTensor.lean}
     \leanok
     Let $\Phi : (\operatorname{End}_R V)^{\otimes k} \to \operatorname{End}_R(V^{\otimes k})$ be the
-    $R$-algebra homomorphism sending a pure tensor $m_1 \otimes \cdots \otimes m_k$ to
-    $\mathrm{map}(i \mapsto m_i)$. It is well defined because the family $(m_i) \mapsto
-    \mathrm{map}(i \mapsto m_i)$ is multilinear and multiplicative
-    (\texttt{PiTensorProduct.map\_mul}, \texttt{PiTensorProduct.map\_comp}), so the universal property
-    of \texttt{PiTensorProduct} produces an algebra homomorphism $\Phi$.
+    $R$-algebra homomorphism obtained from \texttt{PiTensorProduct.liftAlgHom} applied to the
+    multilinear map
+    \[
+        F := \texttt{PiTensorProduct.mapMultilinear}\,:\,
+        \textstyle\bigl(\prod_{i} (V \to_\ell V)\bigr) \to_{\mathrm{ML}} (V^{\otimes k} \to_\ell V^{\otimes k}),
+        \qquad F(m)_{\bullet} = \texttt{PiTensorProduct.map}\,m,
+    \]
+    which carries a family $m = (m_i)_i$ of endomorphisms of $V$ to $\mathrm{map}(i \mapsto m_i)$. To invoke
+    \texttt{liftAlgHom} we supply the two multiplicativity data it requires:
+    \begin{itemize}
+        \item $F(1) = 1$, i.e.\ $\mathrm{map}(i \mapsto \mathrm{id}_V) = \mathrm{id}_{V^{\otimes k}}$, which is
+              \texttt{PiTensorProduct.map\_id};
+        \item $F(m \cdot m') = F(m) \cdot F(m')$, i.e.\ $\mathrm{map}(i \mapsto m_i m_i') =
+              \mathrm{map}(i \mapsto m_i) \circ \mathrm{map}(i \mapsto m_i')$, which is
+              \texttt{PiTensorProduct.map\_mul} (equivalently \texttt{PiTensorProduct.map\_comp}).
+    \end{itemize}
+    The resulting algebra homomorphism $\Phi := \texttt{liftAlgHom}\,F\,(\ldots)$ satisfies
+    $\Phi(m_1 \otimes \cdots \otimes m_k) = \mathrm{map}(i \mapsto m_i)$ by
+    \texttt{liftAlgHom\_apply} together with \texttt{mapMultilinear\_apply}.
 \end{definition}
+
+\begin{lemma}[Dimension of a tensor power]
+    \label{lem:finrank-tensor-power}
+    With $M$ a finite-dimensional $R$-vector space, $\dim_R \bigl(\bigotimes^k_R M\bigr) = (\dim_R M)^k$.
+\end{lemma}
+\begin{proof}
+    A basis $(b_\alpha)$ of $M$ induces a basis of $M^{\otimes k}$ indexed by tuples
+    $\mathrm{Fin}\,k \to (\text{index set of the basis})$, namely
+    $\texttt{Basis.piTensorProduct}$. Therefore by \texttt{Module.finrank\_eq\_card\_basis} the dimension
+    is the cardinality of that index type, which is $(\dim_R M)^k$ by \texttt{Fintype.card\_pi} (a finite
+    product of $k$ equal factors $\dim_R M$, via \texttt{Fintype.card\_fun}/\texttt{Finset.prod\_const}).
+\end{proof}
 
 \begin{lemma}[The two endomorphism spaces have equal dimension]
     \label{lem:finrank-end-tensor}
     \lean{LeanEval.RepresentationTheory.finrank_endTensor_eq}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/EndTensor.lean}
+    \uses{lem:finrank-tensor-power}
     \leanok
     With $V$ finite-dimensional,
     $\dim_R (\operatorname{End}_R V)^{\otimes k} = \dim_R \operatorname{End}_R(V^{\otimes k})$; both equal
     $(\dim_R V)^{2k}$.
 \end{lemma}
 \begin{proof}
-    A basis of $V$ induces a basis of $V^{\otimes k}$ indexed by $\mathrm{Fin}\,k \to (\text{basis of }V)$
-    (\texttt{Basis.piTensorProduct}); hence $\dim_R V^{\otimes k} = (\dim_R V)^k$ by
-    \texttt{Module.finrank\_eq\_card\_basis} and \texttt{Fintype.card\_pi}, and therefore
-    $\dim_R \operatorname{End}_R(V^{\otimes k}) = (\dim_R V^{\otimes k})^2 = (\dim_R V)^{2k}$ by
-    \texttt{Module.finrank\_linearMap}. Likewise a basis of $\operatorname{End}_R V$ induces a basis of
-    $(\operatorname{End}_R V)^{\otimes k}$, so the same two lemmas give
+    \uses{lem:finrank-tensor-power}
+    Apply Lemma~\ref{lem:finrank-tensor-power} twice. First with $M = V$:
+    $\dim_R V^{\otimes k} = (\dim_R V)^k$, hence by \texttt{Module.finrank\_linearMap}
+    $\dim_R \operatorname{End}_R(V^{\otimes k}) = (\dim_R V^{\otimes k})^2 = (\dim_R V)^{2k}$. Second with
+    $M = \operatorname{End}_R V$ (whose dimension is $(\dim_R V)^2$ by \texttt{Module.finrank\_linearMap}):
     $\dim_R (\operatorname{End}_R V)^{\otimes k} = (\dim_R \operatorname{End}_R V)^k = ((\dim_R V)^2)^k =
     (\dim_R V)^{2k}$. The two dimensions are thus equal.
+\end{proof}
+
+\begin{lemma}[Matrix units of $V^{\otimes k}$ span its endomorphisms]
+    \label{lem:matrix-units-span-end}
+    Fix a basis $(b_\alpha)$ of the finite-dimensional space $V$; it induces a basis of $V^{\otimes k}$
+    indexed by tuples (\texttt{Basis.piTensorProduct}). The associated matrix units
+    $E_{\beta,\gamma}$ (the rank-one maps $x \mapsto (\text{coordinate}_\gamma\,x)\, e_\beta$ for basis
+    vectors $e_\beta, e_\gamma$ of $V^{\otimes k}$) span $\operatorname{End}_R(V^{\otimes k})$ as an
+    $R$-module.
+\end{lemma}
+\begin{proof}
+    For a finite basis of a module, the matrix units (\texttt{Basis.end} / the image of the standard basis
+    of $\mathrm{Matrix}$ under \texttt{LinearMap.toMatrix}, equivalently \texttt{Matrix.stdBasis})
+    form a basis of $\operatorname{End}_R(V^{\otimes k})$ (\texttt{LinearMap.toMatrix} is a linear
+    equivalence to a matrix space whose standard basis spans). In particular they span, by
+    \texttt{Basis.span\_eq}.
+\end{proof}
+
+\begin{lemma}[Matrix units factor through $\Phi$]
+    \label{lem:matrix-units-factor-Phi}
+    \uses{def:end-tensor-hom}
+    With $(b_\alpha)$ a basis of $V$ and matrix units $E_{\beta,\gamma}$ of $V^{\otimes k}$ as in
+    Lemma~\ref{lem:matrix-units-span-end}, each $E_{\beta,\gamma}$ lies in $\operatorname{range}\Phi$:
+    explicitly $E_{\beta,\gamma} = \mathrm{map}(i \mapsto E_{\beta_i,\gamma_i}) =
+    \Phi(E_{\beta_1,\gamma_1} \otimes \cdots \otimes E_{\beta_k,\gamma_k})$, where $E_{\beta_i,\gamma_i}$ are
+    matrix units of $\operatorname{End}_R V$.
+\end{lemma}
+\begin{proof}
+    \uses{def:end-tensor-hom}
+    On a pure basis tensor $b_{\gamma_1} \otimes \cdots \otimes b_{\gamma_k}$, the map
+    $\mathrm{map}(i \mapsto E_{\beta_i,\gamma_i})$ returns $E_{\beta_1,\gamma_1}(b_{\gamma_1}) \otimes \cdots
+    \otimes E_{\beta_k,\gamma_k}(b_{\gamma_k}) = b_{\beta_1} \otimes \cdots \otimes b_{\beta_k}$ and on every
+    other basis tensor it returns $0$ (one factor kills it); this is exactly the action of the matrix unit
+    $E_{\beta,\gamma}$ on the induced basis, so the two maps agree (\texttt{Basis.ext}). Finally $\Phi$
+    agrees with $\texttt{PiTensorProduct.map}$ on pure tensors (Definition~\ref{def:end-tensor-hom}), so
+    $E_{\beta,\gamma} = \Phi(E_{\beta_1,\gamma_1} \otimes \cdots \otimes E_{\beta_k,\gamma_k})$.
+\end{proof}
+
+\begin{lemma}[$\Phi$ is surjective: its range is everything]
+    \label{lem:matrix-units-in-range-Phi}
+    \uses{lem:matrix-units-span-end, lem:matrix-units-factor-Phi}
+    With $V$ finite-dimensional, $\operatorname{range}\Phi = \top$, i.e.\ $\Phi$ is surjective.
+\end{lemma}
+\begin{proof}
+    \uses{lem:matrix-units-span-end, lem:matrix-units-factor-Phi}
+    The matrix units $E_{\beta,\gamma}$ span $\operatorname{End}_R(V^{\otimes k})$
+    (Lemma~\ref{lem:matrix-units-span-end}) and each lies in the subalgebra $\operatorname{range}\Phi$
+    (Lemma~\ref{lem:matrix-units-factor-Phi}). A submodule containing a spanning set is everything
+    (\texttt{Submodule.span\_le}/\texttt{eq\_top\_iff}), so $\operatorname{range}\Phi = \top$.
 \end{proof}
 
 \begin{lemma}[$\Phi$ is bijective]
     \label{lem:end-tensor-bijective}
     \lean{LeanEval.RepresentationTheory.endTensorHom_bijective}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/EndTensor.lean}
-    \uses{def:end-tensor-hom, lem:finrank-end-tensor}
+    \uses{def:end-tensor-hom, lem:finrank-end-tensor, lem:matrix-units-in-range-Phi}
     With $V$ finite-dimensional, $\Phi$ is bijective.
 \end{lemma}
 \begin{proof}
-    \uses{def:end-tensor-hom, lem:finrank-end-tensor}
+    \uses{lem:finrank-end-tensor, lem:matrix-units-in-range-Phi}
     Source and target are finite-dimensional of equal dimension by
     Lemma~\ref{lem:finrank-end-tensor}, so by
     \texttt{LinearMap.injective\_iff\_surjective\_of\_finrank\_eq\_finrank} it suffices to prove $\Phi$ is
-    surjective. Fix a basis $(b_\alpha)$ of $V$; it induces a basis
-    $(b_{\alpha_1} \otimes \cdots \otimes b_{\alpha_k})$ of $V^{\otimes k}$
-    (\texttt{Basis.piTensorProduct}), and $\operatorname{End}_R(V^{\otimes k})$ is spanned by the associated
-    matrix units $E_{\beta,\gamma}$. Each such matrix unit factors as a pure tensor of matrix units of
-    $\operatorname{End}_R V$, $E_{\beta,\gamma} = \mathrm{map}(i \mapsto E_{\beta_i,\gamma_i})$
-    (\texttt{PiTensorProduct.map\_tprod} evaluated on the basis tensors), and
-    $\mathrm{map}(i \mapsto E_{\beta_i,\gamma_i}) =
-    \Phi(E_{\beta_1,\gamma_1} \otimes \cdots \otimes E_{\beta_k,\gamma_k})$ lies in the range of $\Phi$.
-    Thus $\Phi$ is surjective, hence bijective.
+    surjective, which is Lemma~\ref{lem:matrix-units-in-range-Phi}. Hence $\Phi$ is bijective.
 \end{proof}
 
 \begin{definition}[The tensor-power-of-$\operatorname{End}$ algebra equivalence]
@@ -351,26 +535,64 @@ permuting the $k$ tensor legs.
     Lemma~\ref{lem:sym-gl-commute}.
 \end{proof}
 
+\begin{lemma}[Vandermonde matrices on distinct nodes are invertible]
+    \label{lem:vandermonde-invertible}
+    Given $d+1$ pairwise distinct scalars $t_0, \ldots, t_d \in R$ (with $R$ a field), the Vandermonde
+    matrix $W \in \mathrm{Matrix}\,(\mathrm{Fin}(d+1))\,(\mathrm{Fin}(d+1))\,R$ with entries
+    $W_{j,i} = t_j^{\,i}$ (i.e.\ $\texttt{Matrix.vandermonde}\,(t_\bullet)$) is invertible: $\det W \ne 0$
+    and $W \in \mathrm{Matrix}.\mathrm{GL}$, with two-sided inverse $W^{-1}$ satisfying
+    $W^{-1} W = 1$ and $W W^{-1} = 1$.
+\end{lemma}
+\begin{proof}
+    By \texttt{Matrix.det\_vandermonde}, $\det W = \prod_{i<j}(t_j - t_i)$, which is nonzero in the field
+    $R$ exactly when the $t_j$ are pairwise distinct; this equivalence is
+    \texttt{Matrix.det\_vandermonde\_ne\_zero\_iff}, so $\det W \ne 0$. A square matrix over a field with
+    nonzero determinant is a unit (\texttt{Matrix.isUnit\_iff\_isUnit\_det} together with
+    \texttt{isUnit\_iff\_ne\_zero}), giving the two-sided inverse $W^{-1}$ with $W^{-1} W = 1 = W W^{-1}$
+    (\texttt{Matrix.nonsing\_inv\_mul}, \texttt{Matrix.mul\_nonsing\_inv}).
+\end{proof}
+
+\begin{lemma}[Vandermonde-inverse coefficient recovery]
+    \label{lem:poly-coeff-vandermonde-recovery}
+    \uses{lem:vandermonde-invertible}
+    Let $M$ be an $R$-module and $c : \mathrm{Fin}(d+1) \to M$, and set
+    $p(t) := \sum_{i=0}^{d} t^{\,i}\, c_i \in M$. Given $d+1$ pairwise distinct scalars
+    $t_0, \ldots, t_d \in R$ with Vandermonde matrix $W_{j,i} = t_j^{\,i}$ and its inverse $W^{-1}$
+    (Lemma~\ref{lem:vandermonde-invertible}), every coefficient is recovered as the explicit $R$-linear
+    combination
+    \[
+        c_i = \sum_{j} (W^{-1})_{i,j}\, p(t_j).
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:vandermonde-invertible}
+    The defining relation is the \emph{scalar} identity $p(t_j) = \sum_i W_{j,i}\, c_i$ (entries of $W$ are
+    scalars; $c_i, p(t_j) \in M$). Substituting and exchanging finite sums,
+    $\sum_j (W^{-1})_{i,j}\, p(t_j) = \sum_j (W^{-1})_{i,j} \sum_l W_{j,l}\, c_l
+      = \sum_l \bigl(\sum_j (W^{-1})_{i,j} W_{j,l}\bigr) c_l = \sum_l (W^{-1} W)_{i,l}\, c_l$ by
+    \texttt{Matrix.mul\_apply}, and $W^{-1} W = 1$ (Lemma~\ref{lem:vandermonde-invertible}) collapses this to
+    $\sum_l \delta_{i,l}\, c_l = c_i$ (\texttt{Matrix.one\_apply}).
+\end{proof}
+
 \begin{lemma}[Coefficients of a polynomial map lie in the span of its values]
     \label{lem:poly-coeff-in-span}
     \lean{LeanEval.RepresentationTheory.coeff_mem_span_values_one}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Polarization.lean}
-    \uses{lem:cast-distinct}
+    \uses{lem:cast-distinct, lem:poly-coeff-vandermonde-recovery}
     \leanok
-    Let $M$ be an $R$-module and let $p(t) = \sum_{i=0}^{d} c_i\, t^i$ with coefficients
-    $c_i \in M$ and $d \le k$. Given $d+1$ pairwise distinct scalars $t_0, \ldots, t_d \in R$ (which
-    exist by Lemma~\ref{lem:cast-distinct}), every coefficient $c_i$ — in particular the constant term
-    $c_0 = p(0)$ and the top coefficient $c_d$ — is an $R$-linear combination of the values
-    $p(t_0), \ldots, p(t_d)$.
+    Let $M$ be an $R$-module and let $c : \mathrm{Fin}(d+1) \to M$ be a family of coefficients
+    (\emph{module-valued}, so the data is a function into $M$, not a \texttt{Polynomial}), and set
+    $p(t) := \sum_{i=0}^{d} t^{\,i}\, c_i \in M$ for $t \in R$, with $d \le k$. Given $d+1$ pairwise
+    distinct scalars $t_0, \ldots, t_d \in R$ (which exist by Lemma~\ref{lem:cast-distinct}), every
+    coefficient $c_i$ — in particular the constant term $c_0 = p(0)$ and the top coefficient $c_d$ — lies
+    in the $R$-submodule $\operatorname{span}_R\{p(t_0), \ldots, p(t_d)\}$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:cast-distinct}
-    The values are related to the coefficients by the Vandermonde system
-    $p(t_j) = \sum_{i=0}^{d} t_j^{\,i} c_i$. The Vandermonde matrix $(t_j^{\,i})_{0 \le i,j \le d}$ has
-    determinant $\prod_{i<j}(t_j - t_i)$ (\texttt{Matrix.det\_vandermonde}), which is a unit in the
-    field $R$ because the $t_j$ are pairwise distinct. Inverting it expresses each $c_i$ as an
-    $R$-linear combination of the $p(t_j)$; concretely this is the Lagrange interpolation formula
-    \texttt{Lagrange.interpolate}, whose coefficients are scalars determined by the $t_j$.
+    \uses{lem:cast-distinct, lem:poly-coeff-vandermonde-recovery}
+    By Lemma~\ref{lem:poly-coeff-vandermonde-recovery}, $c_i = \sum_j (W^{-1})_{i,j}\, p(t_j)$ is an
+    $R$-linear combination of the values $p(t_0), \ldots, p(t_d)$. Each $p(t_j) \in
+    \operatorname{span}_R\{p(t_0), \ldots, p(t_d)\}$ by \texttt{Submodule.subset\_span}, so the combination
+    lies in the span by \texttt{Submodule.sum\_mem} and \texttt{Submodule.smul\_mem}.
 \end{proof}
 
 \begin{definition}[The symmetriser $e$]
@@ -388,24 +610,48 @@ permuting the $k$ tensor legs.
     is the averaging projection \texttt{Representation.averageMap}\,$\rho$ associated with $\rho$.
 \end{definition}
 
-\begin{lemma}[The symmetriser is an idempotent projection onto the invariants]
-    \label{lem:symmetriser-idempotent}
-    \lean{LeanEval.RepresentationTheory.symmetriser_idempotent}
-    \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Polarization.lean}
+\begin{lemma}[The symmetriser is a projection]
+    \label{lem:symmetriser-isproj}
     \uses{def:symmetriser}
-    \leanok
-    The symmetriser $e$ is idempotent, $e \circ e = e$, and its range equals the subspace of
-    $\rho$-invariant (permutation-fixed) tensors: $\operatorname{LinearMap.range} e = \rho.\mathrm{invariants}$.
+    The symmetriser $e = \texttt{averageMap}\,\rho$ is a projection onto the invariants:
+    \texttt{LinearMap.IsProj}\,$\rho.\mathrm{invariants}\,e$. Concretely $e(x)$ is always
+    $\rho$-invariant, and $e(x) = x$ whenever $x$ is $\rho$-invariant.
 \end{lemma}
 \begin{proof}
     \uses{def:symmetriser}
-    By \texttt{Representation.isProj\_averageMap}, $e = \texttt{averageMap}\,\rho$ satisfies
-    \texttt{LinearMap.IsProj}\,$\rho.\mathrm{invariants}$: \texttt{Representation.averageMap\_invariant}
-    gives that $e(x)$ is always $\rho$-invariant, and \texttt{Representation.averageMap\_id} gives
-    $e(x) = x$ for $\rho$-invariant $x$. The first yields
-    $\operatorname{range} e \subseteq \rho.\mathrm{invariants}$ and, applied to $e(x)$, idempotence
-    $e(e(x)) = e(x)$; the second yields $\rho.\mathrm{invariants} \subseteq \operatorname{range} e$. Hence
-    $\operatorname{LinearMap.range} e = \rho.\mathrm{invariants}$ and $e \circ e = e$.
+    This is \texttt{Representation.isProj\_averageMap}: \texttt{Representation.averageMap\_invariant} gives
+    that $e(x) \in \rho.\mathrm{invariants}$ for all $x$, and \texttt{Representation.averageMap\_id} gives
+    $e(x) = x$ for $\rho$-invariant $x$. Together these are exactly the two clauses of
+    \texttt{LinearMap.IsProj}\,$\rho.\mathrm{invariants}\,e$.
+\end{proof}
+
+\begin{lemma}[The symmetriser is idempotent]
+    \label{lem:symmetriser-idempotent}
+    \lean{LeanEval.RepresentationTheory.symmetriser_idempotent}
+    \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Polarization.lean}
+    \uses{lem:symmetriser-isproj}
+    \leanok
+    The symmetriser $e$ is idempotent: $e \circ e = e$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:symmetriser-isproj}
+    By Lemma~\ref{lem:symmetriser-isproj}, $e(x)$ is $\rho$-invariant for every $x$, and $e$ fixes
+    $\rho$-invariant elements; hence $e(e(x)) = e(x)$ for all $x$, i.e.\ $e \circ e = e$
+    (\texttt{LinearMap.IsProj.isIdempotentElem} / \texttt{LinearMap.ext}).
+\end{proof}
+
+\begin{lemma}[The range of the symmetriser is the invariants]
+    \label{lem:symmetriser-range-invariants}
+    \uses{lem:symmetriser-isproj}
+    The range of $e$ equals the subspace of $\rho$-invariant (permutation-fixed) tensors:
+    $\operatorname{LinearMap.range} e = \rho.\mathrm{invariants}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:symmetriser-isproj}
+    By Lemma~\ref{lem:symmetriser-isproj}, $e(x)$ is always $\rho$-invariant, giving
+    $\operatorname{range} e \subseteq \rho.\mathrm{invariants}$; and $e$ fixes every $\rho$-invariant $x$,
+    so $x = e(x) \in \operatorname{range} e$, giving the reverse inclusion. (Both are packaged by
+    \texttt{LinearMap.IsProj.range\_eq}.)
 \end{proof}
 
 \begin{lemma}[The range of $e$ is spanned by symmetrised pure tensors]
@@ -426,24 +672,63 @@ permuting the $k$ tensor legs.
     $e(m_1 \otimes \cdots \otimes m_k)$.
 \end{proof}
 
+\begin{lemma}[Regrouping a multivariate polynomial map by its last variable]
+    \label{lem:polarization-regroup}
+    Let $M$ be an $R$-module and $c : (\mathrm{Fin}(n{+}1) \to \mathrm{Fin}(k+1)) \to M$, with associated
+    polynomial map $P(t_1, \ldots, t_{n+1}) = \sum_{d} (\prod_{j} t_j^{\,d_j})\, c_d$. Then $P$ can be
+    written, as a polynomial in its last variable $t_{n+1}$, as
+    \[
+        P(t_1, \ldots, t_{n+1}) = \sum_{e=0}^{k} t_{n+1}^{\,e}\, Q_e(t_1, \ldots, t_n),
+        \qquad
+        Q_e(t_1, \ldots, t_n) := \sum_{d' : \mathrm{Fin}\,n \to \mathrm{Fin}(k+1)}
+            \Bigl(\textstyle\prod_{j \le n} t_j^{\,d'_j}\Bigr)\, c_{(d', e)},
+    \]
+    where each $Q_e$ is again a polynomial map of the same form in $n$ variables, and the coefficient family
+    of $Q_1$ at multidegree $\mathbf 1 \in \mathrm{Fin}\,n \to \mathrm{Fin}(k+1)$ is $c_{(\mathbf 1, 1)}$.
+\end{lemma}
+\begin{proof}
+    A multidegree $d : \mathrm{Fin}(n{+}1) \to \mathrm{Fin}(k+1)$ splits uniquely as $(d', e)$ with
+    $d' = d|_{\mathrm{Fin}\,n}$ and $e = d(n{+}1)$ (the equivalence $(\mathrm{Fin}(n{+}1) \to X) \simeq
+    (\mathrm{Fin}\,n \to X) \times X$, \texttt{Fin.snoc}/\texttt{Fintype.sum\_prod\_type}). Summing over
+    this product and pulling the factor $t_{n+1}^{\,e}$ (which depends only on $e$) out of the inner sum
+    (\texttt{Finset.sum\_comm}/\texttt{Finset.mul\_sum}) gives $\sum_e t_{n+1}^{\,e}\, Q_e$ with $Q_e$ as
+    stated. The coefficient of $Q_1$ at $\mathbf 1$ is the summand with $d' = \mathbf 1$, namely
+    $c_{(\mathbf 1, 1)}$, by definition of $Q_1$.
+\end{proof}
+
 \begin{lemma}[Multilinear coefficient extraction by iterated interpolation]
     \label{lem:multivariate-polarization}
     \lean{LeanEval.RepresentationTheory.coeff_mem_span_values}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Polarization.lean}
-    \uses{lem:poly-coeff-in-span, lem:cast-distinct}
-    Let $M$ be an $R$-module and $P : R^n \to M$ a map that is polynomial of degree $\le k$ in each of its
-    $n$ arguments separately. Then the coefficient of the multilinear monomial $t_1 \cdots t_n$ in $P$ is an
-    $R$-linear combination of finitely many values $P(t^{(1)}, \ldots, t^{(n)})$ with all
-    $t^{(j)} \in \{0, 1, \ldots, k\}$.
+    \uses{lem:poly-coeff-in-span, lem:cast-distinct, lem:polarization-regroup}
+    \emph{Precise model.} Let $M$ be an $R$-module and let the coefficient data be a function
+    $c : (\mathrm{Fin}\,n \to \mathrm{Fin}(k+1)) \to M$ indexed by multidegrees
+    $d = (d_1, \ldots, d_n)$ with every $d_j \le k$ (equivalently a \texttt{Finsupp} on
+    $\mathrm{Fin}\,n \to_0 \mathbb{N}$ supported in the box $[0,k]^n$ — this is an iterated
+    \texttt{Polynomial}/\texttt{MvPolynomial} of degree $\le k$ in each variable, with $M$-valued
+    coefficients). Define the polynomial map
+    \[
+        P(t_1, \ldots, t_n) := \sum_{d : \mathrm{Fin}\,n \to \mathrm{Fin}(k+1)}
+            \Bigl(\textstyle\prod_{j=1}^{n} t_j^{\,d_j}\Bigr)\, c_d \;\in\; M .
+    \]
+    Then the coefficient $c_{\mathbf 1}$ of the multilinear monomial $t_1 \cdots t_n$ (i.e.\ $d = \mathbf 1 =
+    (1, \ldots, 1)$) lies in the $R$-submodule spanned by the grid values
+    $\{\, P(s_1, \ldots, s_n) : s \in \{0, 1, \ldots, k\}^n \,\}$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:poly-coeff-in-span, lem:cast-distinct}
-    Induct on $n$, peeling off one variable at a time. Holding all variables but $t_j$ fixed, $P$ is a
-    polynomial of degree $\le k$ in $t_j$ with coefficients in $M$; by Lemma~\ref{lem:poly-coeff-in-span},
-    using the $k+1$ pairwise distinct points $0, 1, \ldots, k$ of Lemma~\ref{lem:cast-distinct}, the
-    coefficient of $t_j^1$ is an $R$-linear combination of the values of $P$ at $t_j \in \{0, \ldots, k\}$.
-    Applying this successively for $j = 1, \ldots, n$ expresses the multilinear coefficient as an
-    $R$-linear combination of values of $P$ on the grid $\{0, \ldots, k\}^n$.
+    \uses{lem:poly-coeff-in-span, lem:cast-distinct, lem:polarization-regroup}
+    Induct on $n$. The base case $n = 0$ is trivial ($c_{\mathbf 1} = P()$). For the step, by
+    Lemma~\ref{lem:polarization-regroup} write $P(t_1,\ldots,t_n) = \sum_{e=0}^{k} t_n^{\,e}\,
+    Q_e(t_1,\ldots,t_{n-1})$, so for each fixed $(t_1,\ldots,t_{n-1})$ the map $t_n \mapsto P(\cdot,t_n)$ is a
+    single-variable polynomial with coefficients $Q_e(\cdot) \in M$. The $k+1$ points $0,\ldots,k$ are
+    pairwise distinct (Lemma~\ref{lem:cast-distinct}), so the one-variable extraction
+    (Lemma~\ref{lem:poly-coeff-in-span}) gives $Q_1(t_1,\ldots,t_{n-1}) \in \operatorname{span}_R\{\,
+    P(t_1,\ldots,t_{n-1}, s_n) : s_n \in \{0,\ldots,k\}\,\}$. By Lemma~\ref{lem:polarization-regroup} the
+    multilinear coefficient of the $(n-1)$-variable map $Q_1$ is $c_{(\mathbf 1,1)} = c_{\mathbf 1}$, so the
+    induction hypothesis gives $c_{\mathbf 1} \in \operatorname{span}_R\{\, Q_1(s_1,\ldots,s_{n-1}) : s' \in
+    \{0,\ldots,k\}^{n-1}\,\}$. Composing the two span memberships (transitivity, \texttt{Submodule.span\_le})
+    places $c_{\mathbf 1}$ in the span of the full grid values $\{P(s_1,\ldots,s_n) : s \in
+    \{0,\ldots,k\}^n\}$.
 \end{proof}
 
 \begin{lemma}[Pure powers are symmetric]
@@ -465,26 +750,97 @@ permuting the $k$ tensor legs.
     \operatorname{LinearMap.range} e$.
 \end{proof}
 
-\begin{lemma}[Multilinear component of a power]
-    \label{lem:multilinear-component}
-    \lean{LeanEval.RepresentationTheory.sum_perm_tprod_eq}
-    \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Polarization.lean}
+\begin{lemma}[Multilinear map of slotwise sums, reindexed by functions]
+    \label{lem:multilinear-map-sum-expand}
+    Let $g : \prod_{i \in \mathrm{Fin}\,k} W \to_{\mathrm{ML}} M$ be a multilinear map and, for each slot
+    $i$, let the input be a finite sum $\sum_{j \in \mathrm{Fin}\,n} v_{i,j}$ with $v_{i,j} \in W$. Then
+    \[
+        g\Bigl(i \mapsto \textstyle\sum_{j} v_{i,j}\Bigr)
+          = \sum_{f : \mathrm{Fin}\,k \to \mathrm{Fin}\,n} g\bigl(i \mapsto v_{i, f(i)}\bigr).
+    \]
+\end{lemma}
+\begin{proof}
+    This is \texttt{MultilinearMap.map\_sum} (each slot ranges over the finite index set
+    $\mathrm{Fin}\,n$), whose right-hand side is a sum over $\texttt{Fintype.piFinset}\,(i \mapsto
+    \mathrm{univ})$. Reindexing that \texttt{piFinset} along the canonical identification with the function
+    type $\mathrm{Fin}\,k \to \mathrm{Fin}\,n$ (every $f$ is in the \texttt{piFinset} since each factor is
+    \texttt{univ}, \texttt{Fintype.mem\_piFinset}) rewrites the sum as $\sum_{f} g(i \mapsto v_{i,f(i)})$.
+\end{proof}
+
+\begin{lemma}[Tensor power of a sum expands over index functions]
+    \label{lem:tprod-sum-expand}
+    \uses{lem:multilinear-map-sum-expand}
+    Let $W = \operatorname{End}_R V$, $m_1, \ldots, m_n \in W$ and $t_1, \ldots, t_n \in R$. Then in
+    $W^{\otimes k}$,
+    \[
+        \Bigl(\sum_{j=1}^{n} t_j\, m_j\Bigr)^{\otimes k}
+          = \sum_{f : \mathrm{Fin}\,k \to \mathrm{Fin}\,n}
+              \Bigl(\textstyle\prod_{i=1}^{k} t_{f(i)}\Bigr)\, \bigl(m_{f(1)} \otimes \cdots \otimes m_{f(k)}\bigr) .
+    \]
+\end{lemma}
+\begin{proof}
+    \uses{lem:multilinear-map-sum-expand}
+    Apply Lemma~\ref{lem:multilinear-map-sum-expand} to the multilinear pure-tensor map
+    $\texttt{PiTensorProduct.tprod}\,R$ with the slotwise sums $\sum_j (t_j m_j)$ (independent of $i$):
+    this gives $\sum_{f} \mathrm{tprod}(i \mapsto t_{f(i)} m_{f(i)})$. Pulling each scalar $t_{f(i)}$ out of
+    its slot by multilinearity (\texttt{MultilinearMap.map\_smul}, applied $k$ times) yields the factor
+    $\prod_i t_{f(i)}$ in front of $m_{f(1)} \otimes \cdots \otimes m_{f(k)}$, which is the claim.
+\end{proof}
+
+\begin{lemma}[The multilinear terms are indexed by permutations]
+    \label{lem:multilinear-terms-are-perms}
+    \uses{lem:tprod-sum-expand}
+    Let $W = \operatorname{End}_R V$ and $m_1, \ldots, m_k \in W$ (so $n = k$). In the expansion of
+    $\bigl(\sum_{j=1}^{k} t_j\, m_j\bigr)^{\otimes k}$ (Lemma~\ref{lem:tprod-sum-expand}), the terms whose
+    monomial is the multilinear $t_1 \cdots t_k$ are exactly those indexed by bijections $f : \mathrm{Fin}\,k
+    \to \mathrm{Fin}\,k$; hence the coefficient of $t_1 \cdots t_k$ is
+    $\sum_{\sigma \in S_k} m_{\sigma(1)} \otimes \cdots \otimes m_{\sigma(k)}$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:tprod-sum-expand}
+    By Lemma~\ref{lem:tprod-sum-expand} the term indexed by $f$ carries the monomial $\prod_i t_{f(i)}$ and
+    the tensor $m_{f(1)} \otimes \cdots \otimes m_{f(k)}$. The monomial equals $t_1 \cdots t_k$ (each
+    variable to the first power) exactly when $f$ hits each index once, i.e.\ $f$ is a bijection
+    $f = \sigma \in S_k$ (\texttt{Fintype.bijective\_iff\_injective}/\texttt{Equiv.Perm}); restricting the
+    sum to these $f$ (\texttt{Finset.sum\_filter}/the equivalence $S_k \simeq \{$bijections$\}$) gives
+    $\sum_{\sigma \in S_k} m_{\sigma(1)} \otimes \cdots \otimes m_{\sigma(k)}$.
+\end{proof}
+
+\begin{lemma}[Sum of permuted tensors is the symmetriser]
+    \label{lem:sum-perm-eq-symmetriser}
     \uses{def:symmetriser}
-    \leanok
-    Let $W = \operatorname{End}_R V$ and $m_1, \ldots, m_n \in W$. Expanding
-    $\bigl(\sum_{j=1}^{n} t_j\, m_j\bigr)^{\otimes k}$ as a polynomial in $t_1, \ldots, t_n$, the
-    coefficient of the multilinear monomial $t_1 \cdots t_n$ (for $n = k$, multidegree $(1,\ldots,1)$)
-    equals $\sum_{\sigma \in S_k} m_{\sigma(1)} \otimes \cdots \otimes m_{\sigma(k)} =
+    Let $W = \operatorname{End}_R V$ and $m_1, \ldots, m_k \in W$. Then
+    $\sum_{\sigma \in S_k} m_{\sigma(1)} \otimes \cdots \otimes m_{\sigma(k)} =
     k!\, e(m_1 \otimes \cdots \otimes m_k)$, where $e$ is the symmetriser of
     Definition~\ref{def:symmetriser}.
 \end{lemma}
 \begin{proof}
-    Multilinearity of $\otimes$ expands $\bigl(\sum_j t_j m_j\bigr)^{\otimes k}$ as
-    $\sum_{f : \mathrm{Fin}\,k \to \{1,\ldots,n\}} \bigl(\prod_i t_{f(i)}\bigr)\,
-    (m_{f(1)} \otimes \cdots \otimes m_{f(k)})$. With $n = k$ the multidegree-$(1,\ldots,1)$ terms are
-    exactly those indexed by bijections $f$, i.e.\ by $\sigma \in S_k$, giving
-    $\sum_{\sigma} m_{\sigma(1)} \otimes \cdots \otimes m_{\sigma(k)}$. By definition of the
-    symmetriser this sum is $k!\, e(m_1 \otimes \cdots \otimes m_k)$.
+    \uses{def:symmetriser}
+    Reindexing each summand by $\sigma$ identifies $m_{\sigma(1)} \otimes \cdots \otimes m_{\sigma(k)}$ with
+    $\rho(\sigma)(m_1 \otimes \cdots \otimes m_k)$ (\texttt{PiTensorProduct.reindex\_tprod}). Hence the sum
+    is $\sum_\sigma \rho(\sigma)(m_1 \otimes \cdots \otimes m_k)$, which is $k!\, e(m_1 \otimes \cdots
+    \otimes m_k)$ since $e = \tfrac{1}{k!}\sum_\sigma \rho(\sigma)$ (Definition~\ref{def:symmetriser}) and
+    $k!$ is invertible.
+\end{proof}
+
+\begin{lemma}[Multilinear component of a power]
+    \label{lem:multilinear-component}
+    \lean{LeanEval.RepresentationTheory.sum_perm_tprod_eq}
+    \leanfile{LeanEval/RepresentationTheory/SchurWeyl/Polarization.lean}
+    \uses{lem:multilinear-terms-are-perms, lem:sum-perm-eq-symmetriser}
+    \leanok
+    Let $W = \operatorname{End}_R V$ and $m_1, \ldots, m_k \in W$ (so $n = k$). In the expansion of
+    $\bigl(\sum_{j=1}^{k} t_j\, m_j\bigr)^{\otimes k}$ as a polynomial in $t_1, \ldots, t_k$, the
+    coefficient of the multilinear monomial $t_1 \cdots t_k$ (multidegree $(1,\ldots,1)$) equals
+    $\sum_{\sigma \in S_k} m_{\sigma(1)} \otimes \cdots \otimes m_{\sigma(k)} =
+    k!\, e(m_1 \otimes \cdots \otimes m_k)$, where $e$ is the symmetriser of
+    Definition~\ref{def:symmetriser}.
+\end{lemma}
+\begin{proof}
+    \uses{lem:multilinear-terms-are-perms, lem:sum-perm-eq-symmetriser}
+    By Lemma~\ref{lem:multilinear-terms-are-perms} the coefficient of $t_1 \cdots t_k$ is
+    $\sum_{\sigma \in S_k} m_{\sigma(1)} \otimes \cdots \otimes m_{\sigma(k)}$, and by
+    Lemma~\ref{lem:sum-perm-eq-symmetriser} this sum equals $k!\, e(m_1 \otimes \cdots \otimes m_k)$.
 \end{proof}
 
 \begin{lemma}[Pure powers span the symmetric tensors]
@@ -513,67 +869,138 @@ permuting the $k$ tensor legs.
     power. Dividing by the invertible $k!$ exhibits $e(m_1 \otimes \cdots \otimes m_k)$ in the span.
 \end{proof}
 
+\begin{lemma}[The shifted determinant is the evaluation of a fixed polynomial]
+    \label{lem:shifted-det-is-poly}
+    For $m \in \operatorname{End}_R V$ with $V$ finite-dimensional, set $q(X) := (-1)^{\dim V}\,
+    \chi_m(-X) \in R[X]$, where $\chi_m = \texttt{LinearMap.charpoly}\,m$. Then for every $t \in R$,
+    $\det(m + t\,\mathrm{id}) = q(t)$.
+\end{lemma}
+\begin{proof}
+    By \texttt{LinearMap.eval\_charpoly}, $\chi_m(s) = \det(s\,\mathrm{id} - m)$ for every $s \in R$
+    (the algebra map sends $s$ to $s\,\mathrm{id}$). Setting $s = -t$ gives $\chi_m(-t) =
+    \det(-t\,\mathrm{id} - m) = \det\bigl(-(m + t\,\mathrm{id})\bigr) = (-1)^{\dim V}\det(m + t\,\mathrm{id})$
+    (\texttt{LinearMap.det\_smul}/\texttt{det} of a negation, $\det(-1 \cdot f) = (-1)^{\dim V}\det f$).
+    Multiplying by $(-1)^{\dim V}$ yields $q(t) = (-1)^{\dim V}\chi_m(-t) = \det(m + t\,\mathrm{id})$.
+\end{proof}
+
+\begin{lemma}[The shifted-determinant polynomial is monic of degree $\dim V$, hence nonzero]
+    \label{lem:charpoly-shift-nonzero}
+    \uses{lem:shifted-det-is-poly}
+    For $m \in \operatorname{End}_R V$ with $V$ finite-dimensional, the polynomial $q(X) =
+    (-1)^{\dim V}\chi_m(-X)$ of Lemma~\ref{lem:shifted-det-is-poly} is monic of degree $\dim V$; in
+    particular $q \ne 0$, and $\det(m + t\,\mathrm{id}) = q(t)$ for every $t \in R$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:shifted-det-is-poly}
+    The characteristic polynomial $\chi_m$ is monic (\texttt{LinearMap.charpoly\_monic}) of degree
+    $\dim V$ (\texttt{LinearMap.charpoly\_natDegree}). Precomposing with $X \mapsto -X$ and scaling by the
+    unit $(-1)^{\dim V}$ preserves both monicity and degree (\texttt{Polynomial.Monic.comp}/the leading
+    coefficient is multiplied by a unit), so $q$ is monic of degree $\dim V$ and therefore $q \ne 0$
+    (\texttt{Polynomial.Monic.ne\_zero}). The evaluation identity is Lemma~\ref{lem:shifted-det-is-poly}.
+\end{proof}
+
 \begin{lemma}[Generic shifts are invertible]
     \label{lem:shifted-invertible}
     \lean{LeanEval.RepresentationTheory.finite_not_isUnit_shift}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/EndTensor.lean}
+    \uses{lem:charpoly-shift-nonzero}
     \leanok
     For $m \in \operatorname{End}_R V$ with $V$ finite-dimensional, the endomorphism
     $m + t\cdot\mathrm{id}$ is invertible (an element of $GL(V)$) for all but at most $\dim V$ values of
     $t \in R$.
 \end{lemma}
 \begin{proof}
-    $m + t\,\mathrm{id}$ fails to be invertible exactly when $-t$ is an eigenvalue of $m$, i.e.\ when
-    $\det(m + t\,\mathrm{id}) = 0$ (\texttt{LinearMap.isUnit\_iff\_det}). As a function of $t$ this
-    determinant is the value at $-t$ of the characteristic polynomial of $m$
-    (\texttt{LinearMap.charpoly}), a monic polynomial of degree $\dim V$; a nonzero polynomial over the
-    field $R$ has at most $\deg = \dim V$ roots (\texttt{Polynomial.card\_roots'}). So the excluded
-    set of $t$ has size $\le \dim V$.
+    \uses{lem:charpoly-shift-nonzero}
+    By \texttt{LinearMap.isUnit\_iff\_det}, $m + t\,\mathrm{id}$ fails to be invertible exactly when
+    $\det(m + t\,\mathrm{id}) = 0$. By Lemma~\ref{lem:charpoly-shift-nonzero} this determinant equals
+    $q(t)$ for a nonzero polynomial $q$ of degree $\dim V$, so the bad set is contained in the root set
+    $\{t : q(t) = 0\}$, which has at most $\deg q = \dim V$ elements since a nonzero polynomial over the
+    field $R$ has at most $\deg$ roots (\texttt{Polynomial.card\_roots'} / \texttt{Polynomial.setOf\_isRoot\_finite}).
+    Hence the excluded set of $t$ has size $\le \dim V$.
+\end{proof}
+
+\begin{lemma}[Enough distinct scalars with invertible shifts]
+    \label{lem:exists-distinct-invertible-shifts}
+    \uses{lem:shifted-invertible}
+    Assume $R$ is infinite (\texttt{[Infinite R]}). For $m \in \operatorname{End}_R V$ with $V$
+    finite-dimensional, there exist $k+1$ pairwise distinct scalars $t_0, \ldots, t_k \in R$ such that
+    $m + t_j\,\mathrm{id} \in GL(V)$ for every $j$.
+\end{lemma}
+\begin{proof}
+    \uses{lem:shifted-invertible}
+    By Lemma~\ref{lem:shifted-invertible} the bad set $B = \{ t \in R : m + t\,\mathrm{id} \notin GL(V)\}$
+    is finite (of cardinality $\le \dim V$). Since $R$ is infinite, removing a finite set leaves an
+    infinite set: $R \setminus B$ is infinite (\texttt{Set.Finite.infinite\_compl}). An infinite set
+    contains a subset of any prescribed finite cardinality (\texttt{Set.Infinite.exists\_subset\_card\_eq}),
+    so we may choose $k+1$ pairwise distinct $t_0, \ldots, t_k \in R \setminus B$. Each $t_j \notin B$ gives
+    $m + t_j\,\mathrm{id} \in GL(V)$, as required.
+
+    \emph{Remark.} The hypothesis \texttt{[Infinite R]} is essential and replaces the weaker
+    Lemma~\ref{lem:cast-distinct}, which only yields $|R| \ge k+1$ globally and cannot guarantee $k+1$
+    distinct scalars \emph{outside} the bad set $B$ (whose only known bound is $|B| \le \dim V$). One could
+    instead assume the explicit inequality $k + \dim_R V < |R|$.
 \end{proof}
 
 \begin{lemma}[The unit orbit spans the same space]
     \label{lem:units-span-eq}
     \lean{LeanEval.RepresentationTheory.span_range_glAction_eq_span_map}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/EndTensor.lean}
-    \uses{lem:cast-distinct, lem:shifted-invertible, lem:poly-coeff-in-span, def:end-tensor-equiv}
+    \uses{lem:exists-distinct-invertible-shifts, lem:poly-coeff-in-span, def:end-tensor-equiv}
     The $R$-linear span of $\{\, \mathrm{glAction}(g) : g \in GL(V) \,\}$ equals the span of
     $\{\, \mathrm{map}(i \mapsto m) : m \in \operatorname{End}_R V \,\}$, i.e.\ under $\Phi^{\sim}$ the span of
     $\{ g^{\otimes k} : g \in GL(V)\}$ equals the span of $\{ m^{\otimes k} : m \in \operatorname{End}_R V\}$.
 \end{lemma}
 \begin{proof}
-    \uses{lem:cast-distinct, lem:shifted-invertible, lem:poly-coeff-in-span}
+    \uses{lem:exists-distinct-invertible-shifts, lem:poly-coeff-in-span}
     Since $\Phi^{\sim}$ (Definition~\ref{def:end-tensor-equiv}) sends $g^{\otimes k}$ to
     $\mathrm{glAction}(g)$ and $m^{\otimes k}$ to $\mathrm{map}(i \mapsto m)$, it is equivalent to prove
     the spans of $\{g^{\otimes k}\}$ and $\{m^{\otimes k}\}$ in $W^{\otimes k}$ agree. One inclusion is
     clear since units are endomorphisms. For the other, fix $m \in \operatorname{End}_R V$ and consider
-    the polynomial map $p(t) = (m + t\cdot\mathrm{id})^{\otimes k}$ of degree $\le k$ in $t$, with
-    constant term $p(0) = m^{\otimes k}$. By Lemma~\ref{lem:shifted-invertible} all but $\le \dim V$
-    scalars $t$ give $m + t\,\mathrm{id} \in GL(V)$, and by Lemma~\ref{lem:cast-distinct} $R$ has at
-    least $k+1$ elements, so we may pick $k+1$ pairwise distinct $t_0, \ldots, t_k$ with each
-    $m + t_j\,\mathrm{id} \in GL(V)$. Applying Lemma~\ref{lem:poly-coeff-in-span} to the constant term
-    expresses $m^{\otimes k}$ as an $R$-linear combination of the values $(m + t_j\,\mathrm{id})^{\otimes k}$,
-    each of which is $g^{\otimes k}$ for a unit $g$ and so lies in the span of the unit orbit.
+    the single-variable polynomial map $p(t) = (m + t\cdot\mathrm{id})^{\otimes k}$ of degree $\le k$ in
+    $t$, with constant term $p(0) = m^{\otimes k}$. By Lemma~\ref{lem:exists-distinct-invertible-shifts}
+    pick $k+1$ pairwise distinct $t_0, \ldots, t_k$ with each $m + t_j\,\mathrm{id} \in GL(V)$. Applying
+    Lemma~\ref{lem:poly-coeff-in-span} to the constant term expresses $m^{\otimes k}$ as an $R$-linear
+    combination of the values $(m + t_j\,\mathrm{id})^{\otimes k}$, each of which is $g^{\otimes k}$ for a
+    unit $g$ and so lies in the span of the unit orbit.
+\end{proof}
+
+\begin{lemma}[Commuting with $S_k$ corresponds to $\rho$-invariance under $\Phi^{\sim}$]
+    \label{lem:commute-symAction-iff-invariant}
+    \uses{def:end-tensor-equiv, lem:end-tensor-intertwine}
+    Let $x \in \operatorname{End}_R(V^{\otimes k})$ and write $\xi := (\Phi^{\sim})^{-1}(x) \in
+    (\operatorname{End}_R V)^{\otimes k}$. Then $x \in \mathcal{C}(\operatorname{range}\mathrm{symAction})$
+    (i.e.\ $x$ commutes with $\mathrm{symAction}(\sigma)$ for every $\sigma \in S_k$) if and only if
+    $\xi$ is $\rho$-invariant, $\rho(\sigma)\,\xi = \xi$ for all $\sigma$.
+\end{lemma}
+\begin{proof}
+    \uses{def:end-tensor-equiv, lem:end-tensor-intertwine}
+    By \texttt{Subalgebra.mem\_centralizer\_iff}, $x$ commutes with $\mathrm{symAction}(\sigma)$ iff
+    $\mathrm{symAction}(\sigma)\,x\,\mathrm{symAction}(\sigma)^{-1} = x$. Transporting through the algebra
+    equivalence $\Phi^{\sim}$ (Definition~\ref{def:end-tensor-equiv}) and using
+    Lemma~\ref{lem:end-tensor-intertwine}, which states $\Phi^{\sim}(\rho(\sigma)\,\xi) =
+    \mathrm{symAction}(\sigma)\,\Phi^{\sim}(\xi)\,\mathrm{symAction}(\sigma)^{-1}$, the conjugation-fixed
+    condition on $x = \Phi^{\sim}(\xi)$ is equivalent (by injectivity of $\Phi^{\sim}$) to
+    $\rho(\sigma)\,\xi = \xi$. Quantifying over $\sigma$ gives the claim.
 \end{proof}
 
 \begin{lemma}[Centralizer of $S_k$ is the symmetric tensors]
     \label{lem:centralizer-sym-eq-symmetric}
     \lean{LeanEval.RepresentationTheory.centralizer_range_symAction_eq_span_map}
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl/EndTensor.lean}
-    \uses{def:symmetriser, def:end-tensor-equiv, lem:end-tensor-intertwine, lem:symmetriser-idempotent, lem:powers-span-symmetric}
+    \uses{def:symmetriser, def:end-tensor-equiv, lem:commute-symAction-iff-invariant, lem:symmetriser-range-invariants, lem:powers-span-symmetric}
     $\mathcal{C}(\operatorname{range}\mathrm{symAction})$ equals the image under $\Phi^{\sim}$ of the
     symmetric tensors $\operatorname{LinearMap.range} e$ in $(\operatorname{End}_R V)^{\otimes k}$,
     equivalently the $R$-linear span of
     $\{\, \mathrm{map}(i \mapsto m) : m \in \operatorname{End}_R V \,\}$.
 \end{lemma}
 \begin{proof}
-    \uses{def:end-tensor-equiv, lem:end-tensor-intertwine, lem:symmetriser-idempotent, lem:powers-span-symmetric}
-    Under the equivalence $\Phi^{\sim}$ (Definition~\ref{def:end-tensor-equiv}), conjugation by
-    $\mathrm{symAction}(\sigma)$ corresponds to the factor-permuting $S_k$-action by
-    Lemma~\ref{lem:end-tensor-intertwine}; hence commuting with every $\mathrm{symAction}(\sigma)$ is
-    equivalent to being fixed by every factor permutation, i.e.\ to being a $\rho$-invariant tensor. By
-    Lemma~\ref{lem:symmetriser-idempotent} the $\rho$-invariants are exactly
-    $\operatorname{LinearMap.range} e$. By Lemma~\ref{lem:powers-span-symmetric} those symmetric tensors are
-    exactly the span of the pure powers $\{m^{\otimes k}\}$, which $\Phi^{\sim}$ carries to the span of
+    \uses{def:end-tensor-equiv, lem:commute-symAction-iff-invariant, lem:symmetriser-range-invariants, lem:powers-span-symmetric}
+    By Lemma~\ref{lem:commute-symAction-iff-invariant}, $x \in \mathcal{C}(\operatorname{range}
+    \mathrm{symAction})$ iff $(\Phi^{\sim})^{-1}(x)$ is $\rho$-invariant; i.e.\
+    $\mathcal{C}(\operatorname{range}\mathrm{symAction}) = \Phi^{\sim}(\rho.\mathrm{invariants})$. By
+    Lemma~\ref{lem:symmetriser-range-invariants} the $\rho$-invariants are exactly
+    $\operatorname{LinearMap.range} e$, and by Lemma~\ref{lem:powers-span-symmetric} these symmetric
+    tensors are the span of the pure powers $\{m^{\otimes k}\}$, which $\Phi^{\sim}$ carries to the span of
     $\{\mathrm{map}(i \mapsto m)\}$.
 \end{proof}
 
@@ -602,11 +1029,13 @@ permuting the $k$ tensor legs.
     \leanfile{LeanEval/RepresentationTheory/SchurWeyl.lean}
     \uses{lem:adjoin-le-centralizer, lem:double-commutant, lem:units-span-eq, lem:centralizer-sym-eq-symmetric, lem:centralizer-span}
     \leanok
-    With $R$ a field, $V$ finite-dimensional and $k!$ invertible in $R$,
+    With $R$ an infinite field (\texttt{[Infinite R]}), $V$ finite-dimensional and $k!$ invertible in $R$,
     \[
         \operatorname{adjoin}_R(\operatorname{range}\mathrm{symAction})
           = \mathcal{C}\bigl(\operatorname{range}\mathrm{glAction}\bigr).
     \]
+    (The infiniteness of $R$ is used only through Lemma~\ref{lem:exists-distinct-invertible-shifts}, via
+    Lemma~\ref{lem:units-span-eq}; it can be relaxed to $k + \dim_R V < |R|$.)
 \end{theorem}
 \begin{proof}
     \uses{lem:adjoin-le-centralizer, lem:double-commutant, lem:units-span-eq, lem:centralizer-sym-eq-symmetric, lem:centralizer-span}

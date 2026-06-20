@@ -238,7 +238,7 @@ theorem finite_not_isUnit_shift [FiniteDimensional R M] (m : Module.End R M) :
       have h_eval : p.eval (-t) = LinearMap.det ((algebraMap R (Module.End R M) (-t)) - m) := by
         rw [LinearMap.eval_charpoly m (-t)]
       have h_eq : (algebraMap R (Module.End R M) (-t)) - m = -(m + t • (1 : Module.End R M)) := by
-        ext x; simp [sub_eq_add_neg, smul_neg]
+        ext x; simp [sub_eq_add_neg]
       have h_det_neg : LinearMap.det (-(m + t • (1 : Module.End R M))) =
         (-1 : R) ^ Module.finrank R M * LinearMap.det (m + t • (1 : Module.End R M)) := by
         simpa [add_comm, add_left_comm, add_assoc] using
@@ -277,7 +277,7 @@ theorem finite_not_isUnit_shift [FiniteDimensional R M] (m : Module.End R M) :
   let Rset : Set R := {r | p.eval r = 0}
   have hRset_finite : Rset.Finite := Polynomial.finite_setOf_isRoot hp_ne_zero
   have hS_eq_image : {t | p.eval (-t) = 0} = (-·) '' Rset := by
-    ext t; simp [Rset, Set.mem_image, eq_comm]
+    ext t; simp [Rset, eq_comm]
   have hfinite : S.Finite := by
     rw [hS_eq, hS_eq_image]
     exact hRset_finite.image (fun x : R => -x)
@@ -303,7 +303,8 @@ theorem finite_not_isUnit_shift [FiniteDimensional R M] (m : Module.End R M) :
 
 /-- The `GL(V)`-orbit spans the same space as the diagonal `End_R V`-orbit: the span of
 `{ glAction g : g ∈ GL(V) }` equals the span of `{ map (fun i => m) : m ∈ End_R V }`. -/
-theorem span_range_glAction_eq_span_map [FiniteDimensional R M] [Invertible (k.factorial : R)] :
+theorem span_range_glAction_eq_span_map [Infinite R] [FiniteDimensional R M]
+    [Invertible (k.factorial : R)] :
     Submodule.span R (Set.range (glAction R M k)) =
       Submodule.span R (Set.range fun m : Module.End R M =>
         PiTensorProduct.map (fun _ : Fin k => m)) := by
