@@ -25,7 +25,28 @@ noncomputable def endTensorHom (R M : Type*) [Field R] [AddCommGroup M] [Module 
     (PiTensorProduct.lift
       (PiTensorProduct.mapMultilinear (R := R) (s := fun _ : Fin k => M)
         (t := fun _ : Fin k => M)))
-    sorry sorry
+    (by
+      rw [PiTensorProduct.one_def, PiTensorProduct.lift.tprod,
+        PiTensorProduct.mapMultilinear_apply]
+      exact PiTensorProduct.map_one)
+    (by
+      intro x y
+      refine PiTensorProduct.induction_on x ?_ ?_
+      · intro r a
+        refine PiTensorProduct.induction_on y ?_ ?_
+        · intro s b
+          rw [PiTensorProduct.smul_tprod_mul_smul_tprod, map_smul, map_smul, map_smul,
+            PiTensorProduct.lift.tprod, PiTensorProduct.lift.tprod, PiTensorProduct.lift.tprod,
+            PiTensorProduct.mapMultilinear_apply, PiTensorProduct.mapMultilinear_apply,
+            PiTensorProduct.mapMultilinear_apply, smul_mul_smul_comm]
+          congr 1
+          have hab : (a * b) = (fun i => a i ∘ₗ b i) := rfl
+          rw [hab, PiTensorProduct.map_comp]
+          rfl
+        · intro y₁ y₂ hy₁ hy₂
+          rw [mul_add, map_add, map_add, hy₁, hy₂, mul_add]
+      · intro x₁ x₂ hx₁ hx₂
+        rw [add_mul, map_add, map_add, hx₁, hx₂, add_mul])
 
 /-- The two endomorphism spaces have equal (finite) dimension, both `(dim V)^(2k)`. -/
 theorem finrank_endTensor_eq [FiniteDimensional R M] :
