@@ -330,7 +330,7 @@ private lemma commute_symAction_iff_invariant [FiniteDimensional R M]
     have hx_all' (σ : Equiv.Perm (Fin k)) : σAct σ * x * σAct (σ⁻¹) = x := by
       calc
         σAct σ * x * σAct (σ⁻¹) = (x * σAct σ) * σAct (σ⁻¹) := by rw [hx_all σ]
-        _ = x * (σAct σ * σAct (σ⁻¹)) := by ring
+        _ = x * (σAct σ * σAct (σ⁻¹)) := by rw [mul_assoc]
         _ = x * σAct (σ * σ⁻¹) := by rw [MonoidHom.map_mul (σAct : _ →* _)]
         _ = x * σAct 1 := by simp
         _ = x := by simp
@@ -356,24 +356,20 @@ private lemma commute_symAction_iff_invariant [FiniteDimensional R M]
     intro y hy
     rcases hy with ⟨σ, rfl⟩
     have hξ_σ : ρ σ (Φ.symm x) = Φ.symm x := hξ_all σ
-    calc
-      σAct σ * x = σAct σ * Φ (Φ.symm x) := by simp
-      _ = σAct σ * endTensorHom R M k (Φ.symm x) := rfl
-      _ = (σAct σ * endTensorHom R M k (Φ.symm x) * σAct (σ⁻¹)) * σAct σ := by
-        calc
-          σAct σ * endTensorHom R M k (Φ.symm x)
-              = (σAct σ * endTensorHom R M k (Φ.symm x) * σAct (σ⁻¹)) * σAct σ := by
-            calc
-              σAct σ * endTensorHom R M k (Φ.symm x)
-                  = (σAct σ * endTensorHom R M k (Φ.symm x) * 1) := by simp
-              _ = (σAct σ * endTensorHom R M k (Φ.symm x) * (σAct (σ⁻¹) * σAct σ)) := by simp
-              _ = (σAct σ * endTensorHom R M k (Φ.symm x) * σAct (σ⁻¹)) * σAct σ := by ring
-          _ = (σAct σ * endTensorHom R M k (Φ.symm x) * σAct (σ⁻¹)) * σAct σ := rfl
-      _ = endTensorHom R M k (ρ σ (Φ.symm x)) * σAct σ := by
-        rw [← endTensorHom_intertwine σ (Φ.symm x)]
-      _ = endTensorHom R M k (Φ.symm x) * σAct σ := by rw [hξ_σ]
-      _ = Φ (Φ.symm x) * σAct σ := rfl
-      _ = x * σAct σ := by simp
+    have hΦx : endTensorHom R M k (Φ.symm x) = x := by
+      show Φ (Φ.symm x) = x
+      simp
+    have hinv : σAct (σ⁻¹) * σAct σ = 1 := by
+      rw [← map_mul]
+      simp
+    have key : x = σAct σ * x * σAct (σ⁻¹) := by
+      have h1 : endTensorHom R M k (ρ σ (Φ.symm x)) = σAct σ * x * σAct (σ⁻¹) := by
+        rw [endTensorHom_intertwine σ (Φ.symm x), hΦx]
+      have h2 : endTensorHom R M k (ρ σ (Φ.symm x)) = x := by
+        rw [hξ_σ, hΦx]
+      exact h2.symm.trans h1
+    conv_rhs => rw [key]
+    rw [mul_assoc (σAct σ * x) (σAct (σ⁻¹)) (σAct σ), hinv, mul_one]
 
 /-- The centralizer of `range symAction` equals (as a set) the span of the diagonal maps
 `{ map (fun i => m) : m ∈ End_R V }`, i.e. the symmetric tensors transported by `Φ^~`. -/
