@@ -83,7 +83,34 @@ theorem cyclotomic_embedding (n : ℕ) [NeZero n] [NeZero ((n : ℕ) : ℚ)]
     ∃ φ : CyclotomicField n ℚ →+* ℂ,
       IsPrimitiveRoot
         (φ (IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ))) n := by
-  sorry
+  have hn : 0 < n := NeZero.pos n
+  rcases complex_primitive_root n hn with ⟨ζ, hζ⟩
+  have hzeta_spec : IsPrimitiveRoot
+      (IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ)) n :=
+    IsCyclotomicExtension.zeta_spec n ℚ (CyclotomicField n ℚ)
+  have hirr : Irreducible (Polynomial.cyclotomic n ℚ) :=
+    Polynomial.cyclotomic.irreducible_rat hn
+  let h_equiv : (CyclotomicField n ℚ →ₐ[ℚ] ℂ) ≃ primitiveRoots n ℂ :=
+    hzeta_spec.embeddingsEquivPrimitiveRoots ℂ hirr
+  have mem : ζ ∈ primitiveRoots n ℂ :=
+    ((mem_primitiveRoots hn).mpr hζ)
+  let root : primitiveRoots n ℂ := ⟨ζ, mem⟩
+  let φ' : CyclotomicField n ℚ →ₐ[ℚ] ℂ := h_equiv.symm root
+  have h_φ'_zeta_eq_ζ : φ' (IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ)) = ζ := by
+    calc
+      φ' (IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ))
+          = (hzeta_spec.embeddingsEquivPrimitiveRoots ℂ hirr φ' : ℂ) := by
+        symm
+        exact hzeta_spec.embeddingsEquivPrimitiveRoots_apply_coe ℂ hirr φ'
+      _ = (h_equiv φ' : ℂ) := rfl
+      _ = (root : ℂ) := by
+        rw [Equiv.apply_symm_apply]
+      _ = ζ := rfl
+  refine ⟨φ'.toRingHom, ?_⟩
+  have h_target : φ'.toRingHom (IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ)) = ζ := by
+    simpa using h_φ'_zeta_eq_ζ
+  rw [h_target]
+  exact hζ
 
 /-- The range of any ring embedding `φ : CyclotomicField n ℚ →+* ℂ` whose
 image of the canonical primitive root is a primitive `n`-th root of unity
@@ -95,7 +122,20 @@ theorem range_contains_roots_of_unity (n : ℕ) [NeZero n] [NeZero ((n : ℕ) : 
             (φ (IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ))) n)
     {μ : ℂ} (hμ : μ ^ n = 1) :
     μ ∈ φ.range := by
-  sorry
+  -- let ζ be the canonical primitive root in CyclotomicField n ℚ
+  let ζ := IsCyclotomicExtension.zeta n ℚ (CyclotomicField n ℚ)
+  -- z := φ ζ is a primitive n-th root of unity in ℂ by hypothesis
+  have hz : IsPrimitiveRoot (φ ζ) n := hφ
+  -- every μ with μ^n = 1 is a power (φ ζ)^i for some i < n
+  rcases hz.eq_pow_of_pow_eq_one hμ with ⟨i, hi, h⟩
+  -- then μ = φ (ζ^i)
+  have hmem : μ = φ (ζ ^ i) := by
+    calc
+      μ = (φ ζ) ^ i := h.symm
+      _ = φ (ζ ^ i) := by rw [map_pow φ ζ i]
+  -- hence μ ∈ φ.range
+  rw [RingHom.mem_range]
+  exact ⟨ζ ^ i, hmem.symm⟩
 
 @[eval_problem]
 theorem brauer_character_in_cyclotomic
