@@ -1,0 +1,173 @@
+\section{Bourbaki's locally convex extension of Banach--Alaoglu}
+
+Throughout this chapter $E$ is a real locally convex topological vector space:
+an $\mathbb{R}$-vector space with a topology making addition and scalar
+multiplication continuous and admitting a base of convex neighbourhoods of the
+origin. We write $\mathrm{WeakDual}\,\mathbb{R}\,E$ for the space of continuous
+linear functionals $\varphi : E \to \mathbb{R}$ equipped with the weak-star
+topology, i.e.\ the topology of pointwise convergence induced by the evaluation
+maps $\varphi \mapsto \varphi(x)$.
+
+\begin{definition}[Weak-star polar]
+    \label{def:weak-star-polar}
+    Let $s \subseteq E$. The \emph{weak-star polar} of $s$ is the set
+    \[
+        \operatorname{polar}(s)
+        = \{\, \varphi \in \mathrm{WeakDual}\,\mathbb{R}\,E \mid
+              \forall x \in s,\ \lVert \varphi(x) \rVert \le 1 \,\}.
+    \]
+    (This matches the Lean definition \texttt{LeanEval.Analysis.weakStarPolar}.)
+\end{definition}
+
+The proof realises each functional by its family of values and transfers the
+problem to the space $E \to \mathbb{R}$ carrying the topology of pointwise
+convergence. The first lemma records that this transfer is faithful.
+
+\begin{lemma}[The evaluation embedding]
+    \label{lem:coe-embedding}
+    The coercion
+    $(\cdot) : \mathrm{WeakDual}\,\mathbb{R}\,E \to (E \to \mathbb{R})$,
+    $\varphi \mapsto (x \mapsto \varphi(x))$, is a topological embedding.
+    Consequently, for any $S \subseteq \mathrm{WeakDual}\,\mathbb{R}\,E$, the set
+    $S$ is compact if and only if its image $(\cdot)\,''\,S$ is compact in
+    $E \to \mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    By definition the weak-star topology on $\mathrm{WeakDual}\,\mathbb{R}\,E$
+    is the topology induced by this coercion, and the coercion is injective
+    because a linear functional is determined by its values. An injective map
+    from a space carrying the induced topology is a topological embedding, and a
+    set is compact if and only if its image under a topological embedding is
+    compact.
+\end{proof}
+
+\begin{lemma}[Pointwise boundedness via absorbency]
+    \label{lem:polar-pointwise-bounded}
+    \uses{def:weak-star-polar}
+    Let $U$ be a neighbourhood of $0$ in $E$ and let $x \in E$. Then there
+    exists $r \ge 0$ such that $\lVert \varphi(x) \rVert \le r$ for every
+    $\varphi \in \operatorname{polar}(U)$.
+\end{lemma}
+\begin{proof}
+    A neighbourhood of the origin in a topological vector space is absorbent, so
+    there is a scalar $c \ne 0$ with $c^{-1} \cdot x \in U$. For any
+    $\varphi \in \operatorname{polar}(U)$, linearity gives
+    $\varphi(x) = c \, \varphi(c^{-1} \cdot x)$, and
+    $\lVert \varphi(c^{-1} \cdot x) \rVert \le 1$ since $c^{-1} \cdot x \in U$.
+    Hence $\lVert \varphi(x) \rVert \le \lvert c \rvert$, and $r = \lvert c
+    \rvert$ works.
+\end{proof}
+
+\begin{lemma}[Bounded linear functionals are continuous]
+    \label{lem:linear-bounded-continuous}
+    Let $U$ be a neighbourhood of $0$ in $E$ and let $g : E \to \mathbb{R}$ be a
+    linear functional with $\lVert g(x) \rVert \le 1$ for all $x \in U$. Then
+    $g$ is continuous; equivalently, $g$ is the coercion of an element of
+    $\mathrm{WeakDual}\,\mathbb{R}\,E$.
+\end{lemma}
+\begin{proof}
+    The functional $g$ maps the neighbourhood $U$ of $0$ into the interval
+    $[-1,1] \subseteq \mathbb{R}$. This interval is metric-bounded by
+    \texttt{Metric.isBounded\_Icc}, hence von Neumann bounded by
+    \texttt{NormedSpace.isVonNBounded\_of\_isBounded}. A linear map sending some
+    neighbourhood of $0$ into a von Neumann bounded set is continuous, so $g$ is
+    continuous and therefore is the coercion of a continuous linear functional,
+    i.e.\ an element of $\mathrm{WeakDual}\,\mathbb{R}\,E$.
+\end{proof}
+
+\begin{lemma}[The image as an intersection]
+    \label{lem:polar-image-eq}
+    \uses{def:weak-star-polar, lem:linear-bounded-continuous}
+    Let $U$ be a neighbourhood of $0$ in $E$. Write
+    $L \subseteq (E \to \mathbb{R})$ for the range of the coercion
+    $\mathrm{Hom}_{\mathbb{R}}(E, \mathbb{R}) \to (E \to \mathbb{R})$ that forgets
+    linearity, i.e.\ the set of $\mathbb{R}$-linear functions $E \to \mathbb{R}$.
+    Then
+    \[
+        (\cdot)\,''\,\operatorname{polar}(U)
+        = L \cap \{\, g : E \to \mathbb{R} \mid
+              \forall x \in U,\ \lVert g(x) \rVert \le 1 \,\}.
+    \]
+\end{lemma}
+\begin{proof}
+    Forward inclusion: if $g = (\cdot)\,\varphi$ for some
+    $\varphi \in \operatorname{polar}(U)$, then $g$ is linear (as the coercion of
+    a continuous linear functional) and $\lVert g(x) \rVert \le 1$ for all
+    $x \in U$ by definition of $\operatorname{polar}(U)$. Backward inclusion:
+    given a linear $g$ with $\lVert g(x) \rVert \le 1$ for all $x \in U$,
+    Lemma~\ref{lem:linear-bounded-continuous} shows $g$ is the coercion of some
+    $\varphi \in \mathrm{WeakDual}\,\mathbb{R}\,E$, and this $\varphi$ lies in
+    $\operatorname{polar}(U)$ because $\lVert \varphi(x) \rVert = \lVert g(x)
+    \rVert \le 1$ for $x \in U$; hence $g$ is in the image.
+\end{proof}
+
+\begin{lemma}[Closedness of the intersection]
+    \label{lem:polar-image-closed}
+    The set
+    \[
+        L \cap \{\, g : E \to \mathbb{R} \mid
+              \forall x \in U,\ \lVert g(x) \rVert \le 1 \,\}
+    \]
+    from Lemma~\ref{lem:polar-image-eq} is closed in $E \to \mathbb{R}$ for the
+    topology of pointwise convergence.
+\end{lemma}
+\begin{proof}
+    The set $L$ of linear functions is closed by
+    \texttt{LinearMap.isClosed\_range\_coe}. The second factor is the
+    intersection over $x \in U$ of the sets
+    $\{ g \mid \lVert g(x) \rVert \le 1 \}$; it is closed by
+    \texttt{isClosed\_iInter}, since each such set is closed by
+    \texttt{isClosed\_le} applied to the continuous maps $g \mapsto \lVert g(x)
+    \rVert$ (the evaluation $g \mapsto g(x)$ is continuous by
+    \texttt{continuous\_apply}) and the constant map $1$. An intersection of two
+    closed sets is closed.
+\end{proof}
+
+\begin{lemma}[The image lies in a compact box]
+    \label{lem:polar-image-subset-compact-box}
+    \uses{def:weak-star-polar, lem:polar-pointwise-bounded}
+    Let $U$ be a neighbourhood of $0$ in $E$. By
+    Lemma~\ref{lem:polar-pointwise-bounded} choose, for each $x \in E$, a bound
+    $r(x) \ge 0$ with $\lVert \varphi(x) \rVert \le r(x)$ for all
+    $\varphi \in \operatorname{polar}(U)$. Then the box
+    $\prod_{x \in E} [-r(x), r(x)]$ is compact in $E \to \mathbb{R}$, and the
+    image $(\cdot)\,''\,\operatorname{polar}(U)$ is contained in it.
+\end{lemma}
+\begin{proof}
+    Each factor $[-r(x), r(x)]$ is a compact interval
+    (\texttt{isCompact\_Icc}), so the product box is compact by Tychonoff's
+    theorem (\texttt{isCompact\_univ\_pi}). If $g = (\cdot)\,\varphi$ with
+    $\varphi \in \operatorname{polar}(U)$, then for each $x \in E$ we have
+    $\lVert g(x) \rVert = \lVert \varphi(x) \rVert \le r(x)$, so
+    $g(x) \in [-r(x), r(x)]$; hence $g$ lies in the box.
+\end{proof}
+
+\begin{lemma}[Compactness of the image]
+    \label{lem:polar-image-compact}
+    \uses{lem:polar-image-subset-compact-box, lem:polar-image-eq, lem:polar-image-closed}
+    Let $U$ be a neighbourhood of $0$ in $E$. The image
+    $(\cdot)\,''\,\operatorname{polar}(U)$ is compact in $E \to \mathbb{R}$.
+\end{lemma}
+\begin{proof}
+    By Lemma~\ref{lem:polar-image-subset-compact-box} the image is contained in
+    the compact box $\prod_{x \in E} [-r(x), r(x)]$. By
+    Lemma~\ref{lem:polar-image-eq} the image equals the intersection
+    $L \cap \{ g \mid \forall x \in U,\ \lVert g(x) \rVert \le 1 \}$, which is
+    closed by Lemma~\ref{lem:polar-image-closed}. A closed subset of a compact
+    set is compact (\texttt{IsCompact.of\_isClosed\_subset}), so the image is
+    compact.
+\end{proof}
+
+\begin{theorem}[Bourbaki's locally convex Banach--Alaoglu]
+    \label{thm:banach-alaoglu-bourbaki}
+    \uses{def:weak-star-polar, lem:coe-embedding, lem:polar-image-compact}
+    Let $E$ be a real locally convex topological vector space and let $U$ be a
+    neighbourhood of $0$ in $E$. Then $\operatorname{polar}(U)$ is compact in
+    $\mathrm{WeakDual}\,\mathbb{R}\,E$.
+\end{theorem}
+\begin{proof}
+    \uses{lem:coe-embedding, lem:polar-image-compact}
+    By Lemma~\ref{lem:coe-embedding} it suffices to prove that the image
+    $(\cdot)\,''\,\operatorname{polar}(U)$ is compact in $E \to \mathbb{R}$,
+    which is Lemma~\ref{lem:polar-image-compact}.
+\end{proof}
