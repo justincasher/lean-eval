@@ -613,7 +613,7 @@ def extractStatementText (problemId : String) (sourcePath : System.FilePath)
   let some headerEnd := Source.findTheoremHeader src 0 theoremName
     | throw <| IO.userError
         s!"Could not recover theorem statement text for '{problemId}' from {sourcePath}"
-  let some byPos := Source.rfind src src.size ":= by".toList
+  let some byPos := Source.find src headerEnd ":= by".toList
     | throw <| IO.userError
         s!"Could not recover theorem statement text for '{problemId}' from {sourcePath}"
   if byPos < headerEnd then
@@ -689,17 +689,6 @@ def explicitBinderApplicationArgs (statement : String) : Array String := Id.run 
       args := args.push name
   return args
 
-/-- Strip the `:= <body>` off the end of a sliced declaration. Mirrors
-`_hole_decl_signature`. -/
-def holeDeclSignature (declText basename : String) : IO String := do
-  let stripped := (stripProblemMarkers declText).trimAscii.toString
-  let src := Source.ofString stripped
-  let some idx := Source.rfind src src.size ":=".toList
-    | throw <| IO.userError
-        s!"Hole '{basename}' declaration has no `:=` to split: {stripped.quote}"
-  let prefix' := (Source.slice src 0 idx).trimAsciiEnd.toString
-  return prefix' ++ " := "
-
 /-- Find `<keyword> <basename>` for any keyword in `keywords`, with word
 boundaries. Returns the codepoint position of the start of the keyword and
 the position just past the basename. -/
@@ -727,6 +716,23 @@ def Source.findKeywordBasename (s : Source) (keywords : Array String) (basename 
                 return some (i, endBase)
     i := i + 1
   return none
+
+/-- Strip the outer `:= <body>` off a sliced declaration. Search after the
+declaration basename and use the first body marker so nested local definitions
+and proofs do not leak into the generated signature. -/
+def holeDeclSignature (declText basename : String) : IO String := do
+  let stripped := (stripProblemMarkers declText).trimAscii.toString
+  let src := Source.ofString stripped
+  let some (_, basenameEnd) := Source.findKeywordBasename src
+      #["def", "instance", "theorem", "opaque", "lemma", "abbrev", "class", "example"]
+      basename
+    | throw <| IO.userError
+        s!"Could not locate basename '{basename}' in source declaration."
+  let some idx := Source.find src basenameEnd ":=".toList
+    | throw <| IO.userError
+        s!"Hole '{basename}' declaration has no `:=` to split: {stripped.quote}"
+  let prefix' := (Source.slice src 0 idx).trimAsciiEnd.toString
+  return prefix' ++ " := "
 
 /-- Rewrite a non-theorem hole signature for the `Solution.lean` delegation:
 inject `@[reducible] noncomputable` immediately before the declaration
@@ -1534,7 +1540,7 @@ private def renderWorkspaceMultiHole (root : System.FilePath) (entry : EvalProbl
           s!"Could not locate basename '{basename}' in source decl for hole '{fullName}'."
     let between := Source.slice declSrc kwEnd declSrc.size
     let betweenSrc := Source.ofString between
-    let some lastEq := Source.rfind betweenSrc betweenSrc.size ":=".toList
+    let some lastEq := Source.find betweenSrc 0 ":=".toList
       | throw <| IO.userError s!"Source decl for hole '{fullName}' has no `:=` body marker."
     let statement := Source.slice betweenSrc 0 lastEq
     let explicitArgs := explicitBinderApplicationArgs statement

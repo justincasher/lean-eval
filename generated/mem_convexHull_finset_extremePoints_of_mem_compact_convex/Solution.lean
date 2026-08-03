@@ -1,7 +1,10 @@
-import Mathlib
+import ChallengeDeps
 import Submission
 
+open LeanEval.ConvexGeometry
 open Set
+
+universe u
 
 theorem mem_convexHull_finset_extremePoints_of_mem_compact_convex {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     {s : Set E} {x : E}

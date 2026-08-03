@@ -1,4 +1,6 @@
-import Mathlib
+import ChallengeDeps
+
+open LeanEval.RepresentationTheory
 
 theorem brauer_character_in_cyclotomic (G : Type) [Group G] [Fintype G] :
     ∃ φ : CyclotomicField (Monoid.exponent G) ℚ →+* ℂ,

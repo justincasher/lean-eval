@@ -6,7 +6,7 @@
       "name": "LeanEval.GroupTheory.BooneHigmanSimpleProblem.boone_higman_simple",
       "basename": "boone_higman_simple",
       "kind": "theorem",
-      "body": "/-- **Kuznetsov's theorem** (A.V. Kuznetsov, 1958). A finitely presented\nsimple group has a solvable word problem. -/\ntheorem boone_higman_simple\n    {G : Type*} [Group G] [IsSimpleGroup G]\n    {n : \u2115} (\u03c6 : FreeGroup (Fin n) \u2192* G)\n    (_hsurj : Function.Surjective \u03c6)\n    (_hker : (MonoidHom.ker \u03c6).IsFinitelyNormallyGenerated) :\n    WordProblemSolvable \u03c6 := by\n  sorry"
+      "body": "/-- **Kuznetsov's theorem** (A.V. Kuznetsov, 1958). A finitely presented simple\ngroup has a solvable word problem. -/\ntheorem boone_higman_simple\n    {G : Type*} [Group G] [IsSimpleGroup G]\n    {n : \u2115} (\u03c6 : FreeGroup (Fin n) \u2192* G)\n    (_hsurj : Function.Surjective \u03c6)\n    (_hker : (MonoidHom.ker \u03c6).IsFinitelyNormallyGenerated) :\n    WordProblemSolvable \u03c6 := by\n  -- Equip the predicate with classical decidability\n  haveI : DecidablePred (wordProblemPred \u03c6) := Classical.decPred _\n  -- By Post's theorem, a decidable-instance predicate is computable iff both it\n  -- and its complement are recursively enumerable.\n  rw [WordProblemSolvable, ComputablePred.computable_iff_re_compl_re]\n  refine \u27e8?_, ?_\u27e9\n  \u00b7 exact re_positive \u03c6 _hker\n  \u00b7 exact re_negative \u03c6 _hsurj _hker"
     }
   ]
 }

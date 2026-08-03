@@ -1,5 +1,6 @@
-import Mathlib
+import ChallengeDeps
 
+open LeanEval.ComplexAnalysis
 open Polynomial
 
 theorem exists_complementary_polynomial_on_unit_circle (P : ℂ[X])

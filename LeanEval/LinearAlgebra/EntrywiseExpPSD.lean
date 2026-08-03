@@ -21,6 +21,8 @@ positive semidefiniteness, with applications in statistics (correlation matrices
 quantum information theory (density matrices).
 -/
 
+section
+
 variable {n : Type*} [Fintype n] [DecidableEq n] {A : Matrix n n ℝ}
 
 omit [DecidableEq n] in
@@ -176,7 +178,10 @@ theorem quadForm_map_exp_eq_tsum (A : Matrix n n ℝ) (x : n → ℝ) :
       refine tsum_congr (fun k => ?_)
       rw [power_term_eq_quadForm A x k]
 
-omit [DecidableEq n] in
+end
+
+variable {n : Type*} [Fintype n] {A : Matrix n n ℝ}
+
 /-- **Entrywise exponential of a PSD matrix is PSD.** If `A ∈ ℝ^{n × n}` is positive
 semidefinite, then its entrywise exponential `exp_⊙(A)` (with entries `exp(a_{ij})`) is
 positive semidefinite. -/

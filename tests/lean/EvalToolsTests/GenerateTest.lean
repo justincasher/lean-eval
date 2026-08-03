@@ -91,6 +91,28 @@ def main : IO UInt32 := do
     pure <| assertEq "submission namespace inserted after header"
       ((wrapped.find? "\nnamespace Submission\n\nnamespace Demo\n").isSome) true
 
+  -- The theorem statement ends at the outer proof delimiter, not at a nested
+  -- local proof later in the declaration body. Using the last `:= by` here
+  -- leaks solution tactics into the generated challenge.
+  check "extractStatementText stops at the outer proof" passes fails do
+    let declaration :=
+      "theorem target (x : Nat) : True := by\n" ++
+      "  have h : True := by\n" ++
+      "    trivial\n" ++
+      "  exact h\n"
+    let statement ← extractStatementText "demo" "Demo.lean" declaration "target"
+    pure <| assertEq "outer theorem statement" statement "(x : Nat) : True"
+
+  check "holeDeclSignature stops at the outer proof" passes fails do
+    let declaration :=
+      "theorem target (x : Nat) : True := by\n" ++
+      "  have h : True := by\n" ++
+      "    trivial\n" ++
+      "  exact h\n"
+    let signature ← holeDeclSignature declaration "target"
+    pure <| assertEq "outer hole signature"
+      signature "theorem target (x : Nat) : True := "
+
   check "isScopedOpenLine: open Foo is top-level" passes fails do
     pure <| assertEq "scoped" (isScopedOpenLine "open Foo") false
 

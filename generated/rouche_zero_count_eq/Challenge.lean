@@ -1,5 +1,6 @@
-import Mathlib
+import ChallengeDeps
 
+open LeanEval.ComplexAnalysis
 open MeromorphicOn
 
 theorem rouche_zero_count_eq {f g : ℂ → ℂ} {R : ℝ}

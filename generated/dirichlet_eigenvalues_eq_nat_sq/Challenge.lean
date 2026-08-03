@@ -1,5 +1,6 @@
-import Mathlib
+import ChallengeDeps
 
+open LeanEval.Analysis.ODE
 open scoped Real
 
 theorem dirichlet_eigenvalues_eq_nat_sq (lam : ℝ) :

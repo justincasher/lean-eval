@@ -156,16 +156,16 @@ theorem mulCayley_connected_iff_reachable_one :
 /-- **Cayley graph connected iff generators generate.** The Cayley graph `mulCayley S` is
 connected if and only if `S` generates `G`, i.e. `Subgroup.closure S = ⊤`. -/
 @[eval_problem]
-theorem mulCayley_connected_iff_closure_eq_top :
-    (SimpleGraph.mulCayley S).Connected ↔ Subgroup.closure S = ⊤ := by
+theorem mulCayley_connected_iff_closure_eq_top (S' : Set G) :
+    (SimpleGraph.mulCayley S').Connected ↔ Subgroup.closure S' = ⊤ := by
   rw [mulCayley_connected_iff_reachable_one, Subgroup.eq_top_iff']
   constructor
   · intro h g
-    have hg : (SimpleGraph.mulCayley S).Reachable (1 : G) g := h g
-    have mem := mulCayley_inv_mul_mem_closure_of_reachable S (1 : G) g hg
+    have hg : (SimpleGraph.mulCayley S').Reachable (1 : G) g := h g
+    have mem := mulCayley_inv_mul_mem_closure_of_reachable S' (1 : G) g hg
     simpa using mem
   · intro h g
-    exact mulCayley_reachable_one_of_mem_closure S (h g)
+    exact mulCayley_reachable_one_of_mem_closure S' (h g)
 
 end Combinatorics
 end LeanEval

@@ -1,5 +1,7 @@
-import Mathlib
+import ChallengeDeps
 import Submission
+
+open LeanEval.Topology
 
 theorem pi3_sphere_two_mulEquiv_int (x : Metric.sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) :
     Nonempty

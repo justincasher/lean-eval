@@ -6,7 +6,7 @@
       "name": "LeanEval.Combinatorics.finite_graph_ramsey_theorem",
       "basename": "finite_graph_ramsey_theorem",
       "kind": "theorem",
-      "body": "theorem finite_graph_ramsey_theorem :\n    \u2200 r s : \u2115, 2 \u2264 r \u2192 2 \u2264 s \u2192 \u2203 n : \u2115, \u2200 G : SimpleGraph (Fin n), \u00ac G.CliqueFree r \u2228 \u00ac G\u1d9c.CliqueFree s := by\n  sorry"
+      "body": "/-- Finite Ramsey theorem for graphs: for all `r, s \u2265 2` there is an `n` such that every simple\ngraph on `Fin n` contains a red `r`-clique or a blue `s`-clique. -/\ntheorem finite_graph_ramsey_theorem :\n    \u2200 r s : \u2115, 2 \u2264 r \u2192 2 \u2264 s \u2192 \u2203 n : \u2115, \u2200 G : SimpleGraph (Fin n), \u00ac G.CliqueFree r \u2228 \u00ac G\u1d9c.CliqueFree s := by\n  intro r s hr hs\n  rcases ramsey_exists hr hs with \u27e8n, hn\u27e9\n  refine \u27e8n, ?_\u27e9\n  intro G\n  have hcard : n \u2264 Fintype.card (Fin n) := by\n    simp [Fintype.card_fin]\n  exact hn (Fin n) G hcard"
     }
   ]
 }

@@ -1,5 +1,9 @@
-import Mathlib
+import ChallengeDeps
 import Submission.Helpers
+
+open LeanEval.GroupTheory
+
+variable {G : Type*} [Group G]
 
 namespace Submission
 
