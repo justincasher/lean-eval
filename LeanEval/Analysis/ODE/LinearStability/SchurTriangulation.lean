@@ -121,7 +121,7 @@ protected noncomputable def SchurTriangulationAux.of {E : Type*}
     let W : Submodule 𝕜 E := Vᗮ
     let m := Module.finrank 𝕜 V
     have hdim : m + Module.finrank 𝕜 W = Module.finrank 𝕜 E := V.finrank_add_finrank_orthogonal
-    let g : Module.End 𝕜 W := Submodule.orthogonalProjection W ∘ₗ f.domRestrict W
+    let g : Module.End 𝕜 W := Submodule.orthogonalProjectionOnto W ∘ₗ f.domRestrict W
     let ⟨n, hn, bW, hg⟩ := SchurTriangulationAux.of g
 
     have bV : OrthonormalBasis (Fin m) 𝕜 V := stdOrthonormalBasis 𝕜 V
@@ -143,11 +143,11 @@ protected noncomputable def SchurTriangulationAux.of {E : Type*}
           | ⟨true, i⟩ => show bE ⟨true, i⟩ = bV i from
             show (int.collectedBasis fun b => (B b).toBasis).toOrthonormalBasis _ ⟨true, i⟩ = bV i
             by simp only [Module.Basis.coe_toOrthonormalBasis, DirectSum.IsInternal.collectedBasis_coe,
-              cond_true, OrthonormalBasis.coe_toBasis, B, V, W]; rfl
+              cond_true, B, V, W]; rfl
           | ⟨false, j⟩ => show bE ⟨false, j⟩ = bW j from
             show (int.collectedBasis fun b => (B b).toBasis).toOrthonormalBasis _ ⟨false, j⟩ = bW j
             by simp only [Module.Basis.coe_toOrthonormalBasis, DirectSum.IsInternal.collectedBasis_coe,
-              cond_false, OrthonormalBasis.coe_toBasis, B, V, W]; rfl
+              cond_false, B, V, W]; rfl
         have hf {bi i' bj j'} (hi : e i = ⟨bi, i'⟩) (hj : e j = ⟨bj, j'⟩) :=
           calc toMatrixOrthonormal basis f i j
             _ = toMatrixOrthonormal bE f (e i) (e j) := by
@@ -184,7 +184,7 @@ protected noncomputable def SchurTriangulationAux.of {E : Type*}
               hf (Equiv.finAddEquivSigmaCond_false hi) (Equiv.finAddEquivSigmaCond_false hj)
             _ = ⟪bW i', g (bW j')⟫_𝕜 := by
               rw [coe_comp, ContinuousLinearMap.coe_coe, Function.comp_apply, domRestrict_apply,
-                Submodule.inner_orthogonalProjection_eq_of_mem_left]
+                Submodule.inner_orthogonalProjectionOnto_eq_of_mem_left]
             _ = toMatrixOrthonormal bW g i' j' := (g.toMatrixOrthonormal_apply_apply ..).symm
             _ = 0 := hg (Nat.sub_lt_sub_right (Nat.le_of_not_lt hj) hji)
     }

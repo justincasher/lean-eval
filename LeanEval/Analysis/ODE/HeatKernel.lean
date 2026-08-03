@@ -96,7 +96,12 @@ theorem kernel_hasDerivAt_space {t : ℝ} (ht : 0 < t) (x : ℝ) :
   have hg : HasDerivAt (fun z : ℝ => -(z ^ 2) / (4 * t)) (-(x / (2 * t))) x := by
     have hsq : HasDerivAt (fun z : ℝ => z ^ 2) (2*x) x := by
       simpa using hasDerivAt_pow 2 x
-    have hneg : HasDerivAt (fun z : ℝ => -(z ^ 2)) (-(2*x)) x := by simpa using hsq.neg
+    have hneg_fun : -(fun z : ℝ => z ^ 2) = fun z : ℝ => -(z ^ 2) := by
+      ext z
+      rfl
+    have hneg : HasDerivAt (fun z : ℝ => -(z ^ 2)) (-(2*x)) x := by
+      rw [← hneg_fun]
+      exact hsq.neg
     have hdiv : HasDerivAt (fun z : ℝ => -(z ^ 2) / (4 * t)) (-(2*x) / (4*t)) x :=
       hneg.div_const (4*t)
     have h_eq : -(2*x) / (4*t) = -(x / (2*t)) := by
@@ -164,7 +169,7 @@ theorem prefactor_hasDerivAt {t : ℝ} (ht : 0 < t) :
       (((-1 : ℝ) / 2) * (4 * Real.pi * t) ^ (((-1 : ℝ) / 2) - 1)) * (4 * Real.pi) =
           ((-1 : ℝ) / 2) * ((4 * Real.pi * t) ^ (((-1 : ℝ) / 2) - 1)) * (4 * Real.pi) := by ring
       _ = ((-1 : ℝ) / 2) * (4 * Real.pi) * (4 * Real.pi * t) ^ (((-1 : ℝ) / 2) - 1) := by ring
-      _ = ((-1 : ℝ) / 2) * (4 * Real.pi) * (4 * Real.pi * t) ^ ((-3 : ℝ) / 2) := by ring
+      _ = ((-1 : ℝ) / 2) * (4 * Real.pi) * (4 * Real.pi * t) ^ ((-3 : ℝ) / 2) := by ring_nf
       _ = (-(1 / (2 * t))) * ((4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2)) := by
         -- Key identity: (4π) * (4π*t)^(-3/2) = (1/t) * (4π*t)^(-1/2)
         have h_key : (4 * Real.pi) * (4 * Real.pi * t) ^ ((-3 : ℝ) / 2) =
@@ -178,19 +183,19 @@ theorem prefactor_hasDerivAt {t : ℝ} (ht : 0 < t) :
                 (4 * Real.pi) * ((4 * Real.pi * t) ^ ((-3 : ℝ) / 2) * (4 * Real.pi * t) ^ ((3 : ℝ) / 2)) := by ring
             _ = (4 * Real.pi) * (4 * Real.pi * t) ^ (((-3 : ℝ) / 2) + ((3 : ℝ) / 2)) := by
               rw [Real.rpow_add h4πt_pos]
-            _ = (4 * Real.pi) * (4 * Real.pi * t) ^ (0 : ℝ) := by ring
+            _ = (4 * Real.pi) * (4 * Real.pi * t) ^ (0 : ℝ) := by ring_nf
             _ = (4 * Real.pi) * 1 := by rw [Real.rpow_zero]
             _ = 4 * Real.pi := by ring
             _ = (1 / t) * (4 * Real.pi * t) := by field_simp [ht_ne_zero]
             _ = (1 / t) * ((4 * Real.pi * t) ^ (1 : ℝ)) := by norm_num
-            _ = (1 / t) * ((4 * Real.pi * t) ^ (((-1 : ℝ) / 2) + ((3 : ℝ) / 2))) := by ring
+            _ = (1 / t) * ((4 * Real.pi * t) ^ (((-1 : ℝ) / 2) + ((3 : ℝ) / 2))) := by ring_nf
             _ = (1 / t) * ((4 * Real.pi * t) ^ ((-1 : ℝ) / 2) * (4 * Real.pi * t) ^ ((3 : ℝ) / 2)) := by
               rw [Real.rpow_add h4πt_pos]
             _ = ((1 / t) * (4 * Real.pi * t) ^ ((-1 : ℝ) / 2)) * (4 * Real.pi * t) ^ ((3 : ℝ) / 2) := by ring
             _ = ((1 / t) * ((4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2))) * (4 * Real.pi * t) ^ ((3 : ℝ) / 2) := by
               have h_eq_rpow : (4 * Real.pi * t) ^ ((-1 : ℝ) / 2) = (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) := by
                 calc
-                  (4 * Real.pi * t) ^ ((-1 : ℝ) / 2) = (4 * Real.pi * t) ^ (-((1 : ℝ) / 2)) := by ring
+                  (4 * Real.pi * t) ^ ((-1 : ℝ) / 2) = (4 * Real.pi * t) ^ (-((1 : ℝ) / 2)) := by ring_nf
                   _ = ((4 * Real.pi * t) ^ ((1 : ℝ) / 2))⁻¹ := by
                     rw [Real.rpow_neg (by positivity : 0 ≤ 4 * Real.pi * t) _]
                   _ = (4 * Real.pi * t)⁻¹ ^ ((1 : ℝ) / 2) := by
@@ -266,7 +271,18 @@ theorem kernel_hasDerivAt_time (x : ℝ) {t : ℝ} (ht : 0 < t) :
     dsimp [gaussianHeatKernel]
     ring
   rw [h_deriv_eq] at h_product
-  simpa [gaussianHeatKernel] using h_product
+  have h_product_fun :
+      ((fun s : ℝ => (4 * Real.pi * s)⁻¹ ^ ((1 : ℝ) / 2)) *
+          (fun s : ℝ => Real.exp (-(x ^ 2) / (4 * s)))) =
+        (fun s : ℝ => (4 * Real.pi * s)⁻¹ ^ ((1 : ℝ) / 2) *
+          Real.exp (-(x ^ 2) / (4 * s))) := by
+    ext s
+    rfl
+  rw [h_product_fun] at h_product
+  change HasDerivAt
+    (fun s : ℝ => (4 * Real.pi * s)⁻¹ ^ ((1 : ℝ) / 2) * Real.exp (-(x ^ 2) / (4 * s)))
+    ((x ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) * gaussianHeatKernel t x) t
+  exact h_product
 
 /-- **Kernel solves the heat equation pointwise.** The second spatial derivative and the
 time derivative of the kernel produce the same value. -/
@@ -303,7 +319,7 @@ theorem integrable_sq_mul_gaussian {c : ℝ} (hc : 0 < c) :
 
 /-- **Polynomial-times-Gaussian is integrable (centered case).** -/
 theorem gaussian_poly_integrable_zero {c : ℝ} (hc : 0 < c) {a b d : ℝ}
-    (ha : 0 ≤ a) (hb : 0 ≤ b) (hd : 0 ≤ d) :
+    (_ha : 0 ≤ a) (_hb : 0 ≤ b) (_hd : 0 ≤ d) :
     Integrable (fun y : ℝ => (a + b * |y| + d * y ^ 2) * Real.exp (-c * y ^ 2)) := by
   have h_exp : Integrable (fun y : ℝ => Real.exp (-c * y ^ 2)) :=
     integrable_exp_neg_mul_sq hc
@@ -311,8 +327,17 @@ theorem gaussian_poly_integrable_zero {c : ℝ} (hc : 0 < c) {a b d : ℝ}
     integrable_abs_mul_gaussian hc
   have h_sq : Integrable (fun y : ℝ => y ^ 2 * Real.exp (-c * y ^ 2)) :=
     integrable_sq_mul_gaussian hc
-  simpa [mul_add, add_mul, mul_assoc, add_assoc] using
-    (h_exp.const_mul a).add ((h_abs.const_mul b).add (h_sq.const_mul d))
+  have h_sum := (h_exp.const_mul a).add ((h_abs.const_mul b).add (h_sq.const_mul d))
+  have h_sum_fun :
+      ((fun y : ℝ => a * Real.exp (-c * y ^ 2)) +
+          ((fun y : ℝ => b * (|y| * Real.exp (-c * y ^ 2))) +
+            (fun y : ℝ => d * (y ^ 2 * Real.exp (-c * y ^ 2))))) =
+        (fun y : ℝ => (a + b * |y| + d * y ^ 2) * Real.exp (-c * y ^ 2)) := by
+    ext y
+    dsimp
+    ring
+  rw [← h_sum_fun]
+  exact h_sum
 
 /-- **Shifted polynomial-times-Gaussian is integrable.** -/
 theorem shifted_gaussian_integrable (x₀ : ℝ) {c : ℝ} (hc : 0 < c) {a b d : ℝ}
@@ -888,7 +913,14 @@ theorem hasDerivAt_under_integral {F F' : ℝ → ℝ → ℝ} {r₀ : ℝ} {s :
         dsimp [q]
         rw [slope_def_field]
       have h_comp := hy_slope.comp hu_tendsto_punct
-      simpa [h_slope_q] using h_comp
+      change Filter.Tendsto
+        (fun n => slope (fun r'' : ℝ => F r'' y) r₀ (u n))
+        Filter.atTop (nhds (F' r₀ y)) at h_comp
+      have h_q_fun : (fun n => q n y) =
+          (fun n => slope (fun r'' : ℝ => F r'' y) r₀ (u n)) :=
+        funext h_slope_q
+      rw [h_q_fun]
+      exact h_comp
     exact aestronglyMeasurable_of_tendsto_ae Filter.atTop hq_meas h_tendsto_q
   -- Apply the target lemma
   exact hasDerivAt_integral_of_dominated_loc_of_deriv_le hs hF_meas hF₀ hF'_meas h_bound' hg h_diff'
@@ -1025,7 +1057,7 @@ theorem heatSolution_eventuallyEq_kernel_integral (f : ℝ → ℝ) {t : ℝ} (h
   simpa using heatSolution_eq_kernel_integral f hs_pos x
 
 /-- **Time derivative of the solution.** -/
-lemma continuous_gaussianHeatKernel (t : ℝ) (ht : 0 < t) : Continuous (gaussianHeatKernel t) := by
+lemma continuous_gaussianHeatKernel (t : ℝ) (_ht : 0 < t) : Continuous (gaussianHeatKernel t) := by
   unfold gaussianHeatKernel
   have h_exp_cont : Continuous (fun (x : ℝ) => Real.exp (-(x ^ 2) / (4 * t))) := by
     refine Real.continuous_exp.comp ?_
@@ -1131,7 +1163,7 @@ theorem gaussian_exponent_simplify {t : ℝ} (ht : 0 < t) (z : ℝ) :
   have h_sq : (Real.sqrt t) ^ 2 = t := Real.sq_sqrt ht.le
   calc
     Real.exp (-((2 * Real.sqrt t * z) ^ 2) / (4 * t))
-        = Real.exp (-((4 * ((Real.sqrt t) ^ 2) * z ^ 2)) / (4 * t)) := by ring
+        = Real.exp (-((4 * ((Real.sqrt t) ^ 2) * z ^ 2)) / (4 * t)) := by ring_nf
     _ = Real.exp (-((4 * t * z ^ 2)) / (4 * t)) := by rw [h_sq]
     _ = Real.exp (-(z ^ 2)) := by
       field_simp [show t ≠ 0 from by linarith]

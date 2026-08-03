@@ -4,7 +4,7 @@ import EvalTools.Markers
 /-!
 Topological facts about the two "type copies" of `B(H)` used in the von Neumann
 double commutant theorem: the weak operator topology `ContinuousLinearMapWOT`
-(inclusion `ContinuousLinearMap.toWOT`) and the strong operator topology /
+(inclusion `ContinuousLinearMapWOT.ofCLM`) and the strong operator topology /
 pointwise-convergence topology `PointwiseConvergenceCLM` (inclusion
 `ContinuousLinearMap.toPointwiseConvergenceCLM`). Helper file for
 `LeanEval.Analysis.VonNeumannDoubleCommutant`.
@@ -13,7 +13,7 @@ Note. The ambient Mathlib used here defines `ContinuousLinearMapWOT σ E F` as a
 irreducible type copy of `E →SL[σ] F` carrying only the additive/topological
 structure of the weak operator topology; it does not register a multiplicative
 (ring) structure on the type copy. We therefore transport the ring structure
-from `H →L[ℂ] H` along the linear equivalence `ContinuousLinearMap.toWOT`, so
+from `H →L[ℂ] H` along the equivalence `ContinuousLinearMapWOT.equiv.symm`, so
 that the multiplication-dependent statements (commutants, `Commute`, …) can be
 phrased faithfully on the WOT type copy. The two inclusions `ι_W` and `ι_S` are
 recorded as plain equivalences `wotEquiv` and `sotEquiv` (each the underlying map
@@ -25,13 +25,13 @@ namespace Analysis
 
 open scoped InnerProductSpace
 
-variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
+variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
 
 /-- The WOT inclusion `ι_W : H →L[ℂ] H → (H →WOT[ℂ] H)` as an equivalence, the
-underlying map of `ContinuousLinearMap.toWOT` (the identity on operators). -/
+underlying map of `ContinuousLinearMapWOT.ofCLM` (the identity on operators). -/
 noncomputable def wotEquiv :
     (H →L[ℂ] H) ≃ (ContinuousLinearMapWOT (RingHom.id ℂ) H H) :=
-  (ContinuousLinearMap.toWOT (RingHom.id ℂ) H H).toEquiv
+  ContinuousLinearMapWOT.equiv.symm
 
 /-- The SOT inclusion `ι_S : H →L[ℂ] H → (H →Lₚₜ[ℂ] H)` as an equivalence, the
 underlying map of `ContinuousLinearMap.toPointwiseConvergenceCLM` (the identity on
@@ -157,7 +157,14 @@ theorem sot_pairing_continuous (x y : H) :
   have h_eval : Continuous (fun T : PointwiseConvergenceCLM (RingHom.id ℂ) H H => T x) :=
     continuous_eval_const x
   have h_comp : Continuous (fun T : PointwiseConvergenceCLM (RingHom.id ℂ) H H => (sotEquiv (H := H)).symm T x) := by
-    simpa using h_eval
+    have hfun : (fun T : PointwiseConvergenceCLM (RingHom.id ℂ) H H =>
+        (sotEquiv (H := H)).symm T x) = fun T => T x := by
+      funext T
+      change ((ContinuousLinearMap.toUniformConvergenceCLM (RingHom.id ℂ) H
+        {s : Set H | Finite s}).symm T) x = T x
+      exact ContinuousLinearMap.toUniformConvergenceCLM_symm_apply
+    rw [hfun]
+    exact h_eval
   have h_const : Continuous (fun (_ : PointwiseConvergenceCLM (RingHom.id ℂ) H H) => y) :=
     continuous_const
   exact (h_comp.inner h_const)
@@ -166,8 +173,8 @@ theorem sot_pairing_continuous (x y : H) :
 type copy: it sends `ι_S T` to `ι_W T`. This is the continuous map `φ` of
 `lem:continuous-sot-wot`; concretely it is `ι_W ∘ ι_S⁻¹`. -/
 noncomputable def sotToWot (H : Type*) [NormedAddCommGroup H] [InnerProductSpace ℂ H]
-    [CompleteSpace H] :
-    PointwiseConvergenceCLM (RingHom.id ℂ) H H → ContinuousLinearMapWOT (RingHom.id ℂ) H H :=
+    : PointwiseConvergenceCLM (RingHom.id ℂ) H H →
+      ContinuousLinearMapWOT (RingHom.id ℂ) H H :=
   fun T => wotEquiv (H := H) ((sotEquiv (H := H)).symm T)
 
 /-- `φ ∘ ι_S = ι_W` on underlying operators: the SOT-to-WOT map agrees with the WOT
@@ -178,7 +185,7 @@ theorem sotToWot_sotEquiv (T : H →L[ℂ] H) :
 
 /-- The SOT is finer than the WOT: the identity map `φ = sotToWot` from the SOT
 type copy to the WOT type copy is continuous (`lem:continuous-sot-wot`). -/
-theorem continuous_sotToWot :
+theorem continuous_sotToWot [CompleteSpace H] :
     Continuous (sotToWot H) := by
   -- The WOT topology on ContinuousLinearMapWOT is induced by the family of
   -- pairings A ↦ y' (A x).  By continuous_of_dual_apply_continuous it suffices
@@ -195,7 +202,7 @@ theorem continuous_sotToWot :
       _ = inner ℂ z v := rfl
   have h_sotToWot_apply (T : PointwiseConvergenceCLM (RingHom.id ℂ) H H) (v : H) :
       (sotToWot H T) v = ((sotEquiv (H := H)).symm T) v := by
-    simp [sotToWot, wotEquiv]
+    rfl
   have h_inner_conj (T : PointwiseConvergenceCLM (RingHom.id ℂ) H H) :
       y' ((sotToWot H T) x) = starRingEnd ℂ (inner ℂ ((sotEquiv (H := H)).symm T x) z) := by
     calc
@@ -246,6 +253,7 @@ theorem sot_image_eq_preimage (X : Set (H →L[ℂ] H)) :
 /-- `(2) ⇒ (3)`: if the WOT image of `S` is closed, then its SOT image is closed
 (`lem:wot-closed-imp-sot-closed`). -/
 theorem wot_closed_imp_sot_closed (S : Set (H →L[ℂ] H))
+    [CompleteSpace H]
     (hS : IsClosed ((wotEquiv (H := H)) '' S)) :
     IsClosed ((sotEquiv (H := H)) '' S) := by
   rw [sot_image_eq_preimage]

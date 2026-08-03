@@ -16,8 +16,8 @@ theorem deriv_endpoints_of_signed_interior {f : ℝ → ℝ} {La Lb a b : ℝ} (
   rcases hsign with (hpos | hneg)
   · rcases deriv_endpoints_of_pos_interior hab hfa' hfb' hfa hfb hpos hLa hLb with ⟨hLa_pos, hLb_neg⟩
     exact mul_neg_of_pos_of_neg hLa_pos hLb_neg
-  · have hga : (-f) a = 0 := by simpa [hfa]
-    have hgb : (-f) b = 0 := by simpa [hfb]
+  · have hga : (-f) a = 0 := by simp [hfa]
+    have hgb : (-f) b = 0 := by simp [hfb]
     have hpos_g : ∀ x ∈ Set.Ioo a b, 0 < (-f) x := by
       intro x hx
       have h := hneg x hx

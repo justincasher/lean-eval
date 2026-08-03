@@ -132,7 +132,7 @@ theorem line_to_progression {L : ℕ} (hL : 1 ≤ L) {κ : Type*} (χ : ℕ → 
 /-- **Van der Waerden's theorem.** For every finite colouring `χ : ℕ → κ` of the
 naturals and every length `L ≥ 1` there is a monochromatic arithmetic
 progression of length `L` with common difference `m ≥ 1`. -/
-theorem van_der_waerden {κ : Type*} [Finite κ] (χ : ℕ → κ) {L : ℕ} (hL : 1 ≤ L) :
+theorem van_der_waerden {κ : Type*} [Finite κ] (χ : ℕ → κ) {L : ℕ} (_hL : 1 ≤ L) :
     ∃ s m : ℕ, 1 ≤ m ∧ ∃ c : κ, ∀ t : ℕ, t < L → χ (s + t * m) = c := by
   obtain ⟨m, hm_pos, s, c, h⟩ :=
     exists_mono_homothetic_copy (Finset.range L : Finset ℕ) χ

@@ -1,4 +1,5 @@
 import Mathlib.Analysis.Calculus.Deriv.Basic
+import Mathlib.Analysis.Calculus.Deriv.Prod
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Normed.Algebra.MatrixExponential
 import Mathlib.Analysis.Matrix.Normed
@@ -208,7 +209,7 @@ lemma spectralRadius_exp_lt_one {n : ℕ} (B : Matrix (Fin n) (Fin n) ℂ)
 /-- **From the `1/m`-th root bound to the power bound.** In `[0, ∞]`, if
 `‖a^m‖^{1/m} < ρ` (with `m ≥ 1`) then `‖a^m‖ < ρ^m`. -/
 lemma enorm_pow_lt_of_root_lt {𝒜 : Type*} [NormedRing 𝒜] (a : 𝒜) {ρ : ℝ≥0∞}
-    (hρ : 0 < ρ) {m : ℕ} (hm : 1 ≤ m)
+    (_hρ : 0 < ρ) {m : ℕ} (hm : 1 ≤ m)
     (h : (‖a ^ m‖₊ : ℝ≥0∞) ^ (1 / m : ℝ) < ρ) :
     (‖a ^ m‖₊ : ℝ≥0∞) < ρ ^ m := by
   set X := (‖a ^ m‖₊ : ℝ≥0∞) with hX
@@ -305,11 +306,12 @@ lemma exp_smul_nat {n : ℕ} (B : Matrix (Fin n) (Fin n) ℂ) (m : ℕ) :
     NormedSpace.exp ((m : ℝ) • B) = (NormedSpace.exp B) ^ m := by
   have h : (m : ℝ) • B = (m : ℕ) • B := by
     simpa using Nat.cast_smul_eq_nsmul (R := ℝ) (M := Matrix (Fin n) (Fin n) ℂ) m B
-  rw [h, NormedSpace.exp_nsmul]
+  rw [h]
+  exact NormedSpace.exp_nsmul m B
 
 /-- **Splitting the exponential at the integer part.** For `t ≥ 0` and `m = ⌊t⌋`,
 `e^{t • B} = (e^{B})^m · e^{(t - m) • B}`. -/
-lemma exp_smul_split {n : ℕ} (B : Matrix (Fin n) (Fin n) ℂ) {t : ℝ} (ht : 0 ≤ t) :
+lemma exp_smul_split {n : ℕ} (B : Matrix (Fin n) (Fin n) ℂ) {t : ℝ} (_ht : 0 ≤ t) :
     NormedSpace.exp (t • B)
       = (NormedSpace.exp B) ^ (⌊t⌋₊) * NormedSpace.exp ((t - (⌊t⌋₊ : ℝ)) • B) := by
   set m := ⌊t⌋₊ with hm
@@ -328,7 +330,7 @@ lemma exp_smul_split {n : ℕ} (B : Matrix (Fin n) (Fin n) ℂ) {t : ℝ} (ht : 
   calc
     NormedSpace.exp (t • B) = NormedSpace.exp (((m : ℝ) • B) + ((t - (m : ℝ)) • B)) := by rw [h_add]
     _ = NormedSpace.exp ((m : ℝ) • B) * NormedSpace.exp ((t - (m : ℝ)) • B) := by
-      rw [NormedSpace.exp_add_of_commute h_comm]
+      exact NormedSpace.exp_add_of_commute h_comm
     _ = (NormedSpace.exp B) ^ m * NormedSpace.exp ((t - (m : ℝ)) • B) := by rw [exp_smul_nat B m]
     _ = (NormedSpace.exp B) ^ (⌊t⌋₊) * NormedSpace.exp ((t - (⌊t⌋₊ : ℝ)) • B) := by rfl
 
@@ -422,7 +424,33 @@ lemma exp_smul_hasDerivAt {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) (t₁ t : �
       (A * NormedSpace.exp (((t - t₁) : ℝ) • A)) (t - t₁) :=
     hasDerivAt_exp_smul_const' A (t - t₁)
   have h_comp := h_outer.scomp t h_inner
-  simpa [one_smul] using h_comp
+  apply hasDerivAt_pi.mpr
+  intro i
+  apply hasDerivAt_pi.mpr
+  intro j
+  let φ : Matrix (Fin n) (Fin n) ℝ →ₗ[ℝ] ℝ :=
+    { toFun := fun M => M i j
+      map_add' := fun M N => rfl
+      map_smul' := fun c M => rfl }
+  have hφ_cont : Continuous (fun M : Matrix (Fin n) (Fin n) ℝ => M i j) :=
+    φ.continuous_of_finiteDimensional
+  let φL : Matrix (Fin n) (Fin n) ℝ →L[ℝ] ℝ := ⟨φ, hφ_cont⟩
+  have h_coord := h_comp.comp_semilinear (RingHom.id ℝ) φL
+  have hφL_apply (M : Matrix (Fin n) (Fin n) ℝ) : φL M = M i j := rfl
+  have h_coord_fun :
+      (⇑φL ∘ ((fun u : ℝ => NormedSpace.exp (u • A)) ∘ fun τ : ℝ => τ - t₁) ∘
+          ⇑(RingHom.id ℝ)) =
+        (fun x => NormedSpace.exp ((x - t₁) • A) i j) := by
+    funext x
+    change φL (NormedSpace.exp ((x - t₁) • A)) = NormedSpace.exp ((x - t₁) • A) i j
+    exact hφL_apply _
+  have h_coord_deriv : φL ((1 : ℝ) • (A * NormedSpace.exp ((t - t₁) • A))) =
+      (A * NormedSpace.exp ((t - t₁) • A)) i j := by
+    rw [one_smul]
+    exact hφL_apply _
+  have h_coord' := h_coord.congr_deriv h_coord_deriv
+  refine h_coord'.congr_of_eventuallyEq ?_
+  exact Filter.Eventually.of_forall fun x => (congrFun h_coord_fun x).symm
 
 /-- **Derivative of `τ ↦ e^{(τ - t₁) • A} v`.** Its derivative at `t` is
 `A · (e^{(t-t₁) • A} v)`. -/
@@ -455,7 +483,7 @@ lemma exp_smul_mulVec_hasDerivAt {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ)
         simp [hL]
       _ = A.mulVec ((NormedSpace.exp ((t - t₁) • A)).mulVec v) := by
         -- using Matrix.mulVec_mulVec: (A * B).mulVec v = A.mulVec (B.mulVec v)
-        simpa using (Matrix.mulVec_mulVec v (NormedSpace.exp ((t - t₁) • A)) A).symm
+        simp [Matrix.mulVec_mulVec]
   rw [h_mulVec] at h_comp
   exact h_comp
 
@@ -497,16 +525,94 @@ lemma ODE_solution_unique_univ {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) {a b :
     (ht₀ : t₀ ∈ Set.Ioo a b) (heq : f t₀ = g t₀) :
     Set.EqOn f g (Set.Ioo a b) := by
   rcases vectorField_lipschitz A with ⟨K, hK⟩
-  have hv : ∀ t ∈ Set.Ioo a b, LipschitzOnWith K (fun (z : Fin n → ℝ) => A.mulVec z) (Set.univ : Set (Fin n → ℝ)) := by
-    intro t ht
-    exact hK.lipschitzOnWith (s := Set.univ)
-  have hf' : ∀ τ ∈ Set.Ioo a b, HasDerivAt f (A.mulVec (f τ)) τ ∧ f τ ∈ Set.univ := by
-    intro τ hτ
-    refine ⟨hf τ hτ, Set.mem_univ _⟩
-  have hg' : ∀ τ ∈ Set.Ioo a b, HasDerivAt g (A.mulVec (g τ)) τ ∧ g τ ∈ Set.univ := by
-    intro τ hτ
-    refine ⟨hg τ hτ, Set.mem_univ _⟩
-  exact ODE_solution_unique_of_mem_Ioo hv ht₀ hf' hg' heq
+  intro τ hτ
+  rcases le_total t₀ τ with hforward | hbackward
+  · have hsubset : Set.Icc t₀ τ ⊆ Set.Ioo a b := by
+      intro s hs
+      exact ⟨lt_of_lt_of_le ht₀.1 hs.1, lt_of_le_of_lt hs.2 hτ.2⟩
+    have hf_cont : ContinuousOn f (Set.Icc t₀ τ) :=
+      HasDerivAt.continuousOn fun s hs => hf s (hsubset hs)
+    have hg_cont : ContinuousOn g (Set.Icc t₀ τ) :=
+      HasDerivAt.continuousOn fun s hs => hg s (hsubset hs)
+    have hf_within : ∀ s ∈ Set.Ico t₀ τ,
+        HasDerivWithinAt f (A.mulVec (f s)) (Set.Ici s) s := by
+      intro s hs
+      exact (hf s (hsubset (Set.Ico_subset_Icc_self hs))).hasDerivWithinAt
+    have hg_within : ∀ s ∈ Set.Ico t₀ τ,
+        HasDerivWithinAt g (A.mulVec (g s)) (Set.Ici s) s := by
+      intro s hs
+      exact (hg s (hsubset (Set.Ico_subset_Icc_self hs))).hasDerivWithinAt
+    have hdist := dist_le_of_trajectories_ODE
+      (v := fun _ z => A.mulVec z) (K := K) (a := t₀) (b := τ) (δ := 0)
+      (fun _ => hK) hf_cont hf_within hg_cont hg_within
+      (by simp [heq]) τ ⟨hforward, le_rfl⟩
+    apply dist_eq_zero.mp
+    exact le_antisymm (by simpa using hdist) dist_nonneg
+  · let T := t₀ - τ
+    let fr : ℝ → (Fin n → ℝ) := fun s => f (t₀ - s)
+    let gr : ℝ → (Fin n → ℝ) := fun s => g (t₀ - s)
+    have hT : 0 ≤ T := by
+      dsimp [T]
+      linarith
+    have horig : ∀ s ∈ Set.Icc (0 : ℝ) T, t₀ - s ∈ Set.Ioo a b := by
+      intro s hs
+      dsimp [T] at hs
+      constructor
+      · have hle : τ ≤ t₀ - s := by linarith [hs.2]
+        exact lt_of_lt_of_le hτ.1 hle
+      · have hle : t₀ - s ≤ t₀ := by linarith [hs.1]
+        exact lt_of_le_of_lt hle ht₀.2
+    have hfr_deriv : ∀ s ∈ Set.Icc (0 : ℝ) T,
+        HasDerivAt fr (-(A.mulVec (fr s))) s := by
+      intro s hs
+      have h_inner_raw := (hasDerivAt_const s t₀).sub (hasDerivAt_id s)
+      have h_inner_fun : ((fun _ : ℝ => t₀) - id) = (fun q : ℝ => t₀ - q) := by
+        ext q
+        rfl
+      have h_inner : HasDerivAt (fun q : ℝ => t₀ - q) (-1) s := by
+        rw [← h_inner_fun]
+        simpa using h_inner_raw
+      have h_comp := (hf (t₀ - s) (horig s hs)).scomp s h_inner
+      simpa [fr, Function.comp_def] using h_comp
+    have hgr_deriv : ∀ s ∈ Set.Icc (0 : ℝ) T,
+        HasDerivAt gr (-(A.mulVec (gr s))) s := by
+      intro s hs
+      have h_inner_raw := (hasDerivAt_const s t₀).sub (hasDerivAt_id s)
+      have h_inner_fun : ((fun _ : ℝ => t₀) - id) = (fun q : ℝ => t₀ - q) := by
+        ext q
+        rfl
+      have h_inner : HasDerivAt (fun q : ℝ => t₀ - q) (-1) s := by
+        rw [← h_inner_fun]
+        simpa using h_inner_raw
+      have h_comp := (hg (t₀ - s) (horig s hs)).scomp s h_inner
+      simpa [gr, Function.comp_def] using h_comp
+    have hK_neg_raw : LipschitzWith K (-(fun z : Fin n → ℝ => A.mulVec z)) := hK.neg
+    have hneg_fun : -(fun z : Fin n → ℝ => A.mulVec z) =
+        (fun z : Fin n → ℝ => -(A.mulVec z)) := by
+      ext z i
+      rfl
+    have hK_neg : LipschitzWith K (fun z : Fin n → ℝ => -(A.mulVec z)) := by
+      rw [← hneg_fun]
+      exact hK_neg_raw
+    have hfr_cont : ContinuousOn fr (Set.Icc (0 : ℝ) T) :=
+      HasDerivAt.continuousOn hfr_deriv
+    have hgr_cont : ContinuousOn gr (Set.Icc (0 : ℝ) T) :=
+      HasDerivAt.continuousOn hgr_deriv
+    have hfr_within : ∀ s ∈ Set.Ico (0 : ℝ) T,
+        HasDerivWithinAt fr (-(A.mulVec (fr s))) (Set.Ici s) s := by
+      intro s hs
+      exact (hfr_deriv s (Set.Ico_subset_Icc_self hs)).hasDerivWithinAt
+    have hgr_within : ∀ s ∈ Set.Ico (0 : ℝ) T,
+        HasDerivWithinAt gr (-(A.mulVec (gr s))) (Set.Ici s) s := by
+      intro s hs
+      exact (hgr_deriv s (Set.Ico_subset_Icc_self hs)).hasDerivWithinAt
+    have hdist := dist_le_of_trajectories_ODE
+      (v := fun _ z => -(A.mulVec z)) (K := K) (a := 0) (b := T) (δ := 0)
+      (fun _ => hK_neg) hfr_cont hfr_within hgr_cont hgr_within
+      (by simp [fr, gr, heq]) T ⟨hT, le_rfl⟩
+    have hzero : dist (fr T) (gr T) = 0 :=
+      le_antisymm (by simpa using hdist) dist_nonneg
+    simpa [fr, gr, T] using dist_eq_zero.mp hzero
 
 /-- **Agreement of a solution and the propagator on `(0, b)`.** A solution of `x' = A x`
 on `(0, b)` agrees there with `τ ↦ e^{(τ - t₁) • A} x(t₁)` for any base point `t₁`. -/
@@ -614,13 +720,17 @@ lemma exp_map_complexify {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) :
     intro i j
     have h_proj : Continuous (fun (M : Matrix (Fin n) (Fin n) ℝ) => M i j) :=
       (continuous_apply j).comp (continuous_apply i)
-    simpa [RingHom.mapMatrix_apply, Matrix.map_apply] using
-      Complex.continuous_ofReal.comp h_proj
+    have h_entry : (fun a : Matrix (Fin n) (Fin n) ℝ => f a i j) =
+        Complex.ofReal ∘ fun a : Matrix (Fin n) (Fin n) ℝ => a i j := by
+      funext a
+      simp [f, RingHom.mapMatrix_apply, Matrix.map_apply]
+    rw [h_entry]
+    exact Complex.continuous_ofReal.comp h_proj
   calc
     (NormedSpace.exp M).map (algebraMap ℝ ℂ) = f (NormedSpace.exp M) := by
       simp [f, RingHom.mapMatrix_apply]
     _ = NormedSpace.exp (f M) := by
-      rw [NormedSpace.map_exp f hf_cont M]
+      exact NormedSpace.map_exp f hf_cont M
     _ = NormedSpace.exp (M.map (algebraMap ℝ ℂ)) := by
       simp [f, RingHom.mapMatrix_apply]
 

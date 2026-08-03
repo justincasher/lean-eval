@@ -85,7 +85,9 @@ theorem double_commutant_approx (S : StarSubalgebra ℂ (H →L[ℂ] H))
     · intro ⟨A, hA, hAy⟩
       rw [hR, amplificationSubalgebra, StarSubalgebra.mem_map] at hA
       rcases hA with ⟨A₀, hA₀S, hA_eq⟩
-      have hA_eq' : amplificationMap A₀ = A := by simpa using hA_eq
+      have hA_eq' : amplificationMap A₀ = A := by
+        change amplificationMap A₀ = A at hA_eq
+        exact hA_eq
       refine ⟨A₀, hA₀S, ?_⟩
       rw [← hA_eq'] at hAy
       rw [h_amp_eq A₀] at hAy
@@ -108,6 +110,7 @@ theorem double_commutant_approx (S : StarSubalgebra ℂ (H →L[ℂ] H))
   -- Apply the coordinate-wise approximation lemma
   exact closure_coord_approx S T x h_mem hε
 
+omit [CompleteSpace H] in
 /-- `lem:sot-nhds-zero-basis`: in the SOT type copy `PointwiseConvergenceCLM`, the
 neighbourhood filter of `0` has a basis given by the sets
 `W_{x, ε} = {U | ∀ i, ‖U (x i)‖ < ε}`, indexed by finite families
@@ -139,7 +142,7 @@ theorem sot_hasBasis_nhds_zero :
         refine ⟨i, ?_⟩
         dsimp [x, i, y']
         have : e.symm (e ⟨y, hy⟩) = ⟨y, hy⟩ := Equiv.symm_apply_apply e ⟨y, hy⟩
-        simpa
+        simp
       rcases hy_range with ⟨i, hi⟩
       have hUi : ‖U (x i)‖ < ε := hU i
       have hUy : U y = U (x i) := by rw [hi]
@@ -171,6 +174,7 @@ theorem sot_hasBasis_nhds_zero :
     rw [h_eq] at hmem
     exact Filter.mem_of_superset hmem hsub
 
+omit [CompleteSpace H] in
 /-- `lem:sot-nhds-basis`: for `T₀` in the SOT type copy, the neighbourhood filter of
 `T₀` has a basis given by the sets `V_{x, ε} = {U | ∀ i, ‖U (x i) - T₀ (x i)‖ < ε}`,
 indexed by finite families `x : Fin n → H` and reals `ε > 0`. -/
@@ -274,10 +278,9 @@ theorem sot_closed_mem (S : StarSubalgebra ℂ (H →L[ℂ] H))
   rcases hsubset hmemsot with ⟨A, hA, h_eq⟩
   have h_inj : Function.Injective (f : (H →L[ℂ] H) → PointwiseConvergenceCLM (RingHom.id ℂ) H H) := by
     intro x y h
-    apply ContinuousLinearMap.ext
-    intro v
-    have := congrArg (fun g => g v) h
-    simpa [f, ContinuousLinearMap.toPointwiseConvergenceCLM, LinearMap.id_coe] using this
+    apply (ContinuousLinearMap.toUniformConvergenceCLM (RingHom.id ℂ) H
+      {s : Set H | Finite s}).injective
+    exact h
   have hTA : T = A := h_inj h_eq.symm
   rw [hTA]
   exact hA

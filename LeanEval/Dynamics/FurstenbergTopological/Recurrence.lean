@@ -25,6 +25,7 @@ def recurrenceSet (T : X → X) (d : ℕ) (ε : ℝ) : Set X :=
 
 variable (T : X ≃ₜ X)
 
+omit [Nonempty X] in
 /-- **Finite `ε`-cover of a compact space.** For every `ε > 0` there is a finite
 set of centres whose `ε`-balls cover `X`. -/
 theorem finite_eps_cover (ε : ℝ) (hε : 0 < ε) :
@@ -34,10 +35,11 @@ theorem finite_eps_cover (ε : ℝ) (hε : 0 < ε) :
   refine ⟨ht_fin.toFinset, ?_⟩
   simpa [ht_fin.coe_toFinset] using h_cover
 
+omit [CompactSpace X] [Nonempty X] in
 /-- **Orbit colouring by an `ε`-net.** Given centres whose `ε/2`-balls cover `X`,
 each orbit time `i` can be assigned a centre `col i` whose ball contains
 `T^[i] z`. -/
-theorem orbit_colouring (ε : ℝ) (hε : 0 < ε) (z : X) (s : Finset X)
+theorem orbit_colouring (ε : ℝ) (_hε : 0 < ε) (z : X) (s : Finset X)
     (hs : (Set.univ : Set X) ⊆ ⋃ c ∈ s, Metric.ball c (ε / 2)) :
     ∃ col : ℕ → X, (∀ i, col i ∈ s) ∧
       ∀ i, dist ((T : X → X)^[i] z) (col i) < ε / 2 := by
@@ -55,6 +57,7 @@ theorem orbit_colouring (ε : ℝ) (hε : 0 < ε) (z : X) (s : Finset X)
   · intro i
     exact (hcol i).2
 
+omit [CompactSpace X] [Nonempty X] in
 /-- **A common ball bounds the distance.** Two points in a common `ε/2`-ball are
 within `ε` of each other. -/
 theorem common_ball_dist {a b c : X} {ε : ℝ}
@@ -121,6 +124,7 @@ theorem eps_multiple_recurrence (ε : ℝ) (hε : 0 < ε) (d : ℕ) (hd : 1 ≤ 
   have htemp := common_ball_dist (a := x) (b := ((T : X → X)^[j * m] x)) (c := c.val) hx_mem hTx_mem
   simpa [dist_comm] using htemp
 
+omit [CompactSpace X] [Nonempty X] in
 /-- **The recurrence sets are open.** -/
 theorem recurrenceSet_open (d : ℕ) (ε : ℝ) :
     IsOpen (recurrenceSet (T : X → X) d ε) := by
@@ -164,6 +168,7 @@ theorem recurrenceSet_open (d : ℕ) (ε : ℝ) :
   intro n hn
   exact h_pre_n n
 
+omit [Nonempty X] in
 /-- **Orbit preimages cover a minimal system.** In a minimal system every point's
 forward orbit meets a given nonempty open set. -/
 theorem orbit_preimage_cover (hmin : IsMinimal (T : X → X)) {U : Set X}
@@ -180,6 +185,7 @@ theorem orbit_preimage_cover (hmin : IsMinimal (T : X → X)) {U : Set X}
   rw [hk']
   exact hy_U
 
+omit [Nonempty X] in
 /-- **Finite cover by orbit preimages.** In a minimal system the preimages
 `T^{-k} U` (`k ≤ K`) cover the whole space for some `K`. -/
 theorem cover_by_preimages (hmin : IsMinimal (T : X → X)) {U : Set X}
@@ -238,6 +244,7 @@ theorem finite_min_pos (K : ℕ) (δ : ℕ → ℝ) (hδ : ∀ k ≤ K, 0 < δ k
       omega
     exact Finset.inf'_le δ hk_mem
 
+omit [Nonempty X] in
 /-- **Uniform modulus for finitely many iterates.** On a compact space, for every
 `ε > 0` there is `δ > 0` controlling `T^[k]` simultaneously for all `k ≤ K`. -/
 theorem uniform_modulus (K : ℕ) (ε : ℝ) (hε : 0 < ε) :
