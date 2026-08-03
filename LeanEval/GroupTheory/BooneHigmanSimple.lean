@@ -26,6 +26,13 @@ The strategy is Kuznetsov's r.e.-from-both-sides argument: `P` is recursively
 enumerable, its complement is recursively enumerable (here simplicity is used),
 and a predicate that is r.e. with r.e. complement is computable (Post's theorem,
 `ComputablePred.computable_iff_re_compl_re`).
+
+Mathlib has `Group.IsFinitelyPresented`,
+`Subgroup.IsFinitelyNormallyGenerated`, `FreeGroup`, `PresentedGroup`,
+`IsSimpleGroup`, and the
+`ComputablePred` / `Computable` / `Partrec` stack, but no notion of
+the word problem of a group or the Kuznetsov / Boone–Higman / Novikov
+theorems.
 -/
 
 variable {G : Type*} [Group G] {n : ℕ}
@@ -48,7 +55,7 @@ lemma pred_iff_mem_ker (φ : FreeGroup (Fin n) →* G) (w : List (Fin n × Bool)
 /-- **The kernel is a normal closure of relators.** There is a finite relator
 list `R` with `ker φ = normalClosure (relatorSet R)`. -/
 lemma ker_eq_normalClosure (φ : FreeGroup (Fin n) →* G)
-    (hker : (MonoidHom.ker φ).IsNormalClosureFG) :
+    (hker : (MonoidHom.ker φ).IsFinitelyNormallyGenerated) :
     ∃ R : List (Word n),
       MonoidHom.ker φ = Subgroup.normalClosure (relatorSet R) := by
   rcases hker with ⟨T, hT_fin, hT⟩
@@ -86,7 +93,7 @@ lemma re_mem_normalClosure (R : List (Word n)) :
 /-- **Positive side is r.e.**  The word problem predicate `P` is recursively
 enumerable. -/
 lemma re_positive (φ : FreeGroup (Fin n) →* G)
-    (hker : (MonoidHom.ker φ).IsNormalClosureFG) :
+    (hker : (MonoidHom.ker φ).IsFinitelyNormallyGenerated) :
     REPred (wordProblemPred φ) := by
   rcases ker_eq_normalClosure φ hker with ⟨R, hR⟩
   refine REPred.of_eq (re_mem_normalClosure R) (fun w => ?_)
@@ -216,7 +223,7 @@ lemma neg_iff_forall_gen [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
 enumerable. -/
 lemma re_negative [IsSimpleGroup G] (φ : FreeGroup (Fin n) →* G)
     (hsurj : Function.Surjective φ)
-    (hker : (MonoidHom.ker φ).IsNormalClosureFG) :
+    (hker : (MonoidHom.ker φ).IsFinitelyNormallyGenerated) :
     REPred (fun w : Word n => ¬ wordProblemPred φ w) := by
   rcases ker_eq_normalClosure φ hker with ⟨R, hR⟩
   have hR_symm : Subgroup.normalClosure (relatorSet R) = MonoidHom.ker φ := hR.symm
@@ -245,7 +252,7 @@ theorem boone_higman_simple
     {G : Type*} [Group G] [IsSimpleGroup G]
     {n : ℕ} (φ : FreeGroup (Fin n) →* G)
     (_hsurj : Function.Surjective φ)
-    (_hker : (MonoidHom.ker φ).IsNormalClosureFG) :
+    (_hker : (MonoidHom.ker φ).IsFinitelyNormallyGenerated) :
     WordProblemSolvable φ := by
   -- Equip the predicate with classical decidability
   haveI : DecidablePred (wordProblemPred φ) := Classical.decPred _

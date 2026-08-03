@@ -62,9 +62,9 @@ theorem induce_clique_lift {V : Type*} (G : SimpleGraph V) (A : Set V) {r : ℕ}
     rcases (SimpleGraph.map_adj f (G.induce A) u v).mp h with ⟨x, y, hadj, hx, hy⟩
     have hGadj : G.Adj (x : V) (y : V) := (SimpleGraph.induce_adj (s := A)).mp hadj
     have hx' : (x : V) = u := by
-      simpa [Function.Embedding.coe_subtype] using hx
+      simpa [f, Function.Embedding.coe_subtype] using hx
     have hy' : (y : V) = v := by
-      simpa [Function.Embedding.coe_subtype] using hy
+      simpa [f, Function.Embedding.coe_subtype] using hy
     rw [hx', hy'] at hGadj
     exact hGadj
   have hGclique : G.IsNClique r (Finset.map f t) :=
@@ -78,7 +78,7 @@ theorem induce_clique_lift {V : Type*} (G : SimpleGraph V) (A : Set V) {r : ℕ}
 /-- If `v ∉ A`, `v` is adjacent to every vertex of `A`, and the subgraph induced on `A` is not
 `r`-clique-free, then `G` is not `(r+1)`-clique-free. -/
 theorem common_neighbor {V : Type*} (G : SimpleGraph V) (v : V) (A : Set V) {r : ℕ}
-    (hv : v ∉ A) (hadj : ∀ a ∈ A, G.Adj v a)
+    (_hv : v ∉ A) (hadj : ∀ a ∈ A, G.Adj v a)
     (h : ¬ (G.induce A).CliqueFree r) : ¬ G.CliqueFree (r + 1) := by
   classical
   -- From non-r-clique-freeness, extract an r-clique t of (G.induce A)
@@ -113,7 +113,8 @@ theorem degree_split {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V)
     simp
   rw [hdeg_card, hdeg_compl_card]
   rw [SimpleGraph.degree_compl G v]
-  have hdeg_lt : G.degree v < Fintype.card V := SimpleGraph.degree_lt_card_verts G v
+  have hdeg_lt : G.degree v < Fintype.card V :=
+    SimpleGraph.degree_lt_card_verts (G := G) v
   omega
 
 /-- Neighbourhood side of the recursion: a clique result on the subgraph induced by the
@@ -126,7 +127,7 @@ theorem neighbor_side {V : Type*} [Fintype V] [DecidableEq V] (G : SimpleGraph V
   set A := (G.neighborFinset v : Set V) with hA
   have hv : v ∉ A := by
     rw [hA]
-    simpa using SimpleGraph.notMem_neighborFinset_self (G := G) (v := v)
+    simp
   have hadj : ∀ a ∈ A, G.Adj v a := by
     rw [hA]
     intro a ha
@@ -225,8 +226,7 @@ theorem ramsey_exists {r s : ℕ} (hr : 2 ≤ r) (hs : 2 ≤ s) : ∃ n : ℕ, I
   have hP : ∀ k : ℕ, (∀ r' s', 2 ≤ r' → 2 ≤ s' → r' + s' ≤ k → ∃ n, IsRamsey r' s' n) := by
     intro k
     refine Nat.strong_induction_on k ?_
-    intro k IH
-    intro r' s' hr' hs' hsum
+    intro k IH r' s' hr' hs' hsum
     by_cases h2r : r' = 2
     · subst h2r; exact ⟨s', base s'⟩
     · by_cases h2s : s' = 2

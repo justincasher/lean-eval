@@ -277,41 +277,62 @@ def Source.startsWithAt (s : Source) (i : Nat) (needle : List Char) : Bool := Id
 
 /-! ## Text utilities (line-based) -/
 
-/-- Number of codepoints at the top of `source` taken up by `import` lines and
-blank lines. Mirrors `import_prelude_length`. -/
-def importPreludeLength (source : Source) : Nat := Id.run do
+/-- Index just past the closing delimiter of the block comment beginning at
+`start` (which must point at a block-comment opener), accounting for nested
+block comments. Returns `source.size` if the comment is unterminated. -/
+def blockCommentEnd (source : Source) (start : Nat) : Nat := Id.run do
+  let n := source.size
+  let openCh := "/-".toList
+  let closeCh := "-/".toList
+  let mut i := start
+  let mut depth : Nat := 0
+  while i < n do
+    if Source.startsWithAt source i openCh then
+      depth := depth + 1
+      i := i + 2
+    else if Source.startsWithAt source i closeCh then
+      depth := depth - 1
+      i := i + 2
+      if depth == 0 then
+        return i
+    else
+      i := i + 1
+  return n
+
+/-- Return `(endOfLastImport, bodyStart)` as codepoint indices in `source`.
+Comments and whitespace are treated as header trivia, including nested block
+comments. Thus comments before or between imports are included in
+`endOfLastImport`, while a module doc comment after the last import remains
+available to callers slicing from that offset. -/
+def scanHeader (source : Source) : Nat × Nat := Id.run do
   let n := source.size
   let mut i : Nat := 0
-  let mut consumed : Nat := 0
+  let mut endOfLastImport : Nat := 0
   while i < n do
-    -- find end of current line
-    let lineStart := i
-    while i < n && source[i]! != '\n' do
+    while i < n && source[i]!.isWhitespace do
       i := i + 1
-    -- includes trailing '\n' if present
-    let lineEnd := i
-    let inclEnd := if i < n then i + 1 else i
-    -- compute stripped: skip leading/trailing whitespace
-    let mut s := lineStart
-    while s < lineEnd && source[s]!.isWhitespace do
-      s := s + 1
-    let mut e := lineEnd
-    while e > s && source[e - 1]!.isWhitespace do
-      e := e - 1
-    if s == e then
-      -- blank line
-      consumed := inclEnd
-      i := inclEnd
-    else
-      -- check if starts with "import "
-      let importChars := "import ".toList
-      let isImport := Source.startsWithAt source s importChars
-      if isImport then
-        consumed := inclEnd
-        i := inclEnd
-      else
-        return consumed
-  return consumed
+    if i == n then return (endOfLastImport, n)
+    if Source.startsWithAt source i "--".toList then
+      while i < n && source[i]! != '\n' do
+        i := i + 1
+      continue
+    if Source.startsWithAt source i "/-".toList then
+      i := blockCommentEnd source i
+      continue
+    let importEnd := i + "import".length
+    if Source.startsWithAt source i "import".toList
+        && importEnd < n && source[importEnd]!.isWhitespace then
+      while i < n && source[i]! != '\n' do
+        i := i + 1
+      if i < n then i := i + 1
+      endOfLastImport := i
+      continue
+    return (endOfLastImport, i)
+  return (endOfLastImport, n)
+
+/-- Codepoint index just after the last import in the source header. -/
+def importPreludeLength (source : Source) : Nat :=
+  (scanHeader source).1
 
 /-- True if the line's trimmed content is `import EvalTools.Markers`, allowing
 arbitrary intra-line whitespace between `import` and the module name (the
@@ -436,10 +457,17 @@ def repoLocalImportModules (root : System.FilePath) (moduleName : String) :
 
 /-! ## ILean metadata -/
 
+/-- A declaration's source range from the `.ilean`, as
+`[startLine, startColumn, endLine, endColumn]` (`.ilean` records these
+0-indexed; we convert lines to 1-indexed to match `offsetForLineColumn`).
+The range spans the *whole* declaration, doc comment through the end of the
+body, so `(endLine, endColumn)` is the precise end — no heuristic needed. -/
 structure IleanDeclEntry where
   name : String
   startLine : Nat
   startColumn : Nat
+  endLine : Nat
+  endColumn : Nat
   deriving Inhabited
 
 def loadIleanDeclRanges (root : System.FilePath) (moduleName : String) :
@@ -466,67 +494,25 @@ def loadIleanDeclRanges (root : System.FilePath) (moduleName : String) :
     | .error _ => continue
     | .ok arr =>
         if arr.size < 4 then continue
-        match arr[0]!.getNat?, arr[1]!.getNat? with
-        | .ok line, .ok col =>
-            out := out.push { name, startLine := line + 1, startColumn := col }
-        | _, _ => continue
+        match arr[0]!.getNat?, arr[1]!.getNat?, arr[2]!.getNat?, arr[3]!.getNat? with
+        | .ok line, .ok col, .ok endLine, .ok endCol =>
+            out := out.push
+              { name, startLine := line + 1, startColumn := col
+                endLine := endLine + 1, endColumn := endCol }
+        | _, _, _, _ => continue
   return out
 
 /-! ## Header scanning, namespace ops -/
 
-/-- Return `(insertAfterImports, bodyStart)` line indices for the lines in
-`lines` (already split keeping their trailing newlines). Mirrors `_scan_header`. -/
-def scanHeader (lines : Array String) : Nat × Nat := Id.run do
-  let mut inBlockComment := false
-  let mut lastImportIdx : Int := -1
-  let mut bodyStart : Nat := lines.size
-  let mut found := false
-  for idx in [0:lines.size] do
-    if found then break
-    let raw := lines[idx]!
-    let stripped := raw.trimAscii.toString
-    if inBlockComment then
-      if (stripped.splitOn "-/").length > 1 then inBlockComment := false
-      continue
-    if stripped.isEmpty then continue
-    if stripped.startsWith "--" then continue
-    if stripped.startsWith "/-" then
-      let rest := (stripped.drop 2).toString
-      if !((rest.splitOn "-/").length > 1) then
-        inBlockComment := true
-      continue
-    if stripped.startsWith "import " then
-      lastImportIdx := idx
-      continue
-    bodyStart := idx
-    found := true
-  if !found then bodyStart := lines.size
-  let insertAt : Nat := if lastImportIdx ≥ 0 then (lastImportIdx + 1).toNat else 0
-  (insertAt, bodyStart)
-
-/-- Split `source` into lines preserving trailing newlines (like Python's
-`splitlines(keepends=True)`). -/
-def splitLinesKeepEnds (source : String) : Array String := Id.run do
-  let parts := source.splitOn "\n"
-  let mut acc : Array String := #[]
-  for i in [0:parts.length] do
-    let s := parts[i]!
-    if i + 1 < parts.length then
-      acc := acc.push (s ++ "\n")
-    else if !s.isEmpty then
-      acc := acc.push s
-  return acc
-
 /-- Insert `line` (must end in `\n`) just after the last import line at the
 top of `source`. Mirrors `_inject_after_imports`. -/
 def injectAfterImports (source line : String) : String := Id.run do
-  let lines := splitLinesKeepEnds source
-  let (insertAt, _) := scanHeader lines
-  let anyImport := lines.any fun l => l.trimAsciiStart.toString.startsWith "import "
-  if insertAt == 0 && !anyImport then
+  let src := Source.ofString source
+  let (insertAt, _) := scanHeader src
+  if insertAt == 0 then
     return "import Mathlib\n" ++ line ++ source
-  let before := (lines.extract 0 insertAt).foldl (· ++ ·) ""
-  let after := (lines.extract insertAt lines.size).foldl (· ++ ·) ""
+  let before := Source.slice src 0 insertAt
+  let after := Source.slice src insertAt src.size
   return before ++ line ++ after
 
 /-- Top-level namespace names declared in `body`, in source order. Mirrors
@@ -556,11 +542,11 @@ def topLevelNamespaces (body userNamespace : String) : Array String := Id.run do
 Mirrors `_wrap_body_in_submission_namespace`. -/
 def wrapBodyInSubmissionNamespace (source userNamespace : String)
     (extraOpens : Array String := #[]) : String := Id.run do
-  let lines := splitLinesKeepEnds source
-  let (_, bodyStart) := scanHeader lines
-  if bodyStart ≥ lines.size then return source
-  let head := (lines.extract 0 bodyStart).foldl (· ++ ·) ""
-  let mut body := (lines.extract bodyStart lines.size).foldl (· ++ ·) ""
+  let src := Source.ofString source
+  let (_, bodyStart) := scanHeader src
+  if bodyStart ≥ src.size then return source
+  let head := Source.slice src 0 bodyStart
+  let mut body := Source.slice src bodyStart src.size
   if !body.endsWith "\n" then body := body ++ "\n"
   -- Open `extraOpens` (the `_root_`-qualified enclosing namespaces of trusted
   -- helpers now living in `ChallengeDeps`) together with the source's own
@@ -741,6 +727,33 @@ def Source.findKeywordBasename (s : Source) (keywords : Array String) (basename 
                 return some (i, endBase)
     i := i + 1
   return none
+
+/-- Rewrite a non-theorem hole signature for the `Solution.lean` delegation:
+inject `@[reducible] noncomputable` immediately before the declaration
+keyword. The delegation must be `noncomputable` because honest solutions to
+data holes are frequently noncomputable (e.g. `genus` in the Jacobian
+challenge), and a computable `def` whose body references a noncomputable
+`Submission.<name>` fails to compile; comparator never sees computability,
+so the marker is invisible to scoring. An existing `noncomputable` modifier
+in the source signature is folded into the rewrite — Lean's grammar puts
+attributes before `noncomputable`, so leaving it in place would produce the
+invalid `noncomputable @[reducible] def`. Returns `none` when no
+`def`/`instance`/`abbrev` keyword anchors the basename. -/
+def injectSolutionHoleModifiers (signature basename : String) : Option String := do
+  let sigSrc := Source.ofString signature
+  let (kwStart, _) ← Source.findKeywordBasename sigSrc #["def", "instance", "abbrev"] basename
+  let prefixText := Source.slice sigSrc 0 kwStart
+  let trimmed := prefixText.trimAsciiEnd.toString
+  let noncomputableKw := "noncomputable"
+  let prefixText :=
+    if trimmed == noncomputableKw then
+      ""
+    else if trimmed.endsWith noncomputableKw &&
+        (trimmed.dropRight noncomputableKw.length).back.isWhitespace then
+      trimmed.dropRight noncomputableKw.length
+    else
+      prefixText
+  return prefixText ++ "@[reducible] noncomputable " ++ Source.slice sigSrc kwStart sigSrc.size
 
 /-! ## Context opens -/
 
@@ -948,14 +961,32 @@ private def variableShadowedByTheorem (varText : String)
     if !theoremBinderNames.contains name then return false
   return true
 
-def extractContextVariables (source : String) (extracted? : Option ExtractedTheorem)
-    (theoremBinderNames : Array String) : String := Id.run do
+/-- Top-level command keywords that begin a fresh declaration/command. A
+whitespace-indented line opening with one of these is never a continuation of a
+preceding `variable`/`universe` block (Lean permits indented top-level
+commands), so the block scanner must stop before absorbing it. -/
+private def startsWithCommandKeyword (stripped : String) : Bool := Id.run do
+  if stripped.startsWith "@[" then return true
+  let kws := #["def", "theorem", "lemma", "instance", "abbrev", "opaque",
+    "axiom", "class", "structure", "inductive", "namespace", "section", "end",
+    "variable", "universe", "open", "example", "noncomputable", "private",
+    "protected", "scoped", "attribute", "macro", "notation", "syntax"]
+  for kw in kws do
+    if startsWithKeyword stripped kw then return true
+  return false
+
+/-- Walk `source` up to `extracted?`'s start line, collecting top-level command
+blocks that begin with `keyword` (e.g. `variable` or `universe`), respecting
+`section`/`namespace` scoping: a block declared inside a `section`/`namespace`
+goes out of scope at the matching `end`. Multi-line blocks absorb following
+whitespace-indented continuation lines. Each collected block is filtered through
+`keep`; only blocks for which `keep` returns true are emitted. Returns the kept
+blocks joined by newlines with a trailing blank line, or `""` if none. -/
+def extractScopedCommandBlocks (source : String) (extracted? : Option ExtractedTheorem)
+    (keyword : String) (keep : String → Bool) : String := Id.run do
   let lines := source.splitOn "\n"
   let targetLine? : Option Nat := extracted?.map fun e => e.startLine
-  -- One layer per `section`/`namespace` we are still inside. A `variable`
-  -- declared in a `section`/`namespace` goes out of scope at the matching
-  -- `end`; treating both the same way matches Lean's scoping for `variable`.
-  let mut variableLayers : Array (Array String) := #[#[]]
+  let mut layers : Array (Array String) := #[#[]]
   let mut frameDepth : Nat := 0
   let mut inBlockComment := false
   let mut idx : Nat := 0
@@ -998,14 +1029,14 @@ def extractContextVariables (source : String) (extracted? : Option ExtractedTheo
       continue
     if startsWithKeyword stripped "namespace" || startsWithKeyword stripped "section" then
       frameDepth := frameDepth + 1
-      variableLayers := variableLayers.push #[]
+      layers := layers.push #[]
       idx := idx + 1
     else if startsWithKeyword stripped "end" then
       if frameDepth > 0 then
         frameDepth := frameDepth - 1
-        variableLayers := variableLayers.pop
+        layers := layers.pop
       idx := idx + 1
-    else if startsWithKeyword stripped "variable" then
+    else if startsWithKeyword stripped keyword then
       let mut block := line
       idx := idx + 1
       while idx < lines.length do
@@ -1015,20 +1046,37 @@ def extractContextVariables (source : String) (extracted? : Option ExtractedTheo
         let next := lines[idx]!
         if next.trimAscii.toString.isEmpty then break
         if !isLineStartingWithWhitespace next then break
+        if startsWithCommandKeyword next.trimAsciiStart.toString then break
         block := block ++ "\n" ++ next
         idx := idx + 1
-      if !variableShadowedByTheorem block theoremBinderNames then
-        let layerIdx := variableLayers.size - 1
-        let layer := variableLayers[layerIdx]!.push block
-        variableLayers := variableLayers.set! layerIdx layer
+      if keep block then
+        let layerIdx := layers.size - 1
+        let layer := layers[layerIdx]!.push block
+        layers := layers.set! layerIdx layer
     else
       idx := idx + 1
   let mut flat : Array String := #[]
-  for layer in variableLayers do
+  for layer in layers do
     for v in layer do
       flat := flat.push v
   if flat.isEmpty then return ""
   return "\n".intercalate flat.toList ++ "\n\n"
+
+def extractContextVariables (source : String) (extracted? : Option ExtractedTheorem)
+    (theoremBinderNames : Array String) : String :=
+  -- One layer per `section`/`namespace` we are still inside, matching Lean's
+  -- scoping for `variable`. Blocks shadowed by the theorem's own binders are
+  -- dropped (they would otherwise be flagged as unused).
+  extractScopedCommandBlocks source extracted? "variable"
+    (fun block => !variableShadowedByTheorem block theoremBinderNames)
+
+/-- Collect top-level `universe` commands in scope at the theorem. A source
+module may declare `universe u v` and refer to `u`/`v` in a theorem whose
+reconstructed `Challenge.lean` slice (`theorem … := by sorry`) would otherwise
+have no binder for them, failing with `unknown universe level`. Re-emitting the
+in-scope `universe` commands restores them. -/
+def extractContextUniverses (source : String) (extracted? : Option ExtractedTheorem) : String :=
+  extractScopedCommandBlocks source extracted? "universe" (fun _ => true)
 
 /-! ## Render ChallengeDeps.lean -/
 
@@ -1039,6 +1087,13 @@ structure DeclSpan where
   name : String
   start : Nat
   stop : Nat
+  /-- The precise end of the declaration (doc comment through end of body),
+  taken directly from the `.ilean` range. Unlike `stop` (the next
+  declaration's start, which overshoots), this ends exactly at the last
+  token, so removing `[start, declEnd)` deletes the whole declaration —
+  including a multi-paragraph doc comment — without truncating at an
+  interior blank line. -/
+  declEnd : Nat
   deriving Inhabited
 
 /-- Load every top-level declaration range from the module's `.ilean`, mapped
@@ -1047,18 +1102,19 @@ needs to slice the source by declaration. -/
 def loadDeclSpans (root : System.FilePath) (entry : EvalProblemMetadata)
     (sourceSrc : Source) : IO (Array DeclSpan) := do
   let declRanges ← loadIleanDeclRanges root entry.moduleName
-  let mut startsBuf : Array (String × Nat) := #[]
+  let mut startsBuf : Array (String × Nat × Nat) := #[]
   for ileanEntry in declRanges do
     let off ← sourceSrc.offsetForLineColumn ileanEntry.startLine ileanEntry.startColumn
-    startsBuf := startsBuf.push (ileanEntry.name, off)
-  let starts := startsBuf.qsort (fun a b => a.2 < b.2)
+    let endOff ← sourceSrc.offsetForLineColumn ileanEntry.endLine ileanEntry.endColumn
+    startsBuf := startsBuf.push (ileanEntry.name, off, endOff)
+  let starts := startsBuf.qsort (fun a b => a.2.1 < b.2.1)
   let mut spans : Array DeclSpan := #[]
   for i in [0:starts.size] do
-    let (name, start) := starts[i]!
+    let (name, start, declEnd) := starts[i]!
     let stop :=
-      if i + 1 < starts.size then starts[i+1]!.2
+      if i + 1 < starts.size then starts[i+1]!.2.1
       else findTopLevelEndOffset sourceSrc start
-    spans := spans.push { name, start, stop }
+    spans := spans.push { name, start, stop, declEnd }
   return spans
 
 /-- Apply a list of `(start, stop, replacement)` edits to `sourceText`. Edits
@@ -1072,40 +1128,6 @@ def applyEdits (sourceText : String) (edits : Array (Nat × Nat × String)) : St
     result := Source.slice src 0 start ++ replacement ++ Source.slice src stop src.size
   return result
 
-/-- Tighten the upper bound of a declaration's byte range. `.ilean` only
-records each declaration's *start*, so `loadDeclSpans` derives the stop as
-the next declaration's start (or the module's top-level `end`) — which can
-overshoot, eating intervening `namespace ...` / `end ...` lines when one
-declaration sits at root namespace and the next sits inside a nested
-namespace.
-
-This heuristic walks forward from `declStart`, line by line, until it hits
-either (a) a blank line (whitespace-only), or (b) a line starting with a
-top-level structural keyword (`namespace `, `end `, `end\n`). Either marks
-the end of the declaration's "paragraph". The result lies in
-`[declStart, cap]` and is safe to use for stripping a single declaration
-out of source text while preserving the surrounding namespace scaffolding. -/
-def declTightEnd (sourceSrc : Source) (declStart cap : Nat) : Nat := Id.run do
-  let n := min cap sourceSrc.size
-  let mut i := declStart
-  while i < n do
-    while i < n && sourceSrc[i]! != '\n' do
-      i := i + 1
-    if i >= n then return n
-    let afterNewline := i + 1
-    if afterNewline >= n then return afterNewline
-    let mut j := afterNewline
-    while j < n && (sourceSrc[j]! == ' ' || sourceSrc[j]! == '\t') do
-      j := j + 1
-    if j >= n || sourceSrc[j]! == '\n' then
-      return afterNewline
-    let probeEnd := min (j + 12) n
-    let probe := Source.slice sourceSrc j probeEnd
-    if probe.startsWith "namespace " || probe.startsWith "end " ||
-       probe.startsWith "end\n" then
-      return afterNewline
-    i := afterNewline
-  return n
 
 /-- Shared core of single- and multi-hole `ChallengeDeps.lean` rendering.
 
@@ -1463,7 +1485,7 @@ private def renderWorkspaceMultiHole (root : System.FilePath) (entry : EvalProbl
            found in source module: {", ".intercalate missing.toList}"
   let helperRanges : Array (Nat × Nat) :=
     spans.filterMap fun s =>
-      if helperNames.contains s.name then some (s.start, declTightEnd src s.start s.stop)
+      if helperNames.contains s.name then some (s.start, s.declEnd)
       else none
   let localImports ← repoLocalImportModules root entry.moduleName
   -- Open the enclosing namespaces of the in-module helpers. When the problem
@@ -1498,14 +1520,13 @@ private def renderWorkspaceMultiHole (root : System.FilePath) (entry : EvalProbl
     let basename := lastComponentStr fullName
     let mut signature ← holeDeclSignature declText basename
     if kind != "theorem" then
-      match Source.findKeywordBasename (Source.ofString signature) #["def", "instance", "abbrev"] basename with
+      match injectSolutionHoleModifiers signature basename with
       | none =>
           throw <| IO.userError
-            s!"Could not anchor `@[reducible]` injection in signature for hole '{fullName}'."
-      | some (kwStart, _) =>
-          let sigSrc := Source.ofString signature
-          signature := (Source.slice sigSrc 0 kwStart) ++ "@[reducible] "
-            ++ (Source.slice sigSrc kwStart sigSrc.size)
+            s!"Could not anchor `@[reducible] noncomputable` injection in signature for \
+               hole '{fullName}'."
+      | some rewritten =>
+          signature := rewritten
     let declSrc := Source.ofString declText
     let some (_, kwEnd) := Source.findKeywordBasename declSrc
       #["def", "instance", "theorem", "opaque", "lemma", "abbrev", "class", "example"] basename
@@ -1612,6 +1633,8 @@ private def renderWorkspaceSingleHole (root : System.FilePath) (entry : EvalProb
     if hasChallengeDeps then "import ChallengeDeps\nimport Submission.Helpers\n\n"
     else "import Mathlib\nimport Submission.Helpers\n\n"
   let theoremBinderNames := binderIntroducedNames theoremStatement
+  let contextUniverseBlock :=
+    extractContextUniverses sourceText (some extracted)
   let contextVariablesBlock :=
     extractContextVariables sourceText (some extracted) theoremBinderNames
   let includeNamespaces := hasChallengeDeps || !localImports.isEmpty
@@ -1632,13 +1655,13 @@ private def renderWorkspaceSingleHole (root : System.FilePath) (entry : EvalProb
   let readmeLines := renderReadmeLines entry #[extracted] (multiHole := false)
   let readme := "\n".intercalate readmeLines.toList ++ "\n"
   let challengeFile :=
-    challengeImport ++ contextOpenBlock ++ contextVariablesBlock ++
+    challengeImport ++ contextOpenBlock ++ contextUniverseBlock ++ contextVariablesBlock ++
     s!"theorem {theoremName} {theoremStatement} := by\n  sorry\n"
   let solutionFile :=
-    solutionImports ++ contextOpenBlock ++ contextVariablesBlock ++
+    solutionImports ++ contextOpenBlock ++ contextUniverseBlock ++ contextVariablesBlock ++
     s!"theorem {theoremName} {theoremStatement} := by\n  exact {solutionExact}\n"
   let submissionFile :=
-    submissionImports ++ contextOpenBlock ++ contextVariablesBlock ++
+    submissionImports ++ contextOpenBlock ++ contextUniverseBlock ++ contextVariablesBlock ++
     "namespace Submission\n\n" ++
     s!"theorem {theoremName} {theoremStatement} := by\n  sorry\n\n" ++
     "end Submission\n"

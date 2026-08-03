@@ -23,7 +23,7 @@ open MeromorphicOn
 /-! ## Logarithmic derivative of factorized rationals -/
 
 /-- Logarithmic derivative of a single power factor `(· - u) ^ n`. -/
-theorem logDeriv_zpow_shift (u : ℂ) (n : ℤ) {z : ℂ} (hz : z ≠ u) :
+theorem logDeriv_zpow_shift (u : ℂ) (n : ℤ) {z : ℂ} (_hz : z ≠ u) :
     logDeriv (fun w => (w - u) ^ n) z = (n : ℂ) * (z - u)⁻¹ := by
   have hdf : DifferentiableAt ℂ (fun w => w - u) z :=
     (differentiableAt_id (x := z)).sub_const u
@@ -55,8 +55,7 @@ theorem logDeriv_factorizedRational {d : ℂ → ℤ} (hd : Function.HasFiniteSu
     finprod_eq_prod_of_mulSupport_subset _ h_mulSupport_subset
   -- For each `u` in the finite support, `z ≠ u` (otherwise `z` would be in the support of `d`).
   have hz_ne_u : ∀ u ∈ hd.toFinset, z ≠ u := by
-    intro u hu
-    intro h_eq
+    intro u hu h_eq
     apply hz
     have h_support : u ∈ Function.support d := hd.mem_toFinset.mp hu
     rw [h_eq]
@@ -88,7 +87,8 @@ theorem logDeriv_factorizedRational {d : ℂ → ℤ} (hd : Function.HasFiniteSu
   have h_log_sum : ∑ u ∈ hd.toFinset, logDeriv ((fun w : ℂ => w - u) ^ d u) z
       = ∑ u ∈ hd.toFinset, (d u : ℂ) * (z - u)⁻¹ := by
     refine Finset.sum_congr rfl fun u hu => ?_
-    simpa [Pi.pow_apply] using logDeriv_zpow_shift u (d u) (hz_ne_u u hu)
+    change logDeriv (fun w => (w - u) ^ d u) z = (d u : ℂ) * (z - u)⁻¹
+    exact logDeriv_zpow_shift u (d u) (hz_ne_u u hu)
   -- The infinite sum on the right equals the finite sum over the support.
   have h_finsum_eq : ∑ᶠ u, (d u : ℂ) * (z - u)⁻¹ = ∑ u ∈ hd.toFinset, (d u : ℂ) * (z - u)⁻¹ :=
     finsum_eq_sum_of_support_subset (fun u : ℂ => (d u : ℂ) * (z - u)⁻¹) (s := hd.toFinset) (by
@@ -162,7 +162,7 @@ theorem circleIntegral_sum_inv {R : ℝ} {d : ℂ → ℤ} (hd : Function.HasFin
         apply hu
         simp [hzero]
       simpa [s] using (hd.mem_toFinset.mpr hmem)
-    rw [finsum_eq_finset_sum_of_support_subset (fun (u : ℂ) => (d u : ℂ) * ((z : ℂ) - u)⁻¹) h_support]
+    rw [finsum_eq_finsetSum_of_support_subset (fun (u : ℂ) => (d u : ℂ) * ((z : ℂ) - u)⁻¹) h_support]
   have h_finsum2 : ∑ᶠ u, (d u : ℂ) = ∑ u ∈ s, (d u : ℂ) := by
     have h_support2 : Function.support (fun (u : ℂ) => (d u : ℂ)) ⊆ (s : Set ℂ) := by
       intro u hu
@@ -172,7 +172,7 @@ theorem circleIntegral_sum_inv {R : ℝ} {d : ℂ → ℤ} (hd : Function.HasFin
         apply hu
         simp [hzero]
       simpa [s] using (hd.mem_toFinset.mpr hmem)
-    rw [finsum_eq_finset_sum_of_support_subset (fun (u : ℂ) => (d u : ℂ)) h_support2]
+    rw [finsum_eq_finsetSum_of_support_subset (fun (u : ℂ) => (d u : ℂ)) h_support2]
   calc
     (∮ z in C(0, R), ∑ᶠ u, (d u : ℂ) * (z - u)⁻¹)
         = (∮ z in C(0, R), ∑ u ∈ s, (d u : ℂ) * (z - u)⁻¹) := by
@@ -202,9 +202,10 @@ theorem logDeriv_analytic_unit {R : ℝ} {U : ℂ → ℂ}
   have hUz : AnalyticAt ℂ U z := hUana z hz
   have hderivUz : AnalyticAt ℂ (deriv U) z := hUana.deriv z hz
   have hUz_ne : U z ≠ 0 := hU0 z hz
-  have h_log_analytic : AnalyticAt ℂ (deriv U / U) z :=
+  have h_log_analytic : AnalyticAt ℂ (fun x => deriv U x / U x) z :=
     hderivUz.div hUz hUz_ne
-  simpa [logDeriv_apply] using h_log_analytic
+  change AnalyticAt ℂ (fun x => deriv U x / U x) z
+  exact h_log_analytic
 
 /-- For `R > 0` the closed disk is preperfect. -/
 theorem closedBall_preperfect {R : ℝ} (hR : 0 < R) :
@@ -559,7 +560,7 @@ theorem factorization_existence {h : ℂ → ℂ} {R : ℝ}
     simpa [hprod_eq] using hx
   have h_filter_le : Filter.codiscreteWithin (Metric.closedBall (0 : ℂ) R) ≤
       Filter.codiscreteWithin (Metric.ball (0 : ℂ) R') := by
-    exact Filter.codiscreteWithin.mono h_sub
+    exact Filter.codiscreteWithin_mono h_sub
   have h_eq_closedBall : h =ᶠ[Filter.codiscreteWithin (Metric.closedBall (0 : ℂ) R)]
       (∏ᶠ u, (fun x => x - u) ^ (divisor h (Metric.closedBall 0 R)) u) • g :=
     h_eq'.filter_mono h_filter_le
@@ -610,8 +611,8 @@ theorem circleIntegral_logDeriv_factorizedRational {h : ℂ → ℂ} {R : ℝ}
       rw [hball_empty] at hu_ball
       exact hu_ball
     rw [hd_zero]
-    simp [Pi.zero_apply, zpow_zero, logDeriv_apply, deriv_const]
-    simp [circleIntegral, smul_zero, intervalIntegral.integral_zero]
+    simp [zpow_zero, logDeriv_apply]
+    simp [circleIntegral, intervalIntegral.integral_zero]
 
 end ComplexAnalysis
 end LeanEval
