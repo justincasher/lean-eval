@@ -139,7 +139,7 @@ lemma sin_nx_nontrivial_witness (n : ℕ) (hn : 0 < n) :
   have hcalc : Real.sin ((n : ℝ) * x₀) = 1 := by
     calc
       Real.sin ((n : ℝ) * x₀) = Real.sin ((n : ℝ) * (Real.pi / (2 * (n : ℝ)))) := rfl
-      _ = Real.sin (((n : ℝ) * Real.pi) / (2 * (n : ℝ))) := by ring
+      _ = Real.sin (((n : ℝ) * Real.pi) / (2 * (n : ℝ))) := by ring_nf
       _ = Real.sin (Real.pi / 2) := by
         have h_eq : (n : ℝ) * Real.pi / (2 * (n : ℝ)) = Real.pi / 2 := by
           field_simp [hn_ne]
@@ -184,7 +184,7 @@ lemma sin_eigenfunction (n : ℕ) (hn : 0 < n) :
     simp [Real.sin_zero]
   have hypi : y Real.pi = 0 := by
     dsimp [y]
-    simpa using Real.sin_nat_mul_pi n
+    simp
   have h_nonzero : ∃ x₀ ∈ Set.Ioo (0 : ℝ) Real.pi, y x₀ ≠ 0 :=
     sin_nx_nontrivial_witness n hn
   exact ⟨hy_deriv, hy_second_deriv, hy0, hypi, h_nonzero⟩

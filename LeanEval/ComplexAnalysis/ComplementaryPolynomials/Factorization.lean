@@ -17,7 +17,7 @@ namespace ComplexAnalysis
 open Polynomial
 
 /-- Two nonzero polynomials with equal leading coefficient and equal root multiset are equal. -/
-theorem eq_of_leadingCoeff_roots {F G : ℂ[X]} (hF : F ≠ 0) (hG : G ≠ 0)
+theorem eq_of_leadingCoeff_roots {F G : ℂ[X]} (_hF : F ≠ 0) (_hG : G ≠ 0)
     (hlc : F.leadingCoeff = G.leadingCoeff) (hroots : F.roots = G.roots) : F = G := by
   have hF_root_card : Multiset.card F.roots = F.natDegree := by
     simpa using IsAlgClosed.card_roots_eq_natDegree (p := F) (k := ℂ)
@@ -86,7 +86,7 @@ theorem invConj_invConj {w : ℂ} (hw : w ≠ 0) :
   exact And.intro h1 h2
 
 /-- Size bound for the root half. -/
-theorem fr_size_bound (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
+theorem fr_size_bound (n : ℕ) (H : ℂ[X]) (_hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
     {S : Multiset ℂ} (hS : H.roots = S + S.map invConj) : S.card ≤ n := by
   have h_card_roots : H.roots.card = H.natDegree :=
     IsAlgClosed.card_roots_eq_natDegree (p := H)
@@ -305,7 +305,7 @@ theorem fr_build_S_partition (R : Multiset ℂ) :
     have h_not_gt : ¬ 1 < ‖a‖ := by linarith
     simp [hlt, h_not_eq, h_not_gt]
   · by_cases heq : ‖a‖ = 1
-    · simp [hlt, heq]
+    · simp [heq]
     · have hge : 1 ≤ ‖a‖ := not_lt.mp hlt
       have hgt : 1 < ‖a‖ := by
         by_contra! hle
@@ -462,8 +462,8 @@ theorem exists_half_of_even_count {α : Type*} [DecidableEq α] (M : Multiset α
         · rw [Multiset.count_cons_of_ne ha, hT'count a, hcount'_ne a ha]
 
 /-- The circle part of the root multiset has all-even counts and a `σ`-invariant half. -/
-theorem fr_build_S_circle_half (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
-    (hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H) :
+theorem fr_build_S_circle_half (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (_hdeg : H.natDegree ≤ 2 * n)
+    (_hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H) :
     (∀ w : ℂ, Even ((H.roots.filter (fun r => ‖r‖ = 1)).count w)) ∧
       ∃ T : Multiset ℂ, T + T = H.roots.filter (fun r => ‖r‖ = 1) ∧
         (∀ w : ℂ, T.count w = (H.roots.filter (fun r => ‖r‖ = 1)).count w / 2) ∧
@@ -609,7 +609,7 @@ theorem fr_multiset (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree �
 
 /-- Constant term of a top-degree self-inversive polynomial is the conjugate of its leading
 coefficient (hence nonzero). -/
-theorem fr_multiset_H0 (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
+theorem fr_multiset_H0 (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (_hdeg : H.natDegree ≤ 2 * n)
     (hself : conjRecip (2 * n) H = H) (hdegeq : H.natDegree = 2 * n) :
     H.eval 0 = starRingEnd ℂ H.leadingCoeff ∧ H.eval 0 ≠ 0 := by
   have hcoeff_symm : coeff H 0 = starRingEnd ℂ (coeff H (2 * n)) := by
@@ -785,7 +785,7 @@ theorem fr_positive_multiple_D (n : ℕ) (S : Multiset ℂ) (hS : ∀ r ∈ S, r
   have h_D_ne_zero : D ≠ 0 := by
     intro hzero
     have hzero_lc : D.leadingCoeff = 0 := by
-      simpa [hzero] using Polynomial.leadingCoeff_zero
+      simp [hzero]
     rw [h_lc] at hzero_lc
     exact h_omega_ne_zero hzero_lc
   exact ⟨h_D_ne_zero, h_omega_ne_zero, h_roots, h_lc⟩
@@ -840,10 +840,10 @@ theorem fr_D_eval_circle (n : ℕ) (S : Multiset ℂ) (hcard : S.card ≤ n) {z 
     _ = ((‖Q0.eval z‖ ^ 2 : ℝ) : ℂ) := by simp
 
 /-- Positivity of the scaling factor `λ` with `H = C λ · D`. -/
-theorem fr_positive_multiple_lambda (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegree ≤ 2 * n)
-    (hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H)
-    (S : Multiset ℂ) (hS : ∀ r ∈ S, r ≠ 0) (hcard : S.card ≤ n)
-    (hroots : H.roots = S + S.map invConj)
+theorem fr_positive_multiple_lambda (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (_hdeg : H.natDegree ≤ 2 * n)
+    (_hself : conjRecip (2 * n) H = H) (hpos : NonnegRealOnCircle n H)
+    (S : Multiset ℂ) (_hS : ∀ r ∈ S, r ≠ 0) (hcard : S.card ≤ n)
+    (_hroots : H.roots = S + S.map invConj)
     (lam : ℂ)
     (hHeq : H = C lam *
       ((S.map (fun r => X - C r)).prod * conjRecip n (S.map (fun r => X - C r)).prod)) :
@@ -905,7 +905,7 @@ theorem fr_positive_multiple_lambda (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg
       _ = ((r : ℂ) / ((‖Q0.eval z0‖ ^ 2 : ℝ) : ℂ)) := by
         simp [div_eq_mul_inv]
       _ = ((r / (‖Q0.eval z0‖ ^ 2) : ℝ) : ℂ) := by
-        simpa using (map_div₀ (algebraMap ℝ ℂ) r (‖Q0.eval z0‖ ^ 2)).symm
+        simp
       _ = (t : ℂ) := rfl
   exact ⟨t, ht_pos, hlam_real⟩
 
@@ -977,7 +977,7 @@ theorem fr_leading_coeff (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDeg
         symm; exact Complex.normSq_eq_norm_sq c
       _ = Complex.normSq (Real.sqrt lam : ℂ) := rfl
       _ = (Real.sqrt lam : ℝ) * (Real.sqrt lam : ℝ) := by
-        simpa using Complex.normSq_ofReal (Real.sqrt lam)
+        simp
       _ = lam := by
         rw [Real.mul_self_sqrt (show 0 ≤ lam from by linarith)]
   refine ⟨c, hc_ne_zero, ?_⟩
@@ -1124,7 +1124,7 @@ theorem fr_zero_mult_le (n : ℕ) (H : ℂ[X]) (hH0 : H ≠ 0) (hdeg : H.natDegr
 
 /-- Self-inversiveness of the zero-free quotient `H₁` in `H = Xᵏ · H₁`. -/
 theorem fr_zero_factor_selfInv (n k : ℕ) (H H1 : ℂ[X]) (hself : conjRecip (2 * n) H = H)
-    (hk : k ≤ n) (hH1 : H1 ≠ 0) (hdeg1 : H1.natDegree ≤ 2 * (n - k))
+    (hk : k ≤ n) (_hH1 : H1 ≠ 0) (hdeg1 : H1.natDegree ≤ 2 * (n - k))
     (hfact : H = X ^ k * H1) :
     conjRecip (2 * (n - k)) H1 = H1 := by
   have hXk_deg : (X ^ k : ℂ[X]).natDegree ≤ 2 * k := by

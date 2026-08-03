@@ -49,7 +49,7 @@ theorem reflect_linear {v : ℂ} (hv : v ≠ 0) :
         _ = C (-v) * X - C (-v) * C v⁻¹ := by simp
         _ = C (-v) * (X - C v⁻¹) := by ring
 
-private lemma aux_reflect_linear' (v : ℂ) : reflect 1 X = (1 : ℂ[X]) := by
+private lemma aux_reflect_linear' (_v : ℂ) : reflect 1 X = (1 : ℂ[X]) := by
   calc
     reflect 1 X = reflect 1 (C (1 : ℂ) * X ^ 1) := by simp
     _ = C (1 : ℂ) * X ^ (revAt 1 1) := reflect_C_mul_X_pow 1 1 (c := (1 : ℂ))

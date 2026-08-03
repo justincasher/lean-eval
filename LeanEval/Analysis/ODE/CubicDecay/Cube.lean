@@ -15,7 +15,7 @@ open scoped NNReal
 /-- Derivative of the negated cube (`lem:cube-deriv`): `deriv (z ↦ -z³) z = -3z²`. -/
 theorem deriv_neg_cube (z : ℝ) : deriv (fun z : ℝ => -(z ^ 3)) z = -3 * z ^ 2 := by
   have h := ((hasDerivAt_pow 3 z).neg).deriv
-  simpa using h
+  simp
 
 /-- Derivative bound for the cube (`lem:cube-deriv-bound`): for `M ≥ 0` and `z ∈ [-M, M]`,
 the derivative of `z ↦ -z³` has nonnegative norm at most `3M²`. -/

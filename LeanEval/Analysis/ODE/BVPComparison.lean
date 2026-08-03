@@ -155,7 +155,7 @@ interval `J` containing `[0, 1]`, satisfy `-u'' ≤ -v''` on the interior, and a
 at the boundary, then `u ≤ v` throughout `[0, 1]`. -/
 @[eval_problem]
 theorem bvp_comparison
-    (J : Set ℝ) (hJ_open : IsOpen J) (hJ_sub : Set.Icc (0 : ℝ) 1 ⊆ J)
+    (J : Set ℝ) (_hJ_open : IsOpen J) (hJ_sub : Set.Icc (0 : ℝ) 1 ⊆ J)
     (u v : ℝ → ℝ)
     (hu : ∀ x ∈ J, HasDerivAt u (deriv u x) x)
     (hu' : ∀ x ∈ J, HasDerivAt (deriv u) (deriv (deriv u) x) x)

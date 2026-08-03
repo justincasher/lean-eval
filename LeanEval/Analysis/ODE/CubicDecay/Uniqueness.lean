@@ -35,7 +35,7 @@ continuous on `[a, t]`, and stays in `[-M, M]`. -/
 theorem solution_traj
     (hy_diff : ∀ t : ℝ, 0 < t → HasDerivAt y (-(y t) ^ 3) t)
     (hy_cont : ContinuousWithinAt y (Set.Ici 0) 0)
-    (a t M : ℝ) (ha : 0 < a) (hat : a ≤ t)
+    (a t M : ℝ) (ha : 0 < a) (_hat : a ≤ t)
     (hM : ∀ s ∈ Set.Icc (0 : ℝ) t, |y s| ≤ M) :
     (∀ s ∈ Set.Icc a t, HasDerivWithinAt y (-(y s) ^ 3) (Set.Ici s) s) ∧
       ContinuousOn y (Set.Icc a t) ∧
@@ -56,7 +56,7 @@ theorem solution_traj
 bounding `|g|` on `[0, t]`, on `[a, t]` the closed form has derivative `-g(s)³` within `Ici s`,
 is continuous on `[a, t]`, and stays in `[-M, M]`. -/
 theorem closedForm_traj
-    (a t M : ℝ) (ha : 0 < a) (hat : a ≤ t)
+    (a t M : ℝ) (ha : 0 < a) (_hat : a ≤ t)
     (hM : ∀ s ∈ Set.Icc (0 : ℝ) t, |closedForm s| ≤ M) :
     (∀ s ∈ Set.Icc a t, HasDerivWithinAt closedForm (-(closedForm s) ^ 3) (Set.Ici s) s) ∧
       ContinuousOn closedForm (Set.Icc a t) ∧
@@ -79,7 +79,7 @@ theorem closedForm_traj
 theorem gronwall_bound
     (hy_diff : ∀ t : ℝ, 0 < t → HasDerivAt y (-(y t) ^ 3) t)
     (hy_cont : ContinuousWithinAt y (Set.Ici 0) 0)
-    (t M : ℝ) (ht : 0 < t)
+    (t M : ℝ) (_ht : 0 < t)
     (hMy : ∀ s ∈ Set.Icc (0 : ℝ) t, |y s| ≤ M)
     (hMg : ∀ s ∈ Set.Icc (0 : ℝ) t, |closedForm s| ≤ M)
     (a : ℝ) (ha : 0 < a) (hat : a ≤ t) :
@@ -197,7 +197,7 @@ theorem limit_forces_nonpos {h : ℝ → ℝ} {c t : ℝ} (ht : 0 < t)
 theorem gronwall_rhs_tendsto
     (hy_diff : ∀ t : ℝ, 0 < t → HasDerivAt y (-(y t) ^ 3) t)
     (hy_cont : ContinuousWithinAt y (Set.Ici 0) 0)
-    (hy0 : y 0 = 1) (t M : ℝ) (ht : 0 < t) :
+    (hy0 : y 0 = 1) (t M : ℝ) (_ht : 0 < t) :
     Tendsto (fun a : ℝ => |y a - closedForm a| * Real.exp (3 * M ^ 2 * (t - a)))
       (𝓝[>] (0 : ℝ)) (𝓝 0) := by
   have hy_tendsto : Tendsto y (𝓝[>] 0) (𝓝 (y 0)) := by
