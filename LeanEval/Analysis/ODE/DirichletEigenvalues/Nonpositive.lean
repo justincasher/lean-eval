@@ -21,8 +21,9 @@ lemma y_sq_first_deriv {y : ℝ → ℝ} {J : Set ℝ}
     HasDerivAt (fun t => y t * y t) (2 * y x * deriv y x) x := by
   have h := hy x hx
   have prod := h.mul h
+  change HasDerivAt (y * y) (2 * y x * deriv y x) x
   convert prod using 1
-  ring
+  all_goals first | rfl | ring
 
 /-- Second derivative formula for `y²`: with `h(t) = 2 y(t) y'(t)`, the function `h` has
 derivative `2 y'(x)² - 2 λ y(x)²` at each `x ∈ J`. -/
@@ -37,7 +38,9 @@ lemma y_sq_second_deriv_formula {y : ℝ → ℝ} {J : Set ℝ} {lam : ℝ}
   have prod := hyx.mul hyyx
   have prod_simp : HasDerivAt (fun t => y t * deriv y t) (deriv y x ^ 2 - lam * y x ^ 2) x := by
     have h_eq : deriv y x * deriv y x + -(y x * (lam * y x)) = deriv y x ^ 2 - lam * y x ^ 2 := by ring
-    simpa [Pi.mul_apply, h_eq] using prod
+    change HasDerivAt (y * deriv y) (deriv y x ^ 2 - lam * y x ^ 2) x
+    convert prod using 1
+    all_goals first | rfl | ring
   have h := prod_simp.const_mul 2
   have h_eq2 : 2 * (deriv y x ^ 2 - lam * y x ^ 2) = 2 * deriv y x ^ 2 - 2 * lam * y x ^ 2 := by ring
   simpa [h_eq2, mul_assoc, mul_comm, mul_left_comm] using h
@@ -85,7 +88,7 @@ lemma y_sq_deriv_differentiableOn_J {y : ℝ → ℝ} {J : Set ℝ} {lam : ℝ}
     have hJmem : J ∈ 𝓝 x := hJ.mem_nhds hx
     refine Filter.mem_of_superset hJmem fun z hz => ?_
     have hz_eq := hderiv z hz
-    simpa [hz_eq]
+    simp [hz_eq]
   have h_diff : DifferentiableAt ℝ (fun t => 2 * y t * deriv y t) x := by
     have hf := y_sq_second_deriv_formula hy hyy hx
     exact hf.differentiableAt
@@ -119,7 +122,7 @@ lemma y_sq_convex {y : ℝ → ℝ} {J : Set ℝ} {lam : ℝ}
       apply Filter.eventually_of_mem (hJ.mem_nhds hxJ)
       intro z hz
       have hz_eq := hderiv z hz
-      simpa [hz_eq]
+      simp [hz_eq]
     have h_deriv2_eq : deriv^[2] (fun t => y t * y t) x = deriv (fun t => 2 * y t * deriv y t) x := by
       calc
         deriv^[2] (fun t => y t * y t) x = deriv (deriv (fun t => y t * y t)) x := rfl

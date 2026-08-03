@@ -35,7 +35,9 @@ theorem wronskian_hasDerivAt {x : ℝ} (hx : x ∈ J) :
   have hW : HasDerivAt (wronskian y₁ y₂)
       (((deriv y₁ x) * (deriv y₂ x) + y₁ x * (-(p x * deriv y₂ x + q x * y₂ x))) -
        ((deriv y₂ x) * (deriv y₁ x) + y₂ x * (-(p x * deriv y₁ x + q x * y₁ x)))) x := by
-    simpa [wronskian] using HasDerivAt.sub hA hB
+    change HasDerivAt
+      ((fun t => y₁ t * deriv y₂ t) - fun t => y₂ t * deriv y₁ t) _ x
+    exact HasDerivAt.sub hA hB
   have hW' : ((deriv y₁ x) * (deriv y₂ x) + y₁ x * (-(p x * deriv y₂ x + q x * y₂ x))) -
       ((deriv y₂ x) * (deriv y₁ x) + y₂ x * (-(p x * deriv y₁ x + q x * y₁ x))) =
       -(p x * wronskian y₁ y₂ x) := by

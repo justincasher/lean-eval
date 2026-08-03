@@ -29,7 +29,10 @@ theorem ratio_hasDerivAt {x : ℝ} (hx : x ∈ Set.Ioo a b) :
   have h_div : HasDerivAt (y₂ / y₁) ((deriv y₂ x * y₁ x - y₂ x * deriv y₁ x) / (y₁ x) ^ 2) x :=
     HasDerivAt.div hy₂x hy₁x hy₁_ne
   unfold ratio wronskian
-  simpa [mul_comm, mul_left_comm, mul_assoc] using h_div
+  change HasDerivAt (y₂ / y₁)
+    ((y₁ x * deriv y₂ x - y₂ x * deriv y₁ x) / y₁ x ^ 2) x
+  convert h_div using 1
+  ring
 
 end ODE
 end Analysis

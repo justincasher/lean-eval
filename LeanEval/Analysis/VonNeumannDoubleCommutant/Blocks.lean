@@ -25,6 +25,7 @@ noncomputable def blockEntry (B : (PiLp 2 (fun _ : Fin n => H)) →L[ℂ] (PiLp 
     (i j : Fin n) : H →L[ℂ] H :=
   (ampProj i) ∘L B ∘L (ampSingle j)
 
+omit [CompleteSpace H] in
 /-- `lem:proj-reduction`: two operators into `H^n` are equal iff their
 compositions with every coordinate projection `pᵢ` agree. -/
 theorem proj_reduction
@@ -42,6 +43,7 @@ theorem proj_reduction
         _ = (ampProj i) (C v) := rfl
     simpa [PiLp.proj_apply] using h'
 
+omit [CompleteSpace H] in
 /-- `lem:single-reduction`: two operators on `H^n` are equal iff their
 compositions with every coordinate inclusion `sⱼ` agree. -/
 theorem single_reduction
@@ -73,7 +75,7 @@ theorem single_reduction
       calc
         (∑ j : Fin n, ampSingle (H := H) j ∘L ampProj j) v
             = ∑ j : Fin n, (ampSingle (H := H) j ∘L ampProj j) v := by
-          simp [ContinuousLinearMap.sum_apply]
+          simp
         _ = ∑ j : Fin n, (ampSingle (H := H) j) ((ampProj j) v) := by
           simp
         _ = ∑ j : Fin n, (ampSingle (H := H) j) ((equiv v) j) := by
@@ -90,7 +92,7 @@ theorem single_reduction
       B v = B ((∑ j : Fin n, ampSingle (H := H) j ∘L ampProj j) v) := by
         rw [h_sum_id, ContinuousLinearMap.id_apply]
       _ = B (∑ j : Fin n, (ampSingle (H := H) j ∘L ampProj j) v) := by
-        simp [ContinuousLinearMap.sum_apply]
+        simp
       _ = ∑ j : Fin n, B ((ampSingle (H := H) j ∘L ampProj j) v) := by
         rw [map_sum B]
       _ = ∑ j : Fin n, (B ∘L ampSingle (H := H) j) ((ampProj j) v) := by
@@ -102,10 +104,11 @@ theorem single_reduction
       _ = C (∑ j : Fin n, (ampSingle (H := H) j ∘L ampProj j) v) := by
         rw [map_sum C]
       _ = C ((∑ j : Fin n, ampSingle (H := H) j ∘L ampProj j) v) := by
-        simp [ContinuousLinearMap.sum_apply]
+        simp
       _ = C v := by
         rw [h_sum_id, ContinuousLinearMap.id_apply]
 
+omit [CompleteSpace H] in
 /-- `lem:blocks-eq`: two operators on `H^n` are equal iff all their block
 entries `pᵢ ∘ B ∘ sⱼ` agree. -/
 theorem blocks_eq
@@ -132,6 +135,7 @@ theorem blocks_eq
     simpa [ContinuousLinearMap.comp_apply, PiLp.proj_apply, ampProj] using
       congrArg (fun f : H →L[ℂ] H => f x) (h_proj i)
 
+omit [CompleteSpace H] in
 /-- `lem:block-amp-left`: the `(i, j)` block of `Δ(A) ∘ B` is `A ∘ B_{ij}`. -/
 theorem block_amp_left (A : H →L[ℂ] H)
     (B : (PiLp 2 (fun _ : Fin n => H)) →L[ℂ] (PiLp 2 (fun _ : Fin n => H))) (i j : Fin n) :
@@ -146,7 +150,8 @@ theorem block_amp_left (A : H →L[ℂ] H)
     _ = A ∘L ((ampProj i) ∘L B ∘L (ampSingle j)) := by
       simp [ContinuousLinearMap.comp_assoc]
 
-/-- `(ampSingle j) x = PiLp.single 2 j x` pointwise. -/
+omit [CompleteSpace H] in
+/-- The identity `(ampSingle j) x = PiLp.single 2 j x`, pointwise. -/
 lemma ampSingle_apply_eq (j : Fin n) (x : H) : (ampSingle j) x = PiLp.single 2 j x := by
   calc
     (ampSingle j) x = ((PiLp.continuousLinearEquiv 2 ℂ (fun _ : Fin n => H)).symm
@@ -156,6 +161,7 @@ lemma ampSingle_apply_eq (j : Fin n) (x : H) : (ampSingle j) x = PiLp.single 2 j
     _ = PiLp.single 2 j x := by
       rw [PiLp.continuousLinearEquiv_symm_apply, PiLp.single]
 
+omit [CompleteSpace H] in
 /-- `Δ(A) ∘ sⱼ = sⱼ ∘ A` as an operator equality. -/
 lemma amplificationMap_comp_ampSingle (A : H →L[ℂ] H) (j : Fin n) :
     (amplificationMap A) ∘L (ampSingle (H := H) j) = (ampSingle (H := H) j) ∘L A := by
@@ -168,6 +174,7 @@ lemma amplificationMap_comp_ampSingle (A : H →L[ℂ] H) (j : Fin n) :
     _ = (ampSingle j) (A x) := by rw [ampSingle_apply_eq j (A x)]
     _ = ((ampSingle j) ∘L A) x := rfl
 
+omit [CompleteSpace H] in
 /-- `lem:block-amp-right`: the `(i, j)` block of `B ∘ Δ(A)` is `B_{ij} ∘ A`. -/
 theorem block_amp_right (A : H →L[ℂ] H)
     (B : (PiLp 2 (fun _ : Fin n => H)) →L[ℂ] (PiLp 2 (fun _ : Fin n => H))) (i j : Fin n) :
@@ -182,6 +189,7 @@ theorem block_amp_right (A : H →L[ℂ] H)
     _ = ((ampProj i) ∘L B ∘L (ampSingle j)) ∘L A := by
       simp [ContinuousLinearMap.comp_assoc]
 
+omit [CompleteSpace H] in
 /-- `lem:amp-commute-iff-blocks`: `Δ(A)` commutes with `B` iff `A` commutes with
 every block entry `B_{ij}`. -/
 theorem amp_commute_iff_blocks (A : H →L[ℂ] H)

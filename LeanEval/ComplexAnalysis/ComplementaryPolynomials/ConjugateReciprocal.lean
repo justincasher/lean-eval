@@ -135,7 +135,7 @@ theorem reflect_map_comm {S : Type*} [CommSemiring S] (f : ℂ →+* S) (N : ℕ
   exact Polynomial.reflect_map f A N
 
 /-- The conjugate-reciprocal is an involution (for `N ≥ deg A`). -/
-theorem conjRecip_conjRecip (N : ℕ) (A : ℂ[X]) (hA : A.natDegree ≤ N) :
+theorem conjRecip_conjRecip (N : ℕ) (A : ℂ[X]) (_hA : A.natDegree ≤ N) :
     conjRecip N (conjRecip N A) = A := by
   unfold conjRecip
   calc
@@ -166,12 +166,9 @@ theorem conjRecip_X_pow (n : ℕ) :
     _ = X ^ revAt (2 * n) n := by rw [Polynomial.reflect_monomial]
     _ = X ^ n := by
       have hn : n ≤ 2 * n := by
-        simpa [two_mul] using Nat.le_add_left n n
+        simp [two_mul]
       rw [Polynomial.revAt_le hn]
-      have hsub : (2 * n : ℕ) - n = n := by
-        calc
-          (2 * n : ℕ) - n = n + n - n := by ring
-          _ = n := Nat.add_sub_cancel n n
+      have hsub : (2 * n : ℕ) - n = n := by omega
       rw [hsub]
 
 /-- Coefficient symmetry of a self-inversive polynomial: `coeff j H = conj (coeff (2n-j) H)`. -/

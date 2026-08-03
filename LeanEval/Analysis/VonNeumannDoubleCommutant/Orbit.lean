@@ -29,6 +29,7 @@ noncomputable def orbitSubmodule (R : Subalgebra ℂ (K →L[ℂ] K)) (x : K) : 
 noncomputable def orbitClosure (R : Subalgebra ℂ (K →L[ℂ] K)) (x : K) : Submodule ℂ K :=
   (orbitSubmodule R x).topologicalClosure
 
+omit [CompleteSpace K] in
 /-- The orbit `M₀ = {A x : A ∈ R}` is a submodule containing `x`.  (Blueprint:
 `lem:orbit-submodule`.) -/
 theorem mem_orbitSubmodule (R : Subalgebra ℂ (K →L[ℂ] K)) (x : K) :
@@ -39,6 +40,7 @@ theorem mem_orbitSubmodule (R : Subalgebra ℂ (K →L[ℂ] K)) (x : K) :
   · exact (Subalgebra.mem_toSubmodule (S := R)).mpr (Subalgebra.one_mem R)
   · simp
 
+omit [CompleteSpace K] in
 /-- For every `A ∈ R`, the orbit `M₀` is invariant under `A`, i.e. `A (M₀) ⊆ M₀`.
 (Blueprint: `lem:orbit-invariant`.) -/
 theorem orbitSubmodule_mem_invtSubmodule (R : Subalgebra ℂ (K →L[ℂ] K)) (x : K)
@@ -57,8 +59,9 @@ theorem orbitSubmodule_mem_invtSubmodule (R : Subalgebra ℂ (K →L[ℂ] K)) (x
   rw [orbitSubmodule]
   apply Submodule.mem_map.mpr
   refine ⟨A * B, hAB, ?_⟩
-  simpa [h_eq]
+  simp [h_eq]
 
+omit [CompleteSpace K] in
 /-- The closure `M` of the orbit is a closed invariant subspace containing `x`: `x ∈ M`, and
 for every `A ∈ R` the subspace `M` is invariant under `A`.  (Blueprint:
 `lem:invariant-closure`.) -/
@@ -90,6 +93,7 @@ theorem orthogonal_invariant (A : K →L[ℂ] K) (V : Submodule ℂ K)
   -- This is exactly ContinuousLinearMap.orthogonal_mem_invtSubmodule
   exact ContinuousLinearMap.orthogonal_mem_invtSubmodule hV
 
+omit [CompleteSpace K] in
 /-- If `A (V) ⊆ V`, then the orthogonal projection `P = P_V` fixes `A (P v)`:
 `P (A (P v)) = A (P v)`.  (Blueprint: `lem:proj-on-invariant`.) -/
 theorem starProjection_apply_of_invariant (A : K →L[ℂ] K) (V : Submodule ℂ K)
@@ -103,7 +107,7 @@ theorem starProjection_apply_of_invariant (A : K →L[ℂ] K) (V : Submodule ℂ
         _ = V.starProjection v := by
           have h_idem_elem : IsIdempotentElem (V.starProjection : K →L[ℂ] K) :=
             Submodule.isIdempotentElem_starProjection (K := V)
-          simpa [ContinuousLinearMap.mul_apply] using congrArg (· v) h_idem_elem.eq
+          simpa only [mul_apply_eq_comp] using congrArg (· v) h_idem_elem.eq
     exact ((Submodule.starProjection_eq_self_iff (K := V) (v := V.starProjection v)).mp h_idem)
   have hA_mem : A (V.starProjection v) ∈ V := by
     have hV' : V ≤ V.comap A.toLinearMap := (Module.End.mem_invtSubmodule (f := A.toLinearMap)).mp hV
@@ -111,6 +115,7 @@ theorem starProjection_apply_of_invariant (A : K →L[ℂ] K) (V : Submodule ℂ
   rw [Submodule.starProjection_eq_self_iff]
   exact hA_mem
 
+omit [CompleteSpace K] in
 /-- If `A (Vᗮ) ⊆ Vᗮ`, then the projection `P = P_V` annihilates the orthogonal part:
 `P (A ((1 - P) v)) = 0`.  (Blueprint: `lem:proj-on-orthogonal`.) -/
 theorem starProjection_apply_of_orthogonal_invariant (A : K →L[ℂ] K) (V : Submodule ℂ K)

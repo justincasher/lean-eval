@@ -181,7 +181,10 @@ theorem omega_forward_invariant (x : X) :
 
   have h_subset : omegaFwd (T : X → X) (T x) ⊆ omegaFwd (T : X → X) x := by
     rw [h_eq_shift, omegaFwd]
-    simpa using omegaLimit_subset_of_tendsto (m := fun (n : ℕ) => n + 1) (hf := h_shift_tendsto)
+    change omegaLimit Filter.atTop
+      (fun (n : ℕ) (z : X) => ((T : X → X)^[n]) (T z)) {x}
+        ⊆ omegaLimit Filter.atTop (fun (n : ℕ) => (T : X → X)^[n]) {x}
+    exact omegaLimit_subset_of_tendsto (m := fun (n : ℕ) => n + 1) (hf := h_shift_tendsto)
       (ϕ := fun (n : ℕ) => (T : X → X)^[n]) (s := {x})
 
   -- Step 3: Combine

@@ -70,9 +70,9 @@ theorem circleIntegral_logDeriv_unit {R : ℝ} {U : ℂ → ℂ} (hR : 0 < R)
 of the circle. -/
 theorem factorization_eventuallyEq {h : ℂ → ℂ} {R : ℝ} (hR : 0 < R)
     (hh : MeromorphicOn h Set.univ)
-    (horder : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt h z = 0)
+    (_horder : ∀ z : ℂ, ‖z‖ = R → meromorphicOrderAt h z = 0)
     {U : ℂ → ℂ} (hUana : AnalyticOnNhd ℂ U (Metric.closedBall 0 R))
-    (hU0 : ∀ z ∈ Metric.closedBall (0 : ℂ) R, U z ≠ 0)
+    (_hU0 : ∀ z ∈ Metric.closedBall (0 : ℂ) R, U z ≠ 0)
     (hfact : h =ᶠ[Filter.codiscreteWithin (Metric.closedBall 0 R)]
       (∏ᶠ u, (fun x => x - u) ^ (divisor h (Metric.closedBall 0 R)) u) • U)
     {z : ℂ} (hz : ‖z‖ = R) :
@@ -150,7 +150,7 @@ theorem factorization_logDeriv {h : ℂ → ℂ} {R : ℝ} (hR : 0 < R)
     simpa [Pi.pow_apply] using zpow_ne_zero (d u) hzu
   -- Hence `φ` is differentiable and nonzero at `z`.
   have hφ_diff : DifferentiableAt ℂ φ z := by
-    rw [hφ_prod]; exact DifferentiableAt.finset_prod hfac_diff
+    rw [hφ_prod]; exact DifferentiableAt.finsetProd hfac_diff
   have hφz_ne : φ z ≠ 0 := by
     rw [hφ_prod, Finset.prod_apply]
     exact Finset.prod_ne_zero_iff.mpr hfac_ne

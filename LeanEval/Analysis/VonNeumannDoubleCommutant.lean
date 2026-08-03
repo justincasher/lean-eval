@@ -51,13 +51,15 @@ theorem vonNeumann_doubleCommutant_tfae
     List.TFAE
       [ Set.centralizer (Set.centralizer (S : Set (H →L[ℂ] H))) = S
       , IsClosed
-          (ContinuousLinearMap.toWOT (RingHom.id ℂ) H H '' (S : Set (H →L[ℂ] H)))
+          (ContinuousLinearMapWOT.ofCLM '' (S : Set (H →L[ℂ] H)))
       , IsClosed
           (ContinuousLinearMap.toPointwiseConvergenceCLM ℂ (RingHom.id ℂ) H H ''
             (S : Set (H →L[ℂ] H))) ] := by
   have h_image_wot : (wotEquiv (H := H)) '' (S : Set (H →L[ℂ] H)) =
-      (ContinuousLinearMap.toWOT (RingHom.id ℂ) H H) '' (S : Set (H →L[ℂ] H)) := by
-    ext x; simp [wotEquiv]
+      ContinuousLinearMapWOT.ofCLM '' (S : Set (H →L[ℂ] H)) := by
+    apply Set.image_congr
+    intro x _hx
+    rfl
   have h_image_sot : (sotEquiv (H := H)) '' (S : Set (H →L[ℂ] H)) =
       (ContinuousLinearMap.toPointwiseConvergenceCLM ℂ (RingHom.id ℂ) H H) ''
         (S : Set (H →L[ℂ] H)) := by

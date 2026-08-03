@@ -115,7 +115,9 @@ theorem logDeriv_div_pointwise {f g : ℂ → ℂ} {R : ℝ}
   have hdf : DifferentiableAt ℂ f z := hf_analytic.differentiableAt
   have hdfg : DifferentiableAt ℂ (f + g) z := hfg_analytic.differentiableAt
   have h := logDeriv_div (x := z) (hf := hfg_ne) (hg := hf_ne) (hdf := hdfg) (hdg := hdf)
-  simpa [Pi.div_apply] using h
+  change logDeriv (fun w => (f w + g w) / f w) z =
+    logDeriv (f + g) z - logDeriv f z
+  exact h
 
 /-- The logarithmic derivatives `logDeriv f` and `logDeriv (f + g)` are
 circle-integrable. -/

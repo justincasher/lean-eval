@@ -24,6 +24,73 @@ def main : IO UInt32 := do
   let passes ← IO.mkRef 0
   let fails ← IO.mkRef 0
 
+  -- Regression for https://github.com/leanprover/lean-eval/pull/467:
+  -- Mathlib-style copyright headers precede imports. The generator must drop
+  -- both the header and imports before copying trusted helpers into
+  -- `ChallengeDeps.lean`; otherwise `import EvalTools.Markers` leaks into the
+  -- standalone workspace's trusted-helper path.
+  check "importPreludeLength skips a Mathlib copyright header" passes fails do
+    let prelude :=
+      "/-\n" ++
+      "Copyright (c) 2026 Example. All rights reserved.\n" ++
+      "Released under Apache 2.0 license as described in the file LICENSE.\n" ++
+      "Authors: Example Author\n" ++
+      "-/\n" ++
+      "import Mathlib\n" ++
+      "import EvalTools.Markers\n"
+    let body := "\nnamespace Demo\n\ndef trustedHelper : Nat := 1\n"
+    let source := Source.ofString (prelude ++ body)
+    let afterPrelude := Source.slice source (importPreludeLength source) source.size
+    pure <| assertEq "body after prelude" afterPrelude body
+
+  check "importPreludeLength handles a nested copyright header" passes fails do
+    let prelude :=
+      "/-\n" ++
+      "Copyright (c) 2026 Example. All rights reserved.\n" ++
+      "/- nested block comment -/\n" ++
+      "-/\n" ++
+      "import Mathlib\n" ++
+      "import EvalTools.Markers\n" ++
+      "\n"
+    let body := "namespace Demo\n\ndef trustedHelper : Nat := 1\n"
+    let source := Source.ofString (prelude ++ body)
+    let afterPrelude :=
+      (Source.slice source (importPreludeLength source) source.size).trimAsciiStart.toString
+    pure <| assertEq "body after prelude" afterPrelude body
+
+  -- A module doc comment after the imports belongs to the source body and must
+  -- not be mistaken for a copyright header.
+  check "importPreludeLength preserves a block comment after imports" passes fails do
+    let prelude := "import Mathlib\n\n"
+    let body := "/-! Module documentation. -/\n\nnamespace Demo\n"
+    let source := Source.ofString (prelude ++ body)
+    let afterPrelude :=
+      (Source.slice source (importPreludeLength source) source.size).trimAsciiStart.toString
+    pure <| assertEq "body after prelude" afterPrelude body
+
+  check "importPreludeLength skips comments between imports" passes fails do
+    let prelude :=
+      "-- Copyright (c) 2026 Example\n" ++
+      "import Mathlib\n" ++
+      "/- The marker import is repository-local. -/\n" ++
+      "import EvalTools.Markers\n"
+    let body := "\nnamespace Demo\n"
+    let source := Source.ofString (prelude ++ body)
+    let afterPrelude := Source.slice source (importPreludeLength source) source.size
+    pure <| assertEq "body after prelude" afterPrelude body
+
+  check "wrapBodyInSubmissionNamespace handles a nested header" passes fails do
+    let source :=
+      "/-\n" ++
+      "Copyright (c) 2026 Example.\n" ++
+      "/- nested block comment -/\n" ++
+      "-/\n" ++
+      "import Mathlib\n\n" ++
+      "namespace Demo\n\ndef target : Nat := 1\n\nend Demo\n"
+    let wrapped := wrapBodyInSubmissionNamespace source "Demo"
+    pure <| assertEq "submission namespace inserted after header"
+      ((wrapped.find? "\nnamespace Submission\n\nnamespace Demo\n").isSome) true
+
   check "isScopedOpenLine: open Foo is top-level" passes fails do
     pure <| assertEq "scoped" (isScopedOpenLine "open Foo") false
 
@@ -151,6 +218,95 @@ def main : IO UInt32 := do
       (includeNamespaces := true)
     let hasOpenPolynomial := (block.find? "open Polynomial").isSome
     pure <| assertEq "top-level open with 'in' comment kept" hasOpenPolynomial true
+
+  check "injectSolutionHoleModifiers: plain def gains both modifiers" passes fails do
+    pure <| assertEq "rewritten"
+      (injectSolutionHoleModifiers "def foo : Nat := " "foo")
+      (some "@[reducible] noncomputable def foo : Nat := ")
+
+  check "injectSolutionHoleModifiers: existing noncomputable is folded" passes fails do
+    pure <| assertEq "rewritten"
+      (injectSolutionHoleModifiers "noncomputable def foo : Nat := " "foo")
+      (some "@[reducible] noncomputable def foo : Nat := ")
+
+  check "injectSolutionHoleModifiers: instance with doc comment" passes fails do
+    pure <| assertEq "rewritten"
+      (injectSolutionHoleModifiers
+        "/-- doc -/\nnoncomputable instance instFoo : Inhabited Nat := " "instFoo")
+      (some "/-- doc -/\n@[reducible] noncomputable instance instFoo : Inhabited Nat := ")
+
+  -- The word `noncomputable` at the end of a doc comment is not a modifier
+  -- and must not be stripped.
+  check "injectSolutionHoleModifiers: doc comment mentioning noncomputable" passes fails do
+    pure <| assertEq "rewritten"
+      (injectSolutionHoleModifiers "/-- might be noncomputable -/\ndef foo : Nat := " "foo")
+      (some "/-- might be noncomputable -/\n@[reducible] noncomputable def foo : Nat := ")
+
+  check "injectSolutionHoleModifiers: no def/instance/abbrev anchor" passes fails do
+    pure <| assertEq "rewritten"
+      (injectSolutionHoleModifiers "theorem foo : True := " "foo")
+      none
+
+  -- Regression for https://github.com/leanprover/lean-eval/issues/421:
+  -- a top-level `universe` command in scope at the theorem must be re-emitted,
+  -- or the reconstructed single-hole `Challenge.lean` slice fails with
+  -- `unknown universe level`.
+  check "extractContextUniverses keeps top-level universe in scope" passes fails do
+    let source :=
+      "import Mathlib\n" ++
+      "universe v u\n" ++
+      "def IsTopos (E : Type u) : Prop := True\n" ++
+      "theorem target {E : Type u} : True := trivial\n"
+    let extracted : ExtractedTheorem := {
+      declarationName := "target"
+      module := "Demo"
+      startLine := 4, startColumn := 0
+      endLine := 4, endColumn := 40
+      sameModuleDependencies := #[]
+      kind := "theorem"
+    }
+    let block := extractContextUniverses source (some extracted)
+    pure <| assertEq "universe line emitted" ((block.find? "universe v u").isSome) true
+
+  -- A `universe` declared inside a `section`/`namespace` that has already been
+  -- closed before the theorem is out of scope and must not be re-emitted.
+  check "extractContextUniverses drops out-of-scope universe" passes fails do
+    let source :=
+      "import Mathlib\n" ++
+      "section\n" ++
+      "universe w\n" ++
+      "end\n" ++
+      "theorem target : True := trivial\n"
+    let extracted : ExtractedTheorem := {
+      declarationName := "target"
+      module := "Demo"
+      startLine := 5, startColumn := 0
+      endLine := 5, endColumn := 30
+      sameModuleDependencies := #[]
+      kind := "theorem"
+    }
+    let block := extractContextUniverses source (some extracted)
+    pure <| assertEq "out-of-scope universe dropped" block ""
+
+  -- An indented top-level declaration following `universe` is a fresh command,
+  -- not a continuation of the binder list, and must not be absorbed into the
+  -- emitted block (which would produce malformed `Challenge.lean`).
+  check "extractContextUniverses stops at indented declaration" passes fails do
+    let source :=
+      "import Mathlib\n" ++
+      "universe u\n" ++
+      "  def Foo := Type u\n" ++
+      "theorem target : True := trivial\n"
+    let extracted : ExtractedTheorem := {
+      declarationName := "target"
+      module := "Demo"
+      startLine := 4, startColumn := 0
+      endLine := 4, endColumn := 30
+      sameModuleDependencies := #[]
+      kind := "theorem"
+    }
+    let block := extractContextUniverses source (some extracted)
+    pure <| assertEq "universe line only" block "universe u\n\n"
 
   let passCount ← passes.get
   let failCount ← fails.get

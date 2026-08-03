@@ -217,8 +217,8 @@ theorem translatedSet_convex {s : Set E} (hsconv : Convex ℝ s) (W : Submodule 
         intro x v
         simp [add_assoc]
     }
-  have h := hsconv.affine_preimage f
-  simpa [Set.preimage, Set.mem_setOf_eq] using h
+  change Convex ℝ (f ⁻¹' s)
+  exact hsconv.affine_preimage f
 
 /-- **The translation recovers `s`.** For `p ∈ s` and `W = vectorSpan ℝ s`, the image of the
 translated set `{w : W | (w : E) + p ∈ s}` under `w ↦ (w : E) + p` is `s` itself. -/
@@ -362,7 +362,7 @@ theorem intrinsicInterior_eq_image {s : Set E} {p : E} (hp : p ∈ s) :
   have h_intrinsic_image : intrinsicInterior ℝ s = φ '' intrinsicInterior ℝ s' := by
     calc
       intrinsicInterior ℝ s = intrinsicInterior ℝ (φ '' s') := by rw [h_image]
-      _ = φ '' intrinsicInterior ℝ s' := by rw [AffineIsometry.image_intrinsicInterior]
+      _ = φ '' intrinsicInterior ℝ s' := by rw [AffineIsometry.intrinsicInterior_image]
   -- Step 3: intrinsicInterior ℝ s' = interior s'
   have h_intrinsic_s' : intrinsicInterior ℝ s' = interior s' :=
     intrinsicInterior_eq_interior_of_affineSpan_eq_top (affineSpan_translatedSet_eq_top hp)
@@ -431,7 +431,7 @@ theorem extension_to_E {s : Set E} {p : E} {y : E} (hyW : y - p ∈ vectorSpan �
         (⟨z - p, hzW⟩ : (vectorSpan ℝ s)) ∈ interior {w : (vectorSpan ℝ s) | (w : E) + p ∈ s} →
           ℓ z < ℓ y := by
   -- Use the Hahn-Banach theorem to extend g from W = vectorSpan ℝ s to all of E
-  rcases Real.exists_extension_norm_eq (vectorSpan ℝ s) g with ⟨ℓ, hℓ⟩
+  rcases exists_extension_norm_eq (vectorSpan ℝ s) g with ⟨ℓ, hℓ⟩
   refine ⟨ℓ, ?_, ?_⟩
   · -- ℓ restricts to g on W
     exact hℓ.1
@@ -591,13 +591,15 @@ theorem lineSection_isCompact_convex {s : Set E} (hscomp : IsCompact s) (hsconv 
           intro t u
           simp [add_smul, add_comm, add_assoc]
       }
-    simpa [hT, Set.preimage, Set.mem_setOf_eq] using hsconv.affine_preimage f
+    change Convex ℝ (f ⁻¹' s)
+    exact hsconv.affine_preimage f
   -- 2. Compactness: T is closed and bounded in ℝ, hence compact
   have hT_closed : IsClosed T := by
     have hs_closed : IsClosed s := hscomp.isClosed
     have h_cont : Continuous (fun (t : ℝ) => x + t • v) := by
       continuity
-    simpa [hT] using hs_closed.preimage h_cont
+    change IsClosed ((fun t : ℝ => x + t • v) ⁻¹' s)
+    exact hs_closed.preimage h_cont
   have hT_bounded : Bornology.IsBounded T := by
     have hs_bounded : Bornology.IsBounded s := hscomp.isBounded
     rcases (isBounded_iff_forall_norm_le.mp hs_bounded) with ⟨C, hC⟩
@@ -693,7 +695,6 @@ private lemma lineSection_param_mem_interior {s : Set E} {x : E} (hx : x ∈ s) 
   have h_preimage_open : IsOpen (φ⁻¹' (interior ((↑)⁻¹' s : Set A))) :=
     isOpen_interior.preimage hφ_cont
   have hc_in_preimage : c ∈ φ⁻¹' (interior ((↑)⁻¹' s : Set A)) := by
-    dsimp
     simpa [hφc] using hy
   have h_preimage_subset_T : φ⁻¹' (interior ((↑)⁻¹' s : Set A)) ⊆ T := by
     intro t ht
@@ -760,7 +761,7 @@ theorem interior_in_segment {s : Set E} (hscomp : IsCompact s) (hsconv : Convex 
     have h_preimage_open : IsOpen (φ⁻¹' (interior ((↑)⁻¹' s : Set A))) :=
       isOpen_interior.preimage hφ_cont
     have h0_in_preimage : 0 ∈ φ⁻¹' (interior ((↑)⁻¹' s : Set A)) := by
-      dsimp; simpa [hφ0] using hy
+      simpa [hφ0] using hy
     have h_preimage_subset_T : φ⁻¹' (interior ((↑)⁻¹' s : Set A)) ⊆ T := by
       intro t ht
       have hφt_preimage : φ t ∈ (↑)⁻¹' s := interior_subset ht

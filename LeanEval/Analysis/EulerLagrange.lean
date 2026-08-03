@@ -151,7 +151,8 @@ theorem lagrangianPartialV_contDiff
     have h_comp : HasDerivAt (F ∘ g) ((fderiv ℝ F (a, b, c)) (0, (0, 1))) c :=
       hF_diff.hasFDerivAt.comp_hasDerivAt (f := g) (x := c) (hf := hg_deriv)
     have h_comp' : HasDerivAt (fun (z : ℝ) => L a b z) ((fderiv ℝ F (a, b, c)) (0, (0, 1))) c := by
-      simpa [F, g, hFdef, hgdef] using h_comp
+      change HasDerivAt (F ∘ g) ((fderiv ℝ F (a, b, c)) (0, (0, 1))) c
+      exact h_comp
     have h_deriv : deriv (fun (z : ℝ) => L a b z) c = (fderiv ℝ F (a, b, c)) (0, (0, 1)) :=
       h_comp'.deriv
     simpa [e, a, b, c] using h_deriv
@@ -316,13 +317,16 @@ theorem integrand_hasDerivAt
           + lagrangianPartialVShifted L x h ε₀ t * deriv h t := by
         simp [lagrangianPartialXShifted, lagrangianPartialVShifted, Φ]
   -- Combine the chain rule with the decomposition
-  simpa [σ, Φ] using hChain.congr_deriv h_fderiv_decomp
+  change HasDerivAt (Φ ∘ σ)
+    (lagrangianPartialXShifted L x h ε₀ t * h t
+      + lagrangianPartialVShifted L x h ε₀ t * deriv h t) ε₀
+  exact hChain.congr_deriv h_fderiv_decomp
 
 /-- **The `ε`-derivative integrand is supported in `tsupport h`.** For each `ε`
 the integrand `t ↦ ∂_x L_ε(t) · h t + ∂_{x'} L_ε(t) · h' t` is supported in
 `tsupport h`. -/
 theorem deriv_integrand_support
-    (L : ℝ → ℝ → ℝ → ℝ) (x h : ℝ → ℝ) (hh : HasCompactSupport h) (ε : ℝ) :
+    (L : ℝ → ℝ → ℝ → ℝ) (x h : ℝ → ℝ) (_hh : HasCompactSupport h) (ε : ℝ) :
     Function.support (fun t => lagrangianPartialXShifted L x h ε t * h t
         + lagrangianPartialVShifted L x h ε t * deriv h t) ⊆ tsupport h := by
   intro t ht
@@ -390,7 +394,7 @@ theorem tube_bound
     (L : ℝ → ℝ → ℝ → ℝ) (x h : ℝ → ℝ)
     (hL : ContDiff ℝ 2 (fun p : ℝ × ℝ × ℝ => L p.1 p.2.1 p.2.2))
     (hx : ContDiff ℝ 2 x) (hh : ContDiff ℝ ∞ h) (hhsupp : HasCompactSupport h)
-    {r : ℝ} (hr : 0 < r) :
+    {r : ℝ} (_hr : 0 < r) :
     ∃ M : ℝ, ∀ ε : ℝ, |ε| ≤ r → ∀ t ∈ tsupport h,
       |lagrangianPartialXShifted L x h ε t| ≤ M
         ∧ |lagrangianPartialVShifted L x h ε t| ≤ M := by
@@ -469,7 +473,7 @@ theorem dominating_bound
     {a b : ℝ} (L : ℝ → ℝ → ℝ → ℝ) (x h : ℝ → ℝ)
     (hL : ContDiff ℝ 2 (fun p : ℝ × ℝ × ℝ => L p.1 p.2.1 p.2.2))
     (hx : ContDiff ℝ 2 x) (hh : ContDiff ℝ ∞ h) (hhsupp : HasCompactSupport h)
-    (hsub : tsupport h ⊆ Set.Ioo a b) {r : ℝ} (hr : 0 < r) :
+    (_hsub : tsupport h ⊆ Set.Ioo a b) {r : ℝ} (hr : 0 < r) :
     ∃ g : ℝ → ℝ, Integrable g ∧ (∀ t, 0 ≤ g t) ∧
       ∀ ε : ℝ, |ε| ≤ r → ∀ t,
         |lagrangianPartialXShifted L x h ε t * h t
@@ -635,7 +639,7 @@ theorem integrand_aestronglyMeasurable
 /-- **Integrability of the base integrand.** For `a < b` and `L, x` `C²`, the
 `ε = 0` integrand `t ↦ L(t, x t, x' t)` is integrable on `(a, b)`. -/
 theorem base_integrand_integrable
-    {a b : ℝ} (hab : a < b) (L : ℝ → ℝ → ℝ → ℝ) (x : ℝ → ℝ)
+    {a b : ℝ} (_hab : a < b) (L : ℝ → ℝ → ℝ → ℝ) (x : ℝ → ℝ)
     (hL : ContDiff ℝ 2 (fun p : ℝ × ℝ × ℝ => L p.1 p.2.1 p.2.2))
     (hx : ContDiff ℝ 2 x) :
     IntegrableOn (fun t => L t (x t) (deriv x t)) (Set.Ioo a b) := by
@@ -674,7 +678,11 @@ theorem first_variation
     have hF_meas_nhds : Filter.Eventually (fun ε => AEStronglyMeasurable (F ε) μ) (nhds (0 : ℝ)) :=
       Filter.Eventually.of_forall hF_meas
     have hF_int : Integrable (F 0) μ := by
-      simpa [F, μ] using base_integrand_integrable hab L x hL hx
+      dsimp only [F, μ]
+      have h_base := base_integrand_integrable hab L x hL hx
+      change Integrable (fun t => L t (x t) (deriv x t))
+        (volume.restrict (Set.Ioo a b)) at h_base
+      simpa only [zero_mul, add_zero] using h_base
     have hF'_meas : AEStronglyMeasurable (F' 0) μ := by
       simpa [F'] using (integrand_aestronglyMeasurable L x h hL hx hh).2 0
     have h_bound : ∀ᵐ t ∂μ, ∀ ε ∈ Metric.ball (0 : ℝ) 1, |F' ε t| ≤ g t := by
@@ -742,7 +750,7 @@ theorem boundary_vanishing
 /-- **Integral over `(a, b)` as an interval integral.** For `a ≤ b` and `f`
 integrable on `(a, b)`, the set integral over `(a, b)` equals `∫ a..b`. -/
 theorem ioo_interval_conversion
-    {a b : ℝ} (hab : a ≤ b) (f : ℝ → ℝ) (hf : IntegrableOn f (Set.Ioo a b)) :
+    {a b : ℝ} (hab : a ≤ b) (f : ℝ → ℝ) (_hf : IntegrableOn f (Set.Ioo a b)) :
     ∫ t in Set.Ioo a b, f t = ∫ t in a..b, f t := by
   -- interval integral ∫_a^b f with a ≤ b equals integral over (a, b]
   rw [intervalIntegral.integral_of_le hab]
@@ -786,7 +794,7 @@ theorem ibp_hypotheses
 theorem integration_by_parts
     {a b : ℝ} (hab : a < b) (L : ℝ → ℝ → ℝ → ℝ) (x h : ℝ → ℝ)
     (hL : ContDiff ℝ 2 (fun p : ℝ × ℝ × ℝ => L p.1 p.2.1 p.2.2))
-    (hx : ContDiff ℝ 2 x) (hh : ContDiff ℝ ∞ h) (hhsupp : HasCompactSupport h)
+    (hx : ContDiff ℝ 2 x) (hh : ContDiff ℝ ∞ h) (_hhsupp : HasCompactSupport h)
     (hsub : tsupport h ⊆ Set.Ioo a b) :
     (∫ t in Set.Ioo a b, lagrangianPartialV L x t * deriv h t)
       = - ∫ t in Set.Ioo a b, deriv (lagrangianPartialV L x) t * h t := by

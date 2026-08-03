@@ -23,8 +23,9 @@ lemma yprime_sq_hasDerivAt {y : ℝ → ℝ} {J : Set ℝ} {lam : ℝ}
     {x : ℝ} (hx : x ∈ J) :
     HasDerivAt (fun t => deriv y t * deriv y t) (-2 * lam * y x * deriv y x) x := by
   have prod := (hyy x hx).mul (hyy x hx)
-  have hcalc : -(lam * y x * deriv y x) + -(deriv y x * (lam * y x)) = -2 * lam * y x * deriv y x := by ring
-  simpa [hcalc] using prod
+  change HasDerivAt (deriv y * deriv y) (-2 * lam * y x * deriv y x) x
+  convert prod using 1
+  all_goals first | rfl | ring
 
 /-- The energy `E(x) = λ y(x)² + y'(x)²` has derivative `0` at every `x ∈ J`. -/
 lemma energy_hasDerivAt_zero {y : ℝ → ℝ} {J : Set ℝ} {lam : ℝ}
@@ -43,7 +44,7 @@ lemma energy_hasDerivAt_zero {y : ℝ → ℝ} {J : Set ℝ} {lam : ℝ}
 
 /-- Energy conservation: `E(x) = E(0)` on `[0, π]`. -/
 lemma energy_const {y : ℝ → ℝ} {J : Set ℝ} {lam : ℝ}
-    (hJ : IsOpen J) (hsub : Set.Icc (0 : ℝ) Real.pi ⊆ J)
+    (_hJ : IsOpen J) (hsub : Set.Icc (0 : ℝ) Real.pi ⊆ J)
     (hy : ∀ x ∈ J, HasDerivAt y (deriv y x) x)
     (hyy : ∀ x ∈ J, HasDerivAt (deriv y) (-(lam * y x)) x) :
     ∀ x ∈ Set.Icc (0 : ℝ) Real.pi,
@@ -142,8 +143,9 @@ lemma diff_of_two_ode_solutions {y g : ℝ → ℝ} {J : Set ℝ} {lam : ℝ}
   · intro x hx
     have hzz : HasDerivAt (fun t => deriv y t - deriv g t) (-(lam * (y x - g x))) x := by
       have h := (hyy x hx).sub (hgg x hx)
-      have hcalc : -(lam * y x) - (-(lam * g x)) = -(lam * (y x - g x)) := by ring
-      simpa [hcalc] using h
+      change HasDerivAt (deriv y - deriv g) (-(lam * (y x - g x))) x
+      convert h using 1
+      all_goals first | rfl | ring
     have h_ev : deriv (fun t => y t - g t) =ᶠ[𝓝 x] (fun t => deriv y t - deriv g t) := by
       filter_upwards [hJ.mem_nhds hx] with t ht
       exact deriv_sub ((hy t ht).differentiableAt) ((hg t ht).differentiableAt)
@@ -180,7 +182,8 @@ lemma solution_diff_is_zero_initial_solution {y : ℝ → ℝ} {J : Set ℝ} {la
     have hderiv_zx : deriv z x = deriv y x - deriv g x := by
       dsimp [z]
       exact deriv_sub ((hy x hx).differentiableAt) ((hg x hx).differentiableAt)
-    simpa [hderiv_zx] using hz_has
+    change HasDerivAt (y - g) (deriv z x) x
+    convert hz_has using 1
   -- Second conclusion: deriv z also satisfies the ODE on J
   have hz_second : ∀ x ∈ J, HasDerivAt (deriv z) (-(lam * z x)) x := by
     intro x hx
@@ -200,9 +203,7 @@ lemma solution_diff_is_zero_initial_solution {y : ℝ → ℝ} {J : Set ℝ} {la
     simpa [z, g] using hz_has_second
   -- Third conclusion: z 0 = 0
   have hz0val : z 0 = 0 := by
-    have hg0val : g 0 = y 0 := by
-      have h := sin_cos_combo_initial_values A B s
-      simpa [A, B, g] using h.1
+    have hg0val : g 0 = y 0 := by simp [g, B]
     dsimp [z]
     rw [hg0val, sub_self]
   -- Fourth conclusion: deriv z 0 = 0

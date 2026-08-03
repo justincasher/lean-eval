@@ -24,7 +24,8 @@ theorem sign_persistence {φ : ℝ → ℝ} (hφ : Continuous φ) (h : 0 < φ 0)
   -- Continuity at 0 pulls back neighbourhoods of φ 0 to neighbourhoods of 0
   have hmem' : φ ⁻¹' Set.Ioi (0 : ℝ) ∈ nhds (0 : ℝ) := hφ.continuousAt hmem
   -- Unfold the definition of ∀ᶠ in 𝓝 0
-  simpa using hmem'
+  filter_upwards [hmem'] with t ht
+  exact ht
 
 /-- Nonnegativity of `tᵐ φ(t)` near `0` (with `φ(0) > 0`) forces `m` even. -/
 theorem nonneg_even_order_pos {φ : ℝ → ℝ} (hφ : Continuous φ) (h0 : 0 < φ 0) (m : ℕ)
@@ -304,7 +305,7 @@ theorem circle_root_even (n : ℕ) (H : ℂ[X]) (hH : H ≠ 0) (hpos : NonnegRea
       ‖w * Complex.exp (Complex.I * (t : ℂ))‖ = ‖w‖ * ‖Complex.exp (Complex.I * (t : ℂ))‖ := norm_mul _ _
       _ = 1 * 1 := by
         rw [hw]
-        simpa [mul_comm] using Complex.norm_exp_ofReal_mul_I t
+        simp
       _ = 1 := by simp
   have hz_nonzero : ∀ t : ℝ, w * Complex.exp (Complex.I * (t : ℂ)) ≠ 0 := by
     intro t

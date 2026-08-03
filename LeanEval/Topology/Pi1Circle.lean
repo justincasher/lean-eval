@@ -14,7 +14,7 @@ The headline statement `π₁(S¹, 1) ≃* Multiplicative ℤ` is `LeanEval.Topo
 in `LeanEval.Topology.HomotopyGroups`; the declarations here build the winding-number isomorphism
 with the fundamental group used to prove it.
 
-All proofs are `sorry`'d: this file fixes faithful statements only.
+All declarations below are fully proved.
 -/
 
 namespace LeanEval
@@ -258,7 +258,7 @@ def liftClass (γ : FundamentalGroup Circle 1) :
   let γ_0 := p0.source.trans fiberBasePt.2.symm
   let lp := Circle.isCoveringMap_exp.liftPath p0 fiberBasePt γ_0
   have h_source : lp 0 = (0 : ℝ) := by
-    simpa [fiberBasePt] using Circle.isCoveringMap_exp.liftPath_zero p0 fiberBasePt γ_0
+    simpa [lp, fiberBasePt] using Circle.isCoveringMap_exp.liftPath_zero p0 fiberBasePt γ_0
   have h_target : lp 1 = (Circle.isCoveringMap_exp.monodromy (FundamentalGroup.toPath γ) fiberBasePt).val := by
     have h_mk : Path.Homotopic.Quotient.mk p0 = FundamentalGroup.toPath γ := Quotient.out_eq _
     calc
@@ -284,7 +284,7 @@ theorem map_liftClass (γ : FundamentalGroup Circle 1) :
   have h_lp_lifts : Circle.exp ∘ (⇑lp : ↑unitInterval → ℝ) = ⇑p0 :=
     IsCoveringMap.liftPath_lifts Circle.isCoveringMap_exp p0 fiberBasePt γ_0
   have h_source : lp 0 = (0 : ℝ) := by
-    simpa [fiberBasePt] using Circle.isCoveringMap_exp.liftPath_zero p0 fiberBasePt γ_0
+    simpa [lp, fiberBasePt] using Circle.isCoveringMap_exp.liftPath_zero p0 fiberBasePt γ_0
   have h_target : lp 1 = (Circle.isCoveringMap_exp.monodromy (FundamentalGroup.toPath γ) fiberBasePt).val := by
     calc
       lp 1 = (Circle.isCoveringMap_exp.monodromy (Path.Homotopic.Quotient.mk p0) fiberBasePt).val := rfl
@@ -384,7 +384,17 @@ theorem toPath_fromPath_exp {c : ℝ} (L : Path (0 : ℝ) c) (hc : Circle.exp c 
 theorem monodromy_exp_comp {c : ℝ} (L : Path (0 : ℝ) c) :
     Circle.isCoveringMap_exp.monodromy ((Path.Homotopic.Quotient.mk L).map Circle.exp) ⟨0, rfl⟩
       = ⟨c, rfl⟩ := by
-  simpa using Circle.isCoveringMap_exp.monodromy_map (γ := Path.Homotopic.Quotient.mk L)
+  let exp' : C(ℝ, Circle) :=
+    ⟨Circle.exp, Circle.isCoveringMap_exp.continuous⟩
+  have hexp : exp' = Circle.exp := by
+    ext
+    rfl
+  have h := Circle.isCoveringMap_exp.monodromy_map
+    (γ := Path.Homotopic.Quotient.mk L)
+  change Circle.isCoveringMap_exp.monodromy
+      ((Path.Homotopic.Quotient.mk L).map exp') ⟨0, rfl⟩ = ⟨c, rfl⟩ at h
+  subst exp'
+  exact h
 
 /-- The straight-line path `t ↦ t · b` in `ℝ` from `0` to `b`. -/
 def linePath (b : ℝ) : Path (0 : ℝ) b where

@@ -58,7 +58,8 @@ theorem recurrence_subseq (x : X) (d : ℕ)
     · -- base case k = 0
       intro j hj1 hjd
       have h0_spec := Classical.choose_spec (h 0 (1 : ℝ) (by norm_num))
-      simpa [show (1 : ℝ) / ((0 : ℕ).cast + 1) = (1 : ℝ) by norm_num] using h0_spec.2 j hj1 hjd
+      simpa [n, show (1 : ℝ) / ((0 : ℕ).cast + 1) = (1 : ℝ) by norm_num] using
+        h0_spec.2 j hj1 hjd
     · -- step: k.succ
       intro j hj1 hjd
       have hk_spec := Classical.choose_spec (h (n k) ((1 : ℝ) / ((k : ℝ) + 2)) (hpos_alt k))
@@ -255,7 +256,7 @@ theorem recurrence_periodic (x : X) (d : ℕ)
 /-- **Qualitative recurrence yields a recurrence sequence.** Under the qualitative
 hypothesis there is a strictly increasing `n_k` with `T^[j n_k] x → x` for every
 `1 ≤ j ≤ d`. -/
-theorem recurrence_sequential (x : X) (d : ℕ) (hd : 1 ≤ d)
+theorem recurrence_sequential (x : X) (d : ℕ) (_hd : 1 ≤ d)
     (h : ∀ ε : ℝ, 0 < ε →
       ∃ n, 1 ≤ n ∧ ∀ j, 1 ≤ j → j ≤ d → dist ((T : X → X)^[j * n] x) x < ε) :
     ∃ n : ℕ → ℕ, StrictMono n ∧
@@ -264,7 +265,7 @@ theorem recurrence_sequential (x : X) (d : ℕ) (hd : 1 ≤ d)
   by_cases h_arb : ∀ N : ℕ, ∀ ε : ℝ, 0 < ε → ∃ n, N < n ∧ ∀ j, 1 ≤ j → j ≤ d → dist ((T : X → X)^[j * n] x) x < ε
   · rcases recurrence_subseq (x := x) (d := d) (h := h_arb) with ⟨n, hn_mono, hn⟩
     exact ⟨n, hn_mono, hn⟩
-  · push_neg at h_arb
+  · push Not at h_arb
     rcases h_arb with ⟨N₀, ε₀, hε₀, h2⟩
     have h2' : ∀ n, N₀ < n → ¬ (∀ j, 1 ≤ j → j ≤ d → dist ((T : X → X)^[j * n] x) x < ε₀) := by
       intro n hn h_all

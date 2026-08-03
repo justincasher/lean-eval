@@ -25,6 +25,7 @@ noncomputable def amplificationMap (A : H →L[ℂ] H) :
   (PiLp.continuousLinearEquiv 2 ℂ (fun _ : Fin n => H)).symm.toContinuousLinearMap ∘L
     ContinuousLinearMap.pi (fun i => A ∘L ampProj i)
 
+omit [CompleteSpace H] in
 /-- `lem:amp-proj`: `Δ` commutes with coordinate projections, i.e.
 `pᵢ ∘ Δ(A) = A ∘ pᵢ` for every `A` and index `i`. -/
 theorem ampProj_comp_amplificationMap (A : H →L[ℂ] H) (i : Fin n) :
@@ -41,6 +42,7 @@ theorem ampProj_comp_amplificationMap (A : H →L[ℂ] H) (i : Fin n) :
     _ = A ((ampProj i) v) := rfl
     _ = (A ∘L (ampProj i)) v := rfl
 
+omit [CompleteSpace H] in
 /-- `lem:amp-apply`: the `i`-th coordinate of an amplified vector is
 `(Δ(A) v)ᵢ = A (vᵢ)`. -/
 theorem amplificationMap_apply (A : H →L[ℂ] H) (v : PiLp 2 (fun _ : Fin n => H)) (i : Fin n) :
@@ -57,6 +59,7 @@ theorem amplificationMap_apply (A : H →L[ℂ] H) (v : PiLp 2 (fun _ : Fin n =>
     _ = A (v.ofLp i) := by
       rw [PiLp.proj_apply]
 
+omit [CompleteSpace H] in
 /-- `lem:amp-single`: `Δ` commutes with coordinate inclusions, i.e.
 `Δ(A) (sⱼ x) = sⱼ (A x)`, where `sⱼ x = PiLp.single 2 j x` is the `j`-th
 coordinate inclusion of `H` into `H^n`. -/
@@ -69,19 +72,22 @@ theorem amplificationMap_single (A : H →L[ℂ] H) (j : Fin n) (x : H) :
     simp [amplificationMap_apply]
   · simp [h, amplificationMap_apply, map_zero]
 
+omit [CompleteSpace H] in
 /-- `lem:amp-map-mul`: `Δ` is multiplicative, `Δ(A B) = Δ(A) Δ(B)`. -/
 theorem amplificationMap_mul (A B : H →L[ℂ] H) :
     amplificationMap (n := n) (A * B) = amplificationMap A * amplificationMap B := by
   ext v
   rename_i i
-  simp [amplificationMap_apply, ContinuousLinearMap.mul_apply]
+  simp [amplificationMap_apply]
 
+omit [CompleteSpace H] in
 /-- `lem:amp-map-one`: `Δ` preserves the identity, `Δ(1) = 1`. -/
 theorem amplificationMap_one : amplificationMap (n := n) (1 : H →L[ℂ] H) = 1 := by
   ext v
   rw [amplificationMap_apply]
   simp
 
+omit [CompleteSpace H] in
 /-- `lem:amp-map-add`: `Δ` is additive, `Δ(A + B) = Δ(A) + Δ(B)`. -/
 theorem amplificationMap_add (A B : H →L[ℂ] H) :
     amplificationMap (n := n) (A + B) = amplificationMap A + amplificationMap B := by
@@ -105,13 +111,14 @@ theorem amplificationMap_add (A B : H →L[ℂ] H) :
     _ = ((ampProj i) ∘L (amplificationMap (A + B) : X)) v := by rw [ContinuousLinearMap.comp_apply]
     _ = ((ampProj i) ∘L ((amplificationMap A : X) + (amplificationMap B : X))) v := by rw [h i]
     _ = (ampProj i) (((amplificationMap A : X) + (amplificationMap B : X)) v) := by rw [ContinuousLinearMap.comp_apply]
-    _ = (ampProj i) ((amplificationMap A : X) v + (amplificationMap B : X) v) := by rw [ContinuousLinearMap.add_apply]
+    _ = (ampProj i) ((amplificationMap A : X) v + (amplificationMap B : X) v) := by rw [add_apply]
     _ = (ampProj i) ((amplificationMap A : X) v) + (ampProj i) ((amplificationMap B : X) v) := by rw [map_add]
     _ = ((amplificationMap A : X) v).ofLp i + ((amplificationMap B : X) v).ofLp i := by
       simp [PiLp.proj_apply]
     _ = (((amplificationMap A : X) v) + ((amplificationMap B : X) v)).ofLp i := by rw [PiLp.add_apply]
-    _ = (((amplificationMap A : X) + (amplificationMap B : X)) v).ofLp i := by rw [ContinuousLinearMap.add_apply]
+    _ = (((amplificationMap A : X) + (amplificationMap B : X)) v).ofLp i := by rw [add_apply]
 
+omit [CompleteSpace H] in
 /-- `lem:amp-map-smul`: `Δ` is `ℂ`-linear in scalars, `Δ(c • A) = c • Δ(A)`. -/
 theorem amplificationMap_smul (c : ℂ) (A : H →L[ℂ] H) :
     amplificationMap (n := n) (c • A) = c • amplificationMap A := by

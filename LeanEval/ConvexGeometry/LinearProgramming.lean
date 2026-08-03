@@ -160,7 +160,7 @@ theorem isMaxOn_of_isLocalMaxOn (lp : LinearProgram m n) {x : Fin m → ℝ}
 /-- **A small step stays feasible** (§101). If `B(x, ε) ⊆ feasible` and
 `t * ‖c‖ < ε` with `t > 0`, then `x + t • c` is feasible. -/
 theorem add_smul_mem_feasible (lp : LinearProgram m n) {x : Fin m → ℝ} {ε : ℝ}
-    (hε : 0 < ε) (hball : Metric.ball x ε ⊆ lp.feasible) {t : ℝ} (ht : 0 < t)
+    (_hε : 0 < ε) (hball : Metric.ball x ε ⊆ lp.feasible) {t : ℝ} (ht : 0 < t)
     (htc : t * ‖lp.c‖ < ε) : x + t • lp.c ∈ lp.feasible := by
   have hmem : x + t • lp.c ∈ Metric.ball x ε := by
     rw [Metric.mem_ball, dist_eq_norm]
