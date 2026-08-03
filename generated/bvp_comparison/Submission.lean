@@ -1,9 +1,11 @@
-import Mathlib
+import ChallengeDeps
 import Submission.Helpers
+
+open LeanEval.Analysis.ODE
 
 namespace Submission
 
-theorem bvp_comparison (J : Set ℝ) (hJ_open : IsOpen J) (hJ_sub : Set.Icc (0 : ℝ) 1 ⊆ J)
+theorem bvp_comparison (J : Set ℝ) (_hJ_open : IsOpen J) (hJ_sub : Set.Icc (0 : ℝ) 1 ⊆ J)
     (u v : ℝ → ℝ)
     (hu : ∀ x ∈ J, HasDerivAt u (deriv u x) x)
     (hu' : ∀ x ∈ J, HasDerivAt (deriv u) (deriv (deriv u) x) x)

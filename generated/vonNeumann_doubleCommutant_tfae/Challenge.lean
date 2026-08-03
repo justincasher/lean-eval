@@ -1,4 +1,6 @@
-import Mathlib
+import ChallengeDeps
+
+open LeanEval.Analysis
 
 theorem vonNeumann_doubleCommutant_tfae {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
     (S : StarSubalgebra ℂ (H →L[ℂ] H)) :

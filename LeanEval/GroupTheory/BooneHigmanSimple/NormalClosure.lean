@@ -226,7 +226,7 @@ lemma cert_of_prod (R : List (Word n)) (w : Word n)
               FreeGroup.mk (g' x.val x.property) * (FreeGroup.mk (R.getD (k x.val x.property) [])) ^
                 (if ε x.val x.property then (1 : ℤ) else -1) * (FreeGroup.mk (g' x.val x.property))⁻¹)).prod := by
         rw [List.map_map]; apply congrArg List.prod; ext x; dsimp; rfl
-        
+
       _ = (l.attach.map (fun (x : {x // x ∈ l}) => x.val)).prod := by
         refine congrArg List.prod (List.map_congr_left fun x hx => ?_)
         rcases x with ⟨y, hy⟩

@@ -6,7 +6,7 @@
       "name": "LeanEval.LinearAlgebra.posSemidef_map_exp",
       "basename": "posSemidef_map_exp",
       "kind": "theorem",
-      "body": "theorem posSemidef_map_exp\n    {n : Type*} [Fintype n] [DecidableEq n]\n    {A : Matrix n n \u211d} (hA : A.PosSemidef) :\n    (A.map Real.exp).PosSemidef := by\n  sorry"
+      "body": "/-- **Entrywise exponential of a PSD matrix is PSD.** If `A \u2208 \u211d^{n \u00d7 n}` is positive\nsemidefinite, then its entrywise exponential `exp_\u2299(A)` (with entries `exp(a_{ij})`) is\npositive semidefinite. -/\ntheorem posSemidef_map_exp (hA : A.PosSemidef) :\n    (A.map Real.exp).PosSemidef := by\n  refine Matrix.PosSemidef.of_dotProduct_mulVec_nonneg (isHermitian_map_exp hA) ?_\n  intro x\n  rw [quadForm_map_exp_eq_tsum A x]\n  refine tsum_nonneg (fun k => ?_)\n  have hk_nonneg : 0 \u2264 (1 / (k.factorial : \u211d)) :=\n    div_nonneg (by norm_num) (by exact mod_cast Nat.zero_le _)\n  have hpow : (A.map (\u00b7 ^ k)).PosSemidef := posSemidef_map_pow hA k\n  have hxpow : 0 \u2264 star x \u2b1d\u1d65 ((A.map (\u00b7 ^ k)) *\u1d65 x) :=\n    hpow.dotProduct_mulVec_nonneg x\n  exact mul_nonneg hk_nonneg hxpow"
     }
   ]
 }

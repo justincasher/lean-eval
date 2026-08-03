@@ -1,5 +1,7 @@
-import Mathlib
+import ChallengeDeps
 import Submission.Helpers
+
+open LeanEval.Analysis
 
 namespace Submission
 

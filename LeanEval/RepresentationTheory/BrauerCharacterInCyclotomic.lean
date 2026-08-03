@@ -144,6 +144,15 @@ theorem charpoly_roots_mem_range {V : Type*} [AddCommGroup V] [Module ℂ V]
   haveI : NeZero n := ⟨hn⟩
   exact rootsOfUnity_mem n S hζ hζS h_pow
 
+/-- **The trace is the sum of the characteristic roots.**
+Over `ℂ`, the characteristic polynomial of a finite-dimensional endomorphism
+splits, so its trace is the sum of its roots with multiplicity. -/
+theorem trace_eq_sum_roots_charpoly {V : Type*} [AddCommGroup V] [Module ℂ V]
+    [FiniteDimensional ℂ V] (T : Module.End ℂ V) (hT : T.charpoly.Splits) :
+    LinearMap.trace ℂ V T = T.charpoly.roots.sum := by
+  have h := Module.End.trace_eq_sum_roots_charpoly_of_splits (f := T) hT
+  simpa using h
+
 /-- **Character values lie in a cyclotomic field.**
 Let `G` be a finite group with exponent `n = exp(G)`. There is a ring embedding
 `φ : ℚ(ζₙ) → ℂ` such that for every finite-dimensional complex representation `ρ`
@@ -167,10 +176,7 @@ theorem brauer_character_in_cyclotomic
   have hT : (ρ g) ^ (Monoid.exponent G) = 1 := rho_pow_exponent ρ g
   have h_split : ((ρ g).charpoly).Splits :=
     IsAlgClosed.splits ((ρ g).charpoly)
-  have h_trace_eq : LinearMap.trace ℂ V (ρ g) = ((ρ g).charpoly.roots).sum := by
-    have := Module.End.trace_eq_sum_roots_charpoly_of_splits (f := ρ g) h_split
-    simpa using this
-  rw [h_trace_eq]
+  rw [trace_eq_sum_roots_charpoly (ρ g) h_split]
   apply Subring.multiset_sum_mem
   intro r hr
   exact charpoly_roots_mem_range (ρ g) hn hT φ.range hζ hζrange hr

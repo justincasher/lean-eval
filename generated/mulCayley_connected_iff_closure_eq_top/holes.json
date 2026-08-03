@@ -6,7 +6,7 @@
       "name": "LeanEval.Combinatorics.mulCayley_connected_iff_closure_eq_top",
       "basename": "mulCayley_connected_iff_closure_eq_top",
       "kind": "theorem",
-      "body": "theorem mulCayley_connected_iff_closure_eq_top\n    {G : Type*} [Group G]\n    (S : Set G) :\n    (SimpleGraph.mulCayley S).Connected \u2194 Subgroup.closure S = \u22a4 := by\n  sorry"
+      "body": "/-- **Cayley graph connected iff generators generate.** The Cayley graph `mulCayley S` is\nconnected if and only if `S` generates `G`, i.e. `Subgroup.closure S = \u22a4`. -/\ntheorem mulCayley_connected_iff_closure_eq_top (S' : Set G) :\n    (SimpleGraph.mulCayley S').Connected \u2194 Subgroup.closure S' = \u22a4 := by\n  rw [mulCayley_connected_iff_reachable_one, Subgroup.eq_top_iff']\n  constructor\n  \u00b7 intro h g\n    have hg : (SimpleGraph.mulCayley S').Reachable (1 : G) g := h g\n    have mem := mulCayley_inv_mul_mem_closure_of_reachable S' (1 : G) g hg\n    simpa using mem\n  \u00b7 intro h g\n    exact mulCayley_reachable_one_of_mem_closure S' (h g)"
     }
   ]
 }

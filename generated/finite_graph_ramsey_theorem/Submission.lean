@@ -1,6 +1,7 @@
-import Mathlib
+import ChallengeDeps
 import Submission.Helpers
 
+open LeanEval.Combinatorics
 open SimpleGraph
 
 namespace Submission

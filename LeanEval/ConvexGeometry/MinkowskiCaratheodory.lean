@@ -671,7 +671,7 @@ theorem lineSection_zero_interior {s : Set E} (hscomp : IsCompact s) (hsconv : C
 
 /-- If `x + c • v` belongs to the intrinsic interior of `s`, then `c` is an interior point of the
 section `{t : ℝ | x + t • v ∈ s}`. -/
-private lemma lineSection_param_mem_interior {s : Set E} {x : E} (hx : x ∈ s) {v : E}
+lemma lineSection_param_mem_interior {s : Set E} {x : E} (hx : x ∈ s) {v : E}
     (hvspan : v ∈ vectorSpan ℝ s) {c : ℝ} (hc : x + c • v ∈ intrinsicInterior ℝ s) :
     c ∈ interior {t : ℝ | x + t • v ∈ s} := by
   set T := {t : ℝ | x + t • v ∈ s} with hT_def

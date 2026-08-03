@@ -1,4 +1,8 @@
-import Mathlib
+import ChallengeDeps
+
+open LeanEval.GroupTheory
+
+variable {G : Type*} [Group G]
 
 theorem brauer_fowler :
     ∃ f : ℕ → ℕ, ∀ (G : Type) [Group G] [Finite G],

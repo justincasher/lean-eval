@@ -1,5 +1,6 @@
-import Mathlib
+import ChallengeDeps
 
+open LeanEval.Analysis.ODE
 open Filter Topology
 
 theorem cubic_decay_asymptotic (y : ℝ → ℝ) (hy_diff : ∀ t : ℝ, 0 < t → HasDerivAt y (-(y t) ^ 3) t)

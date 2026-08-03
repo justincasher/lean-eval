@@ -1,6 +1,7 @@
-import Mathlib
+import ChallengeDeps
 import Submission.Helpers
 
+open LeanEval.ComplexAnalysis
 open Polynomial
 
 namespace Submission
